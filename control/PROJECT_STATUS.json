@@ -29,12 +29,12 @@
         },
         "00.2": {
           "name": "Database",
-          "state": "TODO",
+          "state": "IN_PROGRESS",
           "commit": null,
           "report": null,
           "review": null,
           "rework_cycles": 0,
-          "started_at": null,
+          "started_at": "2026-11-03T15:50:03+00:00",
           "done_at": null
         },
         "00.3": {
@@ -2183,13 +2183,13 @@
       "gate": "Gate-0",
       "domain": "Platform",
       "issue": "محل اجرای CI و محیط آزمایشی/تمرین بازیابی Gate-0",
-      "status": "OPEN",
+      "status": "APPROVED",
       "owner": "کارفرما + IT",
       "phase": "PHASE_00",
       "source": "گام 00.1 2026-11-03",
-      "resolution": null,
-      "decided_by": null,
-      "decided_at": null
+      "resolution": "گزینه A: CI روی GitHub-hosted Actions فقط با داده ساختگی و بدون راز؛ اولین تمرین بازیابی Gate-0 روی محیط محلی؛ با آماده شدن سرور داخلی شرکت به runner خودمیزبان و تمرین روی staging منتقل شود",
+      "decided_by": "کارفرما",
+      "decided_at": "2026-11-03T16:11:44+00:00"
     }
   ],
   "ready_for_test": [],
@@ -2246,7 +2246,24 @@
       "state": "PASS",
       "note": null,
       "commit": null
+    },
+    {
+      "at": "2026-11-03T15:50:03+00:00",
+      "kind": "step",
+      "phase": "PHASE_00",
+      "step": "00.2",
+      "state": "IN_PROGRESS",
+      "note": null,
+      "commit": null
+    },
+    {
+      "at": "2026-11-03T16:11:44+00:00",
+      "kind": "decision",
+      "id": "DEC-045",
+      "status": "APPROVED",
+      "by": "کارفرما",
+      "note": "گزینه A: CI روی GitHub-hosted Actions فقط با داده ساختگی و بدون راز؛ اولین تمرین بازیابی Gate-0 روی محیط محلی؛ با آماده شدن سرور داخلی شرکت به runner خودمیزبان و تمرین روی staging منتقل شود"
     }
   ],
-  "updated_at": "2026-11-03T15:39:10+00:00"
+  "updated_at": "2026-11-03T16:11:44+00:00"
 }
