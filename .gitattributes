@@ -2,3 +2,6 @@
 *.png binary
 *.jpg binary
 *.ps1 text eol=crlf
+# handoff/ is an immutable, hash-verified package (handoff/SHA256SUMS.txt): store bytes exactly as delivered
+# (some CSVs are CRLF). See REV-00.1-B and tools/verify_handoff.py.
+handoff/** -text -eol

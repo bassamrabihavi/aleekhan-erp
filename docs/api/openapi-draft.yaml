@@ -1,0 +1,514 @@
+openapi: 3.1.0
+jsonSchemaDialect: https://spec.openapis.org/oas/3.1/dialect/base
+info:
+  title: Aleekhan Factory Platform API
+  version: 0.1.0-draft
+  summary: PHASE_00 draft contract (step 00.1). Platform endpoints only, NO business writes.
+  description: |
+    Status: DRAFT (PHASE_00 / 00.1 Discovery & Contract). Not approved; finalised and generated from code
+    (drf-spectacular or equivalent, schema-diff tested) in step 00.4.
+
+    Stack: Django 5.2 LTS + DRF (DEC-001). Base path is versioned: every endpoint lives under `/api/v1`.
+    A breaking change requires `/api/v2` (or an explicitly approved deprecation window); additive changes only
+    within v1. OpenAPI diff is checked in CI from 00.4 onwards.
+
+    Scope of this draft (PHASE_00 only): liveness, readiness, version, and an access-gate stub that
+    DENIES BY DEFAULT. Authentication (login/session/MFA) is PHASE_01 (users created only inside the
+    system by the owner/admin, DEC-003; no AD/LDAP/SSO). Business resources (customers, products, serials,
+    stock, ...) are intentionally absent.
+
+    Cross-cutting conventions (normative for all later phases, see `x-aleekhan-conventions`):
+    * Request correlation: client MAY send `X-Request-ID` (UUID); server always echoes/assigns it in the
+      response header and in every error body (`request_id`) and audit/outbox record.
+    * Errors: `application/problem+json` (RFC 9457) extended with a stable machine `code`, Persian
+      `message_fa`, `request_id` and optional field `errors[]`. Codes are stable; texts are not.
+    * Pagination: cursor based (`cursor`, `page_size`, default 25, max 100) with `next_cursor`;
+      no unbounded lists.
+    * Concurrency: resources expose `ETag` (strong, derived from row version); writes require `If-Match`
+      (428 if absent, 412 on mismatch).
+    * Idempotency: every mutating request (POST/PUT/PATCH/DELETE) requires `Idempotency-Key` (UUID); same
+      key + same body => same stored response; same key + different body => 422 IDEMPOTENCY_KEY_REUSED.
+    * Object-level authorization: a record outside the caller's scope returns 404 NOT_FOUND (not 403) to
+      avoid enumeration (BOLA/IDOR, SEC-01).
+    * Identifiers: internal ids are UUIDs. 14-digit Rahkaran codes are strings `^[0-9]{14}$` (never numbers;
+      leading zeros preserved) and always carried with their namespace (product_code vs die_code).
+    * Time: all timestamps RFC 3339 in UTC (`Z`). Jalali display (Asia/Tehran) is a UI concern only.
+    * Unknown / unapproved business rules return 409 `RULE_NOT_APPROVED` with the blocking `decision_id`.
+  contact:
+    name: Aleekhan project (internal)
+  license:
+    name: Proprietary - internal use only
+    identifier: LicenseRef-Proprietary
+servers:
+  - url: /api/v1
+    description: Same-origin, versioned base path (staging/production behind HTTPS reverse proxy, DEC-002/DEC-042)
+tags:
+  - name: platform
+    description: Health, readiness and version. No business data.
+  - name: access
+    description: Access-gate stub. Deny-by-default until PHASE_01 implements auth/RBAC.
+paths:
+  /health/live:
+    get:
+      tags: [platform]
+      operationId: getLiveness
+      summary: Liveness probe (process up)
+      description: Unauthenticated. Returns no version, host or dependency details.
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/RequestId'
+      responses:
+        '200':
+          description: Process is alive
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+            Cache-Control:
+              $ref: '#/components/headers/Cache-Control-NoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Liveness'
+              example:
+                status: ok
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /health/ready:
+    get:
+      tags: [platform]
+      operationId: getReadiness
+      summary: Readiness probe (dependencies reachable, migrations applied)
+      description: |
+        Unauthenticated, intended for the reverse proxy / orchestrator on the private network.
+        Exposes only component names and up/down - never hostnames, versions, DSNs or error text.
+        Detailed health (jobs, queues) is page 36 / PHASE_01+ and requires authorization.
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/RequestId'
+      responses:
+        '200':
+          description: All required components ready
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+            Cache-Control:
+              $ref: '#/components/headers/Cache-Control-NoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Readiness'
+              example:
+                status: ready
+                checked_at: '2026-11-03T10:00:00Z'
+                components:
+                  - {name: database, status: up}
+                  - {name: migrations, status: up}
+                  - {name: cache, status: up}
+        '503':
+          description: At least one required component is not ready
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+            Retry-After:
+              $ref: '#/components/headers/Retry-After'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Readiness'
+              example:
+                status: not_ready
+                checked_at: '2026-11-03T10:00:00Z'
+                components:
+                  - {name: database, status: down}
+                  - {name: migrations, status: unknown}
+                  - {name: cache, status: up}
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /version:
+    get:
+      tags: [platform]
+      operationId: getVersion
+      summary: API and build version
+      description: |
+        Returns API contract version and build identity so reports/screenshots can be tied to a commit.
+        OPEN (C-17): whether this stays unauthenticated in production is decided in 00.7 threat model;
+        the draft marks it public but leaks no dependency versions.
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/RequestId'
+      responses:
+        '200':
+          description: Version information
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VersionInfo'
+              example:
+                api_version: v1
+                contract_version: 0.1.0-draft
+                build_commit: 0000000
+                environment: staging
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /access-gate/check:
+    get:
+      tags: [access]
+      operationId: checkAccess
+      summary: Access-gate stub - deny by default
+      description: |
+        Stub of the central authorization gate (per action / record scope / field). In PHASE_00 there is
+        no login and no permission policy, therefore:
+        * no authenticated principal -> 401 AUTHENTICATION_REQUIRED;
+        * any principal (test harness only) -> 200 with decision DENY and reason POLICY_NOT_DEFINED.
+        The endpoint is read-only and NEVER grants access; it exists so 00.3/00.4 can test the
+        deny-by-default contract. Real policy (roles, scopes, MFA step-up, maker-checker) is PHASE_01
+        (permission matrix still PROPOSED; DEC-032 PROPOSED).
+      parameters:
+        - $ref: '#/components/parameters/RequestId'
+        - name: action
+          in: query
+          required: true
+          description: Dotted action identifier, e.g. `warehouse.reservation.create`.
+          schema:
+            type: string
+            pattern: '^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*){1,4}$'
+            maxLength: 120
+        - name: resource_type
+          in: query
+          required: false
+          schema:
+            type: string
+            pattern: '^[a-z][a-z0-9_]{0,63}$'
+        - name: resource_id
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Decision (always DENY in PHASE_00)
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+            Cache-Control:
+              $ref: '#/components/headers/Cache-Control-NoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessDecision'
+              example:
+                decision: DENY
+                reason_code: POLICY_NOT_DEFINED
+                action: warehouse.reservation.create
+                request_id: 3f1c2a9e-6b1d-4c8e-9a51-0d2f6f0b7c11
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: aleekhan_session
+      description: |
+        PLANNED for PHASE_01: server-side Django session (HttpOnly, Secure, SameSite=Lax) issued after
+        local username/password (+ MFA per DEC-003/DEC-042). Unsafe methods additionally require the
+        `X-CSRFToken` header. No AD/LDAP/SSO (DEC-003). Not usable in PHASE_00.
+  parameters:
+    RequestId:
+      name: X-Request-ID
+      in: header
+      required: false
+      description: Client correlation id; server generates one when absent or malformed.
+      schema:
+        type: string
+        format: uuid
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      description: Required on every mutating request (none exist in PHASE_00). Stored with request hash and response.
+      schema:
+        type: string
+        format: uuid
+    IfMatch:
+      name: If-Match
+      in: header
+      required: true
+      description: ETag of the version being modified (optimistic concurrency). Missing -> 428, stale -> 412.
+      schema:
+        type: string
+    Cursor:
+      name: cursor
+      in: query
+      required: false
+      description: Opaque cursor from a previous page's `next_cursor`.
+      schema:
+        type: string
+        maxLength: 512
+    PageSize:
+      name: page_size
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 25
+  headers:
+    X-Request-ID:
+      description: Correlation id of this request (echoed or generated).
+      schema:
+        type: string
+        format: uuid
+    ETag:
+      description: Strong entity tag of the returned representation/version.
+      schema:
+        type: string
+    Retry-After:
+      description: Seconds before retrying.
+      schema:
+        type: integer
+        minimum: 1
+    Cache-Control-NoStore:
+      description: Always `no-store` for health/access responses.
+      schema:
+        type: string
+        const: no-store
+  responses:
+    ValidationFailed:
+      description: Request parameters invalid
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/X-Request-ID'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+          example:
+            type: https://errors.aleekhan.invalid/VALIDATION_FAILED
+            title: Validation failed
+            status: 400
+            code: VALIDATION_FAILED
+            message_fa: مقدار ورودی معتبر نیست.
+            request_id: 3f1c2a9e-6b1d-4c8e-9a51-0d2f6f0b7c11
+            errors:
+              - field: action
+                code: PATTERN_MISMATCH
+    AuthenticationRequired:
+      description: No authenticated principal
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/X-Request-ID'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+          example:
+            type: https://errors.aleekhan.invalid/AUTHENTICATION_REQUIRED
+            title: Authentication required
+            status: 401
+            code: AUTHENTICATION_REQUIRED
+            message_fa: برای این کار باید وارد سامانه شوید.
+            request_id: 3f1c2a9e-6b1d-4c8e-9a51-0d2f6f0b7c11
+    RateLimited:
+      description: Too many requests
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/X-Request-ID'
+        Retry-After:
+          $ref: '#/components/headers/Retry-After'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+  schemas:
+    Liveness:
+      type: object
+      additionalProperties: false
+      required: [status]
+      properties:
+        status:
+          type: string
+          const: ok
+    ComponentStatus:
+      type: object
+      additionalProperties: false
+      required: [name, status]
+      properties:
+        name:
+          type: string
+          enum: [database, migrations, cache, object_storage, worker]
+        status:
+          type: string
+          enum: [up, down, unknown]
+    Readiness:
+      type: object
+      additionalProperties: false
+      required: [status, checked_at, components]
+      properties:
+        status:
+          type: string
+          enum: [ready, not_ready]
+        checked_at:
+          $ref: '#/components/schemas/UtcTimestamp'
+        components:
+          type: array
+          maxItems: 16
+          items:
+            $ref: '#/components/schemas/ComponentStatus'
+    VersionInfo:
+      type: object
+      additionalProperties: false
+      required: [api_version, contract_version, build_commit, environment]
+      properties:
+        api_version:
+          type: string
+          const: v1
+        contract_version:
+          type: string
+          description: SemVer of the OpenAPI document.
+        build_commit:
+          type: string
+          pattern: '^[0-9a-f]{7,40}$'
+        environment:
+          type: string
+          enum: [dev, test, staging, production]
+    AccessDecision:
+      type: object
+      additionalProperties: false
+      required: [decision, reason_code, action, request_id]
+      properties:
+        decision:
+          type: string
+          enum: [ALLOW, DENY]
+          description: Always DENY in PHASE_00.
+        reason_code:
+          type: string
+          enum: [POLICY_NOT_DEFINED, ROLE_MISSING, SCOPE_MISMATCH, MFA_STEP_UP_REQUIRED, SELF_APPROVAL_FORBIDDEN, RULE_NOT_APPROVED]
+        action:
+          type: string
+        decision_id:
+          type: [string, 'null']
+          pattern: '^DEC-[0-9]{3}$'
+          description: Blocking decision when reason_code is RULE_NOT_APPROVED.
+        request_id:
+          type: string
+          format: uuid
+    Problem:
+      type: object
+      description: RFC 9457 problem details + Aleekhan stable fields. Never contains stack traces, SQL, secrets or PII.
+      required: [type, title, status, code, request_id]
+      properties:
+        type:
+          type: string
+          format: uri
+        title:
+          type: string
+        status:
+          type: integer
+          minimum: 400
+          maximum: 599
+        code:
+          $ref: '#/components/schemas/ErrorCode'
+        message_fa:
+          type: string
+          description: Human Persian message (may change; clients must branch on `code`).
+        detail:
+          type: string
+        request_id:
+          type: string
+          format: uuid
+        decision_id:
+          type: string
+          pattern: '^DEC-[0-9]{3}$'
+          description: Present with RULE_NOT_APPROVED.
+        errors:
+          type: array
+          maxItems: 100
+          items:
+            type: object
+            additionalProperties: false
+            required: [field, code]
+            properties:
+              field:
+                type: string
+              code:
+                type: string
+              message_fa:
+                type: string
+    ErrorCode:
+      type: string
+      description: Stable machine error codes (HTTP mapping in x-aleekhan-conventions.error_codes).
+      enum:
+        - VALIDATION_FAILED
+        - AUTHENTICATION_REQUIRED
+        - MFA_REQUIRED
+        - ACCESS_DENIED
+        - NOT_FOUND
+        - METHOD_NOT_ALLOWED
+        - PRECONDITION_REQUIRED
+        - VERSION_CONFLICT
+        - IDEMPOTENCY_KEY_REQUIRED
+        - IDEMPOTENCY_KEY_REUSED
+        - RULE_NOT_APPROVED
+        - STATE_TRANSITION_NOT_ALLOWED
+        - RATE_LIMITED
+        - PAYLOAD_TOO_LARGE
+        - DEPENDENCY_UNAVAILABLE
+        - INTERNAL_ERROR
+    UtcTimestamp:
+      type: string
+      format: date-time
+      pattern: 'Z$'
+      description: RFC 3339 UTC timestamp.
+    Code14:
+      type: string
+      pattern: '^[0-9]{14}$'
+      minLength: 14
+      maxLength: 14
+      description: 14-digit Rahkaran code as STRING (leading zeros preserved). Must be paired with a namespace.
+    CodeNamespace:
+      type: string
+      enum: [product_code, die_code]
+      description: Namespaces are independent; no shared sequence (DOMAIN_ENTITY_CATALOG.md). Cliche codes are alphanumeric and NOT Code14.
+    PageMeta:
+      type: object
+      additionalProperties: false
+      required: [page_size, next_cursor]
+      properties:
+        page_size:
+          type: integer
+        next_cursor:
+          type: [string, 'null']
+x-aleekhan-conventions:
+  status: DRAFT
+  error_codes:
+    VALIDATION_FAILED: 400
+    AUTHENTICATION_REQUIRED: 401
+    MFA_REQUIRED: 401
+    ACCESS_DENIED: 403
+    NOT_FOUND: 404
+    METHOD_NOT_ALLOWED: 405
+    VERSION_CONFLICT: 412
+    PAYLOAD_TOO_LARGE: 413
+    IDEMPOTENCY_KEY_REUSED: 422
+    PRECONDITION_REQUIRED: 428
+    IDEMPOTENCY_KEY_REQUIRED: 428
+    RULE_NOT_APPROVED: 409
+    STATE_TRANSITION_NOT_ALLOWED: 409
+    RATE_LIMITED: 429
+    INTERNAL_ERROR: 500
+    DEPENDENCY_UNAVAILABLE: 503
+  write_requirements: [authenticated, role+record scope, Idempotency-Key, If-Match for updates, audit record, outbox event in same transaction]
+  resource_naming: plural kebab-case nouns grouped by owning module (e.g. /warehouse/reservations); state changes as sub-resource actions POST /{resource}/{id}/{action} (see docs/discovery/CONFLICTS.md C-09)
+  out_of_scope_phase_00: [customers, products, styles, serials, orders, engineering, warehouse, production, quality, dispatch, hr, ai]
