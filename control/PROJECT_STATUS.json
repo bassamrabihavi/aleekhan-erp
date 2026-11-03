@@ -19,12 +19,12 @@
       "steps": {
         "00.1": {
           "name": "Discovery & Contract",
-          "state": "TODO",
-          "commit": null,
-          "report": null,
+          "state": "IN_REVIEW",
+          "commit": "57f4500e87bb936c1b8a622faaee5bb4a657e1d6",
+          "report": "reports/phase-00/step-1/REPORT.md",
           "review": null,
           "rework_cycles": 0,
-          "started_at": null,
+          "started_at": "2026-11-03T15:21:49+00:00",
           "done_at": null
         },
         "00.2": {
@@ -2171,7 +2171,25 @@
       "kind": "phase_started",
       "phase": "PHASE_00",
       "by": "کارفرما"
+    },
+    {
+      "at": "2026-11-03T15:21:49+00:00",
+      "kind": "step",
+      "phase": "PHASE_00",
+      "step": "00.1",
+      "state": "IN_PROGRESS",
+      "note": null,
+      "commit": null
+    },
+    {
+      "at": "2026-11-03T15:34:27+00:00",
+      "kind": "step",
+      "phase": "PHASE_00",
+      "step": "00.1",
+      "state": "IN_REVIEW",
+      "note": null,
+      "commit": "57f4500e87bb936c1b8a622faaee5bb4a657e1d6"
     }
   ],
-  "updated_at": "2026-11-03T15:20:43+00:00"
+  "updated_at": "2026-11-03T15:34:27+00:00"
 }
