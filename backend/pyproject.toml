@@ -1,0 +1,27 @@
+[project]
+name = "aleekhan-backend"
+version = "0.0.0"
+description = "Aleekhan factory platform backend (Django modular monolith, DEC-001)"
+requires-python = ">=3.11"
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+plugins = ["mypy_django_plugin.main"]
+
+[[tool.mypy.overrides]]
+module = ["platform_core.tests.*", "conftest"]
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+
+[[tool.mypy.overrides]]
+module = ["dj_database_url"]
+ignore_missing_imports = true
+
+[tool.django-stubs]
+django_settings_module = "aleekhan.settings"
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "aleekhan.settings"
+testpaths = ["platform_core/tests"]
+addopts = "-ra --strict-markers"

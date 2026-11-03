@@ -1,0 +1,9 @@
+............
+----------------------------------------------------------------------
+Ran 12 tests in 0.068s
+
+OK
+EOL_ONLY        t.csv
+summary: EOL_ONLY=1 | failures=0
+EOL_ONLY        t.csv
+summary: EOL_ONLY=1 | failures=1 (strict)

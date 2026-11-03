@@ -18,11 +18,13 @@ Result classes per SHA256SUMS entry:
 Read-only: this tool never writes into handoff/. Standard library only.
 Exit code: 0 = no failures, 1 = failures, 2 = usage / unreadable sums file.
 """
+
 from __future__ import annotations
 
 import argparse
 import hashlib
 import json
+import re
 import sys
 from pathlib import Path, PurePosixPath
 
@@ -38,6 +40,8 @@ KNOWN_DEFECTS = {
         "ref": "REV-00.1-A / docs/discovery/CONFLICTS.md C-14 / DEC-044",
     },
 }
+
+WINDOWS_DRIVE_RE = re.compile(r"^[A-Za-z]:")
 
 FAIL_CLASSES = {"MISSING", "MISMATCH", "PRIVATE_PRESENT", "UNLISTED"}
 
@@ -65,7 +69,8 @@ def parse_sums(text: str) -> list[tuple[str, str]]:
             raise ValueError(f"line {n}: malformed sums line")
         digest, rel = parts[0].lower(), parts[1].strip().lstrip("*")
         p = PurePosixPath(rel)
-        if p.is_absolute() or ".." in p.parts or "\\" in rel:
+        # REV-0003: also reject Windows drive paths (C:/x, C:x); on Windows root / "C:/x" escapes root.
+        if p.is_absolute() or ".." in p.parts or "\\" in rel or WINDOWS_DRIVE_RE.match(rel):
             raise ValueError(f"line {n}: unsafe path {rel!r}")
         entries.append((digest, rel))
     return entries
@@ -94,8 +99,15 @@ def verify(root: Path, known_defects: dict | None = None) -> list[dict]:
         elif any(sha256_bytes(v) == expected for v in eol_variants(data)):
             results.append({"path": rel, "status": "EOL_ONLY", "actual": actual})
         elif rel in known and known[rel]["expected"] == expected and known[rel]["observed"] == actual:
-            results.append({"path": rel, "status": "KNOWN_DEFECT", "actual": actual, "expected": expected,
-                            "ref": known[rel]["ref"]})
+            results.append(
+                {
+                    "path": rel,
+                    "status": "KNOWN_DEFECT",
+                    "actual": actual,
+                    "expected": expected,
+                    "ref": known[rel]["ref"],
+                }
+            )
         else:
             results.append({"path": rel, "status": "MISMATCH", "actual": actual, "expected": expected})
     for f in sorted(root.rglob("*")):
@@ -111,8 +123,11 @@ def verify(root: Path, known_defects: dict | None = None) -> list[dict]:
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("--root", default=str(Path(__file__).resolve().parent.parent / "handoff"),
-                    help="handoff directory (default: <repo>/handoff)")
+    ap.add_argument(
+        "--root",
+        default=str(Path(__file__).resolve().parent.parent / "handoff"),
+        help="handoff directory (default: <repo>/handoff)",
+    )
     ap.add_argument("--strict", action="store_true", help="treat EOL_ONLY and KNOWN_DEFECT as failures")
     ap.add_argument("--json", action="store_true", help="machine-readable output")
     a = ap.parse_args(argv)
@@ -128,17 +143,34 @@ def main(argv: list[str] | None = None) -> int:
         counts[r["status"]] = counts.get(r["status"], 0) + 1
     failed = [r for r in results if r["status"] in fail]
     if a.json:
-        print(json.dumps({"root": str(root), "counts": counts, "strict": a.strict,
-                          "failed": len(failed), "results": [r for r in results if r["status"] != "OK"]},
-                         ensure_ascii=False, indent=2))
+        print(
+            json.dumps(
+                {
+                    "root": str(root),
+                    "counts": counts,
+                    "strict": a.strict,
+                    "failed": len(failed),
+                    "results": [r for r in results if r["status"] != "OK"],
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
     else:
         for r in results:
             if r["status"] in ("OK", "EXCLUDED"):
                 continue
-            extra = f" ({r['ref']}; expected {r['expected']}, actual {r['actual']})" if r["status"] == "KNOWN_DEFECT" else ""
+            extra = (
+                f" ({r['ref']}; expected {r['expected']}, actual {r['actual']})"
+                if r["status"] == "KNOWN_DEFECT"
+                else ""
+            )
             print(f"{r['status']:<15} {r['path']}{extra}")
-        print("summary: " + ", ".join(f"{k}={v}" for k, v in sorted(counts.items()))
-              + f" | failures={len(failed)}{' (strict)' if a.strict else ''}")
+        print(
+            "summary: "
+            + ", ".join(f"{k}={v}" for k, v in sorted(counts.items()))
+            + f" | failures={len(failed)}{' (strict)' if a.strict else ''}"
+        )
     return 1 if failed else 0
 
 

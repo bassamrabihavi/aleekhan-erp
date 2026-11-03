@@ -1,0 +1,8 @@
+$ ruff --version
+ruff 0.17.1
+$ ruff check backend tools
+All checks passed!
+exit=0
+$ ruff format --check backend tools
+24 files already formatted
+exit=0

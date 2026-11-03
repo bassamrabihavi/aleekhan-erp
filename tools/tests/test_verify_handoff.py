@@ -1,4 +1,5 @@
 """Unit tests for tools/verify_handoff.py (synthetic files only; never touches handoff/)."""
+
 import hashlib
 import sys
 import tempfile
@@ -6,7 +7,7 @@ import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-import verify_handoff as vh  # noqa: E402
+import verify_handoff as vh
 
 
 def h(b: bytes) -> str:
@@ -27,7 +28,8 @@ class VerifyHandoffTest(unittest.TestCase):
             p.parent.mkdir(parents=True, exist_ok=True)
             p.write_bytes(data)
         (self.root / vh.SUMS_NAME).write_text(
-            "".join(f"{d}  {rel}\n" for rel, d in sums.items()), encoding="utf-8")
+            "".join(f"{d}  {rel}\n" for rel, d in sums.items()), encoding="utf-8"
+        )
 
     def statuses(self, known=None):
         return {r["path"]: r["status"] for r in vh.verify(self.root, known or {})}
@@ -53,7 +55,9 @@ class VerifyHandoffTest(unittest.TestCase):
         self.assertEqual(self.statuses(), {"09_PRIVATE_FACTORY_SOURCES/p.xlsm": "EXCLUDED"})
 
     def test_private_file_present_fails(self):
-        self.write_pkg({"09_PRIVATE_FACTORY_SOURCES/p.txt": b"s"}, {"09_PRIVATE_FACTORY_SOURCES/p.txt": h(b"s")})
+        self.write_pkg(
+            {"09_PRIVATE_FACTORY_SOURCES/p.txt": b"s"}, {"09_PRIVATE_FACTORY_SOURCES/p.txt": h(b"s")}
+        )
         self.assertEqual(self.statuses(), {"09_PRIVATE_FACTORY_SOURCES/p.txt": "PRIVATE_PRESENT"})
 
     def test_missing_non_private_fails(self):
@@ -76,6 +80,14 @@ class VerifyHandoffTest(unittest.TestCase):
         (self.root / vh.SUMS_NAME).write_text("0" * 64 + "  ../escape.txt\n", encoding="utf-8")
         with self.assertRaises(ValueError):
             vh.verify(self.root, {})
+
+    def test_windows_drive_path_rejected(self):
+        # REV-0003 regression: drive-letter paths must not escape the package root on Windows.
+        for bad in ("C:/escape.txt", "c:escape.txt", "Z:/dir/x.txt"):
+            line = "0" * 64 + "  " + bad + "\n"
+            (self.root / vh.SUMS_NAME).write_text(line, encoding="utf-8")
+            with self.subTest(path=bad), self.assertRaises(ValueError):
+                vh.verify(self.root, {})
 
     def test_cli_exit_codes(self):
         self.write_pkg({"t.csv": b"a\n"}, {"t.csv": h(b"a\r\n")})
