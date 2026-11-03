@@ -1,0 +1,5 @@
+$ mypy --version
+mypy 2.3.1 (compiled: yes)
+$ (cd backend && mypy .)  [strict, django-stubs plugin, python_version 3.12]
+Success: no issues found in 40 source files
+exit=0

@@ -1,0 +1,10 @@
+$ python --version
+Python 3.12.10
+$ ruff --version
+ruff 0.17.1
+$ ruff check .   (repo-wide; control/ excluded in ruff.toml, REV-0006)
+All checks passed!
+exit=0
+$ ruff format --check .
+70 files already formatted
+exit=0

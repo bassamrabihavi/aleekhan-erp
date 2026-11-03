@@ -1,0 +1,52 @@
+$ PG_BIN=/f/aleekhan/tools/pgsql/bin PYTHON=$PWD/.venv/Scripts/python bash backend/scripts/db_roundtrip.sh $PWD/reports/phase-00/step-3/logs/schema  [Python 3.12.10]
+== server: 17.9
+== drop/create throw-away database aleekhan_roundtrip
+NOTICE:  database "aleekhan_roundtrip" does not exist, skipping
+tables in empty DB: 0
+== [1] migrate up from empty DB
+Operations to perform:
+  Apply all migrations: platform_core
+Running migrations:
+  Applying platform_core.0001_initial... OK
+  Applying platform_core.0002_db_triggers... OK
+  Applying platform_core.0003_seed_schema_meta... OK
+platform_core
+ [X] 0001_initial
+ [X] 0002_db_triggers
+ [X] 0003_seed_schema_meta
+== [2] makemigrations --check --dry-run (model/migration drift)
+No changes detected
+tables after up #1:
+django_migrations
+platform_audit_event
+platform_idempotency_record
+platform_outbox_event
+platform_schema_meta
+seed rows: 1
+== [3] migrate platform_core zero (full rollback)
+Operations to perform:
+  Unapply all migrations: platform_core
+Running migrations:
+  Rendering model states... DONE
+  Unapplying platform_core.0003_seed_schema_meta... OK
+  Unapplying platform_core.0002_db_triggers... OK
+  Unapplying platform_core.0001_initial... OK
+platform_core
+ [ ] 0001_initial
+ [ ] 0002_db_triggers
+ [ ] 0003_seed_schema_meta
+tables after rollback:
+django_migrations
+platform functions left: 0
+== [4] migrate up again
+Operations to perform:
+  Apply all migrations: platform_core
+Running migrations:
+  Applying platform_core.0001_initial... OK
+  Applying platform_core.0002_db_triggers... OK
+  Applying platform_core.0003_seed_schema_meta... OK
+== [5] schema diff (up #1 vs up #2)
+schema diff: EMPTY (386 lines compared)
+== dropped aleekhan_roundtrip
+ROUNDTRIP OK
+exit=0

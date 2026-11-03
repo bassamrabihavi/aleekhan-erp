@@ -8,5 +8,8 @@ djangorestframework-stubs==3.18.1
 types-PyYAML==6.0.12.20260906
 pytest==9.1.1
 pytest-django==4.14.0
+# property-based tests (00.3); 6.170.4 released 2026-10-19 (>= 14 days before pin date)
+hypothesis==6.170.4
+sortedcontainers==2.4.0
 openapi-spec-validator==0.9.0
 PyYAML==6.0.3

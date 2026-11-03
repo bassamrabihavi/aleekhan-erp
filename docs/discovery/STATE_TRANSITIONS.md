@@ -8,9 +8,11 @@ General rules (all machines): server-side only; each transition = one DB transac
 
 ### 1.1 OutboxEvent delivery (PHASE_00 skeleton)
 `PENDING → DISPATCHED → ACKED`; `PENDING|DISPATCHED → FAILED` (attempt++, backoff) `→ PENDING`; `FAILED → DEAD_LETTER` after max attempts (visible to Admin); `DEAD_LETTER → PENDING` only by authorised admin replay (audited). Consumers dedupe by `event_id`.
+Implemented in 00.3 (`platform_core/engine/outbox.py`, golden `tests/golden/outbox_delivery_machine.golden.json`). Composite moves are validated edge by edge and written in one UPDATE: a due retry is claimed as `FAILED → PENDING → DISPATCHED`; a final failure is `DISPATCHED → FAILED → DEAD_LETTER`. Attempts are counted at claim time; a `DISPATCHED` row older than the lease is recovered as a failed attempt. See `docs/engine/README.md` §5.
 
 ### 1.2 IdempotencyRecord (PHASE_00 skeleton)
-`IN_PROGRESS → COMPLETED` (response stored) | `IN_PROGRESS → FAILED_RETRYABLE` (deleted/expired so retry allowed). Same key + different request hash → 422 `IDEMPOTENCY_KEY_REUSED`. Concurrent duplicate while `IN_PROGRESS` → 409. Retention window: proposal 24h, confirm in 00.3.
+`IN_PROGRESS → COMPLETED` (response stored) | `IN_PROGRESS → FAILED_RETRYABLE` (deleted/expired so retry allowed). Same key + different request hash → 422 `IDEMPOTENCY_KEY_REUSED`. Concurrent duplicate while `IN_PROGRESS` → 409 `IDEMPOTENCY_IN_PROGRESS`. Retention window: proposal 24h, confirm in 00.3.
+Implemented in 00.3 (`platform_core/engine/idempotency.py`): retention 24 h and in-progress lease 5 min are technical parameters (defaults, not business rules; ops confirmation in 00.7). `FAILED_RETRYABLE` and expired records are re-claimed in place (`→ IN_PROGRESS`); an `IN_PROGRESS` record past its lease (holder crashed) is taken over. See `docs/engine/README.md` §2.
 
 ### 1.3 Job (PHASE_01/11)
 `QUEUED → RUNNING → SUCCEEDED | FAILED`; `RUNNING → CANCEL_REQUESTED → CANCELLED` (at checkpoint, safe); force-kill of protected jobs **BLOCKED (DEC-024)** (SEC-02).

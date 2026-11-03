@@ -2,7 +2,7 @@ openapi: 3.1.0
 jsonSchemaDialect: https://spec.openapis.org/oas/3.1/dialect/base
 info:
   title: Aleekhan Factory Platform API
-  version: 0.1.0-draft
+  version: 0.2.0-draft
   summary: PHASE_00 draft contract (step 00.1). Platform endpoints only, NO business writes.
   description: |
     Status: DRAFT (PHASE_00 / 00.1 Discovery & Contract). Not approved; finalised and generated from code
@@ -27,7 +27,8 @@ info:
     * Concurrency: resources expose `ETag` (strong, derived from row version); writes require `If-Match`
       (428 if absent, 412 on mismatch).
     * Idempotency: every mutating request (POST/PUT/PATCH/DELETE) requires `Idempotency-Key` (UUID); same
-      key + same body => same stored response; same key + different body => 422 IDEMPOTENCY_KEY_REUSED.
+      key + same body => same stored response; same key + different body => 422 IDEMPOTENCY_KEY_REUSED; same key while the first request is still
+      running => 409 IDEMPOTENCY_IN_PROGRESS (step 00.3, docs/engine/ERROR_CODES.md).
     * Object-level authorization: a record outside the caller's scope returns 404 NOT_FOUND (not 403) to
       avoid enumeration (BOLA/IDOR, SEC-01).
     * Identifiers: internal ids are UUIDs. 14-digit Rahkaran codes are strings `^[0-9]{14}$` (never numbers;
@@ -150,7 +151,7 @@ paths:
                 $ref: '#/components/schemas/VersionInfo'
               example:
                 api_version: v1
-                contract_version: 0.1.0-draft
+                contract_version: 0.2.0-draft
                 build_commit: 0000000
                 environment: staging
         '429':
@@ -460,6 +461,7 @@ components:
         - VERSION_CONFLICT
         - IDEMPOTENCY_KEY_REQUIRED
         - IDEMPOTENCY_KEY_REUSED
+        - IDEMPOTENCY_IN_PROGRESS
         - RULE_NOT_APPROVED
         - STATE_TRANSITION_NOT_ALLOWED
         - RATE_LIMITED
@@ -504,6 +506,7 @@ x-aleekhan-conventions:
     IDEMPOTENCY_KEY_REUSED: 422
     PRECONDITION_REQUIRED: 428
     IDEMPOTENCY_KEY_REQUIRED: 428
+    IDEMPOTENCY_IN_PROGRESS: 409
     RULE_NOT_APPROVED: 409
     STATE_TRANSITION_NOT_ALLOWED: 409
     RATE_LIMITED: 429

@@ -1,0 +1,3 @@
+$ python -c validate(openapi-draft)
+VALID
+exit=0

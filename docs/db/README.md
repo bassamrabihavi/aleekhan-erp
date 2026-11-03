@@ -20,6 +20,7 @@ PHASE_00 scope: platform skeleton tables only. No business tables, no users/role
 | JSON | `jsonb`; payload-like columns have a CHECK `jsonb_typeof(col) = 'object'`. No salary, password or PII in audit `before/after` or outbox payloads (redaction is enforced by the writer, step 00.3 / 00.7). |
 | 14-digit codes | `platform_core.code14`: `Code14Field` = `varchar(14)` + validator (exactly 14 ASCII digits, string, leading zeros kept; ints and Persian/Arabic-Indic digits are rejected, not converted) + `code14_check_constraint(field, name)` = `CHECK (col ~ '^[0-9]{14}$')`. Every code column must also carry its namespace (`product_code` vs `die_code`). Format only; issuing codes is BLOCKED (DEC-005 / DEC-008). No table uses it yet. |
 | Actors | `actor_type` (`USER`/`SYSTEM`/`ANONYMOUS`) + `actor_id uuid`; CHECK: a `USER` actor must have an `actor_id`. The FK to the user table is added in PHASE_01. |
+| Audit columns | Owned business tables carry `created_at`, `created_by`, `updated_at`, `updated_by`, `row_version` (DATA_TABLE.md). **Exemption for platform system tables (REV-0007):** `platform_audit_event`, `platform_outbox_event` and `platform_idempotency_record` record who acted in `actor_type`/`actor_id`, which serves as `created_by`; they have no `updated_by` because only the engine (system) updates them (outbox delivery state, idempotency state), and the audit table is never updated. `platform_audit_event` has no `row_version` (append-only, never updated). `platform_schema_meta` is a non-sensitive singleton written only by migrations and is exempt from `created_*`, `updated_by` and `row_version`. |
 | Money / quantity | `numeric(p,s)` + UOM, never float (from PHASE_02 on). |
 | Config | DB connection only from env (`DATABASE_URL` or `PG*`), see `backend/.env.example`. No credentials in Git. |
 
@@ -163,4 +164,5 @@ WHERE delivery_status = 'DEAD_LETTER'`, `ix_outbox_event_aggregate`, `ix_outbox_
   Separate DB roles (migration owner vs runtime role without UPDATE/DELETE/TRUNCATE on the audit table) and an
   audit integrity check (hash chain or periodic digest) belong to step 00.7.
 - TRUNCATE of an *empty* audit table is allowed (needed for test-database flushes); it cannot destroy data.
-- Behaviour (outbox dispatch/backoff, idempotency protocol, retention window, redaction) is step 00.3.
+- Behaviour (outbox dispatch/backoff, idempotency protocol, retention window, redaction) is implemented in step
+  00.3 without schema changes: see `docs/engine/README.md`. No migration was added in 00.3.

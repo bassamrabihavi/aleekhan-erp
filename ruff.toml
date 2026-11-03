@@ -1,7 +1,9 @@
 # Ruff config for the whole repo (backend/ and tools/). Pinned ruff version: backend/requirements-dev.txt.
-target-version = "py311"
+target-version = "py312"  # ADR-001: Python 3.12+ (REV-0005)
 line-length = 110
-extend-exclude = ["handoff", ".venv"]
+# control/ is the project-governance kit (status.py, hooks), not product code; it has its own style and is
+# not shipped, so it is excluded explicitly to keep `ruff check .` unambiguous in CI (REV-0006).
+extend-exclude = ["handoff", ".venv", "control"]
 
 [lint]
 select = ["E", "F", "W", "I", "B", "UP", "RUF", "DJ"]
@@ -11,6 +13,8 @@ ignore = ["RUF012"]
 [lint.per-file-ignores]
 # Django-generated migrations: long lines are the generator's style.
 "backend/*/migrations/*.py" = ["E501"]
+# Persian user-facing texts (message_fa): Arabic-script letters are intended, not confusables.
+"backend/platform_core/engine/errors.py" = ["RUF001"]
 
 [lint.isort]
 known-first-party = ["aleekhan", "platform_core"]

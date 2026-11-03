@@ -1,0 +1,22 @@
+{
+  "_note": "Golden snapshot of the stable error-code contract (PHASE_00 / 00.3). Changing a code, status or exception class is a breaking API change: update docs/api/openapi-draft.yaml, docs/engine/ERROR_CODES.md and this file in the same reviewed commit.",
+  "error_codes": [
+    {"code": "VALIDATION_FAILED", "http_status": 400, "exception": "ValidationFailed"},
+    {"code": "AUTHENTICATION_REQUIRED", "http_status": 401, "exception": "AuthenticationRequired"},
+    {"code": "MFA_REQUIRED", "http_status": 401, "exception": "MfaRequired"},
+    {"code": "ACCESS_DENIED", "http_status": 403, "exception": "AccessDenied"},
+    {"code": "NOT_FOUND", "http_status": 404, "exception": "NotFound"},
+    {"code": "METHOD_NOT_ALLOWED", "http_status": 405, "exception": "MethodNotAllowed"},
+    {"code": "PRECONDITION_REQUIRED", "http_status": 428, "exception": "PreconditionRequired"},
+    {"code": "VERSION_CONFLICT", "http_status": 412, "exception": "VersionConflict"},
+    {"code": "IDEMPOTENCY_KEY_REQUIRED", "http_status": 428, "exception": "IdempotencyKeyRequired"},
+    {"code": "IDEMPOTENCY_KEY_REUSED", "http_status": 422, "exception": "IdempotencyKeyReused"},
+    {"code": "IDEMPOTENCY_IN_PROGRESS", "http_status": 409, "exception": "IdempotencyInProgress"},
+    {"code": "RULE_NOT_APPROVED", "http_status": 409, "exception": "RuleNotApproved"},
+    {"code": "STATE_TRANSITION_NOT_ALLOWED", "http_status": 409, "exception": "StateTransitionNotAllowed"},
+    {"code": "RATE_LIMITED", "http_status": 429, "exception": "RateLimited"},
+    {"code": "PAYLOAD_TOO_LARGE", "http_status": 413, "exception": "PayloadTooLarge"},
+    {"code": "DEPENDENCY_UNAVAILABLE", "http_status": 503, "exception": "DependencyUnavailable"},
+    {"code": "INTERNAL_ERROR", "http_status": 500, "exception": "InternalError"}
+  ]
+}

@@ -1,0 +1,4 @@
+{
+  "_note": "Golden backoff sequence for the default OutboxPolicy (base 2 s, factor 2, cap 3600 s, no jitter). Seconds after attempt N fails.",
+  "attempt_to_delay_seconds": {"1": 2, "2": 4, "3": 8, "4": 16, "5": 32, "6": 64, "7": 128, "8": 256, "9": 512, "10": 1024, "11": 2048, "12": 3600, "20": 3600, "1000": 3600}
+}
