@@ -16,11 +16,18 @@ from platform_core.engine import idempotency as idem
 from platform_core.engine.context import Actor, RequestContext
 from platform_core.engine.errors import (
     AuthenticationRequired,
+    ClientError,
     EngineContractError,
+    FieldError,
     IdempotencyInProgress,
     IdempotencyKeyRequired,
     IdempotencyKeyReused,
+    MfaRequired,
+    NotFound,
+    RateLimited,
+    RuleNotApproved,
     ValidationFailed,
+    VersionConflict,
 )
 from platform_core.engine.uow import UnitOfWork
 from platform_core.models import AuditEvent, IdempotencyRecord, IdempotencyState, OutboxEvent
@@ -292,3 +299,90 @@ def test_concurrent_same_key_different_bodies_one_wins_rest_rejected() -> None:
     assert sum(isinstance(r, idem.IdempotentResult) for r in results) == 1, results
     assert sum(isinstance(r, IdempotencyKeyReused) for r in results) == 5, results
     assert len(calls) == 1
+
+
+# ------------------------------------------------------------------------------------------- REV-0012
+def _raising_handler(calls: list[int], exc: Exception) -> Any:
+    def handler(uow: UnitOfWork) -> idem.StoredResponse:
+        calls.append(1)
+        # the write happened inside the unit of work and must be rolled back
+        uow.audit(action="platform.synthetic.create", resource_type="platform.synthetic", resource_id="s1")
+        uow.emit(
+            event_type="platform.synthetic.created",
+            aggregate_type="platform.synthetic",
+            aggregate_id="s1",
+            aggregate_version=1,
+        )
+        raise exc
+
+    return handler
+
+
+@pytest.mark.django_db(transaction=True)
+@pytest.mark.usefixtures("audit_cleanup")
+@pytest.mark.parametrize(
+    "exc",
+    [
+        ValidationFailed("synthetic", errors=[FieldError("qty", "OUT_OF_RANGE")]),
+        RuleNotApproved("DEC-005"),
+        VersionConflict(),
+        NotFound(),
+    ],
+    ids=lambda e: type(e).__name__,
+)
+def test_run_idempotent_client_error_is_stored_and_replayed(exc: Exception) -> None:
+    """Deterministic 4xx: rolled back, stored as COMPLETED with the problem body, replayed (no re-run)."""
+    actor, key = uuid.uuid4(), uuid.uuid4()
+    calls: list[int] = []
+    first_ctx = _ctx(actor)
+    kw: dict[str, Any] = {"key": key, "method": "POST", "endpoint": ENDPOINT, "body": {"n": 1}}
+    with pytest.raises(type(exc)):
+        idem.run_idempotent(first_ctx, handler=_raising_handler(calls, exc), **kw)
+    assert AuditEvent.objects.count() == 0 and OutboxEvent.objects.count() == 0
+    rec = IdempotencyRecord.objects.get(actor_id=actor, key=key)
+    assert rec.state == IdempotencyState.COMPLETED
+    assert isinstance(exc, ClientError)
+    assert rec.response_status == exc.http_status
+    assert rec.response_body == exc.to_problem(first_ctx.request_id)  # type: ignore[arg-type]
+    assert rec.response_headers == {"Content-Type": "application/problem+json"}
+
+    again = idem.run_idempotent(_ctx(actor), handler=_handler(calls), **kw)
+    assert again.replayed is True
+    assert again.response.status == exc.http_status
+    assert again.response.body["code"] == exc.code.value
+    assert again.response.body["request_id"] == str(first_ctx.request_id)  # original request id
+    assert len(calls) == 1  # the (succeeding) second handler never ran
+    assert AuditEvent.objects.count() == 0 and OutboxEvent.objects.count() == 0
+    # a different request with the same key is still rejected
+    with pytest.raises(IdempotencyKeyReused):
+        idem.run_idempotent(_ctx(actor), handler=_handler(calls), **{**kw, "body": {"n": 2}})
+
+
+@pytest.mark.django_db(transaction=True)
+@pytest.mark.usefixtures("audit_cleanup")
+@pytest.mark.parametrize(
+    "exc",
+    [IdempotencyInProgress(), RateLimited(), AuthenticationRequired(), MfaRequired()],
+    ids=lambda e: type(e).__name__,
+)
+def test_run_idempotent_transient_client_error_is_retryable(exc: Exception) -> None:
+    actor, key = uuid.uuid4(), uuid.uuid4()
+    calls: list[int] = []
+    kw: dict[str, Any] = {"key": key, "method": "POST", "endpoint": ENDPOINT, "body": {"n": 1}}
+    with pytest.raises(type(exc)):
+        idem.run_idempotent(_ctx(actor), handler=_raising_handler(calls, exc), **kw)
+    assert IdempotencyRecord.objects.get(actor_id=actor, key=key).state == IdempotencyState.FAILED_RETRYABLE
+    ok = idem.run_idempotent(_ctx(actor), handler=_handler(calls), **kw)
+    assert ok.replayed is False and len(calls) == 2
+
+
+def test_replayable_classification_covers_every_client_error() -> None:
+    from platform_core.engine import errors as E
+
+    transient = {E.ErrorCode.IDEMPOTENCY_IN_PROGRESS, E.ErrorCode.RATE_LIMITED}
+    transient |= {E.ErrorCode.AUTHENTICATION_REQUIRED, E.ErrorCode.MFA_REQUIRED}
+    for code, cls in E.EXCEPTION_FOR_CODE.items():
+        if not issubclass(cls, E.ClientError):
+            continue
+        inst = E.RuleNotApproved("DEC-001") if cls is E.RuleNotApproved else cls()
+        assert idem.is_replayable_client_error(inst) is (code not in transient), code

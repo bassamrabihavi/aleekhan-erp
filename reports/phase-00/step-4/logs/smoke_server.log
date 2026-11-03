@@ -1,0 +1,38 @@
+{"ts": "2026-11-03T19:16:43.849+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "0c70e056-12ad-4900-8d68-0d575cac6c04", "event": "http_request", "method": "GET", "path": "/api/v1/health/live", "status": 200, "duration_ms": 1.0}
+[03/Nov/2026 22:46:43] "GET /api/v1/health/live HTTP/1.1" 200 15
+{"ts": "2026-11-03T19:16:43.958+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "0ab8e8e9-1ab8-40a1-961d-33d26c01d99f", "event": "http_request", "method": "GET", "path": "/api/v1/health/live", "status": 200, "duration_ms": 0.5}
+[03/Nov/2026 22:46:43] "GET /api/v1/health/live HTTP/1.1" 200 15
+{"ts": "2026-11-03T19:16:44.096+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "3f1c2a9e-6b1d-4c8e-9a51-0d2f6f0b7c11", "event": "http_request", "method": "GET", "path": "/api/v1/health/ready", "status": 200, "duration_ms": 48.8}
+[03/Nov/2026 22:46:44] "GET /api/v1/health/ready HTTP/1.1" 200 170
+{"ts": "2026-11-03T19:16:44.173+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "d8d6908a-6b62-4078-9c2d-0044ec24d4d3", "event": "http_request", "method": "GET", "path": "/api/v1/version", "status": 200, "duration_ms": 0.5}
+[03/Nov/2026 22:46:44] "GET /api/v1/version HTTP/1.1" 200 98
+{"ts": "2026-11-03T19:16:44.243+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "24ebeb72-b18f-4508-bce5-46d052f91c1b", "event": "http_request", "method": "GET", "path": "/api/v1/access-gate/check", "status": 401, "duration_ms": 0.7, "error_code": "AUTHENTICATION_REQUIRED"}
+{"ts": "2026-11-03T19:16:44.244+00:00", "level": "WARNING", "logger": "django.request", "msg": "Unauthorized: /api/v1/access-gate/check", "request_id": "24ebeb72-b18f-4508-bce5-46d052f91c1b"}
+[03/Nov/2026 22:46:44] "GET /api/v1/access-gate/check?action=warehouse.reservation.create HTTP/1.1" 401 277
+{"ts": "2026-11-03T19:16:44.387+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "73ee3715-0b28-4572-885c-dacbc57ee3db", "event": "http_request", "method": "GET", "path": "/api/v1/access-gate/check", "status": 401, "duration_ms": 0.7, "error_code": "AUTHENTICATION_REQUIRED"}
+{"ts": "2026-11-03T19:16:44.387+00:00", "level": "WARNING", "logger": "django.request", "msg": "Unauthorized: /api/v1/access-gate/check", "request_id": "73ee3715-0b28-4572-885c-dacbc57ee3db"}
+[03/Nov/2026 22:46:44] "GET /api/v1/access-gate/check HTTP/1.1" 401 277
+{"ts": "2026-11-03T19:16:44.546+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "473ad560-8079-4b90-8818-3e57e8507620", "event": "http_request", "method": "POST", "path": "/api/v1/health/live", "status": 405, "duration_ms": 0.5, "error_code": "METHOD_NOT_ALLOWED"}
+{"ts": "2026-11-03T19:16:44.546+00:00", "level": "WARNING", "logger": "django.request", "msg": "Method Not Allowed: /api/v1/health/live", "request_id": "473ad560-8079-4b90-8818-3e57e8507620"}
+[03/Nov/2026 22:46:44] "POST /api/v1/health/live HTTP/1.1" 405 271
+{"ts": "2026-11-03T19:16:44.640+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "89660bfe-759e-4317-920a-27fa26ff360d", "event": "http_request", "method": "GET", "path": "/api/v1/no-such-endpoint", "status": 404, "duration_ms": 0.2, "error_code": "NOT_FOUND"}
+{"ts": "2026-11-03T19:16:44.640+00:00", "level": "WARNING", "logger": "django.request", "msg": "Not Found: /api/v1/no-such-endpoint", "request_id": "89660bfe-759e-4317-920a-27fa26ff360d"}
+[03/Nov/2026 22:46:44] "GET /api/v1/no-such-endpoint HTTP/1.1" 404 225
+{"ts": "2026-11-03T19:16:44.766+00:00", "level": "ERROR", "logger": "django.security.DisallowedHost", "msg": "Invalid HTTP_HOST header: 'evil.example'. You may need to add 'evil.example' to ALLOWED_HOSTS.", "request_id": "32df6f8a-189f-4920-af82-be3f746ae135", "exc_type": "django.core.exceptions.DisallowedHost", "stack": ["F:\\aleekhan\\aleekhan-erp\\.venv\\Lib\\site-packages\\django\\core\\handlers\\exception.py:55:inner", "F:\\aleekhan\\aleekhan-erp\\.venv\\Lib\\site-packages\\django\\utils\\deprecation.py:119:__call__", "F:\\aleekhan\\aleekhan-erp\\.venv\\Lib\\site-packages\\django\\middleware\\common.py:48:process_request", "F:\\aleekhan\\aleekhan-erp\\.venv\\Lib\\site-packages\\django\\http\\request.py:203:get_host"]}
+{"ts": "2026-11-03T19:16:44.767+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "32df6f8a-189f-4920-af82-be3f746ae135", "event": "http_request", "method": "GET", "path": "/api/v1/health/live", "status": 400, "duration_ms": 1.5, "error_code": "VALIDATION_FAILED"}
+[03/Nov/2026 22:46:44] "GET /api/v1/health/live HTTP/1.1" 400 249
+{"ts": "2026-11-03T19:16:44.897+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "05eb527e-1662-45fa-a051-146d471ee5d5", "event": "http_request", "method": "GET", "path": "/api/v1/version", "status": 400, "duration_ms": 0.4, "error_code": "VALIDATION_FAILED"}
+{"ts": "2026-11-03T19:16:44.897+00:00", "level": "WARNING", "logger": "django.request", "msg": "Bad Request: /api/v1/version", "request_id": "05eb527e-1662-45fa-a051-146d471ee5d5"}
+[03/Nov/2026 22:46:44] "GET /api/v1/version HTTP/1.1" 400 295
+{"ts": "2026-11-03T19:16:45.013+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "48034d8e-61fc-402e-a059-a586ceb0ff87", "event": "http_request", "method": "GET", "path": "/api/v1/health/live", "status": 429, "duration_ms": 0.5, "error_code": "RATE_LIMITED"}
+{"ts": "2026-11-03T19:16:45.014+00:00", "level": "WARNING", "logger": "django.request", "msg": "Too Many Requests: /api/v1/health/live", "request_id": "48034d8e-61fc-402e-a059-a586ceb0ff87"}
+[03/Nov/2026 22:46:45] "GET /api/v1/health/live HTTP/1.1" 429 269
+{"ts": "2026-11-03T19:16:45.113+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "e8eb4e58-1c52-4ce7-9491-f85c78371e3f", "event": "http_request", "method": "GET", "path": "/api/v1/health/live", "status": 429, "duration_ms": 0.4, "error_code": "RATE_LIMITED"}
+{"ts": "2026-11-03T19:16:45.114+00:00", "level": "WARNING", "logger": "django.request", "msg": "Too Many Requests: /api/v1/health/live", "request_id": "e8eb4e58-1c52-4ce7-9491-f85c78371e3f"}
+[03/Nov/2026 22:46:45] "GET /api/v1/health/live HTTP/1.1" 429 269
+{"ts": "2026-11-03T19:16:45.209+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "faa24bbc-1a9c-4028-8587-3fe63f0ea6db", "event": "http_request", "method": "GET", "path": "/api/v1/health/live", "status": 429, "duration_ms": 0.5, "error_code": "RATE_LIMITED"}
+{"ts": "2026-11-03T19:16:45.209+00:00", "level": "WARNING", "logger": "django.request", "msg": "Too Many Requests: /api/v1/health/live", "request_id": "faa24bbc-1a9c-4028-8587-3fe63f0ea6db"}
+[03/Nov/2026 22:46:45] "GET /api/v1/health/live HTTP/1.1" 429 269
+{"ts": "2026-11-03T19:17:58.643+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "626ebd08-ba0e-4b8b-8647-e5568c2b7da4", "event": "http_request", "method": "GET", "path": "/api/v1/health/live", "status": 200, "duration_ms": 0.4}
+[03/Nov/2026 22:47:58] "GET /api/v1/health/live HTTP/1.1" 200 15
+# note: last line (19:17:58Z) is a post-run liveness probe by the implementer while stopping the server

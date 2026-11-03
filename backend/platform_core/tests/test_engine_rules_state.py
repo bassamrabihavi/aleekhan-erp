@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from types import MappingProxyType
 from typing import Any
 
 import pytest
@@ -22,7 +23,19 @@ GOLDEN_DIR = Path(__file__).parent / "golden"
 # ------------------------------------------------------------------------------------------- rule gate
 def test_no_business_rule_approved_in_phase_00() -> None:
     """PHASE_00 Gate: code/die/stock and every other business rule stay locked."""
-    assert rules.APPROVED_RULE_DECISIONS == {}
+    assert dict(rules.APPROVED_RULE_DECISIONS) == {}
+
+
+def test_approved_rule_registry_is_immutable_at_runtime() -> None:
+    """REV-0010: runtime code cannot insert an approval and unlock a rule."""
+    registry: Any = rules.APPROVED_RULE_DECISIONS
+    with pytest.raises(TypeError):
+        registry["DEC-005"] = "sneaky"
+    with pytest.raises((TypeError, AttributeError)):
+        registry.update({"DEC-005": "sneaky"})
+    with pytest.raises((TypeError, AttributeError)):
+        registry.setdefault("DEC-005", "sneaky")
+    assert not rules.is_rule_approved("DEC-005")
 
 
 @pytest.mark.parametrize("decision_id", ["DEC-005", "DEC-006", "DEC-008", "DEC-015", "DEC-999"])
@@ -54,7 +67,7 @@ def test_rule_gated_decorator_never_runs_body_until_approved(monkeypatch: pytest
         issue_code(1)
     assert calls == []
     # Simulates a future reviewed approval (test-only patch; there is no runtime toggle).
-    monkeypatch.setitem(rules.APPROVED_RULE_DECISIONS, "DEC-005", "synthetic approval")
+    monkeypatch.setattr(rules, "APPROVED_RULE_DECISIONS", MappingProxyType({"DEC-005": "synthetic approval"}))
     assert issue_code(2) == 2
     assert calls == [2]
 

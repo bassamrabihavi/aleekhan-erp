@@ -12,15 +12,19 @@ code/die/stock and all other business rules are locked (PHASE_00 Gate). Governan
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from functools import wraps
-from typing import ParamSpec, TypeVar
+from types import MappingProxyType
+from typing import Final, ParamSpec, TypeVar
 
 from .errors import DECISION_ID_RE, RuleNotApproved
 
 # decision_id -> short note (commit / review reference). Add an entry only together with the implementation
 # of that rule and its golden tests (golden test ``test_no_business_rule_approved_in_phase_00`` guards it).
-APPROVED_RULE_DECISIONS: dict[str, str] = {}
+# Read-only view (REV-0010): runtime code cannot insert an entry and unlock a rule; the private dict below is
+# the only source and is edited in reviewed commits only.
+_APPROVED_RULE_DECISIONS: Final[dict[str, str]] = {}
+APPROVED_RULE_DECISIONS: Final[Mapping[str, str]] = MappingProxyType(_APPROVED_RULE_DECISIONS)
 
 P = ParamSpec("P")
 R = TypeVar("R")

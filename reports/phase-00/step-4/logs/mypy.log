@@ -1,0 +1,4 @@
+$ (cd backend && python -m mypy .)   # strict; mypy django plugin uses aleekhan.settings_test
+Success: no issues found in 59 source files
+exit=0
+mypy 2.3.1 (compiled: yes)

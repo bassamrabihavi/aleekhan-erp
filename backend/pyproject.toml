@@ -19,9 +19,9 @@ module = ["dj_database_url"]
 ignore_missing_imports = true
 
 [tool.django-stubs]
-django_settings_module = "aleekhan.settings"
+django_settings_module = "aleekhan.settings_test"  # explicit test env (REV-0011)
 
 [tool.pytest.ini_options]
-DJANGO_SETTINGS_MODULE = "aleekhan.settings"
+DJANGO_SETTINGS_MODULE = "aleekhan.settings_test"  # explicit test env (REV-0011)
 testpaths = ["platform_core/tests"]
 addopts = "-ra --strict-markers"

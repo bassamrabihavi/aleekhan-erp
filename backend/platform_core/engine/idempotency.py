@@ -13,6 +13,15 @@ Per (actor_id, Idempotency-Key)::
                  whose lease was taken over cannot complete (its business transaction rolls back)
     release_for_retry() - IN_PROGRESS -> FAILED_RETRYABLE (the write failed and was rolled back)
 
+Outcome of a failed handler in :func:`run_idempotent` (REV-0012, decided in 00.4):
+
+* a *deterministic* client error (:func:`is_replayable_client_error`: any 4xx except the transient ones
+  409 IDEMPOTENCY_IN_PROGRESS, 429 RATE_LIMITED and the session-dependent 401s) is a final outcome: the write
+  is rolled back and the problem response is stored as COMPLETED, so a retry with the same key and the same
+  request replays the same error without executing the handler again ("same key => same stored response");
+* anything else (5xx, transient 4xx, programming errors) releases the claim as FAILED_RETRYABLE, so a retry
+  with the same key executes again.
+
 Race safety: the claim is a plain INSERT guarded by ``uq_idempotency_record_actor_key``; a concurrent
 duplicate either blocks on the unique index until the first inserter commits, or finds the committed row and
 locks it with ``SELECT ... FOR UPDATE``. :func:`run_idempotent` commits the claim on its own and calls
@@ -45,11 +54,14 @@ from platform_core.models import HttpMethod, IdempotencyRecord, IdempotencyState
 from .context import RequestContext, db_now
 from .errors import (
     AuthenticationRequired,
+    ClientError,
     EngineContractError,
     FieldError,
     IdempotencyInProgress,
     IdempotencyKeyRequired,
     IdempotencyKeyReused,
+    MfaRequired,
+    RateLimited,
     ValidationFailed,
 )
 from .uow import UnitOfWork, unit_of_work
@@ -249,8 +261,9 @@ def run_idempotent(
     """Execute ``handler`` at most once per (actor, key, request); replay the stored response otherwise.
 
     The handler runs inside :func:`unit_of_work` (write + audit + outbox) and the idempotency record is
-    completed in that same transaction. On any exception the transaction rolls back and the claim is released
-    for retry (FAILED_RETRYABLE); the exception propagates.
+    completed in that same transaction. On any exception the transaction rolls back and the exception
+    propagates; a deterministic client error is stored for replay, anything else releases the claim for retry
+    (FAILED_RETRYABLE). See the module docstring.
     """
     actor_id = ctx.actor.actor_id
     if actor_id is None:
@@ -277,10 +290,40 @@ def run_idempotent(
         with unit_of_work(ctx, require_event=require_event, using=using) as uow:
             response = handler(uow)
             complete(claim, response, using=using)
-    except BaseException:
-        # Best effort: if even this fails (e.g. lost DB connection) the lease lets a retry take over later;
-        # never mask the original exception.
-        with contextlib.suppress(Exception):
-            release_for_retry(claim, using=using)
+    except BaseException as exc:
+        # The business transaction is already rolled back here. Best effort bookkeeping: if even this fails
+        # (e.g. lost DB connection) the lease lets a retry take over later; never mask the original exception.
+        stored = False
+        if isinstance(exc, ClientError) and is_replayable_client_error(exc):
+            with contextlib.suppress(Exception):
+                complete(claim, stored_problem(exc, ctx), using=using)
+                stored = True
+        if not stored:
+            with contextlib.suppress(Exception):
+                release_for_retry(claim, using=using)
         raise
     return IdempotentResult(response, replayed=False)
+
+
+# Client errors that depend on timing or on the caller's session rather than on the request itself.
+TRANSIENT_CLIENT_ERRORS: tuple[type[ClientError], ...] = (
+    IdempotencyInProgress,
+    RateLimited,
+    AuthenticationRequired,
+    MfaRequired,
+)
+PROBLEM_CONTENT_TYPE = "application/problem+json"
+
+
+def is_replayable_client_error(exc: ClientError) -> bool:
+    return not isinstance(exc, TRANSIENT_CLIENT_ERRORS)
+
+
+def stored_problem(exc: ClientError, ctx: RequestContext) -> StoredResponse:
+    """The problem response stored for a final client error (same body the API returns the first time)."""
+    request_id = ctx.request_id or uuid.uuid4()
+    return StoredResponse(
+        status=exc.http_status,
+        body=exc.to_problem(request_id),
+        headers={"Content-Type": PROBLEM_CONTENT_TYPE},
+    )

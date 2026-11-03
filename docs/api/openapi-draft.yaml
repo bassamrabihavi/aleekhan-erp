@@ -2,15 +2,18 @@ openapi: 3.1.0
 jsonSchemaDialect: https://spec.openapis.org/oas/3.1/dialect/base
 info:
   title: Aleekhan Factory Platform API
-  version: 0.2.0-draft
-  summary: PHASE_00 draft contract (step 00.1). Platform endpoints only, NO business writes.
+  version: 0.3.0-draft
+  summary: PHASE_00 draft contract (steps 00.1-00.4). Platform endpoints only, NO business writes.
   description: |
-    Status: DRAFT (PHASE_00 / 00.1 Discovery & Contract). Not approved; finalised and generated from code
-    (drf-spectacular or equivalent, schema-diff tested) in step 00.4.
+    Status: DRAFT (PHASE_00 / 00.1 Discovery & Contract, implemented in 00.4). Not approved. This hand-written
+    document is the contract (contract-first): the backend is tested against it (route parity, security
+    declarations and response-schema validation of every phase-0 endpoint in
+    backend/platform_core/tests/test_api_contract.py). Runtime details: docs/api/API_RUNTIME.md.
 
     Stack: Django 5.2 LTS + DRF (DEC-001). Base path is versioned: every endpoint lives under `/api/v1`.
     A breaking change requires `/api/v2` (or an explicitly approved deprecation window); additive changes only
-    within v1. OpenAPI diff is checked in CI from 00.4 onwards.
+    within v1. Security is declared top-level (`sessionCookie`, deny by default); only the platform probes
+    override it with `security: []` (REV-0001).
 
     Scope of this draft (PHASE_00 only): liveness, readiness, version, and an access-gate stub that
     DENIES BY DEFAULT. Authentication (login/session/MFA) is PHASE_01 (users created only inside the
@@ -43,6 +46,8 @@ info:
 servers:
   - url: /api/v1
     description: Same-origin, versioned base path (staging/production behind HTTPS reverse proxy, DEC-002/DEC-042)
+security:
+  - sessionCookie: []
 tags:
   - name: platform
     description: Health, readiness and version. No business data.
@@ -132,8 +137,9 @@ paths:
       summary: API and build version
       description: |
         Returns API contract version and build identity so reports/screenshots can be tied to a commit.
-        OPEN (C-17): whether this stays unauthenticated in production is decided in 00.7 threat model;
-        the draft marks it public but leaks no dependency versions.
+        C-17 (00.4 decision, to be re-checked in the 00.7 threat model): public, because reports and
+        screenshots must be tied to a commit; it returns only the API/contract version, the short build
+        commit and the environment name - never Python/Django/PostgreSQL/OS versions, hostnames or paths.
       security: []
       parameters:
         - $ref: '#/components/parameters/RequestId'
@@ -165,10 +171,13 @@ paths:
         Stub of the central authorization gate (per action / record scope / field). In PHASE_00 there is
         no login and no permission policy, therefore:
         * no authenticated principal -> 401 AUTHENTICATION_REQUIRED;
-        * any principal (test harness only) -> 200 with decision DENY and reason POLICY_NOT_DEFINED.
+        * any principal (test harness only) -> 200 with decision DENY and reason POLICY_NOT_DEFINED
+          (parameters are validated first: 400 VALIDATION_FAILED).
         The endpoint is read-only and NEVER grants access; it exists so 00.3/00.4 can test the
         deny-by-default contract. Real policy (roles, scopes, MFA step-up, maker-checker) is PHASE_01
         (permission matrix still PROPOSED; DEC-032 PROPOSED).
+      security:
+        - sessionCookie: []
       parameters:
         - $ref: '#/components/parameters/RequestId'
         - name: action

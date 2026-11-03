@@ -1,0 +1,32 @@
+$ (cd backend && ALEEKHAN_ENV=test python -m pytest -v -p no:cacheprovider platform_core/tests/test_api_contract.py --junitxml=reports/phase-00/step-4/logs/contract-junit.xml)
+============================= test session starts =============================
+platform win32 -- Python 3.12.10, pytest-9.1.1, pluggy-1.7.0 -- F:\aleekhan\aleekhan-erp\.venv\Scripts\python.exe
+hypothesis profile 'aleekhan' -> database=None, deadline=None, max_examples=200, derandomize=True
+django: version: 5.2.18, settings: aleekhan.settings_test (from ini)
+rootdir: F:\aleekhan\aleekhan-erp\backend
+configfile: pyproject.toml
+plugins: hypothesis-6.170.4, django-4.14.0
+collecting ... collected 18 items
+
+platform_core/tests/test_api_contract.py::test_contract_health_live PASSED [  5%]
+platform_core/tests/test_api_contract.py::test_contract_health_ready_200_and_503 PASSED [ 11%]
+platform_core/tests/test_api_contract.py::test_openapi_document_is_valid_oas31 PASSED [ 16%]
+platform_core/tests/test_api_contract.py::test_contract_version_matches_code PASSED [ 22%]
+platform_core/tests/test_api_contract.py::test_every_non_public_operation_declares_security PASSED [ 27%]
+platform_core/tests/test_api_contract.py::test_route_parity_with_openapi PASSED [ 33%]
+platform_core/tests/test_api_contract.py::test_no_test_harness_in_production_urlconf PASSED [ 38%]
+platform_core/tests/test_api_contract.py::test_production_views_use_allowlisted_permissions_and_default_policy PASSED [ 44%]
+platform_core/tests/test_api_contract.py::test_contract_version PASSED   [ 50%]
+platform_core/tests/test_api_contract.py::test_contract_version_prod_environment_name PASSED [ 55%]
+platform_core/tests/test_api_contract.py::test_contract_access_gate_401 PASSED [ 61%]
+platform_core/tests/test_api_contract.py::test_contract_access_gate_200_deny_and_400_with_principal PASSED [ 66%]
+platform_core/tests/test_api_contract.py::test_contract_429[/health/live] PASSED [ 72%]
+platform_core/tests/test_api_contract.py::test_contract_429[/version] PASSED [ 77%]
+platform_core/tests/test_api_contract.py::test_contract_429[/access-gate/check] PASSED [ 83%]
+platform_core/tests/test_api_contract.py::test_contract_405_generic_problem[/health/live] PASSED [ 88%]
+platform_core/tests/test_api_contract.py::test_contract_405_generic_problem[/health/ready] PASSED [ 94%]
+platform_core/tests/test_api_contract.py::test_contract_405_generic_problem[/version] PASSED [100%]
+
+- generated xml file: F:\aleekhan\aleekhan-erp\reports\phase-00\step-4\logs\contract-junit.xml -
+============================= 18 passed in 1.81s ==============================
+exit=0

@@ -30,8 +30,12 @@ with unit_of_work(RequestContext(Actor.user(uid), request_id=rid)) as uow:
 - At least one audit row is required; at least one outbox event unless `require_event=False`. A violation
   raises `EngineContractError` inside the transaction (the write is rolled back).
 - Actor, `request_id` and `correlation_id` (defaults to `request_id`) are copied to audit and outbox rows.
-- Audit `before`/`after` are redacted (`[REDACTED]` for keys like password/secret/token/salary/payroll; see
-  `redaction.py`); an outbox payload with such a key is rejected. Full field classification: 00.7 / later phases.
+- Audit `before`/`after` and `scope` are redacted (`[REDACTED]` for keys like password/secret/token/salary/
+  payroll; see `redaction.py`; `scope` since 00.4, REV-0009); an outbox payload with such a key is rejected.
+  Full field classification: 00.7 / later phases.
+- `reason` (free text) and `resource_id` (identifier) cannot be redacted by key. Rule: `reason` is a short
+  operator justification without personal data or secrets; `resource_id` is a surrogate id or a 14-digit code,
+  never a name, phone number or other personal value. Enforced by code review (REV-0009).
 - Known limit: audit of *denied/failed* attempts must survive the rollback of the failed write; that writer
   (separate transaction) belongs with the API error handler in 00.4.
 
@@ -48,8 +52,19 @@ with unit_of_work(RequestContext(Actor.user(uid), request_id=rid)) as uow:
    - `IN_PROGRESS` past the lease (holder crashed), `FAILED_RETRYABLE`, or expired → new claim.
 3. The handler runs inside `unit_of_work`; `complete` stores the response **in the same transaction** with a
    compare-and-set on `row_version` (a holder that lost its lease cannot complete → its write rolls back).
-4. On any exception: rollback, claim → `FAILED_RETRYABLE`, exception re-raised (the client may retry with the
-   same key and the same request).
+4. On any exception the business transaction rolls back and the exception is re-raised. Then (REV-0012,
+   decided in 00.4):
+   - **deterministic client error** (any 4xx except 409 `IDEMPOTENCY_IN_PROGRESS`, 429 `RATE_LIMITED`,
+     401 `AUTHENTICATION_REQUIRED` / `MFA_REQUIRED`): the problem response is stored and the record becomes
+     `COMPLETED`. A retry with the same key and the same request **replays the same problem** (same status,
+     same body including the original `request_id`, header `Idempotent-Replayed: true`) without running the
+     handler. To try again after fixing the cause, the client sends a new key.
+   - **anything else** (5xx, transient 4xx, programming errors): claim → `FAILED_RETRYABLE`; a retry with the
+     same key and the same request executes again.
+   Rationale: "same key ⇒ same stored response" holds for every final outcome, and a retried request can never
+   flip from an error to a success behind the client's back. Tests: `test_engine_idempotency.py`
+   (`test_run_idempotent_client_error_is_stored_and_replayed`, `..._transient_client_error_is_retryable`) and
+   `test_api_utilities.py` (HTTP level).
 
 Request hash = SHA-256 of canonical JSON `{"method","endpoint","body"}` (sorted keys, no whitespace,
 UTF-8, NaN/Infinity rejected). All times are the DB clock (`statement_timestamp()`).
@@ -57,6 +72,9 @@ UTF-8, NaN/Infinity rejected). All times are the DB clock (`statement_timestamp(
 Defaults (technical, parameters — not business rules; to be confirmed with ops in 00.7):
 `IDEMPOTENCY_TTL` = 24 h (STATE_TRANSITIONS 1.2 proposal), `IN_PROGRESS_LEASE` = 5 min. Housekeeping:
 `purge_expired(limit=)` (scheduling is 00.6/00.7).
+
+API glue: `platform_core.api.idempotent.idempotent_response(request, endpoint=, handler=)` (principal,
+`Idempotency-Key`, request id → `RequestContext`).
 
 ## 3. Optimistic concurrency (`concurrency`)
 

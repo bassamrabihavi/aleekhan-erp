@@ -1,0 +1,196 @@
+# Smoke test: real dev server (manage.py runserver 127.0.0.1:8765, ALEEKHAN_ENV=dev, throwaway DB aleekhan_smoke, ALEEKHAN_BUILD_COMMIT=HEAD short sha, ALEEKHAN_RATE_HEALTH=5/min). Date: 2026-11-03T19:16:43Z
+
+$ curl -s -i http://127.0.0.1:8765/api/v1/health/live
+HTTP/1.1 200 OK
+Date: Tue, 03 Nov 2026 19:16:43 GMT
+Server: WSGIServer/0.2 CPython/3.12.10
+Content-Type: application/json
+Cache-Control: no-store
+Allow: GET, HEAD, OPTIONS
+X-Frame-Options: DENY
+Content-Length: 15
+X-Content-Type-Options: nosniff
+Referrer-Policy: same-origin
+Cross-Origin-Opener-Policy: same-origin
+X-Request-ID: 0ab8e8e9-1ab8-40a1-961d-33d26c01d99f
+
+{"status":"ok"}
+
+$ curl -s -i -H X-Request-ID: 3f1c2a9e-6b1d-4c8e-9a51-0d2f6f0b7c11 http://127.0.0.1:8765/api/v1/health/ready
+HTTP/1.1 200 OK
+Date: Tue, 03 Nov 2026 19:16:44 GMT
+Server: WSGIServer/0.2 CPython/3.12.10
+Content-Type: application/json
+Cache-Control: no-store
+Allow: GET, HEAD, OPTIONS
+X-Frame-Options: DENY
+Content-Length: 170
+X-Content-Type-Options: nosniff
+Referrer-Policy: same-origin
+Cross-Origin-Opener-Policy: same-origin
+X-Request-ID: 3f1c2a9e-6b1d-4c8e-9a51-0d2f6f0b7c11
+
+{"status":"ready","checked_at":"2026-11-03T19:16:44Z","components":[{"name":"database","status":"up"},{"name":"migrations","status":"up"},{"name":"cache","status":"up"}]}
+
+$ curl -s -i -H X-Request-ID: not-a-uuid<script> http://127.0.0.1:8765/api/v1/version
+HTTP/1.1 200 OK
+Date: Tue, 03 Nov 2026 19:16:44 GMT
+Server: WSGIServer/0.2 CPython/3.12.10
+Content-Type: application/json
+ETag: "928fa1a461ad7d2e54fb78e0cf325a0d"
+Cache-Control: no-cache
+Allow: GET, HEAD, OPTIONS
+X-Frame-Options: DENY
+Content-Length: 98
+X-Content-Type-Options: nosniff
+Referrer-Policy: same-origin
+Cross-Origin-Opener-Policy: same-origin
+X-Request-ID: d8d6908a-6b62-4078-9c2d-0044ec24d4d3
+
+{"api_version":"v1","contract_version":"0.3.0-draft","build_commit":"a80bf87","environment":"dev"}
+
+$ curl -s -i http://127.0.0.1:8765/api/v1/access-gate/check?action=warehouse.reservation.create
+HTTP/1.1 401 Unauthorized
+Date: Tue, 03 Nov 2026 19:16:44 GMT
+Server: WSGIServer/0.2 CPython/3.12.10
+Content-Type: application/problem+json
+Cache-Control: no-store
+Allow: GET, HEAD, OPTIONS
+X-Frame-Options: DENY
+Content-Length: 277
+X-Content-Type-Options: nosniff
+Referrer-Policy: same-origin
+Cross-Origin-Opener-Policy: same-origin
+X-Request-ID: 24ebeb72-b18f-4508-bce5-46d052f91c1b
+
+{"type":"https://errors.aleekhan.invalid/AUTHENTICATION_REQUIRED","title":"Authentication required","status":401,"code":"AUTHENTICATION_REQUIRED","message_fa":"برای این کار باید وارد سامانه شوید.","request_id":"24ebeb72-b18f-4508-bce5-46d052f91c1b"}
+
+$ curl -s -i http://127.0.0.1:8765/api/v1/access-gate/check
+HTTP/1.1 401 Unauthorized
+Date: Tue, 03 Nov 2026 19:16:44 GMT
+Server: WSGIServer/0.2 CPython/3.12.10
+Content-Type: application/problem+json
+Cache-Control: no-store
+Allow: GET, HEAD, OPTIONS
+X-Frame-Options: DENY
+Content-Length: 277
+X-Content-Type-Options: nosniff
+Referrer-Policy: same-origin
+Cross-Origin-Opener-Policy: same-origin
+X-Request-ID: 73ee3715-0b28-4572-885c-dacbc57ee3db
+
+{"type":"https://errors.aleekhan.invalid/AUTHENTICATION_REQUIRED","title":"Authentication required","status":401,"code":"AUTHENTICATION_REQUIRED","message_fa":"برای این کار باید وارد سامانه شوید.","request_id":"73ee3715-0b28-4572-885c-dacbc57ee3db"}
+
+$ curl -s -i -X POST -H Content-Type: application/json -d {} http://127.0.0.1:8765/api/v1/health/live
+HTTP/1.1 405 Method Not Allowed
+Date: Tue, 03 Nov 2026 19:16:44 GMT
+Server: WSGIServer/0.2 CPython/3.12.10
+Content-Type: application/problem+json
+Cache-Control: no-store
+Allow: GET, HEAD, OPTIONS
+X-Frame-Options: DENY
+Content-Length: 271
+X-Content-Type-Options: nosniff
+Referrer-Policy: same-origin
+Cross-Origin-Opener-Policy: same-origin
+X-Request-ID: 473ad560-8079-4b90-8818-3e57e8507620
+
+{"type":"https://errors.aleekhan.invalid/METHOD_NOT_ALLOWED","title":"Method not allowed","status":405,"code":"METHOD_NOT_ALLOWED","message_fa":"این نوع درخواست برای این مسیر مجاز نیست.","request_id":"473ad560-8079-4b90-8818-3e57e8507620"}
+
+$ curl -s -i http://127.0.0.1:8765/api/v1/no-such-endpoint
+HTTP/1.1 404 Not Found
+Date: Tue, 03 Nov 2026 19:16:44 GMT
+Server: WSGIServer/0.2 CPython/3.12.10
+Content-Type: application/problem+json
+Cache-Control: no-store
+X-Frame-Options: DENY
+Content-Length: 225
+X-Content-Type-Options: nosniff
+Referrer-Policy: same-origin
+Cross-Origin-Opener-Policy: same-origin
+X-Request-ID: 89660bfe-759e-4317-920a-27fa26ff360d
+
+{"type": "https://errors.aleekhan.invalid/NOT_FOUND", "title": "Not found", "status": 404, "code": "NOT_FOUND", "message_fa": "مورد درخواستی پیدا نشد.", "request_id": "89660bfe-759e-4317-920a-27fa26ff360d"}
+
+$ curl -s -i -H Host: evil.example http://127.0.0.1:8765/api/v1/health/live
+HTTP/1.1 400 Bad Request
+Date: Tue, 03 Nov 2026 19:16:44 GMT
+Server: WSGIServer/0.2 CPython/3.12.10
+Content-Type: application/problem+json
+Cache-Control: no-store
+X-Content-Type-Options: nosniff
+Referrer-Policy: same-origin
+Cross-Origin-Opener-Policy: same-origin
+X-Request-ID: 32df6f8a-189f-4920-af82-be3f746ae135
+Connection: close
+
+{"type": "https://errors.aleekhan.invalid/VALIDATION_FAILED", "title": "Validation failed", "status": 400, "code": "VALIDATION_FAILED", "message_fa": "مقدار ورودی معتبر نیست.", "request_id": "32df6f8a-189f-4920-af82-be3f746ae135"}
+
+$ curl -s -i -H Accept: text/html http://127.0.0.1:8765/api/v1/version
+HTTP/1.1 400 Bad Request
+Date: Tue, 03 Nov 2026 19:16:44 GMT
+Server: WSGIServer/0.2 CPython/3.12.10
+Content-Type: application/problem+json
+Cache-Control: no-store
+Allow: GET, HEAD, OPTIONS
+X-Frame-Options: DENY
+Content-Length: 295
+X-Content-Type-Options: nosniff
+Referrer-Policy: same-origin
+Cross-Origin-Opener-Policy: same-origin
+X-Request-ID: 05eb527e-1662-45fa-a051-146d471ee5d5
+
+{"type":"https://errors.aleekhan.invalid/VALIDATION_FAILED","title":"Validation failed","status":400,"code":"VALIDATION_FAILED","message_fa":"مقدار ورودی معتبر نیست.","request_id":"05eb527e-1662-45fa-a051-146d471ee5d5","detail":"only application/json responses are available"}
+
+## rate limit: 5/min on the probe bucket (health scope). Already used: 1 readiness-poll curl before this log + live + ready + version + POST live (405 is throttled first) = 5; the Host-rejected call never reached DRF. So the next calls get 429.
+
+$ curl -s -i http://127.0.0.1:8765/api/v1/health/live
+HTTP/1.1 429 Too Many Requests
+Date: Tue, 03 Nov 2026 19:16:45 GMT
+Server: WSGIServer/0.2 CPython/3.12.10
+Content-Type: application/problem+json
+Cache-Control: no-store
+Retry-After: 59
+Allow: GET, HEAD, OPTIONS
+X-Frame-Options: DENY
+Content-Length: 269
+X-Content-Type-Options: nosniff
+Referrer-Policy: same-origin
+Cross-Origin-Opener-Policy: same-origin
+X-Request-ID: 48034d8e-61fc-402e-a059-a586ceb0ff87
+
+{"type":"https://errors.aleekhan.invalid/RATE_LIMITED","title":"Too many requests","status":429,"code":"RATE_LIMITED","message_fa":"تعداد درخواست‌ها زیاد است؛ کمی بعد تلاش کنید.","request_id":"48034d8e-61fc-402e-a059-a586ceb0ff87"}
+
+$ curl -s -i http://127.0.0.1:8765/api/v1/health/live
+HTTP/1.1 429 Too Many Requests
+Date: Tue, 03 Nov 2026 19:16:45 GMT
+Server: WSGIServer/0.2 CPython/3.12.10
+Content-Type: application/problem+json
+Cache-Control: no-store
+Retry-After: 59
+Allow: GET, HEAD, OPTIONS
+X-Frame-Options: DENY
+Content-Length: 269
+X-Content-Type-Options: nosniff
+Referrer-Policy: same-origin
+Cross-Origin-Opener-Policy: same-origin
+X-Request-ID: e8eb4e58-1c52-4ce7-9491-f85c78371e3f
+
+{"type":"https://errors.aleekhan.invalid/RATE_LIMITED","title":"Too many requests","status":429,"code":"RATE_LIMITED","message_fa":"تعداد درخواست‌ها زیاد است؛ کمی بعد تلاش کنید.","request_id":"e8eb4e58-1c52-4ce7-9491-f85c78371e3f"}
+
+$ curl -s -i http://127.0.0.1:8765/api/v1/health/live
+HTTP/1.1 429 Too Many Requests
+Date: Tue, 03 Nov 2026 19:16:45 GMT
+Server: WSGIServer/0.2 CPython/3.12.10
+Content-Type: application/problem+json
+Cache-Control: no-store
+Retry-After: 59
+Allow: GET, HEAD, OPTIONS
+X-Frame-Options: DENY
+Content-Length: 269
+X-Content-Type-Options: nosniff
+Referrer-Policy: same-origin
+Cross-Origin-Opener-Policy: same-origin
+X-Request-ID: faa24bbc-1a9c-4028-8587-3fe63f0ea6db
+
+{"type":"https://errors.aleekhan.invalid/RATE_LIMITED","title":"Too many requests","status":429,"code":"RATE_LIMITED","message_fa":"تعداد درخواست‌ها زیاد است؛ کمی بعد تلاش کنید.","request_id":"faa24bbc-1a9c-4028-8587-3fe63f0ea6db"}

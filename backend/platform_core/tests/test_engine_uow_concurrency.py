@@ -119,10 +119,13 @@ def test_audit_snapshots_redacted_and_sensitive_payload_rejected() -> None:
             resource_type="platform.synthetic",
             before={"name": "x", "password": "synthetic-pw"},
             after={"name": "y", "nested": {"salary": 1}},
+            scope={"site": "s1", "password": "synthetic-pw", "teams": [{"api_token": "t"}]},
         )
     stored = AuditEvent.objects.get(pk=a.pk)
     assert stored.before == {"name": "x", "password": REDACTED}
     assert stored.after == {"name": "y", "nested": {"salary": REDACTED}}
+    # REV-0009: scope is redacted too
+    assert stored.scope == {"site": "s1", "password": REDACTED, "teams": [{"api_token": REDACTED}]}
     with pytest.raises(EngineContractError, match="sensitive"), unit_of_work(_ctx()) as uow:
         uow.audit(action="platform.synthetic.update", resource_type="platform.synthetic")
         uow.emit(

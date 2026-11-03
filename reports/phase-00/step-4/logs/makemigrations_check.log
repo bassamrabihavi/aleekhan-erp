@@ -1,0 +1,14 @@
+$ (cd backend && ALEEKHAN_ENV=dev PGDATABASE=aleekhan_smoke python manage.py migrate --noinput)
+Operations to perform:
+  Apply all migrations: platform_core
+Running migrations:
+  Applying platform_core.0001_initial... OK
+  Applying platform_core.0002_db_triggers... OK
+  Applying platform_core.0003_seed_schema_meta... OK
+exit=0
+$ (cd backend && ALEEKHAN_ENV=dev python manage.py makemigrations --check --dry-run)
+No changes detected
+exit=0
+$ (cd backend && ALEEKHAN_ENV=dev python manage.py check)
+System check identified no issues (0 silenced).
+exit=0

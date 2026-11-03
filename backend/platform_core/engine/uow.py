@@ -13,7 +13,10 @@ event"; openapi-draft ``write_requirements``)::
 * At least one audit row is mandatory; at least one outbox event is mandatory unless ``require_event=False``
   (e.g. an admin action whose effect is itself an outbox state change). Violations raise
   :class:`EngineContractError` *inside* the transaction, so the write is rolled back.
-* Audit ``before``/``after`` are redacted; outbox payloads with sensitive keys are rejected.
+* Audit ``before``/``after`` and ``scope`` are redacted (REV-0009); outbox payloads with sensitive keys are
+  rejected. ``reason`` is free text and ``resource_id`` an identifier: neither can be redacted by key, so
+  callers must never put personal data or secrets there (reason = short operator justification, resource_id
+  = surrogate id / 14-digit code only). This is a code-review rule (docs/engine/README.md section 1).
 * Nested use joins the outer transaction as a savepoint (the outer commit decides durability).
 """
 
@@ -63,7 +66,7 @@ class UnitOfWork:
             resource_type=resource_type,
             resource_id=resource_id,
             resource_version=resource_version,
-            scope=dict(scope or {}),
+            scope=redact(dict(scope or {})),
             reason=reason,
             before=redact(dict(before)) if before is not None else None,
             after=redact(dict(after)) if after is not None else None,

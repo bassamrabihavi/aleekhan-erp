@@ -1,0 +1,23 @@
+== GET /api/v1/health/live
+HTTP/1.1 200 OK
+Content-Type: application/json
+X-Request-ID: b3c3255f-c77f-4fa5-a8c3-2dd4d388157b
+{"status":"ok"}
+== GET /api/v1/health/ready
+HTTP/1.1 200 OK
+Content-Type: application/json
+X-Request-ID: cd90e097-20d6-421a-a99a-b566cdbb5168
+{"status":"ready","checked_at":"2026-11-03T19:20:14Z","components":[{"name":"database","status":"up"},{"name":"migrations","status":"up"},{"name":"cache","status":"up"}]}
+== GET /api/v1/version
+HTTP/1.1 200 OK
+Content-Type: application/json
+X-Request-ID: cf910091-c5ad-498a-bf7c-13c722509304
+{"api_version":"v1","contract_version":"0.3.0-draft","build_commit":"0000000","environment":"dev"}
+== GET /api/v1/access-gate/check
+HTTP/1.1 401 Unauthorized
+Content-Type: application/problem+json
+X-Request-ID: 713f6f53-a1d1-4b6a-9780-bc78e42bdd99
+{"type":"https://errors.aleekhan.invalid/AUTHENTICATION_REQUIRED","title":"Authentication required","status":401,"code":"AUTHENTICATION_REQUIRED","message_fa":"برای این کار باید وارد سامانه شوید.","request_id":"713f6f53-a1d1-4b6a-9780-bc78e42bdd99"}
+X-Request-ID: 0b8f7c2e-1d2a-4c3b-9e8f-123456789abc
+    115 200
+     15 429
