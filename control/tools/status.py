@@ -408,6 +408,25 @@ def cmd_decide(a):
     sys.exit(f"unknown decision {a.id}")
 
 
+def cmd_add_decision(a):
+    """Register a decision raised after init (from DECISIONS_ADDENDUM.csv). Never overwrites an existing id."""
+    s = load()
+    if any(d["id"] == a.id for d in s["decisions"]):
+        sys.exit(f"REFUSED: {a.id} already exists")
+    extra = ROOT / "control" / "decisions" / "DECISIONS_ADDENDUM.csv"
+    rows = [r for r in read_csv(extra) if r["decision_id"] == a.id] if extra.exists() else []
+    if not rows:
+        sys.exit(f"REFUSED: add {a.id} to control/decisions/DECISIONS_ADDENDUM.csv first")
+    r = rows[0]
+    s["decisions"].append({"id": r["decision_id"], "priority": r["priority"], "gate": r["decision_gate"],
+                           "domain": r["domain"], "issue": r["issue"], "status": r["status"],
+                           "owner": r["owner"], "phase": r["affects_phase"], "source": r["source"],
+                           "resolution": None, "decided_by": None, "decided_at": None})
+    event(s, "decision_added", id=a.id, status=r["status"])
+    save(s)
+    print(f"{a.id} added ({r['status']})")
+
+
 def cmd_test_add(a):
     s = load()
     tid = f"T-{len(s['ready_for_test']) + 1:03d}"
@@ -775,6 +794,7 @@ def main():
     x = sub.add_parser("gate"); x.add_argument("phase"); x.add_argument("verdict", choices=["ACCEPTED", "REJECTED"])
     x.add_argument("--by"); x.add_argument("--note"); x.set_defaults(f=cmd_gate)
     x = sub.add_parser("decide"); x.add_argument("id"); x.add_argument("status"); x.add_argument("--by"); x.add_argument("--note"); x.set_defaults(f=cmd_decide)
+    x = sub.add_parser("add-decision"); x.add_argument("id"); x.set_defaults(f=cmd_add_decision)
     x = sub.add_parser("test-add"); x.add_argument("phase"); x.add_argument("what"); x.add_argument("how"); x.set_defaults(f=cmd_test_add)
     x = sub.add_parser("test-done"); x.add_argument("id"); x.add_argument("--result", required=True, choices=["PASS", "FAIL"]); x.add_argument("--note"); x.set_defaults(f=cmd_test_done)
     x = sub.add_parser("lock"); x.add_argument("action", choices=["acquire", "release", "show"]); x.add_argument("--force", action="store_true"); x.add_argument("--note"); x.set_defaults(f=cmd_lock)

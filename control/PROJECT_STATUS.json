@@ -2162,6 +2162,34 @@
       "resolution": "درخت سلسله‌مراتب سازمانی (واحدها، سمت‌ها، مدیر هر نفر) باید داخل سامانه تعریف و نمایش داده شود؛ در فاز ۱ همراه کاربران و دسترسی‌ها؛ جزئیات سطوح و اثر آن بر تأییدها در گام 01.1 با کارفرما نهایی شود",
       "decided_by": "کارفرما",
       "decided_at": "2026-11-03"
+    },
+    {
+      "id": "DEC-044",
+      "priority": "P1",
+      "gate": "Gate-0",
+      "domain": "Governance",
+      "issue": "استثنای سلامت بسته handoff: هش اشتباه PACKAGE_MANIFEST.json و پایان خط ۱۳ فایل CSV",
+      "status": "APPROVED",
+      "owner": "کارفرما",
+      "phase": "PHASE_00",
+      "source": "گام 00.1 (REV-00.1-A/B) 2026-11-03",
+      "resolution": "گزینه B: یک‌بار بازگردانی بایت‌های CRLF برای ۱۳ CSV در handoff/ (استثنای مجاز بر «handoff ویرایش نشود»)؛ هش PACKAGE_MANIFEST.json به‌عنوان نقص شناخته‌شده بسته مستند می‌ماند؛ C فقط اگر بسته جدید صادر شد",
+      "decided_by": "کارفرما",
+      "decided_at": "2026-11-03T15:36:59+00:00"
+    },
+    {
+      "id": "DEC-045",
+      "priority": "P0",
+      "gate": "Gate-0",
+      "domain": "Platform",
+      "issue": "محل اجرای CI و محیط آزمایشی/تمرین بازیابی Gate-0",
+      "status": "OPEN",
+      "owner": "کارفرما + IT",
+      "phase": "PHASE_00",
+      "source": "گام 00.1 2026-11-03",
+      "resolution": null,
+      "decided_by": null,
+      "decided_at": null
     }
   ],
   "ready_for_test": [],
@@ -2189,7 +2217,27 @@
       "state": "IN_REVIEW",
       "note": null,
       "commit": "57f4500e87bb936c1b8a622faaee5bb4a657e1d6"
+    },
+    {
+      "at": "2026-11-03T15:36:58+00:00",
+      "kind": "decision_added",
+      "id": "DEC-044",
+      "status": "OPEN"
+    },
+    {
+      "at": "2026-11-03T15:36:59+00:00",
+      "kind": "decision_added",
+      "id": "DEC-045",
+      "status": "OPEN"
+    },
+    {
+      "at": "2026-11-03T15:36:59+00:00",
+      "kind": "decision",
+      "id": "DEC-044",
+      "status": "APPROVED",
+      "by": "کارفرما",
+      "note": "گزینه B: یک‌بار بازگردانی بایت‌های CRLF برای ۱۳ CSV در handoff/ (استثنای مجاز بر «handoff ویرایش نشود»)؛ هش PACKAGE_MANIFEST.json به‌عنوان نقص شناخته‌شده بسته مستند می‌ماند؛ C فقط اگر بسته جدید صادر شد"
     }
   ],
-  "updated_at": "2026-11-03T15:34:27+00:00"
+  "updated_at": "2026-11-03T15:36:59+00:00"
 }
