@@ -1,0 +1,66 @@
+{
+  "phase": "PHASE_00",
+  "step": "00.5",
+  "commit_sha": "fbd4218e8330226d3677583a054a42e9d1f20fff",
+  "status": "COMPLETE",
+  "scope": [
+    "smoke UI system status page",
+    "design tokens",
+    "RTL responsive",
+    "states",
+    "keyboard/a11y",
+    "E2E + screenshots"
+  ],
+  "changes": [
+    "frontend/",
+    "docs/ui/DESIGN_TOKENS.md",
+    ".gitignore",
+    "ruff.toml"
+  ],
+  "migrations": [],
+  "test_evidence": [
+    {
+      "command": "npm run lint",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-5/logs/orch_eslint.log"
+    },
+    {
+      "command": "npm run typecheck",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-5/logs/orch_tsc.log"
+    },
+    {
+      "command": "vitest 23",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-5/logs/orch_vitest.log"
+    },
+    {
+      "command": "npm audit --omit=dev",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-5/logs/orch_audit_prod.log"
+    },
+    {
+      "command": "scripts/e2e.sh 10+1",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-5/logs/orch_playwright.log"
+    }
+  ],
+  "security_evidence": [
+    "0 prod npm vulnerabilities",
+    "no off-origin runtime requests",
+    "no secrets in logs"
+  ],
+  "decisions": [],
+  "risks": [
+    "Edge instead of bundled Chromium",
+    "ESLint 9 EOL",
+    "13 moderate dev-only advisories"
+  ],
+  "evidence_paths": [
+    "reports/phase-00/step-5/screenshots/",
+    "reports/phase-00/step-5/logs/",
+    "docs/ui/DESIGN_TOKENS.md"
+  ],
+  "rollback": "git revert fbd4218e8330226d3677583a054a42e9d1f20fff",
+  "review_request": "PASS"
+}

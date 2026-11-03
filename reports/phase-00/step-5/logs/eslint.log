@@ -1,0 +1,6 @@
+$ npm run lint
+
+> aleekhan-frontend@0.0.0 lint
+> eslint --max-warnings=0 .
+
+rc=0

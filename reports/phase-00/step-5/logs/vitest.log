@@ -1,0 +1,37 @@
+$ npx vitest run --reporter=verbose
+
+ RUN  v5.0.5 F:/aleekhan/aleekhan-erp/frontend
+
+ ✓ src/lib/format.test.ts > toFaDigits > converts Latin and Arabic-Indic digits to Persian 3ms
+ ✓ src/lib/format.test.ts > toFaDigits > keeps leading zeros (14-digit codes are strings) 0ms
+ ✓ src/lib/format.test.ts > formatJalaliDateTime > renders a UTC instant as Jalali date/time in Asia/Tehran (+03:30) with Persian digits 2ms
+ ✓ src/lib/format.test.ts > formatJalaliDateTime > returns a dash for invalid input 0ms
+ ✓ src/lib/format.test.ts > formatAge > age 0 ms -> همین حالا 0ms
+ ✓ src/lib/format.test.ts > formatAge > age 12000 ms -> ۱۲ ثانیه پیش 0ms
+ ✓ src/lib/format.test.ts > formatAge > age 125000 ms -> ۲ دقیقه پیش 0ms
+ ✓ src/lib/format.test.ts > formatAge > age 7200000 ms -> ۲ ساعت پیش 0ms
+ ✓ src/api/client.test.ts > getJson / platform client > returns a contract-valid readiness body 11ms
+ ✓ src/api/client.test.ts > getJson / platform client > accepts 503 not_ready as data (not an error) 2ms
+ ✓ src/api/client.test.ts > getJson / platform client > maps application/problem+json to ApiError with message_fa, code and request_id 1ms
+ ✓ src/api/client.test.ts > getJson / platform client > network failure -> kind network with Persian fallback message and no request id 1ms
+ ✓ src/api/client.test.ts > getJson / platform client > 5xx without a JSON body (dev proxy cannot reach backend) -> network 1ms
+ ✓ src/api/client.test.ts > getJson / platform client > body that violates the contract is rejected, never rendered as data 1ms
+ ✓ src/App.test.tsx > System status page > shows loading first, then real-shaped data with Persian labels and digits 114ms
+ ✓ src/App.test.tsx > System status page > access gate 401 is rendered as the no-access state with message_fa and request id 32ms
+ ✓ src/App.test.tsx > System status page > not_ready (503) shows the down component and a danger chip 38ms
+ ✓ src/App.test.tsx > System status page > error state shows server message_fa, code, HTTP status and request id; retry recovers 212ms
+ ✓ src/App.test.tsx > System status page > network failure shows the Persian fallback and no request id 33ms
+ ✓ src/App.test.tsx > System status page > empty components list renders the empty state 28ms
+ ✓ src/App.test.tsx > System status page > failed refresh keeps last data and flags it as stale 110ms
+stderr | src/App.test.tsx > System status page > refresh button is a real button reachable by keyboard
+The current testing environment is not configured to support act(...)
+
+ ✓ src/App.test.tsx > System status page > refresh button is a real button reachable by keyboard 125ms
+ ✓ src/App.test.tsx > staleness() > no data -> null; error with data -> failed; old data -> age; fresh -> null 1ms
+
+ Test Files  3 passed (3)
+      Tests  23 passed (23)
+   Start at  23:29:39
+   Duration  2.96s (environment 64%, tests 12%, setup 11%, import 9%, transform 4%, worker 1%)
+
+rc=0

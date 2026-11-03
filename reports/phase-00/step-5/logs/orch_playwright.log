@@ -1,0 +1,9 @@
+== server: 17.9
+== create throw-away database aleekhan_e2e
+== migrate (ALEEKHAN_ENV=dev, db=aleekhan_e2e)
+== playwright: real backend (build commit fbd4218e8330)
+  10 passed (25.2s)
+== playwright: backend stopped (E2E_MODE=backend-down)
+  1 passed (5.7s)
+== results: real-backend rc=0, backend-down rc=0
+== drop throw-away database aleekhan_e2e

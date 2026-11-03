@@ -1,0 +1,11 @@
+$ node -v; npm -v
+v24.20.0
+11.19.0
+$ npm ci
+  npm audit fix --force
+
+Some issues need review, and may require choosing
+a different dependency.
+
+Run `npm audit` for details.
+rc=0

@@ -1,0 +1,37 @@
+$ E2E_BROWSER_CHANNEL=msedge (Edge 156.0.4314.58) bash scripts/e2e.sh
+== server: 17.9
+== create throw-away database aleekhan_e2e
+NOTICE:  database "aleekhan_e2e" does not exist, skipping
+== migrate (ALEEKHAN_ENV=dev, db=aleekhan_e2e)
+Operations to perform:
+  Apply all migrations: platform_core
+Running migrations:
+  Applying platform_core.0001_initial... OK
+  Applying platform_core.0002_db_triggers... OK
+  Applying platform_core.0003_seed_schema_meta... OK
+== playwright: real backend (build commit 8b83afd23123)
+
+Running 10 tests using 1 worker
+
+  ok  1 [chromium] › e2e\system-status.spec.ts:27:3 › system status page - real backend › loads as Farsi RTL with the Persian font bundled locally (1.5s)
+  ok  2 [chromium] › e2e\system-status.spec.ts:43:3 › system status page - real backend › shows the real version and build commit returned by /api/v1/version (1.3s)
+  ok  3 [chromium] › e2e\system-status.spec.ts:59:3 › system status page - real backend › shows real readiness: ready, with database / migrations / cache up (1.2s)
+  ok  4 [chromium] › e2e\system-status.spec.ts:78:3 › system status page - real backend › real no-access state: access gate answers 401 problem with message_fa and request id (1.4s)
+  ok  5 [chromium] › e2e\system-status.spec.ts:95:3 › system status page - real backend › keyboard: skip link, focus to main, refresh with Enter triggers a real re-check (2.6s)
+  ok  6 [chromium] › e2e\system-status.spec.ts:116:3 › system status page - real backend › axe: no WCAG 2.1 A/AA violations (ready state) (2.0s)
+  ok  7 [chromium] › e2e\system-status.spec.ts:122:3 › system status page - real backend › screenshots at 1440 / 1180 / 768 / 390 (real data) (4.2s)
+  ok  8 [chromium] › e2e\system-status.spec.ts:139:3 › system status page - [simulated failure] states (network interception) › [simulated failure] readiness routed to a real backend 404 problem shows message_fa + request_id (2.8s)
+  ok  9 [chromium] › e2e\system-status.spec.ts:171:3 › system status page - [simulated failure] states (network interception) › [simulated failure] refresh fails after real data: last data kept and flagged stale (1.4s)
+  ok 10 [chromium] › e2e\system-status.spec.ts:188:3 › system status page - [simulated failure] states (network interception) › [simulated failure] no answer for longer than the freshness window: stale by age (1.4s)
+
+  10 passed (26.5s)
+== playwright: backend stopped (E2E_MODE=backend-down)
+
+Running 1 test using 1 worker
+
+  ok 1 [chromium] › e2e\system-status.spec.ts:203:3 › system status page - backend stopped › real failure: Django is not running, the page shows the network error state @backend-down (2.4s)
+
+  1 passed (6.1s)
+== results: real-backend rc=0, backend-down rc=0
+== drop throw-away database aleekhan_e2e
+rc=0
