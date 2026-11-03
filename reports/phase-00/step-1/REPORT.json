@@ -1,0 +1,71 @@
+{
+  "phase": "PHASE_00",
+  "step": "00.1",
+  "commit_sha": "57f4500e87bb936c1b8a622faaee5bb4a657e1d6",
+  "status": "PARTIAL",
+  "scope": [
+    "conflicts",
+    "data table",
+    "state transitions",
+    "OpenAPI draft",
+    "mock/UI binding",
+    "risks",
+    "P0 packets"
+  ],
+  "changes": [
+    "docs/discovery/CONFLICTS.md",
+    "docs/discovery/DATA_TABLE.md",
+    "docs/discovery/STATE_TRANSITIONS.md",
+    "docs/discovery/MOCK_UI_BINDING.md",
+    "docs/discovery/RISKS.md",
+    "docs/api/openapi-draft.yaml",
+    "tools/verify_handoff.py",
+    "tools/tests/test_verify_handoff.py",
+    ".gitattributes",
+    "control/decisions/DEC-044_PACKET.md",
+    "control/decisions/DEC-045_PACKET.md"
+  ],
+  "migrations": [],
+  "test_evidence": [
+    {
+      "command": "python -m unittest discover -s tools/tests -v",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-1/logs/orch_unittest.log"
+    },
+    {
+      "command": "python tools/verify_handoff.py",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-1/logs/orch_verify_handoff.log"
+    },
+    {
+      "command": "openapi_spec_validator.validate(docs/api/openapi-draft.yaml)",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-1/logs/orch_openapi.log"
+    },
+    {
+      "command": "sha256sum -c handoff/SHA256SUMS.txt",
+      "outcome": "FAIL",
+      "log_path": "reports/phase-00/KICKOFF_INTAKE.md"
+    }
+  ],
+  "security_evidence": [
+    "no secrets added",
+    "no private sources read (ALEEKHAN_PRIVATE_DIR unset)",
+    "verifier rejects unsafe paths and present private files"
+  ],
+  "decisions": [
+    "DEC-044 packet (handoff integrity exception)",
+    "DEC-045 packet (CI runner/restore drill)"
+  ],
+  "risks": [
+    "REV-00.1-A PACKAGE_MANIFEST.json mismatch",
+    "REV-00.1-B CSV bytes LF in git until DEC-044"
+  ],
+  "evidence_paths": [
+    "reports/phase-00/step-1/logs/",
+    "docs/discovery/",
+    "docs/api/openapi-draft.yaml"
+  ],
+  "rollback": "git revert 57f4500e87bb936c1b8a622faaee5bb4a657e1d6",
+  "review_request": "PASS"
+}
