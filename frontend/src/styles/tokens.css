@@ -1,0 +1,87 @@
+/*
+ * Aleekhan design tokens - DRAFT (PHASE_00 / 00.5).
+ * Derived from the DRAFT design catalog (handoff/08_UI_AND_UX/DESIGN_CATALOG_52, not approved page by page).
+ * Every token, its catalog source and any deviation (WCAG AA contrast, base font size) are documented in
+ * docs/ui/DESIGN_TOKENS.md. Change tokens there first, then here.
+ */
+:root {
+  /* colour - surfaces & text */
+  --color-bg: #f5f6f8;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f9fbfd;
+  --color-ink: #1b293b;
+  --color-muted: #5f7186;
+  --color-line: #e5eaf0;
+
+  /* colour - brand */
+  --color-primary: #2164ae;
+  --color-primary-hover: #1b5796;
+  --color-primary-tint: #edf4ff;
+  --color-brand-gold: #875d22;
+  --color-brand-gold-bg: #f7f1e6;
+  --color-brand-gold-line: #e4d5bd;
+
+  /* colour - status (text on tint pairs meet WCAG AA 4.5:1) */
+  --color-success: #0b7a62;
+  --color-success-tint: #e7f7f1;
+  --color-warning: #8a5a12;
+  --color-warning-tint: #fff6eb;
+  --color-danger: #b23c35;
+  --color-danger-tint: #fff0f1;
+  --color-info: #2164ae;
+  --color-info-tint: #f0f5fb;
+  --color-neutral: #4f5f72;
+  --color-neutral-tint: #eef1f5;
+
+  /* focus */
+  --focus-ring: 0 0 0 3px #ffffff, 0 0 0 5px #2164ae;
+
+  /* typography */
+  --font-sans: "Vazirmatn", "Noto Sans Arabic UI", "Noto Sans Arabic", Tahoma, sans-serif;
+  --font-mono: ui-monospace, "Cascadia Mono", Consolas, "Courier New", monospace;
+  --font-size-xs: 0.75rem; /* 12px */
+  --font-size-sm: 0.8125rem; /* 13px */
+  --font-size-md: 0.875rem; /* 14px - body */
+  --font-size-lg: 1rem; /* 16px - panel titles */
+  --font-size-xl: 1.125rem; /* 18px - h1 mobile */
+  --font-size-2xl: 1.4375rem; /* 23px - h1 desktop */
+  --font-weight-regular: 400;
+  --font-weight-medium: 600;
+  --font-weight-bold: 800;
+  --line-height-body: 1.75;
+  --line-height-tight: 1.35;
+
+  /* spacing (4px scale) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 22px;
+  --space-6: 32px;
+
+  /* shape & depth */
+  --radius-sm: 8px;
+  --radius-md: 9px;
+  --radius-lg: 13px;
+  --radius-pill: 999px;
+  --shadow-card: 0 2px 13px rgba(30, 51, 72, 0.047);
+
+  /* layout */
+  --topbar-height: 60px;
+  --content-max: 1280px;
+  --tap-target: 44px;
+
+  /* motion */
+  --duration-fast: 140ms;
+  --duration-base: 230ms;
+}
+
+/* Breakpoints (catalog 29_36/45_52 styles.css): 1200 / 900 / 600 px. CSS custom properties cannot be used
+   inside @media, so the numbers are repeated in base.css. Acceptance widths: 1440 / 1180 / 768 / 390. */
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration-base: 0ms;
+  }
+}

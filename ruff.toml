@@ -3,7 +3,7 @@ target-version = "py312"  # ADR-001: Python 3.12+ (REV-0005)
 line-length = 110
 # control/ is the project-governance kit (status.py, hooks), not product code; it has its own style and is
 # not shipped, so it is excluded explicitly to keep `ruff check .` unambiguous in CI (REV-0006).
-extend-exclude = ["handoff", ".venv", "control"]
+extend-exclude = ["handoff", ".venv", "control", "frontend"]  # frontend/ is linted by eslint + tsc (frontend/package.json)
 
 [lint]
 select = ["E", "F", "W", "I", "B", "UP", "RUF", "DJ"]

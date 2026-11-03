@@ -13,3 +13,10 @@ __pycache__/
 .venv/
 *.pyc
 control/PROJECT_STATUS.tmp
+
+# frontend build/test artefacts (00.5)
+frontend/dist/
+frontend/test-results/
+frontend/playwright-report/
+frontend/coverage/
+*.tsbuildinfo
