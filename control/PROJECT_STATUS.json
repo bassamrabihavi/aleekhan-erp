@@ -29,9 +29,9 @@
         },
         "00.2": {
           "name": "Database",
-          "state": "IN_PROGRESS",
-          "commit": null,
-          "report": null,
+          "state": "IN_REVIEW",
+          "commit": "7cf1f10066aec4c7cda8e6794eab43e748af644e",
+          "report": "reports/phase-00/step-2/REPORT.md",
           "review": null,
           "rework_cycles": 0,
           "started_at": "2026-11-03T15:50:03+00:00",
@@ -2263,7 +2263,16 @@
       "status": "APPROVED",
       "by": "کارفرما",
       "note": "گزینه A: CI روی GitHub-hosted Actions فقط با داده ساختگی و بدون راز؛ اولین تمرین بازیابی Gate-0 روی محیط محلی؛ با آماده شدن سرور داخلی شرکت به runner خودمیزبان و تمرین روی staging منتقل شود"
+    },
+    {
+      "at": "2026-11-03T16:12:53+00:00",
+      "kind": "step",
+      "phase": "PHASE_00",
+      "step": "00.2",
+      "state": "IN_REVIEW",
+      "note": null,
+      "commit": "7cf1f10066aec4c7cda8e6794eab43e748af644e"
     }
   ],
-  "updated_at": "2026-11-03T16:11:44+00:00"
+  "updated_at": "2026-11-03T16:12:53+00:00"
 }
