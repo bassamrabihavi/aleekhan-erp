@@ -11,8 +11,8 @@
       "pages": [],
       "deps": [],
       "est_weeks": 2,
-      "state": "NOT_STARTED",
-      "started_at": null,
+      "state": "ACTIVE",
+      "started_at": "2026-11-03T15:20:43+00:00",
       "gate_pending_at": null,
       "accepted_at": null,
       "accepted_by": null,
@@ -2165,6 +2165,13 @@
     }
   ],
   "ready_for_test": [],
-  "events": [],
-  "updated_at": "2026-11-03T14:50:15+00:00"
+  "events": [
+    {
+      "at": "2026-11-03T15:20:43+00:00",
+      "kind": "phase_started",
+      "phase": "PHASE_00",
+      "by": "کارفرما"
+    }
+  ],
+  "updated_at": "2026-11-03T15:20:43+00:00"
 }
