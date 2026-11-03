@@ -39,12 +39,12 @@
         },
         "00.3": {
           "name": "Domain Engine",
-          "state": "TODO",
-          "commit": null,
-          "report": null,
+          "state": "IN_REVIEW",
+          "commit": "a6efb53cff09aefdacb50ef48e092ec0041ced6f",
+          "report": "reports/phase-00/step-3/REPORT.md",
           "review": null,
           "rework_cycles": 0,
-          "started_at": null,
+          "started_at": "2026-11-03T16:29:41+00:00",
           "done_at": null
         },
         "00.4": {
@@ -2281,7 +2281,25 @@
       "state": "PASS",
       "note": null,
       "commit": null
+    },
+    {
+      "at": "2026-11-03T16:29:41+00:00",
+      "kind": "step",
+      "phase": "PHASE_00",
+      "step": "00.3",
+      "state": "IN_PROGRESS",
+      "note": null,
+      "commit": null
+    },
+    {
+      "at": "2026-11-03T16:48:39+00:00",
+      "kind": "step",
+      "phase": "PHASE_00",
+      "step": "00.3",
+      "state": "IN_REVIEW",
+      "note": null,
+      "commit": "a6efb53cff09aefdacb50ef48e092ec0041ced6f"
     }
   ],
-  "updated_at": "2026-11-03T16:15:51+00:00"
+  "updated_at": "2026-11-03T16:48:39+00:00"
 }
