@@ -1,0 +1,88 @@
+{
+  "phase": "PHASE_00",
+  "step": "00.4",
+  "commit_sha": "bd332cbb85cf6269533c63c33a0e85f8489b90bd",
+  "status": "COMPLETE",
+  "scope": [
+    "DRF /api/v1",
+    "problem errors",
+    "request-id",
+    "rate limit",
+    "cursor pagination",
+    "ETag",
+    "deny-by-default permissions",
+    "OpenAPI contract tests",
+    "REV-0001",
+    "REV-0008..0012"
+  ],
+  "changes": [
+    "backend/platform_core/api/",
+    "backend/aleekhan/settings.py",
+    "backend/aleekhan/settings_test.py",
+    "backend/aleekhan/urls.py",
+    "backend/platform_core/engine/",
+    "backend/platform_core/tests/",
+    "docs/api/openapi-draft.yaml",
+    "docs/api/API_RUNTIME.md",
+    "docs/discovery/CONFLICTS.md",
+    "docs/engine/README.md"
+  ],
+  "migrations": [],
+  "test_evidence": [
+    {
+      "command": "ruff check . + format --check .",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-4/logs/orch_ruff.log"
+    },
+    {
+      "command": "mypy strict",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-4/logs/orch_mypy.log"
+    },
+    {
+      "command": "pytest 293",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-4/logs/orch_pytest_after_guardfix.log"
+    },
+    {
+      "command": "OpenAPI contract tests 18",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-4/logs/orch_contract.log"
+    },
+    {
+      "command": "unittest tools/tests",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-4/logs/orch_tools.log"
+    },
+    {
+      "command": "makemigrations --check",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-4/logs/orch_makemigrations.log"
+    },
+    {
+      "command": "runserver smoke curl",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-4/logs/orch_smoke_curl.log"
+    }
+  ],
+  "security_evidence": [
+    "deny-by-default",
+    "throttle before permission",
+    "no internals in problem body",
+    "allow-listed JSON logs",
+    "strict UUID request id",
+    "check --deploy only W005/W021"
+  ],
+  "decisions": [],
+  "risks": [
+    ".env.example not updated",
+    "Redis not wired",
+    "denied-attempt audit pending PHASE_01"
+  ],
+  "evidence_paths": [
+    "reports/phase-00/step-4/logs/",
+    "docs/api/"
+  ],
+  "rollback": "git revert bd332cbb85cf6269533c63c33a0e85f8489b90bd",
+  "review_request": "PASS"
+}
