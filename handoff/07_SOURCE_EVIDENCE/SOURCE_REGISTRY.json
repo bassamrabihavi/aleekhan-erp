@@ -1,0 +1,462 @@
+[
+  {
+    "path": "09_PRIVATE_FACTORY_SOURCES/planning/Planning--.xlsm",
+    "source_name": "Planning--.xlsm",
+    "classification": "PRIVATE_COMPANY_REFERENCE",
+    "category": "planning",
+    "usage": "critical; encrypted macro workbook; no execution",
+    "sha256": "719a2416f2d3b02e1eaf0a84f8169535ca71d30d06096a57149f299181a54ecc",
+    "bytes": 69242880,
+    "status": "SOURCE_NOT_EXECUTED"
+  },
+  {
+    "path": "09_PRIVATE_FACTORY_SOURCES/warehouse/WH-.xlsm",
+    "source_name": "WH-.xlsm",
+    "classification": "PRIVATE_COMPANY_REFERENCE",
+    "category": "warehouse",
+    "usage": "critical; encrypted macro workbook; no execution",
+    "sha256": "f882f5817a1edd8a5c44e5a6e032f34d2fed8bb1b63c16ab00572a765f355d28",
+    "bytes": 7028224,
+    "status": "SOURCE_NOT_EXECUTED"
+  },
+  {
+    "path": "09_PRIVATE_FACTORY_SOURCES/reporting/report.xlsm",
+    "source_name": "report.xlsm",
+    "classification": "PRIVATE_COMPANY_REFERENCE",
+    "category": "reporting",
+    "usage": "reference; macro workbook; do not run",
+    "sha256": "b24f13650fbaacf0fc4eb1b7adbfb693890433b405e8bd8084b4cb28830fb067",
+    "bytes": 678403,
+    "status": "SOURCE_NOT_EXECUTED"
+  },
+  {
+    "path": "09_PRIVATE_FACTORY_SOURCES/engineering_die/جدول پیگیری تیغه(1).xlsx",
+    "source_name": "جدول پیگیری تیغه(1).xlsx",
+    "classification": "PRIVATE_COMPANY_REFERENCE",
+    "category": "engineering_die",
+    "usage": "latest tracker confirmed by user",
+    "sha256": "99319dfb17ddc8d6a72574ca1add4dd595688338d46cfa29215d326621f9d18b",
+    "bytes": 779211,
+    "status": "SOURCE_NOT_EXECUTED"
+  },
+  {
+    "path": "09_PRIVATE_FACTORY_SOURCES/engineering_die/جدول پیگیری تیغه.xlsx",
+    "source_name": "جدول پیگیری تیغه.xlsx",
+    "classification": "PRIVATE_COMPANY_REFERENCE",
+    "category": "engineering_die",
+    "usage": "older tracker for comparison only",
+    "sha256": "78166f75cac124b9418c4f98b8eb3192c185b332b421316232997ef43f44adc2",
+    "bytes": 774581,
+    "status": "SOURCE_NOT_EXECUTED"
+  },
+  {
+    "path": "09_PRIVATE_FACTORY_SOURCES/warehouse_erp/ListData (2).xlsx",
+    "source_name": "ListData (2).xlsx",
+    "classification": "PRIVATE_COMPANY_REFERENCE",
+    "category": "warehouse_erp",
+    "usage": "latest Rahkaran stock snapshot confirmed by user",
+    "sha256": "d81cf5672ef578451b2218955fbdb49285f2c8b95827926c04fc807848ab47ed",
+    "bytes": 275132,
+    "status": "SOURCE_NOT_EXECUTED"
+  },
+  {
+    "path": "09_PRIVATE_FACTORY_SOURCES/engineering_cliche/جدول کلیشه.xlsx",
+    "source_name": "جدول کلیشه.xlsx",
+    "classification": "PRIVATE_COMPANY_REFERENCE",
+    "category": "engineering_cliche",
+    "usage": "cliche registry source",
+    "sha256": "6d3b5c5f599870f8b1d5f96efa13d18eefbaa21a72918de34406daef471cd214",
+    "bytes": 7755101,
+    "status": "SOURCE_NOT_EXECUTED"
+  },
+  {
+    "path": "09_PRIVATE_FACTORY_SOURCES/legacy_code/AutoJ-BoM.py",
+    "source_name": "AutoJ-BoM.py",
+    "classification": "PRIVATE_COMPANY_REFERENCE",
+    "category": "legacy_code",
+    "usage": "legacy source incomplete Blade List path, do not execute",
+    "sha256": "82e3e6c2cda2e9d563ba92d1e03d7dd94504cedfd0eae764ae7b7d3937a8030c",
+    "bytes": 22156,
+    "status": "SOURCE_NOT_EXECUTED"
+  },
+  {
+    "path": "09_PRIVATE_FACTORY_SOURCES/engineering_dxf/PRD279_V6_03.04.31.dxf",
+    "source_name": "PRD279_V6_03.04.31.dxf",
+    "classification": "PRIVATE_COMPANY_REFERENCE",
+    "category": "engineering_dxf",
+    "usage": "source sample DXF",
+    "sha256": "e9f3bd6ef07c49ff25da308890f2e719a7cce4f3304d7149af164755c63f78ec",
+    "bytes": 3541831,
+    "status": "SOURCE_NOT_EXECUTED"
+  },
+  {
+    "path": "09_PRIVATE_FACTORY_SOURCES/engineering_dxf/livis279_05.06.31 _foloter_V9 -.dxf",
+    "source_name": "livis279_05.06.31 _foloter_V9 -.dxf",
+    "classification": "PRIVATE_COMPANY_REFERENCE",
+    "category": "engineering_dxf",
+    "usage": "skiving DXF sample",
+    "sha256": "083a6086cc1b6f20d02241e2a84cc3eb418167b60c051750be81ea3a727ffb7d",
+    "bytes": 937259,
+    "status": "SOURCE_NOT_EXECUTED"
+  },
+  {
+    "path": "09_PRIVATE_FACTORY_SOURCES/engineering_dxf/maghar279_v1_02.02.30.dxf",
+    "source_name": "maghar279_v1_02.02.30.dxf",
+    "classification": "PRIVATE_COMPANY_REFERENCE",
+    "category": "engineering_dxf",
+    "usage": "jig DXF sample",
+    "sha256": "690a220a65322cbde0dd2eb00dde73548ca1b0f10ff23108f69eda4d2c9d31b0",
+    "bytes": 1751582,
+    "status": "SOURCE_NOT_EXECUTED"
+  },
+  {
+    "path": "09_PRIVATE_FACTORY_SOURCES/engineering_dxf/طراحی.dxf",
+    "source_name": "طراحی.dxf",
+    "classification": "PRIVATE_COMPANY_REFERENCE",
+    "category": "engineering_dxf",
+    "usage": "design DXF example",
+    "sha256": "a8712153d3a25328fe37641b023e1e8d6318cfb752c368c6750eba8e2eaeae7b",
+    "bytes": 1089675,
+    "status": "SOURCE_NOT_EXECUTED"
+  },
+  {
+    "path": "09_PRIVATE_FACTORY_SOURCES/engineering_dxf/مهندسی.dxf",
+    "source_name": "مهندسی.dxf",
+    "classification": "PRIVATE_COMPANY_REFERENCE",
+    "category": "engineering_dxf",
+    "usage": "engineering DXF example",
+    "sha256": "e9f3bd6ef07c49ff25da308890f2e719a7cce4f3304d7149af164755c63f78ec",
+    "bytes": 3541831,
+    "status": "SOURCE_NOT_EXECUTED"
+  },
+  {
+    "path": "09_PRIVATE_FACTORY_SOURCES/bom_samples/BOM  -2192-61329.xlsx",
+    "source_name": "BOM  -2192-61329.xlsx",
+    "classification": "PRIVATE_COMPANY_REFERENCE",
+    "category": "bom_samples",
+    "usage": "BOM sample; review generated variants are not approved standards",
+    "sha256": "da9fb0893c4fd36993e8f31fb257d90adf1bee6611122104aa19970c4a59b965",
+    "bytes": 11557,
+    "status": "SOURCE_NOT_EXECUTED"
+  },
+  {
+    "path": "09_PRIVATE_FACTORY_SOURCES/bom_samples/BOM-0219.xlsx",
+    "source_name": "BOM-0219.xlsx",
+    "classification": "PRIVATE_COMPANY_REFERENCE",
+    "category": "bom_samples",
+    "usage": "BOM sample; review generated variants are not approved standards",
+    "sha256": "864ccf4f6613c4204b47522e393ee136b0eed686f9b24bf0e58a9da7e261a014",
+    "bytes": 12694,
+    "status": "SOURCE_NOT_EXECUTED"
+  },
+  {
+    "path": "09_PRIVATE_FACTORY_SOURCES/bom_samples/BOM-0234.xlsx",
+    "source_name": "BOM-0234.xlsx",
+    "classification": "PRIVATE_COMPANY_REFERENCE",
+    "category": "bom_samples",
+    "usage": "BOM sample; review generated variants are not approved standards",
+    "sha256": "93b069e737fb9d5860aa810fc30ee87f2f9c99daeaceff5706f8335bd0834bef",
+    "bytes": 13024,
+    "status": "SOURCE_NOT_EXECUTED"
+  },
+  {
+    "path": "09_PRIVATE_FACTORY_SOURCES/bom_samples/BOM-0239.xlsx",
+    "source_name": "BOM-0239.xlsx",
+    "classification": "PRIVATE_COMPANY_REFERENCE",
+    "category": "bom_samples",
+    "usage": "BOM sample; review generated variants are not approved standards",
+    "sha256": "8dc7c74339f70c1e59da912cf460df626ad7cb939280be74b0b46946b5475b23",
+    "bytes": 12159,
+    "status": "SOURCE_NOT_EXECUTED"
+  },
+  {
+    "path": "09_PRIVATE_FACTORY_SOURCES/bom_samples/BOM-0279(1).xlsx",
+    "source_name": "BOM-0279(1).xlsx",
+    "classification": "PRIVATE_COMPANY_REFERENCE",
+    "category": "bom_samples",
+    "usage": "BOM sample; review generated variants are not approved standards",
+    "sha256": "82c56e80766639696d09c3e610772791a3ceccc0f41673c8e3d45f6af3ea6629",
+    "bytes": 13970,
+    "status": "SOURCE_NOT_EXECUTED"
+  },
+  {
+    "path": "09_PRIVATE_FACTORY_SOURCES/bom_samples/BOM-0279.xlsx",
+    "source_name": "BOM-0279.xlsx",
+    "classification": "PRIVATE_COMPANY_REFERENCE",
+    "category": "bom_samples",
+    "usage": "BOM sample; review generated variants are not approved standards",
+    "sha256": "caf4a180cb00163c40932d258e17e19484620293e8633d15f68191f96ae12eb1",
+    "bytes": 14258,
+    "status": "SOURCE_NOT_EXECUTED"
+  },
+  {
+    "path": "09_PRIVATE_FACTORY_SOURCES/bom_samples/BOM-0279_review_with_aggregate.xlsx",
+    "source_name": "BOM-0279_review_with_aggregate.xlsx",
+    "classification": "PRIVATE_COMPANY_REFERENCE",
+    "category": "bom_samples",
+    "usage": "BOM sample; review generated variants are not approved standards",
+    "sha256": "cfaf684f29b456404da8b75c46e9d9832b3c426b704fdae0907b8793466c8bb2",
+    "bytes": 12119,
+    "status": "SOURCE_NOT_EXECUTED"
+  },
+  {
+    "path": "09_PRIVATE_FACTORY_SOURCES/bom_samples/BOM-0279_review_with_aggregate_v2.xlsx",
+    "source_name": "BOM-0279_review_with_aggregate_v2.xlsx",
+    "classification": "PRIVATE_COMPANY_REFERENCE",
+    "category": "bom_samples",
+    "usage": "BOM sample; review generated variants are not approved standards",
+    "sha256": "6c8fd38fc032644663631a5ee3fbce6bac492c9a85d6ba2c706086fd018fb176",
+    "bytes": 12151,
+    "status": "SOURCE_NOT_EXECUTED"
+  },
+  {
+    "path": "09_PRIVATE_FACTORY_SOURCES/bom_samples/BOM-0279_review_with_aggregate_v3.xlsx",
+    "source_name": "BOM-0279_review_with_aggregate_v3.xlsx",
+    "classification": "PRIVATE_COMPANY_REFERENCE",
+    "category": "bom_samples",
+    "usage": "BOM sample; review generated variants are not approved standards",
+    "sha256": "78c58183d3dc49c99c8992b89dc690408eb7ae8aacf46aab9886e520eb8709c5",
+    "bytes": 12152,
+    "status": "SOURCE_NOT_EXECUTED"
+  },
+  {
+    "path": "09_PRIVATE_FACTORY_SOURCES/bom_samples/BOM-0328.xlsx",
+    "source_name": "BOM-0328.xlsx",
+    "classification": "PRIVATE_COMPANY_REFERENCE",
+    "category": "bom_samples",
+    "usage": "BOM sample; review generated variants are not approved standards",
+    "sha256": "4f0cccb46a3e6e0fd43be3bb01cd6ea0fe77d192b556d18f6e08a321726fd142",
+    "bytes": 12327,
+    "status": "SOURCE_NOT_EXECUTED"
+  },
+  {
+    "path": "09_PRIVATE_FACTORY_SOURCES/bom_samples/BOM-0334.xlsx",
+    "source_name": "BOM-0334.xlsx",
+    "classification": "PRIVATE_COMPANY_REFERENCE",
+    "category": "bom_samples",
+    "usage": "BOM sample; review generated variants are not approved standards",
+    "sha256": "7b4763e86abe64235ac339cb6691e93b2fb1ac263a67b75fc70b156af693a3c4",
+    "bytes": 14975,
+    "status": "SOURCE_NOT_EXECUTED"
+  },
+  {
+    "path": "09_PRIVATE_FACTORY_SOURCES/bom_samples/BOM-0339.xlsx",
+    "source_name": "BOM-0339.xlsx",
+    "classification": "PRIVATE_COMPANY_REFERENCE",
+    "category": "bom_samples",
+    "usage": "BOM sample; review generated variants are not approved standards",
+    "sha256": "cb54aba32dfbc6a9456cf21b2445a1ae30097bab3d8f81ff4193ad632e470d57",
+    "bytes": 14068,
+    "status": "SOURCE_NOT_EXECUTED"
+  },
+  {
+    "path": "09_PRIVATE_FACTORY_SOURCES/bom_samples/BOM-0365.xlsx",
+    "source_name": "BOM-0365.xlsx",
+    "classification": "PRIVATE_COMPANY_REFERENCE",
+    "category": "bom_samples",
+    "usage": "BOM sample; review generated variants are not approved standards",
+    "sha256": "014264e106e5e5ab5a067af869dd9a305ccea33a9af53245f7c4ae8ccd535e98",
+    "bytes": 16408,
+    "status": "SOURCE_NOT_EXECUTED"
+  },
+  {
+    "path": "09_PRIVATE_FACTORY_SOURCES/bom_samples/BOM-0386.xlsx",
+    "source_name": "BOM-0386.xlsx",
+    "classification": "PRIVATE_COMPANY_REFERENCE",
+    "category": "bom_samples",
+    "usage": "BOM sample; review generated variants are not approved standards",
+    "sha256": "78b64aeeeac87b1bc6787c9758b101e9ee3c840691b21ca2d5cfe2febd395947",
+    "bytes": 11887,
+    "status": "SOURCE_NOT_EXECUTED"
+  },
+  {
+    "path": "09_PRIVATE_FACTORY_SOURCES/bom_samples/BOM-0390.xlsx",
+    "source_name": "BOM-0390.xlsx",
+    "classification": "PRIVATE_COMPANY_REFERENCE",
+    "category": "bom_samples",
+    "usage": "BOM sample; review generated variants are not approved standards",
+    "sha256": "d1a1ac7b05ad9e27a3b2dffb907abac2e3c38b9a1fbcdd5d66c81454b3688191",
+    "bytes": 15092,
+    "status": "SOURCE_NOT_EXECUTED"
+  },
+  {
+    "path": "09_PRIVATE_FACTORY_SOURCES/bom_samples/BOM-0391.xlsx",
+    "source_name": "BOM-0391.xlsx",
+    "classification": "PRIVATE_COMPANY_REFERENCE",
+    "category": "bom_samples",
+    "usage": "BOM sample; review generated variants are not approved standards",
+    "sha256": "2e18528b76f1abd2ea5d8a7722cb65d705eaa3ba78d6f72d2bbcbb05dcb18f60",
+    "bytes": 15082,
+    "status": "SOURCE_NOT_EXECUTED"
+  },
+  {
+    "path": "09_PRIVATE_FACTORY_SOURCES/bom_samples/BOM-0424.xlsx",
+    "source_name": "BOM-0424.xlsx",
+    "classification": "PRIVATE_COMPANY_REFERENCE",
+    "category": "bom_samples",
+    "usage": "BOM sample; review generated variants are not approved standards",
+    "sha256": "c526bc7c95ce0959b1de5f135161a9e4d83302548eb2dc40e549690919f5a298",
+    "bytes": 14191,
+    "status": "SOURCE_NOT_EXECUTED"
+  },
+  {
+    "path": "09_PRIVATE_FACTORY_SOURCES/bom_samples/BOM-0614.xlsx",
+    "source_name": "BOM-0614.xlsx",
+    "classification": "PRIVATE_COMPANY_REFERENCE",
+    "category": "bom_samples",
+    "usage": "BOM sample; review generated variants are not approved standards",
+    "sha256": "d7fb0febeed86dd00c0ac8604c151ff408ce517d4ea3d3e352375098a0b93237",
+    "bytes": 12613,
+    "status": "SOURCE_NOT_EXECUTED"
+  },
+  {
+    "path": "09_PRIVATE_FACTORY_SOURCES/bom_samples/BOM-0644(1).xlsx",
+    "source_name": "BOM-0644(1).xlsx",
+    "classification": "PRIVATE_COMPANY_REFERENCE",
+    "category": "bom_samples",
+    "usage": "BOM sample; review generated variants are not approved standards",
+    "sha256": "1dfe01a8194e4638301f1c09ef1a15b8c2b6afdcd42e2eaef4f9abc9eed131c7",
+    "bytes": 12940,
+    "status": "SOURCE_NOT_EXECUTED"
+  },
+  {
+    "path": "09_PRIVATE_FACTORY_SOURCES/bom_samples/BOM-0644.xlsx",
+    "source_name": "BOM-0644.xlsx",
+    "classification": "PRIVATE_COMPANY_REFERENCE",
+    "category": "bom_samples",
+    "usage": "BOM sample; review generated variants are not approved standards",
+    "sha256": "2c3c423a6b2e766a5abc6d90133920df54426c70677b7e210de259afaa222032",
+    "bytes": 11230,
+    "status": "SOURCE_NOT_EXECUTED"
+  },
+  {
+    "path": "09_PRIVATE_FACTORY_SOURCES/bom_samples/BOM-0644_aggregated_review.xlsx",
+    "source_name": "BOM-0644_aggregated_review.xlsx",
+    "classification": "PRIVATE_COMPANY_REFERENCE",
+    "category": "bom_samples",
+    "usage": "BOM sample; review generated variants are not approved standards",
+    "sha256": "6a0be048bf6c89c7850fe5fa43c116f05b10c52513d0383b5e1d468278debe36",
+    "bytes": 7869,
+    "status": "SOURCE_NOT_EXECUTED"
+  },
+  {
+    "path": "09_PRIVATE_FACTORY_SOURCES/bom_samples/BOM-0644_aggregated_review_v2.xlsx",
+    "source_name": "BOM-0644_aggregated_review_v2.xlsx",
+    "classification": "PRIVATE_COMPANY_REFERENCE",
+    "category": "bom_samples",
+    "usage": "BOM sample; review generated variants are not approved standards",
+    "sha256": "56e6a37067ac5f72ed3d6683b3a28b34274723ab54c3a050ee247806bb98e601",
+    "bytes": 9049,
+    "status": "SOURCE_NOT_EXECUTED"
+  },
+  {
+    "path": "09_PRIVATE_FACTORY_SOURCES/bom_samples/BOM-0702.xlsx",
+    "source_name": "BOM-0702.xlsx",
+    "classification": "PRIVATE_COMPANY_REFERENCE",
+    "category": "bom_samples",
+    "usage": "BOM sample; review generated variants are not approved standards",
+    "sha256": "8b3fd3cc4116ed52a9efd5cbf3979b40e540904bbf635e6f83f1aad6a58fbd23",
+    "bytes": 12304,
+    "status": "SOURCE_NOT_EXECUTED"
+  },
+  {
+    "path": "09_PRIVATE_FACTORY_SOURCES/bom_samples/BOM-0809.xlsx",
+    "source_name": "BOM-0809.xlsx",
+    "classification": "PRIVATE_COMPANY_REFERENCE",
+    "category": "bom_samples",
+    "usage": "BOM sample; review generated variants are not approved standards",
+    "sha256": "1104b29aae529be6eba86f262b6e4d9cf967d8fd2fa60eb50fe2666387b40451",
+    "bytes": 12409,
+    "status": "SOURCE_NOT_EXECUTED"
+  },
+  {
+    "path": "09_PRIVATE_FACTORY_SOURCES/bom_samples/BOM-1016.xlsx",
+    "source_name": "BOM-1016.xlsx",
+    "classification": "PRIVATE_COMPANY_REFERENCE",
+    "category": "bom_samples",
+    "usage": "BOM sample; review generated variants are not approved standards",
+    "sha256": "0ae76721abd19ffbc16d40985d9547306a45b441c652da3541ca8902c10dea8f",
+    "bytes": 13700,
+    "status": "SOURCE_NOT_EXECUTED"
+  },
+  {
+    "path": "09_PRIVATE_FACTORY_SOURCES/bom_samples/BOM-1019.xlsx",
+    "source_name": "BOM-1019.xlsx",
+    "classification": "PRIVATE_COMPANY_REFERENCE",
+    "category": "bom_samples",
+    "usage": "BOM sample; review generated variants are not approved standards",
+    "sha256": "a5f9bea0eb6054145c2b8b7c195200b5ba697a1e80fc84931099d300710737f3",
+    "bytes": 13478,
+    "status": "SOURCE_NOT_EXECUTED"
+  },
+  {
+    "path": "09_PRIVATE_FACTORY_SOURCES/bom_samples/BOM-1037.xlsx",
+    "source_name": "BOM-1037.xlsx",
+    "classification": "PRIVATE_COMPANY_REFERENCE",
+    "category": "bom_samples",
+    "usage": "BOM sample; review generated variants are not approved standards",
+    "sha256": "f7e0fb819f5b62f2d14ffb1cebcde17f0f1c64af158ebf06c80018d80e5f6278",
+    "bytes": 14861,
+    "status": "SOURCE_NOT_EXECUTED"
+  },
+  {
+    "path": "09_PRIVATE_FACTORY_SOURCES/bom_samples/BOM-1041.xlsx",
+    "source_name": "BOM-1041.xlsx",
+    "classification": "PRIVATE_COMPANY_REFERENCE",
+    "category": "bom_samples",
+    "usage": "BOM sample; review generated variants are not approved standards",
+    "sha256": "6d59e3fbf73e611a1cae4b32c094472f8de1f8a88d4b1baf9a19a0620c8a8d3c",
+    "bytes": 14505,
+    "status": "SOURCE_NOT_EXECUTED"
+  },
+  {
+    "path": "09_PRIVATE_FACTORY_SOURCES/bom_samples/BOM-2053.xlsx",
+    "source_name": "BOM-2053.xlsx",
+    "classification": "PRIVATE_COMPANY_REFERENCE",
+    "category": "bom_samples",
+    "usage": "BOM sample; review generated variants are not approved standards",
+    "sha256": "a4337100eea51066befce91dce7548fac2179a84a02c2bea6b56fbb7f2491674",
+    "bytes": 12383,
+    "status": "SOURCE_NOT_EXECUTED"
+  },
+  {
+    "path": "09_PRIVATE_FACTORY_SOURCES/bom_samples/BOM-2056.xlsx",
+    "source_name": "BOM-2056.xlsx",
+    "classification": "PRIVATE_COMPANY_REFERENCE",
+    "category": "bom_samples",
+    "usage": "BOM sample; review generated variants are not approved standards",
+    "sha256": "0e8d836117d1f2963e7b741272419cc6cab479dfdd0227af09618bc76a86dad8",
+    "bytes": 15399,
+    "status": "SOURCE_NOT_EXECUTED"
+  },
+  {
+    "path": "09_PRIVATE_FACTORY_SOURCES/bom_samples/Bom-0324.xlsx",
+    "source_name": "Bom-0324.xlsx",
+    "classification": "PRIVATE_COMPANY_REFERENCE",
+    "category": "bom_samples",
+    "usage": "BOM sample; review generated variants are not approved standards",
+    "sha256": "35546af2513ae413eeb6ca54a7c41f3477af0426dfdadaf469ccade9716e3cd4",
+    "bytes": 10763,
+    "status": "SOURCE_NOT_EXECUTED"
+  },
+  {
+    "path": "09_PRIVATE_FACTORY_SOURCES/bom_samples/Bom-0334-style 3674.xlsx",
+    "source_name": "Bom-0334-style 3674.xlsx",
+    "classification": "PRIVATE_COMPANY_REFERENCE",
+    "category": "bom_samples",
+    "usage": "BOM sample; review generated variants are not approved standards",
+    "sha256": "d4ce7dce2c50eae746fdb61b14455184f914bd5205700d2ee226de955d170954",
+    "bytes": 11939,
+    "status": "SOURCE_NOT_EXECUTED"
+  },
+  {
+    "path": "09_PRIVATE_FACTORY_SOURCES/bom_samples/Bom-0370.xlsx",
+    "source_name": "Bom-0370.xlsx",
+    "classification": "PRIVATE_COMPANY_REFERENCE",
+    "category": "bom_samples",
+    "usage": "BOM sample; review generated variants are not approved standards",
+    "sha256": "ba7519441151613344a4625989702550afe7739ed9f2c6f37d8943ea37cb38d7",
+    "bytes": 10248,
+    "status": "SOURCE_NOT_EXECUTED"
+  }
+]

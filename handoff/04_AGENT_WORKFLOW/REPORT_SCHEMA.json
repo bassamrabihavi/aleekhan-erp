@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Aleekhan Agent Step Report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["phase", "step", "commit_sha", "status", "scope", "changes", "migrations", "test_evidence", "security_evidence", "decisions", "review_request"],
+  "properties": {
+    "phase": {"type": "string", "pattern": "^PHASE_([0][0-9]|1[0-4])$"},
+    "step": {"type": "string", "pattern": "^([0][0-9]|1[0-4])\\.[1-8]$"},
+    "commit_sha": {"type": "string", "minLength": 7},
+    "status": {"enum": ["COMPLETE", "PARTIAL", "BLOCKED"]},
+    "scope": {"type": "array", "items": {"type": "string"}},
+    "changes": {"type": "array", "items": {"type": "string"}},
+    "migrations": {"type": "array", "items": {"type": "string"}},
+    "test_evidence": {"type": "array", "items": {"type": "object", "required": ["command", "outcome"], "properties": {"command": {"type": "string"}, "outcome": {"enum": ["PASS", "FAIL", "SKIPPED"]}, "log_path": {"type": "string"}}}},
+    "security_evidence": {"type": "array", "items": {"type": "string"}},
+    "decisions": {"type": "array", "items": {"type": "string"}},
+    "risks": {"type": "array", "items": {"type": "string"}},
+    "evidence_paths": {"type": "array", "items": {"type": "string"}},
+    "rollback": {"type": "string"},
+    "review_request": {"enum": ["PASS", "REWORK", "BLOCKED"]}
+  }
+}

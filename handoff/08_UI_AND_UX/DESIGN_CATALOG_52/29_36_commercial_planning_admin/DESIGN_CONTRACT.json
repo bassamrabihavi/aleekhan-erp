@@ -1,0 +1,755 @@
+{
+  "company": "سراجی سنتی عالیخان",
+  "prototype_batch": "29-36",
+  "note": "initial UI schema, not deployment-ready",
+  "pages": [
+    {
+      "page_id": "P29",
+      "page_no": 29,
+      "title_fa": "ثبت سفارش جدید و کدگذاری",
+      "owner_module": "بازرگانی / Core",
+      "route": "/app/page/29",
+      "permissions": [
+        "بازرگانی: ایجاد پیش‌نویس",
+        "برنامه‌ریزی: تخصیص شماره سریال و ثبت نهایی",
+        "مهندسی: بررسی استایل/کد جدید"
+      ],
+      "fields": [
+        {
+          "key": "customer_id",
+          "label": "مشتری/برند",
+          "type": "Customer FK",
+          "validation_or_source": "required; commercial owned"
+        },
+        {
+          "key": "external_po_no",
+          "label": "شماره سفارش مشتری",
+          "type": "Text",
+          "validation_or_source": "customer scoped unique when authoritative"
+        },
+        {
+          "key": "order_program_id",
+          "label": "برنامه سفارش",
+          "type": "OrderProgram FK",
+          "validation_or_source": "may be null"
+        },
+        {
+          "key": "product_type_id",
+          "label": "نوع محصول",
+          "type": "Category FK",
+          "validation_or_source": "select from Sorce normalized"
+        },
+        {
+          "key": "product_category_id",
+          "label": "دسته‌بندی",
+          "type": "Category FK",
+          "validation_or_source": "dependent on type"
+        },
+        {
+          "key": "product_code",
+          "label": "کد محصول",
+          "type": "Text[4]",
+          "validation_or_source": "unique within coding scope"
+        },
+        {
+          "key": "style_code",
+          "label": "کد استایل",
+          "type": "Text[4]",
+          "validation_or_source": "style product scope"
+        },
+        {
+          "key": "rahkaran_item_code",
+          "label": "کد کالا راهکاران",
+          "type": "Text[14]",
+          "validation_or_source": "preview=02+type(2)+category(2)+product(4)+style(4) ONLY verified classification"
+        },
+        {
+          "key": "required_quality_grade",
+          "label": "گرید الزامی",
+          "type": "CustomerQualityStandardRevision FK",
+          "validation_or_source": "serial snapshot"
+        },
+        {
+          "key": "order_qty",
+          "label": "تعداد سفارش",
+          "type": "Decimal",
+          "validation_or_source": ">0; integer if PCS"
+        },
+        {
+          "key": "order_date",
+          "label": "تاریخ ثبت",
+          "type": "Date",
+          "validation_or_source": "Jalali display"
+        },
+        {
+          "key": "requested_delivery",
+          "label": "موعد درخواستی",
+          "type": "Date",
+          "validation_or_source": "different from planning commitment"
+        }
+      ],
+      "state_transitions": [
+        "Draft",
+        "Validated",
+        "ReadyForPlanning",
+        "Registered"
+      ],
+      "suggested_api": [
+        "POST /api/v1/commercial/order-drafts",
+        "POST /api/v1/core/serials/allocate",
+        "POST /api/v1/core/product-codes/preview",
+        "GET /api/v1/core/styles/similar"
+      ],
+      "data_privacy": "role + scope + field-level, backend enforced",
+      "interaction_prototype": "client-side only; no persistence",
+      "responsive": {
+        "desktop": "1600x1000 primary panes, right auto-hide sidebar",
+        "laptop": "1366x850 adaptable columns",
+        "tablet": "820x1080 reduced panels, right drawer",
+        "mobile": "390x844 stacked cards and right drawer"
+      },
+      "audit_required": true,
+      "design_state": "initial prototype, owner sign-off pending"
+    },
+    {
+      "page_id": "P30",
+      "page_no": 30,
+      "title_fa": "برنامه سفارش فصل/ماه/هفته",
+      "owner_module": "برنامه‌ریزی",
+      "route": "/app/page/30",
+      "permissions": [
+        "برنامه‌ریزی: نسخه برنامه و تأیید",
+        "تأمین: مشاهده تقاضای خرید",
+        "انبار: مشاهده وضعیت آزاد/رزرو"
+      ],
+      "fields": [
+        {
+          "key": "program_id",
+          "label": "برنامه فصل/ماه/هفته",
+          "type": "UUID FK",
+          "validation_or_source": "master hierarchy"
+        },
+        {
+          "key": "program_type",
+          "label": "نوع برنامه",
+          "type": "Enum",
+          "validation_or_source": "season/month/week/campaign"
+        },
+        {
+          "key": "customer_id",
+          "label": "مشتری",
+          "type": "FK",
+          "validation_or_source": "required for customer-specific plan"
+        },
+        {
+          "key": "forecast_qty",
+          "label": "پیش‌بینی",
+          "type": "Decimal",
+          "validation_or_source": "versioned"
+        },
+        {
+          "key": "firm_qty",
+          "label": "سفارش قطعی",
+          "type": "Decimal",
+          "validation_or_source": "source order line"
+        },
+        {
+          "key": "forecast_consumed_qty",
+          "label": "مصرف Forecast",
+          "type": "Decimal",
+          "validation_or_source": "no double count"
+        },
+        {
+          "key": "material_id",
+          "label": "ماده",
+          "type": "FK",
+          "validation_or_source": "canonical identity"
+        },
+        {
+          "key": "eligible_free_qty",
+          "label": "موجودی آزاد مجاز",
+          "type": "Decimal",
+          "validation_or_source": "quality/customer restricted"
+        },
+        {
+          "key": "reserved_for_program_qty",
+          "label": "رزرو همین برنامه",
+          "type": "Decimal",
+          "validation_or_source": "do not duplicate with free"
+        },
+        {
+          "key": "requirement_net_qty",
+          "label": "نیاز خالص",
+          "type": "Computed",
+          "validation_or_source": "audit formula and source revisions"
+        }
+      ],
+      "state_transitions": [
+        "Forecast",
+        "Reviewed",
+        "Approved",
+        "PartiallyConsumed",
+        "Closed"
+      ],
+      "suggested_api": [
+        "GET /api/v1/planning/programs",
+        "POST /api/v1/planning/programs/{id}/versions",
+        "GET /api/v1/planning/aggregate-demand",
+        "POST /api/v1/planning/forecast-consumption/preview"
+      ],
+      "data_privacy": "role + scope + field-level, backend enforced",
+      "interaction_prototype": "client-side only; no persistence",
+      "responsive": {
+        "desktop": "1600x1000 primary panes, right auto-hide sidebar",
+        "laptop": "1366x850 adaptable columns",
+        "tablet": "820x1080 reduced panels, right drawer",
+        "mobile": "390x844 stacked cards and right drawer"
+      },
+      "audit_required": true,
+      "design_state": "initial prototype, owner sign-off pending"
+    },
+    {
+      "page_id": "P31",
+      "page_no": 31,
+      "title_fa": "زمان‌بندی تفصیلی و صف عملیات",
+      "owner_module": "برنامه‌ریزی",
+      "route": "/app/page/31",
+      "permissions": [
+        "برنامه‌ریزی: بازبرنامه‌ریزی و تعهد",
+        "سرپرست: اجرای برنامه/پیشنهاد منابع",
+        "مدیرعامل: مشاهده"
+      ],
+      "fields": [
+        {
+          "key": "plan_id",
+          "label": "برنامه",
+          "type": "FK",
+          "validation_or_source": "baseline and revision"
+        },
+        {
+          "key": "operation_id",
+          "label": "عملیات OPC",
+          "type": "FK",
+          "validation_or_source": "approved version"
+        },
+        {
+          "key": "line_instance_id",
+          "label": "خط اجرایی",
+          "type": "FK",
+          "validation_or_source": "resource pooled"
+        },
+        {
+          "key": "start_at",
+          "label": "شروع",
+          "type": "timestamp",
+          "validation_or_source": "local business date separate"
+        },
+        {
+          "key": "finish_at",
+          "label": "پایان",
+          "type": "timestamp",
+          "validation_or_source": "finite schedule"
+        },
+        {
+          "key": "capacity_required_minutes",
+          "label": "بار استاندارد",
+          "type": "Decimal",
+          "validation_or_source": "machine + labour synchronized"
+        },
+        {
+          "key": "priority_mode",
+          "label": "اولویت/Fast Track",
+          "type": "Enum",
+          "validation_or_source": "operation-level effect"
+        },
+        {
+          "key": "freeze_zone",
+          "label": "منطقه فریز",
+          "type": "Enum",
+          "validation_or_source": "do not silently move WIP"
+        },
+        {
+          "key": "forecast_at",
+          "label": "پیش‌بینی تحویل",
+          "type": "timestamp",
+          "validation_or_source": "comparison to committed date"
+        }
+      ],
+      "state_transitions": [
+        "Baseline",
+        "ScenarioDraft",
+        "ImpactReviewed",
+        "PlanningApproved",
+        "Applied"
+      ],
+      "suggested_api": [
+        "GET /api/v1/planning/operation-schedule",
+        "POST /api/v1/planning/replanning/scenarios",
+        "POST /api/v1/planning/scenarios/{id}/apply"
+      ],
+      "data_privacy": "role + scope + field-level, backend enforced",
+      "interaction_prototype": "client-side only; no persistence",
+      "responsive": {
+        "desktop": "1600x1000 primary panes, right auto-hide sidebar",
+        "laptop": "1366x850 adaptable columns",
+        "tablet": "820x1080 reduced panels, right drawer",
+        "mobile": "390x844 stacked cards and right drawer"
+      },
+      "audit_required": true,
+      "design_state": "initial prototype, owner sign-off pending"
+    },
+    {
+      "page_id": "P32",
+      "page_no": 32,
+      "title_fa": "سناریوساز ظرفیت و منابع",
+      "owner_module": "برنامه‌ریزی",
+      "route": "/app/page/32",
+      "permissions": [
+        "برنامه‌ریزی: سناریو و اعمال مصوب",
+        "سرپرست: پیشنهاد جابه‌جایی",
+        "HR: مالک مهارت/حضور"
+      ],
+      "fields": [
+        {
+          "key": "scenario_id",
+          "label": "شناسه سناریو",
+          "type": "UUID",
+          "validation_or_source": "draft then reviewed"
+        },
+        {
+          "key": "from_line_id",
+          "label": "خط مبدأ",
+          "type": "FK",
+          "validation_or_source": "resource donor"
+        },
+        {
+          "key": "to_line_id",
+          "label": "خط مقصد",
+          "type": "FK",
+          "validation_or_source": "resource receiver"
+        },
+        {
+          "key": "employee_ids",
+          "label": "منابع انسانی",
+          "type": "FK array or links",
+          "validation_or_source": "skill and attendance validation"
+        },
+        {
+          "key": "machine_id",
+          "label": "ماشین",
+          "type": "FK",
+          "validation_or_source": "no double booking"
+        },
+        {
+          "key": "scenario_start",
+          "label": "زمان شروع",
+          "type": "timestamp",
+          "validation_or_source": "shift scope"
+        },
+        {
+          "key": "net_swu_delta",
+          "label": "افزایش خالص SWU",
+          "type": "Decimal",
+          "validation_or_source": "plant gain after donor loss"
+        },
+        {
+          "key": "commitment_impact",
+          "label": "اثر تعهد",
+          "type": "structured",
+          "validation_or_source": "diff before approval"
+        },
+        {
+          "key": "approval_status",
+          "label": "تأیید برنامه‌ریزی",
+          "type": "Enum",
+          "validation_or_source": "live plan remains immutable until apply"
+        }
+      ],
+      "state_transitions": [
+        "Draft",
+        "Calculated",
+        "ImpactReviewed",
+        "Approved",
+        "Applied"
+      ],
+      "suggested_api": [
+        "POST /api/v1/planning/capacity-scenarios/compute",
+        "POST /api/v1/planning/capacity-scenarios",
+        "POST /api/v1/planning/capacity-scenarios/{id}/approve"
+      ],
+      "data_privacy": "role + scope + field-level, backend enforced",
+      "interaction_prototype": "client-side only; no persistence",
+      "responsive": {
+        "desktop": "1600x1000 primary panes, right auto-hide sidebar",
+        "laptop": "1366x850 adaptable columns",
+        "tablet": "820x1080 reduced panels, right drawer",
+        "mobile": "390x844 stacked cards and right drawer"
+      },
+      "audit_required": true,
+      "design_state": "initial prototype, owner sign-off pending"
+    },
+    {
+      "page_id": "P33",
+      "page_no": 33,
+      "title_fa": "کنترل تغییرات سفارش و مهندسی",
+      "owner_module": "برنامه‌ریزی (هماهنگ‌کننده)",
+      "route": "/app/page/33",
+      "permissions": [
+        "واحد آغازکننده: ثبت درخواست",
+        "مهندسی/QA/تأمین: ارزیابی اثر تخصصی",
+        "برنامه‌ریزی: تصمیم اجرایی"
+      ],
+      "fields": [
+        {
+          "key": "request_id",
+          "label": "درخواست تغییر",
+          "type": "UUID",
+          "validation_or_source": "unique"
+        },
+        {
+          "key": "request_origin",
+          "label": "منشأ تغییر",
+          "type": "Enum",
+          "validation_or_source": "commercial/engineering/QA/production/planning/supply"
+        },
+        {
+          "key": "change_type",
+          "label": "نوع تغییر",
+          "type": "Enum",
+          "validation_or_source": "quantity/design/revision/date/cancellation"
+        },
+        {
+          "key": "serial_id",
+          "label": "سریال",
+          "type": "FK",
+          "validation_or_source": "must exist"
+        },
+        {
+          "key": "old_snapshot",
+          "label": "وضعیت قبلی",
+          "type": "JSON immutable",
+          "validation_or_source": "no overwrite"
+        },
+        {
+          "key": "requested_new",
+          "label": "وضعیت درخواستی",
+          "type": "JSON",
+          "validation_or_source": "versioned"
+        },
+        {
+          "key": "wip_disposition",
+          "label": "تکلیف WIP",
+          "type": "structured",
+          "validation_or_source": "required for cancellation and engineering changes"
+        },
+        {
+          "key": "impact_report",
+          "label": "گزارش اثر",
+          "type": "versioned",
+          "validation_or_source": "materials/commitment/cost/quality"
+        },
+        {
+          "key": "decision",
+          "label": "تصمیم",
+          "type": "approval",
+          "validation_or_source": "scope/permissions enforced"
+        }
+      ],
+      "state_transitions": [
+        "Requested",
+        "UnderImpactAnalysis",
+        "Reviewed",
+        "ApprovedOrRejected",
+        "Effective"
+      ],
+      "suggested_api": [
+        "POST /api/v1/change/requests",
+        "GET /api/v1/change/requests/{id}/impact",
+        "POST /api/v1/change/requests/{id}/decision"
+      ],
+      "data_privacy": "role + scope + field-level, backend enforced",
+      "interaction_prototype": "client-side only; no persistence",
+      "responsive": {
+        "desktop": "1600x1000 primary panes, right auto-hide sidebar",
+        "laptop": "1366x850 adaptable columns",
+        "tablet": "820x1080 reduced panels, right drawer",
+        "mobile": "390x844 stacked cards and right drawer"
+      },
+      "audit_required": true,
+      "design_state": "initial prototype, owner sign-off pending"
+    },
+    {
+      "page_id": "P34",
+      "page_no": 34,
+      "title_fa": "بهای تمام‌شده و قیمت‌گذاری",
+      "owner_module": "Costing",
+      "route": "/app/page/34",
+      "permissions": [
+        "مالی: روش سربار",
+        "تأمین: مالک قیمت مواد",
+        "برنامه‌ریزی و بازرگانی: مشاهده/صدور مجاز",
+        "HR: مالک نرخ واقعی حقوق"
+      ],
+      "fields": [
+        {
+          "key": "costing_id",
+          "label": "محاسبه",
+          "type": "UUID",
+          "validation_or_source": "versioned snapshot"
+        },
+        {
+          "key": "order_qty",
+          "label": "تعداد مبنا",
+          "type": "Decimal",
+          "validation_or_source": ">0"
+        },
+        {
+          "key": "bom_revision_id",
+          "label": "نسخه BOM",
+          "type": "FK",
+          "validation_or_source": "approved or confidence label"
+        },
+        {
+          "key": "opc_revision_id",
+          "label": "نسخه OPC",
+          "type": "FK",
+          "validation_or_source": "approved or estimated"
+        },
+        {
+          "key": "material_price_revision",
+          "label": "نسخه قیمت ماده",
+          "type": "FK",
+          "validation_or_source": "only Supply owner"
+        },
+        {
+          "key": "labor_rate_revision",
+          "label": "نرخ دستمزد",
+          "type": "FK",
+          "validation_or_source": "sensitive permission"
+        },
+        {
+          "key": "cost_breakdown",
+          "label": "تفکیک هزینه",
+          "type": "lines",
+          "validation_or_source": "materials labour machine tooling packaging overhead"
+        },
+        {
+          "key": "quote_status",
+          "label": "وضعیت Quote",
+          "type": "Enum",
+          "validation_or_source": "Issued immutable"
+        },
+        {
+          "key": "valid_until",
+          "label": "اعتبار",
+          "type": "Date",
+          "validation_or_source": "revalidate expiry"
+        },
+        {
+          "key": "currency",
+          "label": "واحد پول",
+          "type": "FK",
+          "validation_or_source": "rial/toman unambiguous"
+        }
+      ],
+      "state_transitions": [
+        "Draft",
+        "Calculated",
+        "Reviewed",
+        "Issued",
+        "ExpiredOrRevised"
+      ],
+      "suggested_api": [
+        "POST /api/v1/costing/estimates",
+        "POST /api/v1/costing/quotes",
+        "POST /api/v1/costing/quotes/{id}/issue"
+      ],
+      "data_privacy": "role + scope + field-level, backend enforced",
+      "interaction_prototype": "client-side only; no persistence",
+      "responsive": {
+        "desktop": "1600x1000 primary panes, right auto-hide sidebar",
+        "laptop": "1366x850 adaptable columns",
+        "tablet": "820x1080 reduced panels, right drawer",
+        "mobile": "390x844 stacked cards and right drawer"
+      },
+      "audit_required": true,
+      "design_state": "initial prototype, owner sign-off pending"
+    },
+    {
+      "page_id": "P35",
+      "page_no": 35,
+      "title_fa": "گزارش و داشبورد مدیریتی",
+      "owner_module": "Analytics",
+      "route": "/app/page/35",
+      "permissions": [
+        "مدیرعامل: مشاهده شاخص‌های دارای مجوز",
+        "برنامه‌ریزی: تحلیل",
+        "ادمین: سلامت لایه تحلیلی"
+      ],
+      "fields": [
+        {
+          "key": "metric_id",
+          "label": "شناسه شاخص",
+          "type": "FK",
+          "validation_or_source": "single Metric Dictionary"
+        },
+        {
+          "key": "metric_version",
+          "label": "نسخه فرمول",
+          "type": "FK",
+          "validation_or_source": "do not recompute historical without label"
+        },
+        {
+          "key": "date_dimension",
+          "label": "بازه گزارش",
+          "type": "Date/Calendar",
+          "validation_or_source": "business_date vs event_time"
+        },
+        {
+          "key": "dimension_set",
+          "label": "ابعاد",
+          "type": "FKs",
+          "validation_or_source": "client/style/serial/line/worker/material"
+        },
+        {
+          "key": "source_watermark_at",
+          "label": "زمان به‌روزرسانی",
+          "type": "Timestamp",
+          "validation_or_source": "visible to users"
+        },
+        {
+          "key": "data_quality_score",
+          "label": "کیفیت منبع",
+          "type": "Percent",
+          "validation_or_source": "explicit confidence"
+        },
+        {
+          "key": "drilldown_refs",
+          "label": "ارجاع داده",
+          "type": "Entity refs",
+          "validation_or_source": "trace to operation/serial"
+        }
+      ],
+      "state_transitions": [
+        "Created",
+        "Reviewed",
+        "Saved",
+        "Published"
+      ],
+      "suggested_api": [
+        "POST /api/v1/analytics/query",
+        "GET /api/v1/analytics/metrics",
+        "GET /api/v1/analytics/lineage/{metric}/{snapshot}"
+      ],
+      "data_privacy": "role + scope + field-level, backend enforced",
+      "interaction_prototype": "client-side only; no persistence",
+      "responsive": {
+        "desktop": "1600x1000 primary panes, right auto-hide sidebar",
+        "laptop": "1366x850 adaptable columns",
+        "tablet": "820x1080 reduced panels, right drawer",
+        "mobile": "390x844 stacked cards and right drawer"
+      },
+      "audit_required": true,
+      "design_state": "initial prototype, owner sign-off pending"
+    },
+    {
+      "page_id": "P36",
+      "page_no": 36,
+      "title_fa": "پایش سلامت و مدیریت پردازش",
+      "owner_module": "Admin",
+      "route": "/app/page/36",
+      "permissions": [
+        "ادمین: مشاهده Job و Cancel محدود",
+        "مالک Process: تشخیص اثر توقف",
+        "امنیت: بازبینی Audit و Break Glass"
+      ],
+      "fields": [
+        {
+          "key": "job_id",
+          "label": "شناسه پردازش",
+          "type": "UUID",
+          "validation_or_source": "immutable"
+        },
+        {
+          "key": "job_type",
+          "label": "نوع پردازش",
+          "type": "Enum",
+          "validation_or_source": "import/replanning/BI/backup/migration"
+        },
+        {
+          "key": "initiator_user_id",
+          "label": "آغازکننده",
+          "type": "FK",
+          "validation_or_source": "for audit"
+        },
+        {
+          "key": "job_state",
+          "label": "وضعیت Job",
+          "type": "Enum",
+          "validation_or_source": "queued/running/cancelling/cancelled/failed/recovery"
+        },
+        {
+          "key": "progress_ratio",
+          "label": "درصد پیشرفت",
+          "type": "Decimal[0,1]",
+          "validation_or_source": "nullable"
+        },
+        {
+          "key": "checkpoint_id",
+          "label": "نقطه امن",
+          "type": "FK",
+          "validation_or_source": "per job"
+        },
+        {
+          "key": "cancel_mode",
+          "label": "نوع توقف",
+          "type": "Enum",
+          "validation_or_source": "safe/forced subject to protection"
+        },
+        {
+          "key": "reason",
+          "label": "دلیل توقف",
+          "type": "Text",
+          "validation_or_source": "mandatory"
+        },
+        {
+          "key": "recovery_state",
+          "label": "وضعیت بازیابی",
+          "type": "Enum",
+          "validation_or_source": "forced kill -> recovery check"
+        },
+        {
+          "key": "audit_event_id",
+          "label": "رویداد ممیزی",
+          "type": "FK",
+          "validation_or_source": "always written"
+        }
+      ],
+      "state_transitions": [
+        "Queued",
+        "Running",
+        "SafeCancelling",
+        "Cancelled",
+        "Failed",
+        "RecoveryRequired",
+        "Completed"
+      ],
+      "suggested_api": [
+        "GET /api/v1/admin/jobs",
+        "POST /api/v1/admin/jobs/{id}/request-cancel",
+        "POST /api/v1/admin/jobs/{id}/request-force-cancel",
+        "GET /api/v1/admin/health"
+      ],
+      "data_privacy": "role + scope + field-level, backend enforced",
+      "interaction_prototype": "client-side only; no persistence",
+      "responsive": {
+        "desktop": "1600x1000 primary panes, right auto-hide sidebar",
+        "laptop": "1366x850 adaptable columns",
+        "tablet": "820x1080 reduced panels, right drawer",
+        "mobile": "390x844 stacked cards and right drawer"
+      },
+      "audit_required": true,
+      "design_state": "initial prototype, owner sign-off pending"
+    }
+  ]
+}

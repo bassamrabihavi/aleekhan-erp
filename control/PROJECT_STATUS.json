@@ -1,0 +1,2170 @@
+{
+  "project": "Aleekhan",
+  "baseline": "ALEEKHAN_MASTER_HANDOFF v1.0 (2026-11-01)",
+  "schedule_note": "est_weeks are planning ASSUMPTIONS, not approved dates",
+  "created_at": "2026-11-03T14:50:15+00:00",
+  "phases": [
+    {
+      "id": "PHASE_00",
+      "title_fa": "تثبیت قراردادهای مبنا و راه‌اندازی مخزن امن",
+      "title_en": "Baseline & Architecture Lock",
+      "pages": [],
+      "deps": [],
+      "est_weeks": 2,
+      "state": "NOT_STARTED",
+      "started_at": null,
+      "gate_pending_at": null,
+      "accepted_at": null,
+      "accepted_by": null,
+      "steps": {
+        "00.1": {
+          "name": "Discovery & Contract",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "00.2": {
+          "name": "Database",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "00.3": {
+          "name": "Domain Engine",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "00.4": {
+          "name": "Backend/API",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "00.5": {
+          "name": "UI",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "00.6": {
+          "name": "Integration",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "00.7": {
+          "name": "Security & Ops",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "00.8": {
+          "name": "Report & Review",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        }
+      }
+    },
+    {
+      "id": "PHASE_01",
+      "title_fa": "هسته سازمانی، امنیت، اسناد و گردش کار",
+      "title_en": "Platform & Identity",
+      "pages": [
+        "36",
+        "39",
+        "40",
+        "42",
+        "46"
+      ],
+      "deps": [
+        "PHASE_00"
+      ],
+      "est_weeks": 3,
+      "state": "NOT_STARTED",
+      "started_at": null,
+      "gate_pending_at": null,
+      "accepted_at": null,
+      "accepted_by": null,
+      "steps": {
+        "01.1": {
+          "name": "Discovery & Contract",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "01.2": {
+          "name": "Database",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "01.3": {
+          "name": "Domain Engine",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "01.4": {
+          "name": "Backend/API",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "01.5": {
+          "name": "UI",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "01.6": {
+          "name": "Integration",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "01.7": {
+          "name": "Security & Ops",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "01.8": {
+          "name": "Report & Review",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        }
+      }
+    },
+    {
+      "id": "PHASE_02",
+      "title_fa": "مشتری، محصول، استایل، ثبت سفارش و سریال",
+      "title_en": "Order & Product Identity",
+      "pages": [
+        "1",
+        "2",
+        "4",
+        "29",
+        "33"
+      ],
+      "deps": [
+        "PHASE_01"
+      ],
+      "est_weeks": 3,
+      "state": "NOT_STARTED",
+      "started_at": null,
+      "gate_pending_at": null,
+      "accepted_at": null,
+      "accepted_by": null,
+      "steps": {
+        "02.1": {
+          "name": "Discovery & Contract",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "02.2": {
+          "name": "Database",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "02.3": {
+          "name": "Domain Engine",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "02.4": {
+          "name": "Backend/API",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "02.5": {
+          "name": "UI",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "02.6": {
+          "name": "Integration",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "02.7": {
+          "name": "Security & Ops",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "02.8": {
+          "name": "Report & Review",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        }
+      }
+    },
+    {
+      "id": "PHASE_03",
+      "title_fa": "تیغه، کلیشه، مقر، لیویس و بسته فنی",
+      "title_en": "Engineering Tools & DXF",
+      "pages": [
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "17"
+      ],
+      "deps": [
+        "PHASE_01",
+        "PHASE_02"
+      ],
+      "est_weeks": 4,
+      "state": "NOT_STARTED",
+      "started_at": null,
+      "gate_pending_at": null,
+      "accepted_at": null,
+      "accepted_by": null,
+      "steps": {
+        "03.1": {
+          "name": "Discovery & Contract",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "03.2": {
+          "name": "Database",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "03.3": {
+          "name": "Domain Engine",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "03.4": {
+          "name": "Backend/API",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "03.5": {
+          "name": "UI",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "03.6": {
+          "name": "Integration",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "03.7": {
+          "name": "Security & Ops",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "03.8": {
+          "name": "Report & Review",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        }
+      }
+    },
+    {
+      "id": "PHASE_04",
+      "title_fa": "ساختار مواد، قطعه، مسیر عملیات، استاندارد زمان",
+      "title_en": "BOM, OPC & Time Study",
+      "pages": [
+        "5",
+        "6",
+        "15",
+        "16"
+      ],
+      "deps": [
+        "PHASE_02",
+        "PHASE_03"
+      ],
+      "est_weeks": 4,
+      "state": "NOT_STARTED",
+      "started_at": null,
+      "gate_pending_at": null,
+      "accepted_at": null,
+      "accepted_by": null,
+      "steps": {
+        "04.1": {
+          "name": "Discovery & Contract",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "04.2": {
+          "name": "Database",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "04.3": {
+          "name": "Domain Engine",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "04.4": {
+          "name": "Backend/API",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "04.5": {
+          "name": "UI",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "04.6": {
+          "name": "Integration",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "04.7": {
+          "name": "Security & Ops",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "04.8": {
+          "name": "Report & Review",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        }
+      }
+    },
+    {
+      "id": "PHASE_05",
+      "title_fa": "تقاضا، تعهد، سناریوی ظرفیت و زمان‌بندی",
+      "title_en": "Planning & Finite Capacity",
+      "pages": [
+        "3",
+        "30",
+        "31",
+        "32",
+        "33",
+        "51"
+      ],
+      "deps": [
+        "PHASE_02",
+        "PHASE_04"
+      ],
+      "est_weeks": 4,
+      "state": "NOT_STARTED",
+      "started_at": null,
+      "gate_pending_at": null,
+      "accepted_at": null,
+      "accepted_by": null,
+      "steps": {
+        "05.1": {
+          "name": "Discovery & Contract",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "05.2": {
+          "name": "Database",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "05.3": {
+          "name": "Domain Engine",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "05.4": {
+          "name": "Backend/API",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "05.5": {
+          "name": "UI",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "05.6": {
+          "name": "Integration",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "05.7": {
+          "name": "Security & Ops",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "05.8": {
+          "name": "Report & Review",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        }
+      }
+    },
+    {
+      "id": "PHASE_06",
+      "title_fa": "انبار مواد، راهکاران، تفکیک و GAP",
+      "title_en": "Warehouse, Supply & ERP Snapshot",
+      "pages": [
+        "18",
+        "19",
+        "20",
+        "24",
+        "43",
+        "44",
+        "49"
+      ],
+      "deps": [
+        "PHASE_01",
+        "PHASE_02",
+        "PHASE_04"
+      ],
+      "est_weeks": 4,
+      "state": "NOT_STARTED",
+      "started_at": null,
+      "gate_pending_at": null,
+      "accepted_at": null,
+      "accepted_by": null,
+      "steps": {
+        "06.1": {
+          "name": "Discovery & Contract",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "06.2": {
+          "name": "Database",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "06.3": {
+          "name": "Domain Engine",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "06.4": {
+          "name": "Backend/API",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "06.5": {
+          "name": "UI",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "06.6": {
+          "name": "Integration",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "06.7": {
+          "name": "Security & Ops",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "06.8": {
+          "name": "Report & Review",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        }
+      }
+    },
+    {
+      "id": "PHASE_07",
+      "title_fa": "برش، خطوط، بچ، اپراتور و توقف‌ها",
+      "title_en": "Cutting & Production MES",
+      "pages": [
+        "21",
+        "22",
+        "23",
+        "28",
+        "48",
+        "51"
+      ],
+      "deps": [
+        "PHASE_03",
+        "PHASE_04",
+        "PHASE_05",
+        "PHASE_06"
+      ],
+      "est_weeks": 5,
+      "state": "NOT_STARTED",
+      "started_at": null,
+      "gate_pending_at": null,
+      "accepted_at": null,
+      "accepted_by": null,
+      "steps": {
+        "07.1": {
+          "name": "Discovery & Contract",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "07.2": {
+          "name": "Database",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "07.3": {
+          "name": "Domain Engine",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "07.4": {
+          "name": "Backend/API",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "07.5": {
+          "name": "UI",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "07.6": {
+          "name": "Integration",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "07.7": {
+          "name": "Security & Ops",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "07.8": {
+          "name": "Report & Review",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        }
+      }
+    },
+    {
+      "id": "PHASE_08",
+      "title_fa": "کیفیت مواد و محصول، گرید و بازکاری",
+      "title_en": "QA / QC / NCR / CAPA",
+      "pages": [
+        "24",
+        "25",
+        "50"
+      ],
+      "deps": [
+        "PHASE_04",
+        "PHASE_06",
+        "PHASE_07"
+      ],
+      "est_weeks": 3,
+      "state": "NOT_STARTED",
+      "started_at": null,
+      "gate_pending_at": null,
+      "accepted_at": null,
+      "accepted_by": null,
+      "steps": {
+        "08.1": {
+          "name": "Discovery & Contract",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "08.2": {
+          "name": "Database",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "08.3": {
+          "name": "Domain Engine",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "08.4": {
+          "name": "Backend/API",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "08.5": {
+          "name": "UI",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "08.6": {
+          "name": "Integration",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "08.7": {
+          "name": "Security & Ops",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "08.8": {
+          "name": "Report & Review",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        }
+      }
+    },
+    {
+      "id": "PHASE_09",
+      "title_fa": "انبار محصول، ارسال جزئی و بستن سریال",
+      "title_en": "Finished Goods & Dispatch",
+      "pages": [
+        "26",
+        "27"
+      ],
+      "deps": [
+        "PHASE_02",
+        "PHASE_07",
+        "PHASE_08"
+      ],
+      "est_weeks": 2,
+      "state": "NOT_STARTED",
+      "started_at": null,
+      "gate_pending_at": null,
+      "accepted_at": null,
+      "accepted_by": null,
+      "steps": {
+        "09.1": {
+          "name": "Discovery & Contract",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "09.2": {
+          "name": "Database",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "09.3": {
+          "name": "Domain Engine",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "09.4": {
+          "name": "Backend/API",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "09.5": {
+          "name": "UI",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "09.6": {
+          "name": "Integration",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "09.7": {
+          "name": "Security & Ops",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "09.8": {
+          "name": "Report & Review",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        }
+      }
+    },
+    {
+      "id": "PHASE_10",
+      "title_fa": "بهای تمام‌شده، منابع انسانی و داشبورد",
+      "title_en": "Cost, HR & BI",
+      "pages": [
+        "34",
+        "35",
+        "37",
+        "38"
+      ],
+      "deps": [
+        "PHASE_04",
+        "PHASE_05",
+        "PHASE_07",
+        "PHASE_09"
+      ],
+      "est_weeks": 3,
+      "state": "NOT_STARTED",
+      "started_at": null,
+      "gate_pending_at": null,
+      "accepted_at": null,
+      "accepted_by": null,
+      "steps": {
+        "10.1": {
+          "name": "Discovery & Contract",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "10.2": {
+          "name": "Database",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "10.3": {
+          "name": "Domain Engine",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "10.4": {
+          "name": "Backend/API",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "10.5": {
+          "name": "UI",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "10.6": {
+          "name": "Integration",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "10.7": {
+          "name": "Security & Ops",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "10.8": {
+          "name": "Report & Review",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        }
+      }
+    },
+    {
+      "id": "PHASE_11",
+      "title_fa": "دستیار AI، قوانین پویا و مانیتورینگ",
+      "title_en": "AI, Rules & Administration",
+      "pages": [
+        "36",
+        "42",
+        "45",
+        "47"
+      ],
+      "deps": [
+        "PHASE_01",
+        "PHASE_02",
+        "PHASE_06",
+        "PHASE_07"
+      ],
+      "est_weeks": 3,
+      "state": "NOT_STARTED",
+      "started_at": null,
+      "gate_pending_at": null,
+      "accepted_at": null,
+      "accepted_by": null,
+      "steps": {
+        "11.1": {
+          "name": "Discovery & Contract",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "11.2": {
+          "name": "Database",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "11.3": {
+          "name": "Domain Engine",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "11.4": {
+          "name": "Backend/API",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "11.5": {
+          "name": "UI",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "11.6": {
+          "name": "Integration",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "11.7": {
+          "name": "Security & Ops",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "11.8": {
+          "name": "Report & Review",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        }
+      }
+    },
+    {
+      "id": "PHASE_12",
+      "title_fa": "مهاجرت و آزمون سرتاسری روی داده امن",
+      "title_en": "Migration & Integration Dress Rehearsal",
+      "pages": [
+        "40",
+        "43",
+        "44"
+      ],
+      "deps": [
+        "PHASE_01",
+        "PHASE_02",
+        "PHASE_03",
+        "PHASE_04",
+        "PHASE_05",
+        "PHASE_06",
+        "PHASE_07",
+        "PHASE_08",
+        "PHASE_09",
+        "PHASE_10",
+        "PHASE_11"
+      ],
+      "est_weeks": 3,
+      "state": "NOT_STARTED",
+      "started_at": null,
+      "gate_pending_at": null,
+      "accepted_at": null,
+      "accepted_by": null,
+      "steps": {
+        "12.1": {
+          "name": "Discovery & Contract",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "12.2": {
+          "name": "Database",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "12.3": {
+          "name": "Domain Engine",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "12.4": {
+          "name": "Backend/API",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "12.5": {
+          "name": "UI",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "12.6": {
+          "name": "Integration",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "12.7": {
+          "name": "Security & Ops",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "12.8": {
+          "name": "Report & Review",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        }
+      }
+    },
+    {
+      "id": "PHASE_13",
+      "title_fa": "پایلوت عملیاتی کنترل‌شده و بازخورد",
+      "title_en": "Factory Pilot & Fix Loop",
+      "pages": [
+        "52"
+      ],
+      "deps": [
+        "PHASE_12"
+      ],
+      "est_weeks": 4,
+      "state": "NOT_STARTED",
+      "started_at": null,
+      "gate_pending_at": null,
+      "accepted_at": null,
+      "accepted_by": null,
+      "steps": {
+        "13.1": {
+          "name": "Discovery & Contract",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "13.2": {
+          "name": "Database",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "13.3": {
+          "name": "Domain Engine",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "13.4": {
+          "name": "Backend/API",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "13.5": {
+          "name": "UI",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "13.6": {
+          "name": "Integration",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "13.7": {
+          "name": "Security & Ops",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "13.8": {
+          "name": "Report & Review",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        }
+      }
+    },
+    {
+      "id": "PHASE_14",
+      "title_fa": "بهره‌برداری کنترل‌شده و پشتیبانی",
+      "title_en": "Go Live & Support",
+      "pages": [
+        "52"
+      ],
+      "deps": [
+        "PHASE_13"
+      ],
+      "est_weeks": 4,
+      "state": "NOT_STARTED",
+      "started_at": null,
+      "gate_pending_at": null,
+      "accepted_at": null,
+      "accepted_by": null,
+      "steps": {
+        "14.1": {
+          "name": "Discovery & Contract",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "14.2": {
+          "name": "Database",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "14.3": {
+          "name": "Domain Engine",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "14.4": {
+          "name": "Backend/API",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "14.5": {
+          "name": "UI",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "14.6": {
+          "name": "Integration",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "14.7": {
+          "name": "Security & Ops",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        },
+        "14.8": {
+          "name": "Report & Review",
+          "state": "TODO",
+          "commit": null,
+          "report": null,
+          "review": null,
+          "rework_cycles": 0,
+          "started_at": null,
+          "done_at": null
+        }
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "id": "DEC-001",
+      "priority": "P0",
+      "gate": "Gate-0",
+      "domain": "Platform",
+      "issue": "تصویب Django/DRF یا جایگزین FastAPI و استراتژی Migration",
+      "status": "APPROVED",
+      "owner": "IT + کارفرما",
+      "phase": "PHASE_00",
+      "source": "ADR_001_TECH_STACK",
+      "resolution": "Django 5.2 LTS + DRF + PostgreSQL 17 + React/TypeScript + Celery/Redis؛ Modular Monolith؛ کاملاً تحت وب",
+      "decided_by": "کارفرما",
+      "decided_at": "2026-11-03"
+    },
+    {
+      "id": "DEC-002",
+      "priority": "P0",
+      "gate": "Gate-0",
+      "domain": "Platform",
+      "issue": "استقرار سرور داخل شرکت یا محیط خصوصی مورد تأیید و سیاست اینترنت",
+      "status": "APPROVED",
+      "owner": "IT + کارفرما",
+      "phase": "PHASE_00",
+      "source": "architectural requirement",
+      "resolution": "سامانه کاملاً تحت وب (مرورگر، HTTPS) و قابل استفاده آنلاین برای کاربران؛ Ubuntu 24.04 + Docker Compose؛ Staging و Production جدا؛ دیتابیس/Redis/فایل‌ها هرگز مستقیم روی اینترنت نیستند. محل میزبانی Production در DEC-042",
+      "decided_by": "کارفرما",
+      "decided_at": "2026-11-03"
+    },
+    {
+      "id": "DEC-003",
+      "priority": "P0",
+      "gate": "Gate-0",
+      "domain": "Security",
+      "issue": "مکانیزم کاربران/SSO/MFA، سطح دسترسی واحدها و تفکیک حقوق",
+      "status": "APPROVED",
+      "owner": "IT + HR + کارفرما",
+      "phase": "PHASE_00",
+      "source": "security baseline proposal",
+      "resolution": "کاربران فقط داخل خود سامانه تعریف می‌شوند؛ کارفرما مالک سامانه و ادمین اصلی است و خودش کاربران را می‌سازد/غیرفعال می‌کند؛ هیچ اتصال به Active Directory (نه حالا نه بعداً)؛ MFA اجباری برای مدیر/مالی/HR/تأییدکننده؛ نقش‌ها طبق ماتریس دسترسی",
+      "decided_by": "کارفرما",
+      "decided_at": "2026-11-03"
+    },
+    {
+      "id": "DEC-004",
+      "priority": "P0",
+      "gate": "Gate-0",
+      "domain": "Security",
+      "issue": "RPO/RTO، سیاست Backup/Restore و دسترسی incident",
+      "status": "APPROVED",
+      "owner": "IT + کارفرما",
+      "phase": "PHASE_00",
+      "source": "risk model proposal",
+      "resolution": "RPO=1h, RTO=4h؛ full شبانه + WAL؛ نگهداری ۳۰ روز؛ نسخه آفلاین رمزگذاری‌شده هفتگی؛ تمرین بازیابی ماهانه",
+      "decided_by": "کارفرما",
+      "decided_at": "2026-11-03"
+    },
+    {
+      "id": "DEC-005",
+      "priority": "P0",
+      "gate": "Phase-2",
+      "domain": "Identity",
+      "issue": "Golden Test قواعد NOrder/Codding/Sorce برای همه خانواده‌ها",
+      "status": "OPEN",
+      "owner": "برنامه‌ریزی + بازرگانی",
+      "phase": "PHASE_02",
+      "source": "Planning--.xlsm",
+      "resolution": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "id": "DEC-006",
+      "priority": "P0",
+      "gate": "Phase-2",
+      "domain": "Identity",
+      "issue": "قاعده دقیق namespace/فرمت Serial و رابطه order line",
+      "status": "PROPOSED",
+      "owner": "برنامه‌ریزی",
+      "phase": "PHASE_02",
+      "source": "user process + audit",
+      "resolution": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "id": "DEC-007",
+      "priority": "P0",
+      "gate": "Phase-3",
+      "domain": "Die",
+      "issue": "قرارداد دقیق محل و شیوه درج کاندیدای تیغه در Tracker",
+      "status": "OPEN",
+      "owner": "مهندسی + برنامه‌ریزی",
+      "phase": "PHASE_03",
+      "source": "user-confirmed workflow; AutoJ-BoM.py incomplete",
+      "resolution": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "id": "DEC-008",
+      "priority": "P0",
+      "gate": "Phase-3",
+      "domain": "Die",
+      "issue": "ستون‌ها و شرایط تخصیص کد ۱۴رقمی تیغه و شرح راهکاران در Tracker",
+      "status": "OPEN",
+      "owner": "مهندسی + مالک راهکاران",
+      "phase": "PHASE_03",
+      "source": "جدول پیگیری تیغه(1).xlsx",
+      "resolution": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "id": "DEC-009",
+      "priority": "P1",
+      "gate": "Phase-3",
+      "domain": "Cliche",
+      "issue": "بررسی کدهای تکراری کلیشه با ابعاد/شرح متعارض",
+      "status": "OPEN",
+      "owner": "مهندسی",
+      "phase": "PHASE_03",
+      "source": "جدول کلیشه.xlsx",
+      "resolution": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "id": "DEC-010",
+      "priority": "P0",
+      "gate": "Phase-4",
+      "domain": "Engineering",
+      "issue": "تأیید مسیر تفصیلی کفش/عملیات و وابستگی‌ها",
+      "status": "OPEN",
+      "owner": "مهندسی کفش",
+      "phase": "PHASE_04",
+      "source": "route currently proposal",
+      "resolution": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "id": "DEC-011",
+      "priority": "P0",
+      "gate": "Phase-4",
+      "domain": "Time Study",
+      "issue": "نحوه نمونه‌برداری زمان، allowance/rating، review authority",
+      "status": "OPEN",
+      "owner": "مهندسی + تولید",
+      "phase": "PHASE_04",
+      "source": "time capacity spec proposed",
+      "resolution": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "id": "DEC-012",
+      "priority": "P0",
+      "gate": "Phase-5",
+      "domain": "Capacity",
+      "issue": "تعریف رسمی SWU (پیشنهادی ۶۰ نفر-دقیقه استاندارد) و سیاست بازکاری",
+      "status": "OPEN",
+      "owner": "مدیریت تولید + برنامه‌ریزی",
+      "phase": "PHASE_05",
+      "source": "time capacity spec proposed",
+      "resolution": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "id": "DEC-013",
+      "priority": "P0",
+      "gate": "Phase-5",
+      "domain": "Capacity",
+      "issue": "تقویم و ساعات دقیق شیفت، استراحت، مهارت، تعطیلی/خرابی",
+      "status": "OPEN",
+      "owner": "منابع انسانی + تولید",
+      "phase": "PHASE_05",
+      "source": "factory time data not supplied",
+      "resolution": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "id": "DEC-014",
+      "priority": "P1",
+      "gate": "Phase-5",
+      "domain": "Planning",
+      "issue": "قانون FastTrack priority و جلوگیری از starvation",
+      "status": "PROPOSED",
+      "owner": "برنامه‌ریزی",
+      "phase": "PHASE_05",
+      "source": "planning architecture",
+      "resolution": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "id": "DEC-015",
+      "priority": "P0",
+      "gate": "Phase-6",
+      "domain": "Inventory",
+      "issue": "معنی موجودی آزاد/رزروشده/QA hold/منفی و مرجع وضعیت فیزیکی",
+      "status": "OPEN",
+      "owner": "انبار + QA",
+      "phase": "PHASE_06",
+      "source": "ListData (2).xlsx only aggregate",
+      "resolution": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "id": "DEC-016",
+      "priority": "P0",
+      "gate": "Phase-6",
+      "domain": "Integration",
+      "issue": "مدت اعتبار Snapshot راهکاران و سیاست reimport/تطبیق",
+      "status": "OPEN",
+      "owner": "انبار + IT",
+      "phase": "PHASE_06",
+      "source": "current import is Excel snapshot",
+      "resolution": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "id": "DEC-017",
+      "priority": "P0",
+      "gate": "Phase-6",
+      "domain": "UOM",
+      "issue": "جدول تبدیل واحدها فوت/متر/رول/جفت/عدد با owner",
+      "status": "OPEN",
+      "owner": "انبار + مهندسی",
+      "phase": "PHASE_06",
+      "source": "inventory includes mixed units",
+      "resolution": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "id": "DEC-018",
+      "priority": "P1",
+      "gate": "Phase-7",
+      "domain": "Production",
+      "issue": "سیاست Offline/Queue در سالن و QR/device policy",
+      "status": "OPEN",
+      "owner": "تولید + IT",
+      "phase": "PHASE_07",
+      "source": "production requirement",
+      "resolution": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "id": "DEC-019",
+      "priority": "P0",
+      "gate": "Phase-8",
+      "domain": "Quality",
+      "issue": "جدول گرید A+/A/B/C و مجوز انحراف مشتری به تفکیک Revision",
+      "status": "OPEN",
+      "owner": "QA/QC + بازرگانی",
+      "phase": "PHASE_08",
+      "source": "QC requirement",
+      "resolution": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "id": "DEC-020",
+      "priority": "P0",
+      "gate": "Phase-9",
+      "domain": "Dispatch",
+      "issue": "شرایط بستن Serial و تأیید دریافت مشتری",
+      "status": "PROPOSED",
+      "owner": "بازرگانی + انبار محصول",
+      "phase": "PHASE_09",
+      "source": "user process",
+      "resolution": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "id": "DEC-021",
+      "priority": "P1",
+      "gate": "Phase-10",
+      "domain": "Finance",
+      "issue": "جزئیات نرخ کار/ماشین/سربار/مواد و Costing",
+      "status": "OPEN",
+      "owner": "مالی + تولید",
+      "phase": "PHASE_10",
+      "source": "business no verified rates",
+      "resolution": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "id": "DEC-022",
+      "priority": "P0",
+      "gate": "Phase-10",
+      "domain": "HR",
+      "issue": "مشمولان دسترسی به داده حقوق و تصویب تغییرات",
+      "status": "OPEN",
+      "owner": "منابع انسانی + کارفرما",
+      "phase": "PHASE_10",
+      "source": "privacy requirement",
+      "resolution": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "id": "DEC-023",
+      "priority": "P0",
+      "gate": "Phase-11",
+      "domain": "AI",
+      "issue": "محیط و Provider مجاز برای AI و scope داده قابل استفاده",
+      "status": "OPEN",
+      "owner": "IT + کارفرما",
+      "phase": "PHASE_11",
+      "source": "AI privacy",
+      "resolution": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "id": "DEC-024",
+      "priority": "P1",
+      "gate": "Phase-11",
+      "domain": "Admin",
+      "issue": "فهرست Jobهای غیرقابل Force Kill و پروتکل Recovery",
+      "status": "PROPOSED",
+      "owner": "IT",
+      "phase": "PHASE_11",
+      "source": "safety requirement",
+      "resolution": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "id": "DEC-025",
+      "priority": "P1",
+      "gate": "Phase-12",
+      "domain": "Migration",
+      "issue": "نسخه صریح مپ تمام شیت‌ها و VBA با Golden Tests",
+      "status": "OPEN",
+      "owner": "Data Steward + برنامه‌ریزی",
+      "phase": "PHASE_12",
+      "source": "Planning/WH remain complex",
+      "resolution": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "id": "DEC-026",
+      "priority": "P0",
+      "gate": "Phase-13",
+      "domain": "Pilot",
+      "issue": "واحد/سریال‌های پایلوت و امضاهای پذیرش/UAT",
+      "status": "OPEN",
+      "owner": "کارفرما + همه مالکان",
+      "phase": "PHASE_13",
+      "source": "pilot must use real factory process",
+      "resolution": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "id": "DEC-027",
+      "priority": "P1",
+      "gate": "Phase-0",
+      "domain": "UI",
+      "issue": "صفحات ۱ و ۲ HTML مستقل ندارند؛ scope approval و Design System",
+      "status": "OPEN",
+      "owner": "کارفرما + UI Lead",
+      "phase": "PHASE_01",
+      "source": "52 draft catalog manifest",
+      "resolution": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "id": "DEC-028",
+      "priority": "P0",
+      "gate": "Phase-0",
+      "domain": "Privacy",
+      "issue": "اجازه استفاده از فایل‌های RAW در Codex/Claude محیط ابری یا فقط Local",
+      "status": "APPROVED",
+      "owner": "IT + کارفرما",
+      "phase": "PHASE_00",
+      "source": "PRIVATE source package",
+      "resolution": "خواندن منابع برنامه‌ریزی/انبار/مهندسی فقط روی سیستم محل کار؛ بدون حقوق/قیمت فروش/تماس مشتری؛ فیکسچر ناشناس؛ هیچ فایل خام در Git",
+      "decided_by": "کارفرما",
+      "decided_at": "2026-11-03"
+    },
+    {
+      "id": "DEC-029",
+      "priority": "P1",
+      "gate": "Phase-3",
+      "domain": "CAD",
+      "issue": "معیار انتخاب Revision DXF به جای newest file modified",
+      "status": "PROPOSED",
+      "owner": "مهندسی",
+      "phase": "PHASE_03",
+      "source": "AutoJ-BoM.py legacy flawed",
+      "resolution": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "id": "DEC-030",
+      "priority": "P1",
+      "gate": "Phase-12",
+      "domain": "Integration",
+      "issue": "مالک Snapshot و تطبیق شرح‌های متفاوت راهکاران/Tracker",
+      "status": "OPEN",
+      "owner": "انبار + مهندسی",
+      "phase": "PHASE_12",
+      "source": "source discrepancies prior audit",
+      "resolution": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "id": "DEC-031",
+      "priority": "P1",
+      "gate": "Phase-4",
+      "domain": "BOM",
+      "issue": "تکلیف ستون‌های چندگانه متریال و رنگ/خررجکار/پرت",
+      "status": "PROPOSED",
+      "owner": "مهندسی",
+      "phase": "PHASE_04",
+      "source": "user dynamic materials",
+      "resolution": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "id": "DEC-032",
+      "priority": "P1",
+      "gate": "Phase-1",
+      "domain": "Workflow",
+      "issue": "الگوی maker-checker و دوره نگهداری Audit",
+      "status": "PROPOSED",
+      "owner": "IT + کارفرما",
+      "phase": "PHASE_01",
+      "source": "security policy",
+      "resolution": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "id": "DEC-033",
+      "priority": "P1",
+      "gate": "Phase-6",
+      "domain": "Supply",
+      "issue": "نحوه ثبت تأمین ساخت ابزار جدا از خرید ماده",
+      "status": "PROPOSED",
+      "owner": "تأمین + مهندسی",
+      "phase": "PHASE_06",
+      "source": "tool process user description",
+      "resolution": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "id": "DEC-034",
+      "priority": "P1",
+      "gate": "Phase-5",
+      "domain": "Shifts",
+      "issue": "دو شیفت چرخشی قابل نگاشت به ۱۰/۱۲ نفر؛ وضعیت واقعی و زمان شیفت",
+      "status": "OPEN",
+      "owner": "تولید + HR",
+      "phase": "PHASE_05",
+      "source": "factory staffing context not time table",
+      "resolution": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "id": "DEC-035",
+      "priority": "P0",
+      "gate": "Phase-12",
+      "domain": "Legacy",
+      "issue": "Macro behavior source form / sheet reference source mapping must be proved",
+      "status": "OPEN",
+      "owner": "برنامه‌ریزی + IT",
+      "phase": "PHASE_12",
+      "source": "Excel unexecuted legacy",
+      "resolution": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "id": "DEC-036",
+      "priority": "P0",
+      "gate": "Gate-0",
+      "domain": "Governance",
+      "issue": "انتقال نقش ممیز از ChatGPT به ممیز مستقل Claude (subagent جدا با context تازه) + تأیید Gate فقط توسط کارفرما",
+      "status": "APPROVED",
+      "owner": "کارفرما",
+      "phase": "PHASE_00",
+      "source": "درخواست کارفرما در گفت‌وگو 2026-11-03",
+      "resolution": "ممیز مستقل Claude برای هر گام؛ Gate فقط با امضای کارفرما؛ بازبینی امنیتی جدا در Gate 0/6/12",
+      "decided_by": "کارفرما",
+      "decided_at": "2026-11-03"
+    },
+    {
+      "id": "DEC-037",
+      "priority": "P1",
+      "gate": "Gate-0",
+      "domain": "Source",
+      "issue": "نسخه‌های جدید Planning--.xlsm و WH-.xlsm (هش متفاوت با Registry) و فایل جدید PSD.py: کدام نسخه مبنای Golden Test است؟",
+      "status": "APPROVED",
+      "owner": "برنامه‌ریزی + انبار + مهندسی",
+      "phase": "PHASE_00",
+      "source": "آپلود کارفرما 2026-11-03",
+      "resolution": "نسخه‌های 2026-11-03 (Planning، WH، PSD.py) مبنای v2؛ نسخه‌های قبلی تاریخچه؛ Golden Test به hash قفل",
+      "decided_by": "کارفرما",
+      "decided_at": "2026-11-03"
+    },
+    {
+      "id": "DEC-038",
+      "priority": "P1",
+      "gate": "Gate-12",
+      "domain": "Pilot",
+      "issue": "گام‌های فاز ۱۳ و ۱۴ همان قالب عمومی ۸ گامی است (Database/Engine در پایلوت معنی ندارد)؛ برنامه گام اختصاصی پایلوت و Go-Live باید نوشته و تصویب شود",
+      "status": "OPEN",
+      "owner": "کارفرما + مدیر پروژه",
+      "phase": "PHASE_12",
+      "source": "ممیزی بسته 2026-11-03",
+      "resolution": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "id": "DEC-039",
+      "priority": "P1",
+      "gate": "Gate-0",
+      "domain": "Platform",
+      "issue": "ممیزی قبلی readiness پیشنهاد FastAPI داده ولی ADR_001 پیشنهاد Django دارد؛ در تصمیم DEC-001 صریحاً یکی انتخاب شود",
+      "status": "CLOSED",
+      "owner": "IT + کارفرما",
+      "phase": "PHASE_00",
+      "source": "ADR_001 vs readiness_legacy_audit_v1/DEVELOPMENT_GATES_FA.md",
+      "resolution": "تعارض FastAPI/Django با انتخاب Django در DEC-001 بسته شد",
+      "decided_by": "کارفرما",
+      "decided_at": "2026-11-03"
+    },
+    {
+      "id": "DEC-040",
+      "priority": "P1",
+      "gate": "Gate-0",
+      "domain": "Security",
+      "issue": "رمز فایل‌های Planning/WH در گفت‌وگو ارسال شده؛ فقط در متغیر محیطی ALEEKHAN_SRC_PASSWORD نگهداری و پس از مهاجرت تعویض شود",
+      "status": "APPROVED",
+      "owner": "IT",
+      "phase": "PHASE_00",
+      "source": "پیام کارفرما 2026-11-03",
+      "resolution": "رمز فقط در env همان جلسه؛ تعویض رمز پس از مهاجرت",
+      "decided_by": "کارفرما",
+      "decided_at": "2026-11-03"
+    },
+    {
+      "id": "DEC-041",
+      "priority": "P0",
+      "gate": "Gate-0",
+      "domain": "Platform",
+      "issue": "مخزن Git مشترک برای کار از دو سیستم (ویندوز محل کار و اوبونتو خانه): GitHub خصوصی یا Gitea داخلی + VPN",
+      "status": "APPROVED",
+      "owner": "کارفرما + IT",
+      "phase": "PHASE_00",
+      "source": "درخواست کارفرما 2026-11-03",
+      "resolution": "GitHub private repo برای کد، گزارش و وضعیت؛ هیچ داده خصوصی کارخانه، رمز یا داده مشتری",
+      "decided_by": "کارفرما",
+      "decided_at": "2026-11-03"
+    },
+    {
+      "id": "DEC-042",
+      "priority": "P0",
+      "gate": "Gate-0",
+      "domain": "Platform",
+      "issue": "محل میزبانی نسخه آنلاین (Production): سرور داخل شرکت با IP ثابت یا دیتاسنتر داخل ایران؛ و قاعده ورود از بیرون کارخانه",
+      "status": "APPROVED",
+      "owner": "کارفرما + IT",
+      "phase": "PHASE_00",
+      "source": "درخواست کارفرما 2026-11-03: همه چیز تحت وب و آنلاین",
+      "resolution": "Production روی سرور داخل شرکت با IP ثابت + دامنه + HTTPS؛ ورود دومرحله‌ای برای همه ورودهای بیرون کارخانه؛ حساب‌های اپراتور فقط از شبکه داخلی؛ پشتیبان بیرون از سرور؛ بازبینی پس از پایلوت",
+      "decided_by": "کارفرما",
+      "decided_at": "2026-11-03"
+    },
+    {
+      "id": "DEC-043",
+      "priority": "P0",
+      "gate": "Phase-1",
+      "domain": "Identity",
+      "issue": "درخت سلسله‌مراتب سازمانی (OrgUnit/Position/Reports-to) داخل سامانه؛ تعریف کاربران فقط توسط ادمین مالک سامانه",
+      "status": "APPROVED",
+      "owner": "کارفرما",
+      "phase": "PHASE_01",
+      "source": "درخواست کارفرما 2026-11-03؛ در بسته handoff پوشش ندارد",
+      "resolution": "درخت سلسله‌مراتب سازمانی (واحدها، سمت‌ها، مدیر هر نفر) باید داخل سامانه تعریف و نمایش داده شود؛ در فاز ۱ همراه کاربران و دسترسی‌ها؛ جزئیات سطوح و اثر آن بر تأییدها در گام 01.1 با کارفرما نهایی شود",
+      "decided_by": "کارفرما",
+      "decided_at": "2026-11-03"
+    }
+  ],
+  "ready_for_test": [],
+  "events": [],
+  "updated_at": "2026-11-03T14:50:15+00:00"
+}

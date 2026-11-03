@@ -1,0 +1,189 @@
+# گزیده دقیق از فایل اصلی AutoJ-BoM.py؛ فقط استخراج، بدون تغییر منطق یا اجرای کد
+# SHA256 فایل اصلی: 82e3e6c2cda2e9d563ba92d1e03d7dd94504cedfd0eae764ae7b7d3937a8030c
+
+===== تابع بازکردن کاراکترهای Unicode در متن DXF — خطوط 25 تا 33 =====
+0025 | def decode_unicode_escape(text):
+0026 |     def replace_match(match):
+0027 |         unicode_code = match.group(1)
+0028 |         code_point = int(unicode_code, 16)
+0029 |         return chr(code_point)
+0030 |     
+0031 |     pattern = r'\\U\+([0-9A-Fa-f]+)'
+0032 |     decoded_text = re.sub(pattern, replace_match, text)
+0033 |     return decoded_text
+
+===== خواندن DXF، خوشه‌بندی و ایجاد گروه tighe — خطوط 425 تا 513 =====
+0425 | def read_dxf(the_code , s_path, sdxf_name , mt):
+0426 |     print(s_path)
+0427 |     sdoc = ezdxf.readfile(s_path)
+0428 |     smod = sdoc.modelspace()
+0429 |     groups = []
+0430 |     y_all = []
+0431 |     charmn = []
+0432 |     pastayen = []
+0433 |     for i in smod:
+0434 |         c = i.dxf.color
+0435 |         # colors : red,green,blue,purple,orange,green c
+0436 |         if c==1 or c==3 or c==5 or c==6 or c == 30 or c==96 : 
+0437 |             ent_bbox = ezdxf.bbox.extents([i])
+0438 |             if i not in groups:
+0439 |                 groups.append([[i, ent_bbox]])
+0440 |             else:
+0441 |                 pass
+0442 |         else:
+0443 |             pass
+0444 | 
+0445 |     for i in smod:
+0446 |         ibbox = ezdxf.bbox.extents([i])
+0447 |         if i.dxftype() =='TEXT':
+0448 |             tx_pos = i.get_placement()[1]
+0449 |             tx_str = i.plain_text()
+0450 |             tx_str = tx_str.strip()
+0451 |             txsp = tx_str.split()
+0452 |             for j in range(len(groups)):
+0453 |                 if groups[j][0][1].inside(tx_pos) == True:
+0454 |                     groups[j].append([i , ibbox])
+0455 |                 else:
+0456 |                     pass
+0457 |             if i.dxf.color == 7 and (txsp[0] == 'y' or txsp[0] == 'Y'):
+0458 |                 y_all.append(tx_str)
+0459 |             elif i.dxf.color == 252:
+0460 |                 if txsp[0] == 'AC' or txsp[0] == 'Ac' or txsp[0] == 'aC' or txsp[0] == 'ac':
+0461 |                     if 'cm' in txsp:
+0462 |                         txsp.remove('cm')
+0463 |                     else:
+0464 |                         pass
+0465 |                     charmn.append(txsp)
+0466 |                     #print(txsp)
+0467 |                 elif txsp[0] == 'AP' or txsp[0] == 'Ap' or txsp[0] == 'aP' or txsp[0] == 'ap':
+0468 |                     if 'cm' in txsp:
+0469 |                         txsp.remove('cm')
+0470 |                     else:
+0471 |                         pass
+0472 |                     pastayen.append(txsp)
+0473 |                 else:
+0474 |                     pass
+0475 |             else:
+0476 |                 pass
+0477 |                 
+0478 |         elif i.dxftype() == 'LWPOLYLINE' or i.dxftype() == 'CIRCLE' or i.dxftype() == 'SPLINE':
+0479 |             for j in range(len(groups)):
+0480 |                 #print(i)
+0481 |                 if groups[j][0][1].contains(ibbox) == True:
+0482 |                     groups[j].append([i , ibbox])
+0483 |                 else:
+0484 |                     pass
+0485 |     charmt = []
+0486 |     charmb = []
+0487 |     astar = []
+0488 |     pastaye = []
+0489 |     tighe = []
+0490 |     controli = []
+0491 |     for i in groups:
+0492 |         if len(i) > 2 :
+0493 |             if i[0][0].dxf.color == 5:
+0494 |                 charmt.append(i)
+0495 |             elif i[0][0].dxf.color == 6:
+0496 |                 charmb.append(i)
+0497 |             elif i[0][0].dxf.color == 30:
+0498 |                 astar.append(i)
+0499 |             elif i[0][0].dxf.color == 3:
+0500 |                 pastaye.append(i)
+0501 |             elif i[0][0].dxf.color == 1:
+0502 |                 tighe.append(i)
+0503 |             elif i[0][0].dxf.color == 96:
+0504 |                 controli.append(i)
+0505 |             else:
+0506 |                 pass
+0507 |         else:
+0508 |             pass           
+0509 |     ft = time.time()
+0510 |     #sdoc.save()
+0511 |     print(ft - st , 'seconds')
+0512 |     #component_list(charmt, charmb, charmn, astar, pastaye, tighe, controli, y_all, the_code , s_path, sdxf_name , mt, pastayen)
+0513 |     BOM(charmt, charmb, charmn, astar, pastaye, tighe, controli, y_all, the_code , s_path, sdxf_name , mt, pastayen)
+
+===== انتخاب فایل و مسیر BM/BL — خطوط 519 تا 578 =====
+0519 | def find_the_path(mt, the_code, S):
+0520 |     s_path = None
+0521 |     gt_path = False
+0522 |     sh_er = True
+0523 |     if S == 'BM':
+0524 |         if mt == "Bags":
+0525 |             path = 'N:'+'/فنی تولید/'
+0526 |             print(path)
+0527 |             for folder_name in os.listdir(path):
+0528 |                 if str(the_code) in folder_name:
+0529 |                     s_path = os.path.join(path, folder_name)
+0530 |                     break 
+0531 |         elif mt == "Pocket Bags":
+0532 |             path = 'Y:/'
+0533 |             print(path)
+0534 |             for folder_name in os.listdir(path):
+0535 |                 if str(the_code) in folder_name:
+0536 |                     s_path = os.path.join(path, folder_name)
+0537 |                     break 
+0538 | 
+0539 |         
+0540 |         else :
+0541 |             messagebox.showerror("Source Error", "Error 58: Oops !")
+0542 |     
+0543 |     else:
+0544 |         messagebox.showerror("Source Error", "Error 59: Oops !")
+0545 |     
+0546 |     
+0547 |     
+0548 |     if s_path != None :
+0549 |         f_path = s_path+'/اندازه تولید/'
+0550 |         if os.path.exists(f_path):
+0551 |             folder_path = f_path
+0552 |         else:
+0553 |             folder_path = f_path = s_path+'/تولید/'
+0554 |     files_a = os.listdir(folder_path)
+0555 |     files = [f for f in files_a if f.endswith(".dxf")]
+0556 |     if files:
+0557 |         files.sort(key=lambda x: os.path.getmtime(os.path.join(folder_path, x)))
+0558 |         last_file = files[-1]
+0559 |     sdxf_name = last_file
+0560 |     last_file_path = folder_path + str(last_file)
+0561 |     s_path = last_file_path
+0562 |     print(s_path)
+0563 |     read_dxf(the_code , s_path, sdxf_name , mt)
+0564 | 
+0565 | 
+0566 | # In[ ]:
+0567 | 
+0568 | def get_entry(S):
+0569 |     global the_code
+0570 |     global mt
+0571 |     the_code = entry1.get()
+0572 |     mt = combo_f.get()
+0573 |     if the_code == '':
+0574 |         messagebox.showerror("Source Error", "Enter the code !")
+0575 |     elif mt == '':
+0576 |         messagebox.showerror("Source Error", "Select system type !")
+0577 |     else: 
+0578 |         find_the_path(mt, the_code, S)
+
+===== کنترل‌های رابط و دکمه‌های BOM/Blade List — خطوط 591 تا 611 =====
+0591 | label1 = tkinter.Label(frame1 , text='Enter the code ' , font = font_style)
+0592 | label1.grid(row=1, column=0,columnspan=2, padx=1, pady=1)
+0593 | entry1 = tkinter.Entry(frame1 , width=20 , font = font_style)
+0594 | entry1.grid(row=2, column=0,columnspan=2, padx=1, pady=1)
+0595 | 
+0596 | 
+0597 | label2 = tkinter.Label(frame1 , text= 'Select system type ', font = font_style)
+0598 | label2.grid(row=4, column=0,columnspan=2, padx=1, pady=1)
+0599 | s_m_n = tkinter.StringVar(frame1)
+0600 | combo_f = ttk.Combobox(frame1, values=["Bags", "Pocket Bags", "Shoes"], textvariable=s_m_n , width=20 ,font = font_style)
+0601 | combo_f.grid(row=5 , column=0 ,columnspan=2, padx=1 , pady=1)
+0602 | 
+0603 | 
+0604 | labe01 = tkinter.Label(frame1 , text=' ' )
+0605 | labe01.grid(row=6, column=0,columnspan=2, padx=1, pady=1)
+0606 | 
+0607 | button1 = tkinter.Button(frame1, text="BoM", command=lambda:get_entry('BM'), width=10, font = font_style)
+0608 | button1.grid(row=7, column=0, padx=1, pady=1)
+0609 | 
+0610 | button2 = tkinter.Button(frame1, text="Blade List", command=lambda:get_entry('BL'), width=10,font = font_style)
+0611 | button2.grid(row=7, column=1, padx=1, pady=1)

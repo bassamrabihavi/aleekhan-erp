@@ -1,0 +1,30 @@
+{
+  "source_name": "AutoJ-BoM.py",
+  "sha256": "82e3e6c2cda2e9d563ba92d1e03d7dd94504cedfd0eae764ae7b7d3937a8030c",
+  "lines": 625,
+  "source_function_signatures": [
+    "read_dxf(the_code, s_path, sdxf_name, mt)",
+    "find_the_path(mt, the_code, S)",
+    "get_entry(S)"
+  ],
+  "legacy_die_classifier": {
+    "basis": "DXF ACI entity color plus bounding box grouping",
+    "die_candidate_group_color": 1,
+    "minimum_group_elements": 3,
+    "candidate_output_variable": "tighe",
+    "output_file": null,
+    "status": "Partial: die candidates detected; Blade List export absent"
+  },
+  "critical_gaps": [
+    "BL branch missing in find_the_path",
+    "component_list call commented and function undefined",
+    "14-digit die coding absent",
+    "DXF selection by mtime only"
+  ],
+  "module_ownership": {
+    "extract_and_review": "engineering",
+    "physical_die_inventory": "tool_warehouse",
+    "fabrication_followup": "supply"
+  },
+  "no_source_executed": true
+}

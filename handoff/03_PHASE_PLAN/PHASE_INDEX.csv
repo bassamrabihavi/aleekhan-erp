@@ -1,0 +1,16 @@
+﻿phase,title_fa,title_en,pages,depends_on,state
+PHASE_00,تثبیت قراردادهای مبنا و راه‌اندازی مخزن امن,Baseline & Architecture Lock,0,,NOT_STARTED
+PHASE_01,هسته سازمانی، امنیت، اسناد و گردش کار,Platform & Identity,36;39;40;42;46,PHASE_00,NOT_STARTED
+PHASE_02,مشتری، محصول، استایل، ثبت سفارش و سریال,Order & Product Identity,1;2;4;29;33,PHASE_01,NOT_STARTED
+PHASE_03,تیغه، کلیشه، مقر، لیویس و بسته فنی,Engineering Tools & DXF,7;8;9;10;11;12;13;14;17,PHASE_01;PHASE_02,NOT_STARTED
+PHASE_04,ساختار مواد، قطعه، مسیر عملیات، استاندارد زمان,"BOM, OPC & Time Study",5;6;15;16,PHASE_02;PHASE_03,NOT_STARTED
+PHASE_05,تقاضا، تعهد، سناریوی ظرفیت و زمان‌بندی,Planning & Finite Capacity,3;30;31;32;33;51,PHASE_02;PHASE_04,NOT_STARTED
+PHASE_06,انبار مواد، راهکاران، تفکیک و GAP,"Warehouse, Supply & ERP Snapshot",18;19;20;24;43;44;49,PHASE_01;PHASE_02;PHASE_04,NOT_STARTED
+PHASE_07,برش، خطوط، بچ، اپراتور و توقف‌ها,Cutting & Production MES,21;22;23;28;48;51,PHASE_03;PHASE_04;PHASE_05;PHASE_06,NOT_STARTED
+PHASE_08,کیفیت مواد و محصول، گرید و بازکاری,QA / QC / NCR / CAPA,24;25;50,PHASE_04;PHASE_06;PHASE_07,NOT_STARTED
+PHASE_09,انبار محصول، ارسال جزئی و بستن سریال,Finished Goods & Dispatch,26;27,PHASE_02;PHASE_07;PHASE_08,NOT_STARTED
+PHASE_10,بهای تمام‌شده، منابع انسانی و داشبورد,"Cost, HR & BI",34;35;37;38,PHASE_04;PHASE_05;PHASE_07;PHASE_09,NOT_STARTED
+PHASE_11,دستیار AI، قوانین پویا و مانیتورینگ,"AI, Rules & Administration",36;42;45;47,PHASE_01;PHASE_02;PHASE_06;PHASE_07,NOT_STARTED
+PHASE_12,مهاجرت و آزمون سرتاسری روی داده امن,Migration & Integration Dress Rehearsal,40;43;44,PHASE_01;PHASE_02;PHASE_03;PHASE_04;PHASE_05;PHASE_06;PHASE_07;PHASE_08;PHASE_09;PHASE_10;PHASE_11,NOT_STARTED
+PHASE_13,پایلوت عملیاتی کنترل‌شده و بازخورد,Factory Pilot & Fix Loop,52,PHASE_12,NOT_STARTED
+PHASE_14,بهره‌برداری کنترل‌شده و پشتیبانی,Go Live & Support,52,PHASE_13,NOT_STARTED

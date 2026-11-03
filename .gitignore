@@ -1,0 +1,14 @@
+.env
+.env.*
+*.xlsm
+*.xlsx
+*.xls
+*.dxf
+*.dwg
+**/09_PRIVATE_FACTORY_SOURCES/
+private/
+node_modules/
+__pycache__/
+.venv/
+*.pyc
+control/PROJECT_STATUS.tmp

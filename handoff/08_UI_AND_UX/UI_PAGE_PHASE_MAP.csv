@@ -1,0 +1,53 @@
+﻿page,title_fa,prototype_relative,status,approved,implementation_phases
+1,مرکز کنترل سریال — نمای خلاصه,,DRAFT,False,PHASE_02
+2,مرکز کنترل سریال — تب سفارش,,DRAFT,False,PHASE_02
+3,اتاق کنترل برنامه‌ریزی,03_planning/planning_control_tower.html,DRAFT,False,PHASE_05
+4,ردیابی محصولات و استایل‌ها,04_product_style/product_style_360.html,DRAFT,False,PHASE_02
+5,برگه تولید پویا PRD.Form,05_06_prd_listgh/production_sheet.html,DRAFT,False,PHASE_04
+6,فهرست قطعات برش listGH,05_06_prd_listgh/production_sheet.html,DRAFT,False,PHASE_04
+7,استخراج تیغه از DXF,07_08_die_extract_registry/index.html,DRAFT,False,PHASE_03
+8,بانک و کدگذاری تیغه‌ها,07_08_die_extract_registry/index.html,DRAFT,False,PHASE_03
+9,پرونده فنی تیغه,09_10_die_detail_supply/index.html,DRAFT,False,PHASE_03
+10,درخواست ساخت و تأمین تیغه,09_10_die_detail_supply/index.html,DRAFT,False,PHASE_03
+11,بانک کلیشه‌ها,11_12_cliche/index.html,DRAFT,False,PHASE_03
+12,پرونده و گردش کلیشه,11_12_cliche/index.html,DRAFT,False,PHASE_03
+13,مقر و جیگ,13_20_engineering_supply/index.html?page=13,DRAFT,False,PHASE_03
+14,لیویس,13_20_engineering_supply/index.html?page=14,DRAFT,False,PHASE_03
+15,BOM,13_20_engineering_supply/index.html?page=15,DRAFT,False,PHASE_04
+16,OPC,13_20_engineering_supply/index.html?page=16,DRAFT,False,PHASE_04
+17,بسته فنی,13_20_engineering_supply/index.html?page=17,DRAFT,False,PHASE_03
+18,جداسازی انبار,13_20_engineering_supply/index.html?page=18,DRAFT,False,PHASE_06
+19,پرونده GAP,13_20_engineering_supply/index.html?page=19,DRAFT,False,PHASE_06
+20,نیازسنجی تجمیعی,13_20_engineering_supply/index.html?page=20,DRAFT,False,PHASE_06
+21,مدیریت برش,21_28_production_quality/index.html?page=21,DRAFT,False,PHASE_07
+22,مدیریت خطوط,21_28_production_quality/index.html?page=22,DRAFT,False,PHASE_07
+23,ترمینال اپراتور,21_28_production_quality/index.html?page=23,DRAFT,False,PHASE_07
+24,QA مواد,21_28_production_quality/index.html?page=24,DRAFT,False,PHASE_06;PHASE_08
+25,QC نهایی,21_28_production_quality/index.html?page=25,DRAFT,False,PHASE_08
+26,انبار محصول,21_28_production_quality/index.html?page=26,DRAFT,False,PHASE_09
+27,ارسال,21_28_production_quality/index.html?page=27,DRAFT,False,PHASE_09
+28,نمای سرپرست,21_28_production_quality/index.html?page=28,DRAFT,False,PHASE_07
+29,ثبت سفارش و کدگذاری,29_36_commercial_planning_admin/index.html?page=29,DRAFT,False,PHASE_02
+30,برنامه فصلی/هفتگی,29_36_commercial_planning_admin/index.html?page=30,DRAFT,False,PHASE_05
+31,زمان‌بندی تفصیلی,29_36_commercial_planning_admin/index.html?page=31,DRAFT,False,PHASE_05
+32,شبیه‌ساز ظرفیت,29_36_commercial_planning_admin/index.html?page=32,DRAFT,False,PHASE_05
+33,تغییرات سفارش و مهندسی,29_36_commercial_planning_admin/index.html?page=33,DRAFT,False,PHASE_02;PHASE_05
+34,قیمت‌گذاری,29_36_commercial_planning_admin/index.html?page=34,DRAFT,False,PHASE_10
+35,گزارش مدیریتی,29_36_commercial_planning_admin/index.html?page=35,DRAFT,False,PHASE_10
+36,سلامت سیستم و Job,29_36_commercial_planning_admin/index.html?page=36,DRAFT,False,PHASE_01;PHASE_11
+37,عملکرد کارکنان,37_44_hr_workflow_docs_data/index.html?page=37,DRAFT,False,PHASE_10
+38,مهارت‌ها و حقوق,37_44_hr_workflow_docs_data/index.html?page=38,DRAFT,False,PHASE_10
+39,تسک‌ها و تأییدها,37_44_hr_workflow_docs_data/index.html?page=39,DRAFT,False,PHASE_01
+40,مدیریت اسناد,37_44_hr_workflow_docs_data/index.html?page=40,DRAFT,False,PHASE_01;PHASE_12
+41,استانداردسازی داده,37_44_hr_workflow_docs_data/index.html?page=41,DRAFT,False,
+42,پارامترها و چیدمان UI,37_44_hr_workflow_docs_data/index.html?page=42,DRAFT,False,PHASE_01;PHASE_11
+43,ورود اطلاعات راهکاران,37_44_hr_workflow_docs_data/index.html?page=43,DRAFT,False,PHASE_06;PHASE_12
+44,مغایرت و تطبیق,37_44_hr_workflow_docs_data/index.html?page=44,DRAFT,False,PHASE_06;PHASE_12
+45,دستیار AI,45_52_ai_security_pilot/index.html?page=45,DRAFT,False,PHASE_11
+46,امنیت و کاربران,45_52_ai_security_pilot/index.html?page=46,DRAFT,False,PHASE_01
+47,قوانین و Master Data,45_52_ai_security_pilot/index.html?page=47,DRAFT,False,PHASE_11
+48,تابلوی سالن تولید,45_52_ai_security_pilot/index.html?page=48,DRAFT,False,PHASE_07
+49,موجودی و شمارش,45_52_ai_security_pilot/index.html?page=49,DRAFT,False,PHASE_06
+50,NCR و CAPA,45_52_ai_security_pilot/index.html?page=50,DRAFT,False,PHASE_08
+51,تعمیرات و کالیبراسیون,45_52_ai_security_pilot/index.html?page=51,DRAFT,False,PHASE_05;PHASE_07
+52,پایلوت و انتشار,45_52_ai_security_pilot/index.html?page=52,DRAFT,False,PHASE_13;PHASE_14

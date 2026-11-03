@@ -1,0 +1,11 @@
+{
+  "name": "ALEEKHAN_MASTER_HANDOFF_V1",
+  "release": "1.0",
+  "date": "2026-11-01",
+  "files_without_manifest": 347,
+  "total_uncompressed_bytes": 125941747,
+  "root_sha256s_file": "SHA256SUMS.txt",
+  "sensitive_folder": "09_PRIVATE_FACTORY_SOURCES",
+  "contents_sha256_verified": true,
+  "source_files_executed": false
+}

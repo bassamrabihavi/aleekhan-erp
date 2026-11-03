@@ -1,0 +1,747 @@
+{
+  "project": "سراجی سنتی عالیخان",
+  "version": "0.1-draft",
+  "status": "prototype only, not production ready",
+  "pages": {
+    "45": {
+      "title": "دستیار هوشمند سازمانی",
+      "owner": "AI Gateway",
+      "readers": [
+        "هر کاربر متناسب با Permission"
+      ],
+      "entities": [
+        "AIConversation",
+        "AIRequest",
+        "AIToolCall",
+        "AIRecommendation",
+        "AISourceReference",
+        "ModelUsage",
+        "AIProviderHealth"
+      ],
+      "fields": [
+        {
+          "key": "conversation_id",
+          "label": "گفتگو",
+          "type": "UUID",
+          "required": true
+        },
+        {
+          "key": "user_id",
+          "label": "کاربر",
+          "type": "UserRef",
+          "required": true
+        },
+        {
+          "key": "scope",
+          "label": "دامنه مجاز داده",
+          "type": "PermissionScope",
+          "required": true
+        },
+        {
+          "key": "question",
+          "label": "سؤال فارسی",
+          "type": "UnicodeText",
+          "required": true
+        },
+        {
+          "key": "source_refs",
+          "label": "استناد داده و Revision",
+          "type": "List[SourceRef]",
+          "required": true
+        },
+        {
+          "key": "response_confidence",
+          "label": "اطمینان پاسخ",
+          "type": "Confidence",
+          "required": false
+        },
+        {
+          "key": "action_proposal_id",
+          "label": "پیشنهاد اقدام",
+          "type": "ActionProposalRef",
+          "required": false
+        }
+      ],
+      "queries": [
+        "GetAIConversation",
+        "GetAITrace",
+        "GetAIUsage"
+      ],
+      "commands": [
+        "AskWithScopedContext",
+        "CreateAIActionProposal"
+      ],
+      "invariants": [
+        "SQL مستقیم و دسترسی آزاد مدل به DB ممنوع",
+        "Tool Return با Scope/Field ACL فیلتر شود",
+        "متن فایل و کامنت دستور سیستم نیست",
+        "AI حساس بدون Workflow اجرا نمی‌شود"
+      ],
+      "ui": {
+        "direction": "rtl",
+        "language": "fa-IR",
+        "sidebar": "right auto-hide on desktop; right drawer on touch",
+        "responsive": [
+          "1600x980",
+          "1366x850",
+          "820x1080",
+          "390x844"
+        ]
+      },
+      "approval_status": "DRAFT",
+      "data": "illustrative"
+    },
+    "46": {
+      "title": "مدیریت کاربران، نقش‌ها و امنیت",
+      "owner": "مدیریت سیستم",
+      "readers": [
+        "ادمین فنی و امنیت",
+        "مالکان کسب‌وکار برای تأیید"
+      ],
+      "entities": [
+        "User",
+        "Role",
+        "Permission",
+        "Scope",
+        "Session",
+        "TemporaryAccess",
+        "EmergencyAccess",
+        "AccessAudit"
+      ],
+      "fields": [
+        {
+          "key": "user_id",
+          "label": "کاربر",
+          "type": "UUID",
+          "required": true
+        },
+        {
+          "key": "role_id",
+          "label": "نقش",
+          "type": "RoleRef",
+          "required": true
+        },
+        {
+          "key": "scope_id",
+          "label": "دامنه",
+          "type": "ScopeRef",
+          "required": true
+        },
+        {
+          "key": "permission_id",
+          "label": "عملیات",
+          "type": "PermissionRef",
+          "required": true
+        },
+        {
+          "key": "access_valid_to",
+          "label": "پایان اعتبار",
+          "type": "Timestamp",
+          "required": false
+        },
+        {
+          "key": "security_event",
+          "label": "رخداد امنیتی",
+          "type": "EventType",
+          "required": false
+        },
+        {
+          "key": "approval_id",
+          "label": "تأیید دسترسی",
+          "type": "ApprovalRef",
+          "required": false
+        }
+      ],
+      "queries": [
+        "ListUsers",
+        "GetEffectivePermissions",
+        "GetSecurityEvents"
+      ],
+      "commands": [
+        "RequestRoleChange",
+        "ExpireTemporaryAccess",
+        "RequestBreakGlass"
+      ],
+      "invariants": [
+        "Admin IT اجازه تأیید BOM، حقوق، موجودی یا ارسال را خودکار ندارد",
+        "SoD: تاییدکننده نباید همان درخواست‌دهنده باشد",
+        "Break Glass با MFA، Reason، TimeLimit و Audit کامل"
+      ],
+      "ui": {
+        "direction": "rtl",
+        "language": "fa-IR",
+        "sidebar": "right auto-hide on desktop; right drawer on touch",
+        "responsive": [
+          "1600x980",
+          "1366x850",
+          "820x1080",
+          "390x844"
+        ]
+      },
+      "approval_status": "DRAFT",
+      "data": "illustrative"
+    },
+    "47": {
+      "title": "داده‌های پایه و موتور قوانین",
+      "owner": "داده‌های پایه / Admin پیکربندی",
+      "readers": [
+        "برنامه‌ریزی",
+        "QA",
+        "مهندسی",
+        "تأمین"
+      ],
+      "entities": [
+        "MasterData",
+        "RuleDefinition",
+        "RuleRevision",
+        "RuleScope",
+        "RuleSimulation",
+        "RuleApproval"
+      ],
+      "fields": [
+        {
+          "key": "rule_id",
+          "label": "قانون",
+          "type": "UUID",
+          "required": true
+        },
+        {
+          "key": "rule_group",
+          "label": "خانواده قانون",
+          "type": "Enum",
+          "required": true
+        },
+        {
+          "key": "scope",
+          "label": "دامنه",
+          "type": "HierarchyScope",
+          "required": true
+        },
+        {
+          "key": "formula",
+          "label": "فرمول کنترل‌شده",
+          "type": "AST/Expression",
+          "required": true
+        },
+        {
+          "key": "effective_at",
+          "label": "تاریخ اثر",
+          "type": "Timestamp",
+          "required": true
+        },
+        {
+          "key": "impact_report",
+          "label": "گزارش اثر روی سریال‌ها",
+          "type": "Reference",
+          "required": false
+        },
+        {
+          "key": "status",
+          "label": "پیش‌نویس/فعال",
+          "type": "Enum",
+          "required": true
+        }
+      ],
+      "queries": [
+        "ListRules",
+        "GetEffectiveRule",
+        "SimulateRuleImpact"
+      ],
+      "commands": [
+        "DraftRuleRevision",
+        "SubmitRuleForApproval",
+        "PublishRuleRevision"
+      ],
+      "invariants": [
+        "کد ۱۴رقمی محصول و کد ۱۴رقمی تیغه دو Rule مستقل هستند",
+        "قانون فعلی به تاریخچه تسری پیدا نکند",
+        "Formula Cycle و Type/UOM mismatch قبل از Publish مسدود شود"
+      ],
+      "ui": {
+        "direction": "rtl",
+        "language": "fa-IR",
+        "sidebar": "right auto-hide on desktop; right drawer on touch",
+        "responsive": [
+          "1600x980",
+          "1366x850",
+          "820x1080",
+          "390x844"
+        ]
+      },
+      "approval_status": "DRAFT",
+      "data": "illustrative"
+    },
+    "48": {
+      "title": "تابلوی زنده عملکرد سالن تولید",
+      "owner": "تولید",
+      "readers": [
+        "سرپرست",
+        "اپراتور",
+        "نمایشگر عمومی سالن"
+      ],
+      "entities": [
+        "PublicProductionProjection",
+        "Shift",
+        "LineInstance",
+        "TargetRevision",
+        "ProductionOutput",
+        "Alert"
+      ],
+      "fields": [
+        {
+          "key": "line_instance_id",
+          "label": "خط",
+          "type": "LineRef",
+          "required": true
+        },
+        {
+          "key": "business_date",
+          "label": "روز کاری",
+          "type": "Date",
+          "required": true
+        },
+        {
+          "key": "shift_id",
+          "label": "شیفت",
+          "type": "ShiftRef",
+          "required": true
+        },
+        {
+          "key": "swu_target",
+          "label": "هدف",
+          "type": "Decimal",
+          "required": true
+        },
+        {
+          "key": "swu_actual",
+          "label": "خروجی واقعی",
+          "type": "Decimal",
+          "required": true
+        },
+        {
+          "key": "achievement_rate",
+          "label": "درصد تحقق",
+          "type": "Decimal",
+          "required": true
+        },
+        {
+          "key": "operational_alerts",
+          "label": "هشدارها",
+          "type": "List[Alert]",
+          "required": false
+        }
+      ],
+      "queries": [
+        "GetPublicLineScoreboard",
+        "GetShiftSummary"
+      ],
+      "commands": [
+        "RequestFullscreenMode"
+      ],
+      "invariants": [
+        "تجهیز نمایشگر عمومی مجوز حقوق، قیمت و اطلاعات محرمانه ندارد",
+        "درصد موفقیت از SWU و کیفیت محاسبه شود نه فقط شمارش تعداد",
+        "مقادیر همراه زمان آخرین Sync نشان داده شوند"
+      ],
+      "ui": {
+        "direction": "rtl",
+        "language": "fa-IR",
+        "sidebar": "right auto-hide on desktop; right drawer on touch",
+        "responsive": [
+          "1600x980",
+          "1366x850",
+          "820x1080",
+          "390x844"
+        ]
+      },
+      "approval_status": "DRAFT",
+      "data": "illustrative"
+    },
+    "49": {
+      "title": "موجودی، شمارش دوره‌ای و مرجوعی مواد",
+      "owner": "مواد و انبار",
+      "readers": [
+        "برنامه‌ریزی",
+        "QA",
+        "تأمین"
+      ],
+      "entities": [
+        "StockSnapshot",
+        "WarehouseLocation",
+        "MaterialLot",
+        "LeatherRoll",
+        "LeatherRemnant",
+        "CycleCount",
+        "MaterialReturn",
+        "QualityHold"
+      ],
+      "fields": [
+        {
+          "key": "material_id",
+          "label": "ماده",
+          "type": "MaterialRef",
+          "required": true
+        },
+        {
+          "key": "lot_id",
+          "label": "Lot / Roll",
+          "type": "LotRef",
+          "required": true
+        },
+        {
+          "key": "location_id",
+          "label": "Rack / Bin",
+          "type": "LocationRef",
+          "required": true
+        },
+        {
+          "key": "on_hand_qty",
+          "label": "موجودی",
+          "type": "Decimal+UOM",
+          "required": true
+        },
+        {
+          "key": "reserved_qty",
+          "label": "رزرو",
+          "type": "Decimal+UOM",
+          "required": true
+        },
+        {
+          "key": "usable_footage",
+          "label": "سطح قابل استفاده چرم",
+          "type": "Decimal+ft2",
+          "required": false
+        },
+        {
+          "key": "expiration",
+          "label": "انقضا",
+          "type": "Date",
+          "required": false
+        },
+        {
+          "key": "quality_grade",
+          "label": "گرید Lot",
+          "type": "QualityGradeRef",
+          "required": false
+        }
+      ],
+      "queries": [
+        "GetWarehouseAvailability",
+        "GetCycleCountQueue",
+        "GetRemnantLedger"
+      ],
+      "commands": [
+        "StartCycleCount",
+        "ConfirmMaterialReturn",
+        "CreateInventoryDiscrepancy"
+      ],
+      "invariants": [
+        "موجودی رسمی از Rahkaran Snapshot؛ پلتفرم گردش عملیاتی را نگه می‌دارد",
+        "Grade/Owner restriction و Hold مانع رزرو شود",
+        "Cycle Count بدون بررسی مالک منجر به Adjustment رسمی نشود"
+      ],
+      "ui": {
+        "direction": "rtl",
+        "language": "fa-IR",
+        "sidebar": "right auto-hide on desktop; right drawer on touch",
+        "responsive": [
+          "1600x980",
+          "1366x850",
+          "820x1080",
+          "390x844"
+        ]
+      },
+      "approval_status": "DRAFT",
+      "data": "illustrative"
+    },
+    "50": {
+      "title": "عدم انطباق، CAPA و مجوز انحراف",
+      "owner": "تضمین کیفیت QA",
+      "readers": [
+        "مهندسی",
+        "برنامه‌ریزی",
+        "QC",
+        "تولید"
+      ],
+      "entities": [
+        "NCR",
+        "NCRDefect",
+        "DefectMaster",
+        "RootCause",
+        "CAPA",
+        "CAPAEffectiveness",
+        "DeviationPermit",
+        "QualityStandardRevision"
+      ],
+      "fields": [
+        {
+          "key": "ncr_id",
+          "label": "پرونده عدم انطباق",
+          "type": "UUID",
+          "required": true
+        },
+        {
+          "key": "serial_or_batch",
+          "label": "سریال/بچ",
+          "type": "EntityRef",
+          "required": true
+        },
+        {
+          "key": "required_grade",
+          "label": "گرید موردنیاز",
+          "type": "QualityGradeRef",
+          "required": true
+        },
+        {
+          "key": "defect_id",
+          "label": "نوع عیب",
+          "type": "DefectRef",
+          "required": true
+        },
+        {
+          "key": "severity",
+          "label": "بحرانی/اساسی/جزئی",
+          "type": "Enum",
+          "required": true
+        },
+        {
+          "key": "inspection_measure",
+          "label": "اندازه‌گیری",
+          "type": "Decimal+UOM",
+          "required": false
+        },
+        {
+          "key": "cause",
+          "label": "علت",
+          "type": "Text",
+          "required": false
+        },
+        {
+          "key": "deviation_qty",
+          "label": "مقدار مشمول مجوز انحراف",
+          "type": "Decimal",
+          "required": false
+        }
+      ],
+      "queries": [
+        "GetNCRCase",
+        "GetCAPAQueue",
+        "GetDeviationEffectivity"
+      ],
+      "commands": [
+        "CreateNCR",
+        "ApplyQualityHold",
+        "SubmitCAPA",
+        "ApproveDeviation",
+        "VerifyCAPAEffectiveness"
+      ],
+      "invariants": [
+        "NCR/CAPA بدون Effectiveness Pass بسته نشود",
+        "Deviation به Serial/Qty/Revision/Time محدود است",
+        "Grade واقعی و Required Grade جدا نگهداری شوند",
+        "اندازه‌گیری با Instrument Calibration معتبر"
+      ],
+      "ui": {
+        "direction": "rtl",
+        "language": "fa-IR",
+        "sidebar": "right auto-hide on desktop; right drawer on touch",
+        "responsive": [
+          "1600x980",
+          "1366x850",
+          "820x1080",
+          "390x844"
+        ]
+      },
+      "approval_status": "DRAFT",
+      "data": "illustrative"
+    },
+    "51": {
+      "title": "نگهداری ماشین‌ها و کالیبراسیون",
+      "owner": "نگهداری و تعمیرات",
+      "readers": [
+        "برنامه‌ریزی",
+        "تولید",
+        "QA",
+        "تأمین"
+      ],
+      "entities": [
+        "Machine",
+        "MaintenanceOrder",
+        "MaintenanceSchedule",
+        "MachineDowntime",
+        "CalibrationRecord",
+        "SparePartRequirement"
+      ],
+      "fields": [
+        {
+          "key": "machine_id",
+          "label": "ماشین",
+          "type": "MachineRef",
+          "required": true
+        },
+        {
+          "key": "maintenance_type",
+          "label": "نوع تعمیر",
+          "type": "Enum",
+          "required": true
+        },
+        {
+          "key": "reported_at",
+          "label": "زمان اعلام خرابی",
+          "type": "Timestamp",
+          "required": true
+        },
+        {
+          "key": "estimated_recovery",
+          "label": "پیش‌بینی بازگشت",
+          "type": "Timestamp",
+          "required": false
+        },
+        {
+          "key": "actual_recovery",
+          "label": "بازگشت واقعی",
+          "type": "Timestamp",
+          "required": false
+        },
+        {
+          "key": "capacity_impact",
+          "label": "اثر ظرفیت",
+          "type": "ResourceCalendarDelta",
+          "required": false
+        },
+        {
+          "key": "instrument_calibration_until",
+          "label": "اعتبار کالیبراسیون",
+          "type": "Date",
+          "required": false
+        }
+      ],
+      "queries": [
+        "GetMaintenanceQueue",
+        "GetMachineCalendar",
+        "GetCalibrationAlerts"
+      ],
+      "commands": [
+        "OpenMaintenanceOrder",
+        "RecordMachineDowntime",
+        "ReleaseMachineToProduction"
+      ],
+      "invariants": [
+        "خرابی ماشین از Capacity Calendar اثر عملیاتی دارد",
+        "تغییر وضعیت ماشین با Forecast اثرسنجی شود",
+        "ابزار اندازه‌گیری منقضی برای QC معتبر نیست"
+      ],
+      "ui": {
+        "direction": "rtl",
+        "language": "fa-IR",
+        "sidebar": "right auto-hide on desktop; right drawer on touch",
+        "responsive": [
+          "1600x980",
+          "1366x850",
+          "820x1080",
+          "390x844"
+        ]
+      },
+      "approval_status": "DRAFT",
+      "data": "illustrative"
+    },
+    "52": {
+      "title": "مدیریت پایلوت، خطاها و انتشار نسخه",
+      "owner": "مدیریت سیستم / دفتر پروژه",
+      "readers": [
+        "مالک هر فرآیند",
+        "QA نرم‌افزار",
+        "مدیریت"
+      ],
+      "entities": [
+        "PilotPlan",
+        "PilotScenario",
+        "DefectTicket",
+        "ReproductionStep",
+        "RegressionTest",
+        "ReleaseCandidate",
+        "Signoff",
+        "RollbackPlan"
+      ],
+      "fields": [
+        {
+          "key": "pilot_id",
+          "label": "شناسه پایلوت",
+          "type": "UUID",
+          "required": true
+        },
+        {
+          "key": "defect_id",
+          "label": "شناسه باگ",
+          "type": "UUID",
+          "required": false
+        },
+        {
+          "key": "severity",
+          "label": "شدت",
+          "type": "Enum",
+          "required": true
+        },
+        {
+          "key": "repro_steps",
+          "label": "مراحل بازتولید",
+          "type": "Text",
+          "required": false
+        },
+        {
+          "key": "test_case_id",
+          "label": "سناریوی تست",
+          "type": "TestRef",
+          "required": false
+        },
+        {
+          "key": "owner_signoff",
+          "label": "تأیید واحد مالک",
+          "type": "ApprovalRef",
+          "required": false
+        },
+        {
+          "key": "release_version",
+          "label": "نسخه نامزد",
+          "type": "SemVer",
+          "required": false
+        },
+        {
+          "key": "rollback_plan_id",
+          "label": "طرح بازگشت",
+          "type": "PlanRef",
+          "required": true
+        }
+      ],
+      "queries": [
+        "GetPilotStatus",
+        "GetReleaseGate",
+        "ListOpenCriticalDefects"
+      ],
+      "commands": [
+        "CreateDefectTicket",
+        "RunRegressionSuite",
+        "ApprovePilotSignoff",
+        "RequestGoLive"
+      ],
+      "invariants": [
+        "Critical bug باز، عدم‌تطابق موجودی یا تأیید ناقص مانع Go-live",
+        "همه اصلاحات نیازمند Regression و Signoff",
+        "Rollback و Restore قبل از Cutover تست شوند"
+      ],
+      "ui": {
+        "direction": "rtl",
+        "language": "fa-IR",
+        "sidebar": "right auto-hide on desktop; right drawer on touch",
+        "responsive": [
+          "1600x980",
+          "1366x850",
+          "820x1080",
+          "390x844"
+        ]
+      },
+      "approval_status": "DRAFT",
+      "data": "illustrative"
+    }
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "deny": [
+      "Edit(./handoff/**)",
+      "Write(./handoff/**)",
+      "Edit(./control/PROJECT_STATUS.json)",
+      "Write(./control/PROJECT_STATUS.json)",
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Edit(./control/SESSION_LOCK.json)",
+      "Write(./control/SESSION_LOCK.json)"
+    ],
+    "allow": [
+      "Bash(git pull:*)",
+      "Bash(git push origin main)",
+      "Bash(git push)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"$CLAUDE_PROJECT_DIR\" && (git pull --ff-only -q 2>/dev/null || echo \"git pull skipped (offline or local changes)\"); for p in python3 python \"py -3\"; do if $p -c \"import sys\" >/dev/null 2>&1; then $p control/tools/status.py brief; break; fi; done"
+          }
+        ]
+      }
+    ]
+  }
+}

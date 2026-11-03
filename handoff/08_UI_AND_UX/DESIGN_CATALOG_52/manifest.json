@@ -1,0 +1,381 @@
+{
+  "company": "سراجی سنتی عالیخان",
+  "version": "design-catalog-v0.1",
+  "cover": "initial UI coverage 52/52",
+  "approval": "NOT approved page-by-page",
+  "deployment": "NOT code-ready",
+  "pages": [
+    {
+      "page": 1,
+      "title": "مرکز کنترل سریال — نمای خلاصه",
+      "prototype_path": null,
+      "status": "DRAFT",
+      "approved": false
+    },
+    {
+      "page": 2,
+      "title": "مرکز کنترل سریال — تب سفارش",
+      "prototype_path": null,
+      "status": "DRAFT",
+      "approved": false
+    },
+    {
+      "page": 3,
+      "title": "اتاق کنترل برنامه‌ریزی",
+      "prototype_path": "03_planning/planning_control_tower.html",
+      "status": "DRAFT",
+      "approved": false
+    },
+    {
+      "page": 4,
+      "title": "ردیابی محصولات و استایل‌ها",
+      "prototype_path": "04_product_style/product_style_360.html",
+      "status": "DRAFT",
+      "approved": false
+    },
+    {
+      "page": 5,
+      "title": "برگه تولید پویا PRD.Form",
+      "prototype_path": "05_06_prd_listgh/production_sheet.html",
+      "status": "DRAFT",
+      "approved": false
+    },
+    {
+      "page": 6,
+      "title": "فهرست قطعات برش listGH",
+      "prototype_path": "05_06_prd_listgh/production_sheet.html",
+      "status": "DRAFT",
+      "approved": false
+    },
+    {
+      "page": 7,
+      "title": "استخراج تیغه از DXF",
+      "prototype_path": "07_08_die_extract_registry/index.html",
+      "status": "DRAFT",
+      "approved": false
+    },
+    {
+      "page": 8,
+      "title": "بانک و کدگذاری تیغه‌ها",
+      "prototype_path": "07_08_die_extract_registry/index.html",
+      "status": "DRAFT",
+      "approved": false
+    },
+    {
+      "page": 9,
+      "title": "پرونده فنی تیغه",
+      "prototype_path": "09_10_die_detail_supply/index.html",
+      "status": "DRAFT",
+      "approved": false
+    },
+    {
+      "page": 10,
+      "title": "درخواست ساخت و تأمین تیغه",
+      "prototype_path": "09_10_die_detail_supply/index.html",
+      "status": "DRAFT",
+      "approved": false
+    },
+    {
+      "page": 11,
+      "title": "بانک کلیشه‌ها",
+      "prototype_path": "11_12_cliche/index.html",
+      "status": "DRAFT",
+      "approved": false
+    },
+    {
+      "page": 12,
+      "title": "پرونده و گردش کلیشه",
+      "prototype_path": "11_12_cliche/index.html",
+      "status": "DRAFT",
+      "approved": false
+    },
+    {
+      "page": 13,
+      "title": "مقر و جیگ",
+      "prototype_path": "13_20_engineering_supply/index.html?page=13",
+      "status": "DRAFT",
+      "approved": false
+    },
+    {
+      "page": 14,
+      "title": "لیویس",
+      "prototype_path": "13_20_engineering_supply/index.html?page=14",
+      "status": "DRAFT",
+      "approved": false
+    },
+    {
+      "page": 15,
+      "title": "BOM",
+      "prototype_path": "13_20_engineering_supply/index.html?page=15",
+      "status": "DRAFT",
+      "approved": false
+    },
+    {
+      "page": 16,
+      "title": "OPC",
+      "prototype_path": "13_20_engineering_supply/index.html?page=16",
+      "status": "DRAFT",
+      "approved": false
+    },
+    {
+      "page": 17,
+      "title": "بسته فنی",
+      "prototype_path": "13_20_engineering_supply/index.html?page=17",
+      "status": "DRAFT",
+      "approved": false
+    },
+    {
+      "page": 18,
+      "title": "جداسازی انبار",
+      "prototype_path": "13_20_engineering_supply/index.html?page=18",
+      "status": "DRAFT",
+      "approved": false
+    },
+    {
+      "page": 19,
+      "title": "پرونده GAP",
+      "prototype_path": "13_20_engineering_supply/index.html?page=19",
+      "status": "DRAFT",
+      "approved": false
+    },
+    {
+      "page": 20,
+      "title": "نیازسنجی تجمیعی",
+      "prototype_path": "13_20_engineering_supply/index.html?page=20",
+      "status": "DRAFT",
+      "approved": false
+    },
+    {
+      "page": 21,
+      "title": "مدیریت برش",
+      "prototype_path": "21_28_production_quality/index.html?page=21",
+      "status": "DRAFT",
+      "approved": false
+    },
+    {
+      "page": 22,
+      "title": "مدیریت خطوط",
+      "prototype_path": "21_28_production_quality/index.html?page=22",
+      "status": "DRAFT",
+      "approved": false
+    },
+    {
+      "page": 23,
+      "title": "ترمینال اپراتور",
+      "prototype_path": "21_28_production_quality/index.html?page=23",
+      "status": "DRAFT",
+      "approved": false
+    },
+    {
+      "page": 24,
+      "title": "QA مواد",
+      "prototype_path": "21_28_production_quality/index.html?page=24",
+      "status": "DRAFT",
+      "approved": false
+    },
+    {
+      "page": 25,
+      "title": "QC نهایی",
+      "prototype_path": "21_28_production_quality/index.html?page=25",
+      "status": "DRAFT",
+      "approved": false
+    },
+    {
+      "page": 26,
+      "title": "انبار محصول",
+      "prototype_path": "21_28_production_quality/index.html?page=26",
+      "status": "DRAFT",
+      "approved": false
+    },
+    {
+      "page": 27,
+      "title": "ارسال",
+      "prototype_path": "21_28_production_quality/index.html?page=27",
+      "status": "DRAFT",
+      "approved": false
+    },
+    {
+      "page": 28,
+      "title": "نمای سرپرست",
+      "prototype_path": "21_28_production_quality/index.html?page=28",
+      "status": "DRAFT",
+      "approved": false
+    },
+    {
+      "page": 29,
+      "title": "ثبت سفارش و کدگذاری",
+      "prototype_path": "29_36_commercial_planning_admin/index.html?page=29",
+      "status": "DRAFT",
+      "approved": false
+    },
+    {
+      "page": 30,
+      "title": "برنامه فصلی/هفتگی",
+      "prototype_path": "29_36_commercial_planning_admin/index.html?page=30",
+      "status": "DRAFT",
+      "approved": false
+    },
+    {
+      "page": 31,
+      "title": "زمان‌بندی تفصیلی",
+      "prototype_path": "29_36_commercial_planning_admin/index.html?page=31",
+      "status": "DRAFT",
+      "approved": false
+    },
+    {
+      "page": 32,
+      "title": "شبیه‌ساز ظرفیت",
+      "prototype_path": "29_36_commercial_planning_admin/index.html?page=32",
+      "status": "DRAFT",
+      "approved": false
+    },
+    {
+      "page": 33,
+      "title": "تغییرات سفارش و مهندسی",
+      "prototype_path": "29_36_commercial_planning_admin/index.html?page=33",
+      "status": "DRAFT",
+      "approved": false
+    },
+    {
+      "page": 34,
+      "title": "قیمت‌گذاری",
+      "prototype_path": "29_36_commercial_planning_admin/index.html?page=34",
+      "status": "DRAFT",
+      "approved": false
+    },
+    {
+      "page": 35,
+      "title": "گزارش مدیریتی",
+      "prototype_path": "29_36_commercial_planning_admin/index.html?page=35",
+      "status": "DRAFT",
+      "approved": false
+    },
+    {
+      "page": 36,
+      "title": "سلامت سیستم و Job",
+      "prototype_path": "29_36_commercial_planning_admin/index.html?page=36",
+      "status": "DRAFT",
+      "approved": false
+    },
+    {
+      "page": 37,
+      "title": "عملکرد کارکنان",
+      "prototype_path": "37_44_hr_workflow_docs_data/index.html?page=37",
+      "status": "DRAFT",
+      "approved": false
+    },
+    {
+      "page": 38,
+      "title": "مهارت‌ها و حقوق",
+      "prototype_path": "37_44_hr_workflow_docs_data/index.html?page=38",
+      "status": "DRAFT",
+      "approved": false
+    },
+    {
+      "page": 39,
+      "title": "تسک‌ها و تأییدها",
+      "prototype_path": "37_44_hr_workflow_docs_data/index.html?page=39",
+      "status": "DRAFT",
+      "approved": false
+    },
+    {
+      "page": 40,
+      "title": "مدیریت اسناد",
+      "prototype_path": "37_44_hr_workflow_docs_data/index.html?page=40",
+      "status": "DRAFT",
+      "approved": false
+    },
+    {
+      "page": 41,
+      "title": "استانداردسازی داده",
+      "prototype_path": "37_44_hr_workflow_docs_data/index.html?page=41",
+      "status": "DRAFT",
+      "approved": false
+    },
+    {
+      "page": 42,
+      "title": "پارامترها و چیدمان UI",
+      "prototype_path": "37_44_hr_workflow_docs_data/index.html?page=42",
+      "status": "DRAFT",
+      "approved": false
+    },
+    {
+      "page": 43,
+      "title": "ورود اطلاعات راهکاران",
+      "prototype_path": "37_44_hr_workflow_docs_data/index.html?page=43",
+      "status": "DRAFT",
+      "approved": false
+    },
+    {
+      "page": 44,
+      "title": "مغایرت و تطبیق",
+      "prototype_path": "37_44_hr_workflow_docs_data/index.html?page=44",
+      "status": "DRAFT",
+      "approved": false
+    },
+    {
+      "page": 45,
+      "title": "دستیار AI",
+      "prototype_path": "45_52_ai_security_pilot/index.html?page=45",
+      "status": "DRAFT",
+      "approved": false
+    },
+    {
+      "page": 46,
+      "title": "امنیت و کاربران",
+      "prototype_path": "45_52_ai_security_pilot/index.html?page=46",
+      "status": "DRAFT",
+      "approved": false
+    },
+    {
+      "page": 47,
+      "title": "قوانین و Master Data",
+      "prototype_path": "45_52_ai_security_pilot/index.html?page=47",
+      "status": "DRAFT",
+      "approved": false
+    },
+    {
+      "page": 48,
+      "title": "تابلوی سالن تولید",
+      "prototype_path": "45_52_ai_security_pilot/index.html?page=48",
+      "status": "DRAFT",
+      "approved": false
+    },
+    {
+      "page": 49,
+      "title": "موجودی و شمارش",
+      "prototype_path": "45_52_ai_security_pilot/index.html?page=49",
+      "status": "DRAFT",
+      "approved": false
+    },
+    {
+      "page": 50,
+      "title": "NCR و CAPA",
+      "prototype_path": "45_52_ai_security_pilot/index.html?page=50",
+      "status": "DRAFT",
+      "approved": false
+    },
+    {
+      "page": 51,
+      "title": "تعمیرات و کالیبراسیون",
+      "prototype_path": "45_52_ai_security_pilot/index.html?page=51",
+      "status": "DRAFT",
+      "approved": false
+    },
+    {
+      "page": 52,
+      "title": "پایلوت و انتشار",
+      "prototype_path": "45_52_ai_security_pilot/index.html?page=52",
+      "status": "DRAFT",
+      "approved": false
+    }
+  ],
+  "known_gaps": [
+    "صفحات ۱ و ۲ تنها مفهوم تصویری هستند و HTML/Specification فیلدبه‌فیلد ندارند",
+    "نقشه منابع و VBA کامل Planning و WH هنوز آزمون تطبیقی و Signoff ندارد",
+    "اسکریپت قدیمی استخراج تیغه از DXF هنوز دریافت نشده",
+    "پیکسل‌به‌پیکسل و رفتار همه ۵۲ صفحه هنوز تأیید نشده",
+    "Backend، OpenAPI قطعی، ERD فیزیکی، Migration و Contract/Regression tests واقعی نداریم",
+    "اتصال راهکاران، حضورغیاب، منابع و پایلوت واقعی اجرا نشده است"
+  ]
+}

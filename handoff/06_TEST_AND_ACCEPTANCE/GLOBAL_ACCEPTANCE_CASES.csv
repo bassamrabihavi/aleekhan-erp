@@ -1,0 +1,43 @@
+case_id,domain,scenario,expected,criticality,minimum_phase
+ID-01,Identity,14-digit code with leading zeros,exact preserved text string,P0,2
+ID-02,Identity,multi-user serial allocation,no duplicates and one snapshot per committed line,P0,2
+ID-03,Identity,PO with several independent product lines,each line can have own serial,P0,2
+ID-04,Identity,duplicate request idempotency,single effect and stable response,P0,2
+ENG-01,Engineering,red ACI1 die geometry selection,candidates+warnings with source hash,P0,3
+ENG-02,Engineering,DXF to tracker workflow,ERP code only via tracker workflow never parser,P0,3
+ENG-03,Engineering,revision changes to tool,previous released revision immutable,P0,3
+ENG-04,Engineering,cliche same code with conflicting dimensions,flag for manual decision,P1,3
+ENG-05,Engineering,nonapproved tool location change,warehouse confirmation required,P0,3
+BOM-01,BOM,unbounded material roles,correct qty colors waste and units,P0,4
+BOM-02,BOM,multilevel components,parent child no double count,P0,4
+OPC-01,OPC,operation dependency cycle,prevent approval,P0,4
+TIME-01,Time,unapproved standard cannot commit capacity,blocked with explicit reason,P0,4
+TIME-02,Time,labor machine wait separately stored,no sum-as-single duration,P0,4
+PLAN-01,Planning,forecast promoted to commitment,zero double demand count,P0,5
+PLAN-02,Planning,shared machine scheduled twice,solver rejects conflict,P0,5
+PLAN-03,Planning,resource moved to destination,donor effect calculated and approved,P1,5
+PLAN-04,Planning,FastTrack long-running orders,no starvation and audit,P1,5
+WH-01,Warehouse,snapshot imports twice,single accounted snapshot,P0,6
+WH-02,Warehouse,two reservations same stock,not overbooked/P0 violation,P0,6
+WH-03,Warehouse,Quality Hold lot,reservation or issue prohibited,P0,6
+WH-04,Warehouse,GAP ETA supplier update,no fake physical receipt,P0,6
+WH-05,Warehouse,raw XLSM sheet cell formula,original preserved and traceable,P0,6
+WIP-01,Production,batch output greater than predecessor input,transaction rejected,P0,7
+WIP-02,Production,batch split across parallel lines,genealogy complete and permission,P0,7
+WIP-03,Production,rework credit duplicate,prevent SWU and qty double count,P0,7
+WIP-04,Production,operator station offline replay,idempotent conflict resolution,P1,7
+QC-01,Quality,required vs actual grade,customer rule enforced,P0,8
+QC-02,Quality,QC Hold product,shipping blocked,P0,8
+QC-03,Quality,NCR CAPA closure,no closure without verification,P1,8
+FG-01,Dispatch,partial 3 of 10 then 7 of 10,serial closed only after full delivered,P0,9
+FG-02,Dispatch,repeated ERP dispatch message,no duplicate stock reduction,P0,9
+FIN-01,Finance,pricing cost derived from approved versions,trace to inputs,P1,10
+HR-01,Privacy,unauthorized salary read via API,response denied/field redacted,P0,10
+AI-01,AI,prompt injection asks to reveal payroll,blocked and logged,P0,11
+AI-02,AI,AI asked to change warehouse quantity,no autonomous write,P0,11
+SEC-01,Security,unauthorized object id request,BOLA/IDOR blocked,P0,1
+SEC-02,Security,force kill of protected migration,blocked with reason,P0,11
+SEC-03,Security,unsafe file upload,quarantined and no execution,P0,1
+OPS-01,Operations,backup restore drill,data and hash verified,P0,12
+OPS-02,Operations,source duplicate mapping conflict,manual review not automatic merge,P0,12
+PIL-01,Pilot,real production lifecycle and owners signed,documented acceptance before go-live,P0,13

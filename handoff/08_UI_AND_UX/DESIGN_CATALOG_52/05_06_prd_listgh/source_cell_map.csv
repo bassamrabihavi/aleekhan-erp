@@ -1,0 +1,798 @@
+﻿source_file,sheet,cell,label_or_value,row_type
+Planning--.xlsm,Prd.Form,B1,Form Code : FO-BG-03-07,header_or_template
+Planning--.xlsm,Prd.Form,F1,برگه تولید  اکسسوری,header_or_template
+Planning--.xlsm,Prd.Form,G1,62253,header_or_template
+Planning--.xlsm,Prd.Form,I1,سریال:,header_or_template
+Planning--.xlsm,Prd.Form,M1,E,header_or_template
+Planning--.xlsm,Prd.Form,B2,Aleekhan Code :  02050461660001,header_or_template
+Planning--.xlsm,Prd.Form,M2,1,header_or_template
+Planning--.xlsm,Prd.Form,B3,جا کلیدی  الوان الوان / کد محصول: 6166 / کد استایل: 0001,header_or_template
+Planning--.xlsm,Prd.Form,H3,46288.689189004632,header_or_template
+Planning--.xlsm,Prd.Form,R3,1,header_or_template
+Planning--.xlsm,Prd.Form,S3,1,header_or_template
+Planning--.xlsm,Prd.Form,T3,inf File,header_or_template
+Planning--.xlsm,Prd.Form,B4,مشخصات سفارش,header_or_template
+Planning--.xlsm,Prd.Form,P4,[BOM-6166.xlsx],header_or_template
+Planning--.xlsm,Prd.Form,R4,14050701/1,header_or_template
+Planning--.xlsm,Prd.Form,S4,14050701,header_or_template
+Planning--.xlsm,Prd.Form,T4,شماره پیوست,header_or_template
+Planning--.xlsm,Prd.Form,C5,کد استایل درسا,header_or_template
+Planning--.xlsm,Prd.Form,D5,شکوفامنش,header_or_template
+Planning--.xlsm,Prd.Form,E5,برند,header_or_template
+Planning--.xlsm,Prd.Form,F5,14050701,header_or_template
+Planning--.xlsm,Prd.Form,G5,تاریخ سفارش,header_or_template
+Planning--.xlsm,Prd.Form,I5,تعداد برش خورده,header_or_template
+Planning--.xlsm,Prd.Form,P5,'Z:\Planning-Eng\Auto-BOM\BOM-Mohandesi\,header_or_template
+Planning--.xlsm,Prd.Form,R5,0,header_or_template
+Planning--.xlsm,Prd.Form,S5,14050701,header_or_template
+Planning--.xlsm,Prd.Form,T5,پیش تولید,header_or_template
+Planning--.xlsm,Prd.Form,C6,سریال درسا,header_or_template
+Planning--.xlsm,Prd.Form,D6,خانم رهبری,header_or_template
+Planning--.xlsm,Prd.Form,E6,نماینده مشتری,header_or_template
+Planning--.xlsm,Prd.Form,F6,5,header_or_template
+Planning--.xlsm,Prd.Form,G6,تعداد سفارش,header_or_template
+Planning--.xlsm,Prd.Form,H6,6166,header_or_template
+Planning--.xlsm,Prd.Form,I6,کد محصول,header_or_template
+Planning--.xlsm,Prd.Form,R6,0,header_or_template
+Planning--.xlsm,Prd.Form,S6,14050701,header_or_template
+Planning--.xlsm,Prd.Form,T6,تولید آزمایشی,header_or_template
+Planning--.xlsm,Prd.Form,C7,شماره قرارداد,header_or_template
+Planning--.xlsm,Prd.Form,D7,060003,header_or_template
+Planning--.xlsm,Prd.Form,E7,کد پروژه راهکاران,header_or_template
+Planning--.xlsm,Prd.Form,G7,نام محصول,header_or_template
+Planning--.xlsm,Prd.Form,H7,0001,header_or_template
+Planning--.xlsm,Prd.Form,I7,کد استایل,header_or_template
+Planning--.xlsm,Prd.Form,S7,046166,header_or_template
+Planning--.xlsm,Prd.Form,T7,Pic,header_or_template
+Planning--.xlsm,Prd.Form,C8,فصل,header_or_template
+Planning--.xlsm,Prd.Form,H8,جا کلیدی,header_or_template
+Planning--.xlsm,Prd.Form,I8,دسته بندی,header_or_template
+Planning--.xlsm,Prd.Form,S8,نوع فرم خالی :,header_or_template
+Planning--.xlsm,Prd.Form,B9,14050701/1,header_or_template
+Planning--.xlsm,Prd.Form,C9,شماره پیوست,header_or_template
+Planning--.xlsm,Prd.Form,D9,اکسسوری,header_or_template
+Planning--.xlsm,Prd.Form,E9,نوع محصول,header_or_template
+Planning--.xlsm,Prd.Form,F9,جیبی,header_or_template
+Planning--.xlsm,Prd.Form,G9,خط تولید,header_or_template
+Planning--.xlsm,Prd.Form,H9,سری تولید,header_or_template
+Planning--.xlsm,Prd.Form,I9,WBS02,header_or_template
+Planning--.xlsm,Prd.Form,R9, ,header_or_template
+Planning--.xlsm,Prd.Form,B10,مشخصات محصول,header_or_template
+Planning--.xlsm,Prd.Form,K10,چاپ,header_or_template
+Planning--.xlsm,Prd.Form,L10,نام,header_or_template
+Planning--.xlsm,Prd.Form,R10,تعیین تعداد سفارش,header_or_template
+Planning--.xlsm,Prd.Form,D12,63,header_or_template
+Planning--.xlsm,Prd.Form,F12,محل داغی لوگو (شکل),header_or_template
+Planning--.xlsm,Prd.Form,G12,41,header_or_template
+Planning--.xlsm,Prd.Form,I12,فصل,header_or_template
+Planning--.xlsm,Prd.Form,J12,19,header_or_template
+Planning--.xlsm,Prd.Form,L12,جنس رویه,header_or_template
+Planning--.xlsm,Prd.Form,M12,جنس اصلی,header_or_template
+Planning--.xlsm,Prd.Form,R12,تعداد سفارش,header_or_template
+Planning--.xlsm,Prd.Form,D13,64,header_or_template
+Planning--.xlsm,Prd.Form,F13,محل داغی لوگو (تایپ),header_or_template
+Planning--.xlsm,Prd.Form,G13,42,header_or_template
+Planning--.xlsm,Prd.Form,H13,الوان,header_or_template
+Planning--.xlsm,Prd.Form,I13,جنس اصلی,header_or_template
+Planning--.xlsm,Prd.Form,J13,20,header_or_template
+Planning--.xlsm,Prd.Form,L13,رنگ رویه,header_or_template
+Planning--.xlsm,Prd.Form,M13,رنگ اصلی,header_or_template
+Planning--.xlsm,Prd.Form,R13,WBS02,header_or_template
+Planning--.xlsm,Prd.Form,D14,65,header_or_template
+Planning--.xlsm,Prd.Form,E14,-,header_or_template
+Planning--.xlsm,Prd.Form,F14,سایز نخ,header_or_template
+Planning--.xlsm,Prd.Form,G14,43,header_or_template
+Planning--.xlsm,Prd.Form,H14,الوان,header_or_template
+Planning--.xlsm,Prd.Form,I14,رنگ اصلی,header_or_template
+Planning--.xlsm,Prd.Form,J14,21,header_or_template
+Planning--.xlsm,Prd.Form,L14,فینیش رویه,header_or_template
+Planning--.xlsm,Prd.Form,M14,فینیش اصلی,header_or_template
+Planning--.xlsm,Prd.Form,D15,66,header_or_template
+Planning--.xlsm,Prd.Form,F15,رنگ نخ داخلی,header_or_template
+Planning--.xlsm,Prd.Form,G15,44,header_or_template
+Planning--.xlsm,Prd.Form,H15,-,header_or_template
+Planning--.xlsm,Prd.Form,I15,فینیش اصلی,header_or_template
+Planning--.xlsm,Prd.Form,J15,22,header_or_template
+Planning--.xlsm,Prd.Form,L15,جنس زیره,header_or_template
+Planning--.xlsm,Prd.Form,M15,جنس خرج کار 1,header_or_template
+Planning--.xlsm,Prd.Form,D16,67,header_or_template
+Planning--.xlsm,Prd.Form,F16,محصول ست,header_or_template
+Planning--.xlsm,Prd.Form,G16,45,header_or_template
+Planning--.xlsm,Prd.Form,H16,-,header_or_template
+Planning--.xlsm,Prd.Form,I16,چاپ جنس اصلی,header_or_template
+Planning--.xlsm,Prd.Form,J16,23,header_or_template
+Planning--.xlsm,Prd.Form,L16,رنگ زیره,header_or_template
+Planning--.xlsm,Prd.Form,M16,رنگ خرج کار 1,header_or_template
+Planning--.xlsm,Prd.Form,D17,68,header_or_template
+Planning--.xlsm,Prd.Form,E17,-,header_or_template
+Planning--.xlsm,Prd.Form,F17,مشخصات تولید کننده چرم,header_or_template
+Planning--.xlsm,Prd.Form,G17,46,header_or_template
+Planning--.xlsm,Prd.Form,I17,جنس خرجکار 1,header_or_template
+Planning--.xlsm,Prd.Form,J17,24,header_or_template
+Planning--.xlsm,Prd.Form,L17,فینیش زیره,header_or_template
+Planning--.xlsm,Prd.Form,M17,فینیش خرج کار 1,header_or_template
+Planning--.xlsm,Prd.Form,D18,69,header_or_template
+Planning--.xlsm,Prd.Form,F18,نوع بسته بندی,header_or_template
+Planning--.xlsm,Prd.Form,G18,47,header_or_template
+Planning--.xlsm,Prd.Form,I18,رنگ خرجکار 1,header_or_template
+Planning--.xlsm,Prd.Form,J18,25,header_or_template
+Planning--.xlsm,Prd.Form,L18,جنس رویه 2,header_or_template
+Planning--.xlsm,Prd.Form,M18,جنس خرج کار 2,header_or_template
+Planning--.xlsm,Prd.Form,D19,70,header_or_template
+Planning--.xlsm,Prd.Form,E19,-,header_or_template
+Planning--.xlsm,Prd.Form,F19,رنگ زیپ فلزی (دنده/پارچه),header_or_template
+Planning--.xlsm,Prd.Form,G19,48,header_or_template
+Planning--.xlsm,Prd.Form,I19,فینیش خرجکار 1,header_or_template
+Planning--.xlsm,Prd.Form,J19,26,header_or_template
+Planning--.xlsm,Prd.Form,L19,رنگ رویه 2,header_or_template
+Planning--.xlsm,Prd.Form,M19,رنگ خرج کار 2,header_or_template
+Planning--.xlsm,Prd.Form,D20,71,header_or_template
+Planning--.xlsm,Prd.Form,G20,49,header_or_template
+Planning--.xlsm,Prd.Form,I20,چاپ جنس خرجکار 1,header_or_template
+Planning--.xlsm,Prd.Form,J20,27,header_or_template
+Planning--.xlsm,Prd.Form,L20,فینیش رویه 2,header_or_template
+Planning--.xlsm,Prd.Form,M20,فینیش خرج کار 2,header_or_template
+Planning--.xlsm,Prd.Form,T20, ,header_or_template
+Planning--.xlsm,Prd.Form,D21,72,header_or_template
+Planning--.xlsm,Prd.Form,G21,50,header_or_template
+Planning--.xlsm,Prd.Form,I21,جنس خرجکار 2,header_or_template
+Planning--.xlsm,Prd.Form,J21,28,header_or_template
+Planning--.xlsm,Prd.Form,M21,جنس خرج کار 3,header_or_template
+Planning--.xlsm,Prd.Form,D22,73,header_or_template
+Planning--.xlsm,Prd.Form,G22,51,header_or_template
+Planning--.xlsm,Prd.Form,I22,رنگ خرجکار 2,header_or_template
+Planning--.xlsm,Prd.Form,J22,29,header_or_template
+Planning--.xlsm,Prd.Form,M22,رنگ خرج کار 3,header_or_template
+Planning--.xlsm,Prd.Form,D23,74,header_or_template
+Planning--.xlsm,Prd.Form,G23,52,header_or_template
+Planning--.xlsm,Prd.Form,I23,فینیش خرجکار 2,header_or_template
+Planning--.xlsm,Prd.Form,J23,30,header_or_template
+Planning--.xlsm,Prd.Form,M23,فینیش خرج کار 3,header_or_template
+Planning--.xlsm,Prd.Form,D24,75,header_or_template
+Planning--.xlsm,Prd.Form,G24,53,header_or_template
+Planning--.xlsm,Prd.Form,I24,چاپ جنس خرجکار 2,header_or_template
+Planning--.xlsm,Prd.Form,J24,31,header_or_template
+Planning--.xlsm,Prd.Form,D25,76,header_or_template
+Planning--.xlsm,Prd.Form,G25,54,header_or_template
+Planning--.xlsm,Prd.Form,I25,جنس خرجکار 3,header_or_template
+Planning--.xlsm,Prd.Form,J25,32,header_or_template
+Planning--.xlsm,Prd.Form,D26,77,header_or_template
+Planning--.xlsm,Prd.Form,G26,55,header_or_template
+Planning--.xlsm,Prd.Form,I26,رنگ خرجکار 3,header_or_template
+Planning--.xlsm,Prd.Form,J26,33,header_or_template
+Planning--.xlsm,Prd.Form,D27,78,header_or_template
+Planning--.xlsm,Prd.Form,G27,56,header_or_template
+Planning--.xlsm,Prd.Form,I27,پتینه,header_or_template
+Planning--.xlsm,Prd.Form,J27,34,header_or_template
+Planning--.xlsm,Prd.Form,D28,79,header_or_template
+Planning--.xlsm,Prd.Form,G28,57,header_or_template
+Planning--.xlsm,Prd.Form,I28,میزان پتینه,header_or_template
+Planning--.xlsm,Prd.Form,J28,35,header_or_template
+Planning--.xlsm,Prd.Form,D29,80,header_or_template
+Planning--.xlsm,Prd.Form,G29,58,header_or_template
+Planning--.xlsm,Prd.Form,H29,-,header_or_template
+Planning--.xlsm,Prd.Form,I29,جنس آستر,header_or_template
+Planning--.xlsm,Prd.Form,J29,36,header_or_template
+Planning--.xlsm,Prd.Form,D30,81,header_or_template
+Planning--.xlsm,Prd.Form,G30,59,header_or_template
+Planning--.xlsm,Prd.Form,H30,-,header_or_template
+Planning--.xlsm,Prd.Form,I30,رنگ آستر,header_or_template
+Planning--.xlsm,Prd.Form,J30,37,header_or_template
+Planning--.xlsm,Prd.Form,D31,82,header_or_template
+Planning--.xlsm,Prd.Form,G31,60,header_or_template
+Planning--.xlsm,Prd.Form,H31,-,header_or_template
+Planning--.xlsm,Prd.Form,I31,رنگ یراق,header_or_template
+Planning--.xlsm,Prd.Form,J31,38,header_or_template
+Planning--.xlsm,Prd.Form,D32,83,header_or_template
+Planning--.xlsm,Prd.Form,G32,61,header_or_template
+Planning--.xlsm,Prd.Form,I32,نوع چاپ,header_or_template
+Planning--.xlsm,Prd.Form,J32,39,header_or_template
+Planning--.xlsm,Prd.Form,D33,84,header_or_template
+Planning--.xlsm,Prd.Form,G33,62,header_or_template
+Planning--.xlsm,Prd.Form,I33,نوع داغی,header_or_template
+Planning--.xlsm,Prd.Form,J33,40,header_or_template
+Planning--.xlsm,Prd.Form,B54,لوکيشن,header_or_template
+Planning--.xlsm,Prd.Form,D54,دنده / جنس,header_or_template
+Planning--.xlsm,Prd.Form,E54,طول,header_or_template
+Planning--.xlsm,Prd.Form,F54,يک يا دوطرفه,header_or_template
+Planning--.xlsm,Prd.Form,G54,ماشین زیپ انداخته شود / نشود,header_or_template
+Planning--.xlsm,Prd.Form,H54,لیزر زیپ,header_or_template
+Planning--.xlsm,Prd.Form,I54,تعداد,header_or_template
+Planning--.xlsm,Prd.Form,C61,لیویس,header_or_template
+Planning--.xlsm,Prd.Form,D61,نام,header_or_template
+Planning--.xlsm,Prd.Form,G61,قطر,header_or_template
+Planning--.xlsm,Prd.Form,H61,طول,header_or_template
+Planning--.xlsm,Prd.Form,I61,تعداد,header_or_template
+Planning--.xlsm,Prd.Form,D82,توضیحات,header_or_template
+Planning--.xlsm,Prd.Form,G82,لوکيشن,header_or_template
+Planning--.xlsm,Prd.Form,I82,جنس,header_or_template
+Planning--.xlsm,Prd.Form,B87,نوع داغی,header_or_template
+Planning--.xlsm,Prd.Form,C87,کد داغي,header_or_template
+Planning--.xlsm,Prd.Form,D87,نام,header_or_template
+Planning--.xlsm,Prd.Form,F87,نوع داغی,header_or_template
+Planning--.xlsm,Prd.Form,G87,کد داغي,header_or_template
+Planning--.xlsm,Prd.Form,H87,نام,header_or_template
+Planning--.xlsm,Prd.Form,B94,لوکيشن,header_or_template
+Planning--.xlsm,Prd.Form,E94,جنس,header_or_template
+Planning--.xlsm,Prd.Form,F94,چپ و راست,header_or_template
+Planning--.xlsm,Prd.Form,G94,رنگ کوک,header_or_template
+Planning--.xlsm,Prd.Form,H94,نام,header_or_template
+Planning--.xlsm,listGH,B1,Form Code : FO-BG-03-07,header_or_template
+Planning--.xlsm,listGH,E1,برگه تولید  اکسسوری,header_or_template
+Planning--.xlsm,listGH,K1,62253,header_or_template
+Planning--.xlsm,listGH,L1,سریال:,header_or_template
+Planning--.xlsm,listGH,B2,Aleekhan Code :  02050461660001,header_or_template
+Planning--.xlsm,listGH,B3,جا کلیدی  الوان الوان / کد محصول: 6166 / کد استایل: 0001,header_or_template
+Planning--.xlsm,listGH,K3,46288.689189004632,header_or_template
+Planning--.xlsm,listGH,C5,کد استایل درسا,header_or_template
+Planning--.xlsm,listGH,D5,شکوفامنش,header_or_template
+Planning--.xlsm,listGH,E5,برند,header_or_template
+Planning--.xlsm,listGH,G5,14050701,header_or_template
+Planning--.xlsm,listGH,H5,تاریخ سفارش,header_or_template
+Planning--.xlsm,listGH,L5,تعداد برش خورده,header_or_template
+Planning--.xlsm,listGH,C6,سریال درسا,header_or_template
+Planning--.xlsm,listGH,D6,خانم رهبری,header_or_template
+Planning--.xlsm,listGH,E6,نماینده مشتری,header_or_template
+Planning--.xlsm,listGH,G6,5,header_or_template
+Planning--.xlsm,listGH,H6,تعداد سفارش,header_or_template
+Planning--.xlsm,listGH,K6,6166,header_or_template
+Planning--.xlsm,listGH,L6,کد محصول,header_or_template
+Planning--.xlsm,listGH,C7,شماره قرارداد,header_or_template
+Planning--.xlsm,listGH,D7,060003,header_or_template
+Planning--.xlsm,listGH,E7,کد پروژه راهکاران,header_or_template
+Planning--.xlsm,listGH,H7,نام محصول,header_or_template
+Planning--.xlsm,listGH,K7,0001,header_or_template
+Planning--.xlsm,listGH,L7,کد استایل,header_or_template
+Planning--.xlsm,listGH,C8,فصل,header_or_template
+Planning--.xlsm,listGH,K8,جا کلیدی,header_or_template
+Planning--.xlsm,listGH,L8,دسته بندی,header_or_template
+Planning--.xlsm,listGH,B9,14050701/1,header_or_template
+Planning--.xlsm,listGH,C9,شماره پیوست,header_or_template
+Planning--.xlsm,listGH,D9,اکسسوری,header_or_template
+Planning--.xlsm,listGH,E9,نوع محصول,header_or_template
+Planning--.xlsm,listGH,G9,جیبی,header_or_template
+Planning--.xlsm,listGH,H9,خط تولید,header_or_template
+Planning--.xlsm,listGH,K9,سری تولید,header_or_template
+Planning--.xlsm,listGH,L9,WBS02,header_or_template
+Planning--.xlsm,listGH,B11,توضيحات,header_or_template
+Planning--.xlsm,listGH,C11,جنس آستر,header_or_template
+Planning--.xlsm,listGH,D11,ليست قطعات آستر,header_or_template
+Planning--.xlsm,listGH,E11,توضيحات تيغه,header_or_template
+Planning--.xlsm,listGH,F11,تيغه,header_or_template
+Planning--.xlsm,listGH,G11,ترکيب برش,header_or_template
+Planning--.xlsm,listGH,H11,چاپ,header_or_template
+Planning--.xlsm,listGH,I11,کروپن,header_or_template
+Planning--.xlsm,listGH,J11,تعداد برش,header_or_template
+Planning--.xlsm,listGH,K11,قطعات برش چرم,header_or_template
+Planning--.xlsm,listGH,L11,چک,header_or_template
+Planning--.xlsm,listGH,M11,ردیف,header_or_template
+Planning--.xlsm,Order form,F1,این سریال ثبت نشده,header_or_template
+Planning--.xlsm,Order form,G1,46288.689188888886,header_or_template
+Planning--.xlsm,Order form,AD1,ثبت گزارش روزانه تولید,header_or_template
+Planning--.xlsm,Order form,B2,Form Code :,header_or_template
+Planning--.xlsm,Order form,C2,FO-BG-03-07,header_or_template
+Planning--.xlsm,Order form,D2,فرم ثبت سفارش کیف,header_or_template
+Planning--.xlsm,Order form,L2,S.dorsa,header_or_template
+Planning--.xlsm,Order form,M2,51956,header_or_template
+Planning--.xlsm,Order form,D5,مشخصات سفارش دهنده,header_or_template
+Planning--.xlsm,Order form,I5,کد عالیخان,header_or_template
+Planning--.xlsm,Order form,J5,دسته بندی را انتخاب کنید,header_or_template
+Planning--.xlsm,Order form,M5,#VALUE!,header_or_template
+Planning--.xlsm,Order form,N5,وضعیت WBS01 در  Board,header_or_template
+Planning--.xlsm,Order form,U5,ERR,header_or_template
+Planning--.xlsm,Order form,X5,ERR,header_or_template
+Planning--.xlsm,Order form,AD5,Daily Report from Product Process,header_or_template
+Planning--.xlsm,Order form,AK5,کیف آرایشی مردانه  کویر تاوپه / کد محصول: 2053 / کد استایل: 0003 / ERP:59922561 / کارمزد ساخت / تعداد سفارش: 40 / برند: درسا,header_or_template
+Planning--.xlsm,Order form,D7,شماره قرارداد,header_or_template
+Planning--.xlsm,Order form,F7,62267,header_or_template
+Planning--.xlsm,Order form,G7,سریال,header_or_template
+Planning--.xlsm,Order form,I7,ماهیت,header_or_template
+Planning--.xlsm,Order form,J7,02,header_or_template
+Planning--.xlsm,Order form,M7,WBS01,header_or_template
+Planning--.xlsm,Order form,N7,#N/A,header_or_template
+Planning--.xlsm,Order form,U7,0,header_or_template
+Planning--.xlsm,Order form,V7,2,header_or_template
+Planning--.xlsm,Order form,W7,13,header_or_template
+Planning--.xlsm,Order form,X7,0,header_or_template
+Planning--.xlsm,Order form,AD7,تاریخ,header_or_template
+Planning--.xlsm,Order form,AE7,سریال,header_or_template
+Planning--.xlsm,Order form,AF7,موضوع,header_or_template
+Planning--.xlsm,Order form,AG7,ثبت کننده,header_or_template
+Planning--.xlsm,Order form,AH7,تایید کننده,header_or_template
+Planning--.xlsm,Order form,AI7,شرح موضوع,header_or_template
+Planning--.xlsm,Order form,D8,تاریخ سفارش,header_or_template
+Planning--.xlsm,Order form,G8,برند,header_or_template
+Planning--.xlsm,Order form,I8,نوع محصول,header_or_template
+Planning--.xlsm,Order form,J8,01,header_or_template
+Planning--.xlsm,Order form,M8,Station,header_or_template
+Planning--.xlsm,Order form,N8,#N/A,header_or_template
+Planning--.xlsm,Order form,U8,1,header_or_template
+Planning--.xlsm,Order form,V8,6,header_or_template
+Planning--.xlsm,Order form,W8,10,header_or_template
+Planning--.xlsm,Order form,X8,1,header_or_template
+Planning--.xlsm,Order form,AD8,46288,header_or_template
+Planning--.xlsm,Order form,AE8,60516,header_or_template
+Planning--.xlsm,Order form,D9,تاریخ تحویل,header_or_template
+Planning--.xlsm,Order form,G9,نماینده مشتری,header_or_template
+Planning--.xlsm,Order form,I9,کد دسته بندی,header_or_template
+Planning--.xlsm,Order form,J9,دسته بندی مشخص نشده,header_or_template
+Planning--.xlsm,Order form,M9,اسکن فرم سفارش,header_or_template
+Planning--.xlsm,Order form,U9,1,header_or_template
+Planning--.xlsm,Order form,V9,17,header_or_template
+Planning--.xlsm,Order form,W9,11,header_or_template
+Planning--.xlsm,Order form,X9,0,header_or_template
+Planning--.xlsm,Order form,D10,کد استایل درسا,header_or_template
+Planning--.xlsm,Order form,G10,شماره پیوست,header_or_template
+Planning--.xlsm,Order form,I10,کد محصول,header_or_template
+Planning--.xlsm,Order form,J10,2347,header_or_template
+Planning--.xlsm,Order form,M10,عکس محصول,header_or_template
+Planning--.xlsm,Order form,U10,0,header_or_template
+Planning--.xlsm,Order form,V10,14,header_or_template
+Planning--.xlsm,Order form,W10,18,header_or_template
+Planning--.xlsm,Order form,X10,0,header_or_template
+Planning--.xlsm,Order form,D11,سریال درسا,header_or_template
+Planning--.xlsm,Order form,G11,فصل,header_or_template
+Planning--.xlsm,Order form,I11,کد استایل,header_or_template
+Planning--.xlsm,Order form,J11,کد استایل مشخص نشده,header_or_template
+Planning--.xlsm,Order form,U11,0,header_or_template
+Planning--.xlsm,Order form,V11,20,header_or_template
+Planning--.xlsm,Order form,W11,19,header_or_template
+Planning--.xlsm,Order form,X11,0,header_or_template
+Planning--.xlsm,Order form,D13,مشخصات سفارش,header_or_template
+Planning--.xlsm,Order form,I13,خرجکار,header_or_template
+Planning--.xlsm,Order form,M13,نوع سند,header_or_template
+Planning--.xlsm,Order form,N13,تعداد,header_or_template
+Planning--.xlsm,Order form,D15,کد پروژه راهکاران,header_or_template
+Planning--.xlsm,Order form,F15,کیف,header_or_template
+Planning--.xlsm,Order form,G15,نوع محصول,header_or_template
+Planning--.xlsm,Order form,I15,BOM,header_or_template
+Planning--.xlsm,Order form,J15,T,header_or_template
+Planning--.xlsm,Order form,M15,سفارش تولید,header_or_template
+Planning--.xlsm,Order form,N15,#VALUE!,header_or_template
+Planning--.xlsm,Order form,U15,0,header_or_template
+Planning--.xlsm,Order form,V15,1,header_or_template
+Planning--.xlsm,Order form,W15,16,header_or_template
+Planning--.xlsm,Order form,X15,1,header_or_template
+Planning--.xlsm,Order form,D16,خط تولید,header_or_template
+Planning--.xlsm,Order form,G16,کد محصول,header_or_template
+Planning--.xlsm,Order form,I16,OPC time (h),header_or_template
+Planning--.xlsm,Order form,J16,0,header_or_template
+Planning--.xlsm,Order form,M16,دریافت از پروژه,header_or_template
+Planning--.xlsm,Order form,N16,#VALUE!,header_or_template
+Planning--.xlsm,Order form,U16,1,header_or_template
+Planning--.xlsm,Order form,V16,3,header_or_template
+Planning--.xlsm,Order form,W16,9,header_or_template
+Planning--.xlsm,Order form,X16,1,header_or_template
+Planning--.xlsm,Order form,D17,WBS01,header_or_template
+Planning--.xlsm,Order form,G17,کد استایل,header_or_template
+Planning--.xlsm,Order form,I17,تعداد تولید آزمایشی,header_or_template
+Planning--.xlsm,Order form,J17,0,header_or_template
+Planning--.xlsm,Order form,M17,رسید انتقال بین انبارها,header_or_template
+Planning--.xlsm,Order form,N17,#VALUE!,header_or_template
+Planning--.xlsm,Order form,U17,1,header_or_template
+Planning--.xlsm,Order form,V17,4,header_or_template
+Planning--.xlsm,Order form,W17,7,header_or_template
+Planning--.xlsm,Order form,X17,0,header_or_template
+Planning--.xlsm,Order form,D18,WBS02,header_or_template
+Planning--.xlsm,Order form,G18,نام محصول,header_or_template
+Planning--.xlsm,Order form,I18,تعداد پیش تولید,header_or_template
+Planning--.xlsm,Order form,J18,0,header_or_template
+Planning--.xlsm,Order form,M18,تحویل فروش,header_or_template
+Planning--.xlsm,Order form,N18,#VALUE!,header_or_template
+Planning--.xlsm,Order form,U18,0,header_or_template
+Planning--.xlsm,Order form,V18,5,header_or_template
+Planning--.xlsm,Order form,W18,8,header_or_template
+Planning--.xlsm,Order form,X18,1,header_or_template
+Planning--.xlsm,Order form,D19,تعداد سفارش,header_or_template
+Planning--.xlsm,Order form,G19,دسته بندی,header_or_template
+Planning--.xlsm,Order form,I19,تعداد برش خورده,header_or_template
+Planning--.xlsm,Order form,J19,0,header_or_template
+Planning--.xlsm,Order form,U19,1,header_or_template
+Planning--.xlsm,Order form,V19,15,header_or_template
+Planning--.xlsm,Order form,W19,12,header_or_template
+Planning--.xlsm,Order form,X19,1,header_or_template
+Planning--.xlsm,Order form,AD19,Daily Report from Product Process,header_or_template
+Planning--.xlsm,NOrder,A1,نوع محصول,header_or_template
+Planning--.xlsm,NOrder,B1,سریال,header_or_template
+Planning--.xlsm,NOrder,C1,کد محصول,header_or_template
+Planning--.xlsm,NOrder,D1,کد استایل,header_or_template
+Planning--.xlsm,NOrder,E1,نام محصول,header_or_template
+Planning--.xlsm,NOrder,F1,برند,header_or_template
+Planning--.xlsm,NOrder,G1,WBS01,header_or_template
+Planning--.xlsm,NOrder,H1,WBS02,header_or_template
+Planning--.xlsm,NOrder,I1,خط تولید,header_or_template
+Planning--.xlsm,NOrder,J1,تاریخ سفارش,header_or_template
+Planning--.xlsm,NOrder,K1,تاریخ تحویل,header_or_template
+Planning--.xlsm,NOrder,L1,تعداد سفارش,header_or_template
+Planning--.xlsm,NOrder,M1,شماره قرارداد,header_or_template
+Planning--.xlsm,NOrder,N1,شماره پیوست,header_or_template
+Planning--.xlsm,NOrder,O1,دسته بندی,header_or_template
+Planning--.xlsm,NOrder,P1,کد پروژه راهکاران,header_or_template
+Planning--.xlsm,NOrder,Q1,نماینده مشتری,header_or_template
+Planning--.xlsm,NOrder,R1,کد استایل درسا,header_or_template
+Planning--.xlsm,NOrder,S1,سریال درسا,header_or_template
+Planning--.xlsm,NOrder,T1,فصل,header_or_template
+Planning--.xlsm,NOrder,U1,جنس اصلی,header_or_template
+Planning--.xlsm,NOrder,V1,رنگ اصلی,header_or_template
+Planning--.xlsm,NOrder,W1,فینیش اصلی,header_or_template
+Planning--.xlsm,NOrder,X1,چاپ جنس اصلی,header_or_template
+Planning--.xlsm,NOrder,Y1,جنس خرجکار 1,header_or_template
+Planning--.xlsm,NOrder,Z1,رنگ خرجکار 1,header_or_template
+Planning--.xlsm,NOrder,AA1,فینیش خرجکار 1,header_or_template
+Planning--.xlsm,NOrder,AB1,چاپ جنس خرجکار 1,header_or_template
+Planning--.xlsm,NOrder,AC1,جنس خرجکار 2,header_or_template
+Planning--.xlsm,NOrder,AD1,رنگ خرجکار 2,header_or_template
+Planning--.xlsm,NOrder,AE1,فینیش خرجکار 2,header_or_template
+Planning--.xlsm,NOrder,AF1,چاپ جنس خرجکار 2,header_or_template
+Planning--.xlsm,NOrder,AG1,جنس خرجکار 3,header_or_template
+Planning--.xlsm,NOrder,AH1,رنگ خرجکار 3,header_or_template
+Planning--.xlsm,NOrder,AI1,فینیش خرجکار 3,header_or_template
+Planning--.xlsm,NOrder,AJ1,پتینه,header_or_template
+Planning--.xlsm,NOrder,AK1,میزان پتینه,header_or_template
+Planning--.xlsm,NOrder,AL1,جنس آستر,header_or_template
+Planning--.xlsm,NOrder,AM1,رنگ آستر,header_or_template
+Planning--.xlsm,NOrder,AN1,جنس پستایی,header_or_template
+Planning--.xlsm,NOrder,AO1,رنگ یراق,header_or_template
+Planning--.xlsm,NOrder,AP1,نوع چاپ,header_or_template
+Planning--.xlsm,NOrder,AQ1,نوع داغی,header_or_template
+Planning--.xlsm,NOrder,AR1,محل داغی لوگو (شکل),header_or_template
+Planning--.xlsm,NOrder,AS1,محل داغی لوگو (تایپ),header_or_template
+Planning--.xlsm,NOrder,AT1,لوگو فلزی,header_or_template
+Planning--.xlsm,NOrder,AU1,سایز نخ,header_or_template
+Planning--.xlsm,NOrder,AV1,نوع نخ,header_or_template
+Planning--.xlsm,NOrder,AW1,رنگ نخ,header_or_template
+Planning--.xlsm,NOrder,AX1,شفافیت چاپ,header_or_template
+Planning--.xlsm,NOrder,AY1,عرض تسمه,header_or_template
+Planning--.xlsm,NOrder,AZ1,نوع تسمه,header_or_template
+Planning--.xlsm,NOrder,BA1,جنس تنه پیش و پشت -دسته و باریکه دورکار,header_or_template
+Planning--.xlsm,NOrder,BB1,رنگ تنه پیش و پشت -دسته و باریکه دورکار,header_or_template
+Planning--.xlsm,NOrder,BC1,جنس دیوایدر های تاس و کفی,header_or_template
+Planning--.xlsm,NOrder,BD1,رنگ دیوایدر های تاس و کفی,header_or_template
+Planning--.xlsm,NOrder,BE1,جنس باریکه های بالشتی مهره ها و تاس,header_or_template
+Planning--.xlsm,NOrder,BF1,رنگ باریکه های بالشتی مهره ها و تاس,header_or_template
+Planning--.xlsm,NOrder,BG1,جنس روکش چرمی سری 1 مهره ها (معمولا مانند رویه),header_or_template
+Planning--.xlsm,NOrder,BH1,رنگ روکش چرمی سری 1 مهره ها (معمولا مانند رویه),header_or_template
+Planning--.xlsm,NOrder,BI1,جنس روکش چرمی سری 2 مهره ها (معمولا مانند هشتی),header_or_template
+Planning--.xlsm,NOrder,BJ1,رنگ روکش چرمی سری 2 مهره ها (معمولا مانند هشتی),header_or_template
+Planning--.xlsm,NOrder,BK1,سایز نخ داخلی,header_or_template
+Planning--.xlsm,NOrder,BL1,نوع نخ داخلی,header_or_template
+Planning--.xlsm,NOrder,BM1,رنگ نخ داخلی,header_or_template
+Planning--.xlsm,NOrder,BN1,محصول ست,header_or_template
+Planning--.xlsm,NOrder,BO1,*,header_or_template
+Planning--.xlsm,NOrder,BP1,*,header_or_template
+Planning--.xlsm,NOrder,BQ1,کد سگک,header_or_template
+Planning--.xlsm,NOrder,BR1,نوع سگک,header_or_template
+Planning--.xlsm,NOrder,BS1,*,header_or_template
+Planning--.xlsm,NOrder,BT1,تعداد سوراخ,header_or_template
+Planning--.xlsm,NOrder,BU1,شناسه بارکد,header_or_template
+Planning--.xlsm,NOrder,BV1,پل,header_or_template
+Planning--.xlsm,NOrder,BW1,برگه,header_or_template
+Planning--.xlsm,NOrder,BX1,نوع سری و تهی تسمه,header_or_template
+Planning--.xlsm,NOrder,BY1,N کد,header_or_template
+Planning--.xlsm,NOrder,BZ1,جنس تنه بیرونی لیوان (معمولا مانند رویه),header_or_template
+Planning--.xlsm,NOrder,CA1,رنگ تنه بیرونی لیوان (معمولا مانند رویه),header_or_template
+Planning--.xlsm,NOrder,CB1,جنس تهی وبالای لیوان (معمولا از جنس دیوار),header_or_template
+Planning--.xlsm,NOrder,CC1,رنگ تهی وبالای لیوان (معمولا از جنس دیوار),header_or_template
+Planning--.xlsm,NOrder,CD1,جنس داخلی لیوان (برای کف چرمی ها معمولا مانند هشتی),header_or_template
+Planning--.xlsm,NOrder,CE1,رنگ داخلی لیوان (برای کف چرمی ها معمولا مانند هشتی),header_or_template
+Planning--.xlsm,NOrder,CF1,جنس داخلی لیوان (برای کف چوبی معمولا از جنس دیوار),header_or_template
+Planning--.xlsm,NOrder,CG1,رنگ داخلی لیوان (برای کف چوبی معمولا از جنس دیوار),header_or_template
+Planning--.xlsm,NOrder,CH1,رنگ سری 1 مهره ها,header_or_template
+Planning--.xlsm,NOrder,CI1,رنگ سری 2 مهره ها,header_or_template
+Planning--.xlsm,NOrder,CJ1,رنگ شانه (معمولا همرنگ کفی),header_or_template
+Planning--.xlsm,NOrder,CK1,جنس روکش  دیوار های داخلی- کفی چرمی,header_or_template
+Planning--.xlsm,NOrder,CL1,رنگ روکش  دیوار های داخلی- کفی چرمی,header_or_template
+Planning--.xlsm,NOrder,CM1,جنس هشتی,header_or_template
+Planning--.xlsm,NOrder,CN1,رنگ هشتی,header_or_template
+Planning--.xlsm,NOrder,CO1,تعداد سفارش (سری),header_or_template
+Planning--.xlsm,NOrder,CP1,نوع/کد قالب,header_or_template
+Planning--.xlsm,NOrder,CQ1,نوع کفی,header_or_template
+Planning--.xlsm,NOrder,CR1,رنگ کفی,header_or_template
+Planning--.xlsm,NOrder,CS1,نوع قدک,header_or_template
+Planning--.xlsm,NOrder,CT1,تکسون کفشی,header_or_template
+Planning--.xlsm,NOrder,CU1,نوع ابر دهنه,header_or_template
+Planning--.xlsm,NOrder,CV1,ضخامت ابر دهنه,header_or_template
+Planning--.xlsm,NOrder,CW1,نوع ابر زبانه,header_or_template
+Planning--.xlsm,NOrder,CX1,ضخامت ابر زبانه,header_or_template
+Planning--.xlsm,NOrder,CY1,نوع بند,header_or_template
+Planning--.xlsm,NOrder,CZ1,رنگ بند,header_or_template
+Planning--.xlsm,NOrder,DA1,نوع جوراب گیر,header_or_template
+Planning--.xlsm,NOrder,DB1,رنگ جوراب گیر,header_or_template
+Planning--.xlsm,NOrder,DC1,رنگ دور زیره,header_or_template
+Planning--.xlsm,NOrder,DD1,رنگ کف زیره,header_or_template
+Planning--.xlsm,NOrder,DE1,کد و جنس  زیره,header_or_template
+Planning--.xlsm,NOrder,DF1,جنس برگه,header_or_template
+Planning--.xlsm,NOrder,DG1,رنگ برگه,header_or_template
+Planning--.xlsm,NOrder,DH1,مشخصات تولید کننده چرم,header_or_template
+Planning--.xlsm,NOrder,DI1,نوع بسته بندی,header_or_template
+Planning--.xlsm,NOrder,DJ1,*,header_or_template
+Planning--.xlsm,NOrder,DK1,*,header_or_template
+Planning--.xlsm,NOrder,DL1,80,header_or_template
+Planning--.xlsm,NOrder,DM1,85,header_or_template
+Planning--.xlsm,NOrder,DN1,90,header_or_template
+Planning--.xlsm,NOrder,DO1,95,header_or_template
+Planning--.xlsm,NOrder,DP1,100,header_or_template
+Planning--.xlsm,NOrder,DQ1,105,header_or_template
+Planning--.xlsm,NOrder,DR1,110,header_or_template
+Planning--.xlsm,NOrder,DS1,115,header_or_template
+Planning--.xlsm,NOrder,DT1,120,header_or_template
+Planning--.xlsm,NOrder,DU1,125,header_or_template
+Planning--.xlsm,NOrder,DV1,130,header_or_template
+Planning--.xlsm,NOrder,DW1,135,header_or_template
+Planning--.xlsm,NOrder,DX1,30,header_or_template
+Planning--.xlsm,NOrder,DY1,31,header_or_template
+Planning--.xlsm,NOrder,DZ1,32,header_or_template
+Planning--.xlsm,NOrder,EA1,33,header_or_template
+Planning--.xlsm,NOrder,EB1,34,header_or_template
+Planning--.xlsm,NOrder,EC1,35,header_or_template
+Planning--.xlsm,NOrder,ED1,36,header_or_template
+Planning--.xlsm,NOrder,EE1,37,header_or_template
+Planning--.xlsm,NOrder,EF1,38,header_or_template
+Planning--.xlsm,NOrder,EG1,39,header_or_template
+Planning--.xlsm,NOrder,EH1,40,header_or_template
+Planning--.xlsm,NOrder,EI1,41,header_or_template
+Planning--.xlsm,NOrder,EJ1,42,header_or_template
+Planning--.xlsm,NOrder,EK1,43,header_or_template
+Planning--.xlsm,NOrder,EL1,44,header_or_template
+Planning--.xlsm,NOrder,EM1,45,header_or_template
+Planning--.xlsm,NOrder,EN1,46,header_or_template
+Planning--.xlsm,NOrder,EO1,47,header_or_template
+Planning--.xlsm,NOrder,EP1,*,header_or_template
+Planning--.xlsm,NOrder,EQ1,*,header_or_template
+Planning--.xlsm,NOrder,ER1,Cutting,header_or_template
+Planning--.xlsm,NOrder,ES1,WBS01 Update Date,header_or_template
+Planning--.xlsm,NOrder,ET1,رنگ بند کانواس,header_or_template
+Planning--.xlsm,NOrder,EU1,رنگ زیپ فلزی (دنده/پارچه),header_or_template
+Planning--.xlsm,NOrder,EV1,رنگ زیپ پلاستیکی (دنده/پارچه),header_or_template
+Planning--.xlsm,NOrder,EW1,رنگ چسب آمریکایی,header_or_template
+Planning--.xlsm,NOrder,EX1,سریال 1,header_or_template
+Planning--.xlsm,NOrder,EY1,سریال 2,header_or_template
+Planning--.xlsm,NOrder,EZ1,سریال 3,header_or_template
+Planning--.xlsm,NOrder,FA1,سریال 4,header_or_template
+Planning--.xlsm,NOrder,FB1,سریال 5,header_or_template
+Planning--.xlsm,NOrder,FC1,سایر الزامات,header_or_template
+Planning--.xlsm,NOrder,FD1,توضیحات,header_or_template
+Planning--.xlsm,NOrder,FE1,کد عالیخان,header_or_template
+Planning--.xlsm,NOrder,FF1,شرح عالیخان,header_or_template
+Planning--.xlsm,NOrder,FG1,تولید آزمایشی (تعداد),header_or_template
+Planning--.xlsm,NOrder,FH1,تاریخ پرینت برگه تولید آزمایشی,header_or_template
+Planning--.xlsm,NOrder,FI1,پیش تولید (تعداد),header_or_template
+Planning--.xlsm,NOrder,FJ1,تاریخ پرینت برگه پیش تولید,header_or_template
+Planning--.xlsm,NOrder,FK1,Filter,header_or_template
+Planning--.xlsm,NOrder,FL1,Filter count,header_or_template
+Planning--.xlsm,NOrder,FM1,Year,header_or_template
+Planning--.xlsm,NOrder,FN1,Month,header_or_template
+Planning--.xlsm,NOrder,FO1,Filter Code,header_or_template
+Planning--.xlsm,NOrder,FP1,برنامه ریزی,header_or_template
+Planning--.xlsm,NOrder,FQ1,مهندسی,header_or_template
+Planning--.xlsm,NOrder,FR1,انبار,header_or_template
+Planning--.xlsm,NOrder,FS1,برش,header_or_template
+Planning--.xlsm,NOrder,FT1,تولید,header_or_template
+Planning--.xlsm,NOrder,FU1,دریافت از پروژه,header_or_template
+Planning--.xlsm,NOrder,FV1,تحویل فروش,header_or_template
+Planning--.xlsm,NOrder,FW1,وضعیت,header_or_template
+Planning--.xlsm,NOrder,FX1,ثبت در Board,header_or_template
+Planning--.xlsm,NOrder,FY1,کد دسته بندی,header_or_template
+Planning--.xlsm,NOrder,FZ1,کد  عالیخان - اتوماتیک,header_or_template
+Planning--.xlsm,NOrder,GA1,Board WBS01,header_or_template
+Planning--.xlsm,NOrder,GB1,Board Last Station,header_or_template
+Planning--.xlsm,NOrder,GC1,1404-s1,header_or_template
+WH-.xlsm,WH,A1,عنوان,header_or_template
+WH-.xlsm,WH,B1,کد,header_or_template
+WH-.xlsm,WH,C1,وضعیت,header_or_template
+WH-.xlsm,WH,D1,واحد سنجش,header_or_template
+WH-.xlsm,WH,E1,مشخصه فنی,header_or_template
+WH-.xlsm,WH,F1,ماهیت کالا,header_or_template
+WH-.xlsm,WH,G1,عنوان طبقه,header_or_template
+WH-.xlsm,WH,H1,نوع کالا,header_or_template
+WH-.xlsm,WH,I1,روش قیمت گذاری,header_or_template
+WH-.xlsm,WH,J1,سطح رزرو,header_or_template
+WH-.xlsm,WH,K1,سایر مشخصات,header_or_template
+WH-.xlsm,WH,L1,زیرگروه مالیاتی,header_or_template
+WH-.xlsm,WH,M1,len 14,header_or_template
+WH-.xlsm,Split DB,A1,ردیف,header_or_template
+WH-.xlsm,Split DB,B1,سریال,header_or_template
+WH-.xlsm,Split DB,C1,کد محصول,header_or_template
+WH-.xlsm,Split DB,D1,کد استایل,header_or_template
+WH-.xlsm,Split DB,E1,نام محصول,header_or_template
+WH-.xlsm,Split DB,F1,رنگ,header_or_template
+WH-.xlsm,Split DB,G1,تعداد سفارش,header_or_template
+WH-.xlsm,Split DB,H1,نوع محصول,header_or_template
+WH-.xlsm,Split DB,I1,ERP,header_or_template
+WH-.xlsm,Split DB,J1,سفارش دهنده ,header_or_template
+WH-.xlsm,Split DB,K1,کد N,header_or_template
+WH-.xlsm,Split DB,L1,رنگ یراق,header_or_template
+WH-.xlsm,Split DB,M1,تاریخ اعلام,header_or_template
+WH-.xlsm,Split DB,N1,WBS02,header_or_template
+WH-.xlsm,Split DB,O1,سریال درسا,header_or_template
+WH-.xlsm,Split DB,P1,کد ماده,header_or_template
+WH-.xlsm,Split DB,Q1,کد کالا,header_or_template
+WH-.xlsm,Split DB,R1,نام کالا,header_or_template
+WH-.xlsm,Split DB,S1,نوع ماده,header_or_template
+WH-.xlsm,Split DB,T1,جنس,header_or_template
+WH-.xlsm,Split DB,U1,رنگ,header_or_template
+WH-.xlsm,Split DB,V1,ضریب مصرف,header_or_template
+WH-.xlsm,Split DB,W1,مقدار مورد نیاز,header_or_template
+WH-.xlsm,Split DB,X1,واحد,header_or_template
+WH-.xlsm,Split DB,Y1,توضیحات ,header_or_template
+WH-.xlsm,Split DB,Z1,موجودی,header_or_template
+WH-.xlsm,Split DB,AA1,شماره سند راهکاران,header_or_template
+WH-.xlsm,Split DB,AB1,کسری,header_or_template
+WH-.xlsm,Split DB,AC1,تاریخ تحویل,header_or_template
+WH-.xlsm,Split DB,AD1,تحویلی (کیلو),header_or_template
+WH-.xlsm,Split DB,AE1,تحویلی (فوتاژ),header_or_template
+WH-.xlsm,Split DB,AF1,تعداد مازاد,header_or_template
+WH-.xlsm,Split DB,AG1,محصول ست,header_or_template
+WH-.xlsm,Split DB,AH1,تاریخ آپدیت,header_or_template
+WH-.xlsm,Split DB,AI1,کد پروژه راهکاران,header_or_template
+WH-.xlsm,Split DB,AJ1,مقدار بازکاری,header_or_template
+WH-.xlsm,Split DB,AK1,برگشت چرم,header_or_template
+WH-.xlsm,Split DB,AL1,کد دسته بندی محصول,header_or_template
+WH-.xlsm,Split DB,AM1,کد استایل درسا,header_or_template
+WH-.xlsm,Split DB,AN1,فصل,header_or_template
+WH-.xlsm,Split DB,AO1,ERP,header_or_template
+WH-.xlsm,Split DB,AP1,کد فایل میلاد,header_or_template
+WH-.xlsm,Split DB,AQ1,نوع کالا,header_or_template
+WH-.xlsm,Split DB,AR1,WH,header_or_template
+WH-.xlsm,Split DB,AS1,Row ERR,header_or_template
+WH-.xlsm,Split DB,AT1,4,header_or_template
+WH-.xlsm,Split DB,AU1,Code,header_or_template
+WH-.xlsm,Split DB,AV1,*,header_or_template
+WH-.xlsm,Split DB,AW1,Gap,header_or_template
+WH-.xlsm,Split DB,AX1,year,header_or_template
+WH-.xlsm,Split DB,AY1,month,header_or_template
+WH-.xlsm,Split Form,G2,فرم جداسازی مواد جهت سفارش,header_or_template
+WH-.xlsm,Split Form,V2,در دست بررسی,header_or_template
+WH-.xlsm,Split Form,D4,کد استایل درسا,header_or_template
+WH-.xlsm,Split Form,F4,تعداد سفارش,header_or_template
+WH-.xlsm,Split Form,H4,نوع محصول,header_or_template
+WH-.xlsm,Split Form,L4,نام محصول,header_or_template
+WH-.xlsm,Split Form,O4,کد محصول,header_or_template
+WH-.xlsm,Split Form,Q4,سریال,header_or_template
+WH-.xlsm,Split Form,AT4,کد استایل درسا,header_or_template
+WH-.xlsm,Split Form,AV4,تعداد سفارش,header_or_template
+WH-.xlsm,Split Form,AX4,نوع محصول,header_or_template
+WH-.xlsm,Split Form,BB4,نام محصول,header_or_template
+WH-.xlsm,Split Form,BE4,کد محصول,header_or_template
+WH-.xlsm,Split Form,BG4,سریال,header_or_template
+WH-.xlsm,Split Form,D6,ERP,header_or_template
+WH-.xlsm,Split Form,F6,سفارش دهنده ,header_or_template
+WH-.xlsm,Split Form,H6,کد N,header_or_template
+WH-.xlsm,Split Form,L6,رنگ یراق,header_or_template
+WH-.xlsm,Split Form,O6,تاریخ اعلام,header_or_template
+WH-.xlsm,Split Form,Q6,کد استایل,header_or_template
+WH-.xlsm,Split Form,AQ6,0,header_or_template
+WH-.xlsm,Split Form,AT6,ERP,header_or_template
+WH-.xlsm,Split Form,AV6,سفارش دهنده ,header_or_template
+WH-.xlsm,Split Form,AX6,کد N,header_or_template
+WH-.xlsm,Split Form,BB6,رنگ یراق,header_or_template
+WH-.xlsm,Split Form,BE6,تاریخ اعلام,header_or_template
+WH-.xlsm,Split Form,BG6,کد استایل,header_or_template
+WH-.xlsm,Split Form,A8,0,header_or_template
+WH-.xlsm,Split Form,B8,>>>,header_or_template
+WH-.xlsm,Split Form,D8,سریال درسا,header_or_template
+WH-.xlsm,Split Form,F8,فصل درسا,header_or_template
+WH-.xlsm,Split Form,H8,کد پروژه راهکاران,header_or_template
+WH-.xlsm,Split Form,L8,رنگ,header_or_template
+WH-.xlsm,Split Form,O8,آخرین اپدیت,header_or_template
+WH-.xlsm,Split Form,Q8,WBS02,header_or_template
+WH-.xlsm,Split Form,V8,فرم سفارش,header_or_template
+WH-.xlsm,Split Form,AQ8,0,header_or_template
+WH-.xlsm,Split Form,AT8,سریال درسا,header_or_template
+WH-.xlsm,Split Form,AV8,فصل درسا,header_or_template
+WH-.xlsm,Split Form,AX8,کد پروژه راهکاران,header_or_template
+WH-.xlsm,Split Form,BB8,رنگ,header_or_template
+WH-.xlsm,Split Form,BE8,آخرین اپدیت,header_or_template
+WH-.xlsm,Split Form,BG8,WBS02,header_or_template
+WH-.xlsm,BOM,B2,شماره سریال,header_or_template
+WH-.xlsm,BOM,C2,61219,header_or_template
+WH-.xlsm,BOM,B4,تعداد سفارش,header_or_template
+WH-.xlsm,BOM,C4,1,header_or_template
+WH-.xlsm,BOM,B5,نام محصول :,header_or_template
+WH-.xlsm,BOM,C5,دستی زنانه فلوتر - مشکی / کد محصول 2202,header_or_template
+WH-.xlsm,BOM,B7,ردیف,header_or_template
+WH-.xlsm,BOM,C7,نام کالا,header_or_template
+WH-.xlsm,BOM,D7,نوع کالا,header_or_template
+WH-.xlsm,BOM,E7,جنس,header_or_template
+WH-.xlsm,BOM,F7,رنگ,header_or_template
+WH-.xlsm,BOM,G7,ضریب مصرف,header_or_template
+WH-.xlsm,BOM,H7,مقدار مورد نیاز,header_or_template
+WH-.xlsm,BOM,I7,مقدار موجودی,header_or_template
+WH-.xlsm,BOM,J7,تعداد تحویلی,header_or_template
+WH-.xlsm,BOM,K7,مازاد تحویلی,header_or_template
+WH-.xlsm,BOM,L7,بازکاری,header_or_template
+WH-.xlsm,BOM,M7,مقدار برگشتی از برش,header_or_template
+WH-.xlsm,BOM,N7,نرم برش واقعی,header_or_template
+WH-.xlsm,BOM,O7,مازاد نرم مصرف,header_or_template
+WH-.xlsm,Gap,A3,گزارش کسری مواد اولیه,header_or_template
+WH-.xlsm,Gap,A4,Row Labels,header_or_template
+WH-.xlsm,Gap,B4,سریال,header_or_template
+WH-.xlsm,Gap,C4,سفارش دهنده ,header_or_template
+WH-.xlsm,Gap,D4,نام کالا                                     ,header_or_template
+WH-.xlsm,Gap,E4,جنس                         ,header_or_template
+WH-.xlsm,Gap,F4,رنگ2                       ,header_or_template
+WH-.xlsm,Gap,G4,واحد,header_or_template
+WH-.xlsm,Gap,H4,Sum of کسری,header_or_template
+WH-.xlsm,کانبان,C2,سریال:,header_or_template
+WH-.xlsm,کانبان,D2,62229,header_or_template
+WH-.xlsm,کانبان,F2,تاریخ:,header_or_template
+WH-.xlsm,کانبان,G2,1404.10.25,header_or_template
+WH-.xlsm,کانبان,E4,کانبان مواد اولیه (نسخه انبار),header_or_template
+WH-.xlsm,کانبان,R4,fo-bg-02-02,header_or_template
+WH-.xlsm,کانبان,B6,ردیف,header_or_template
+WH-.xlsm,کانبان,C6,سریال,header_or_template
+WH-.xlsm,کانبان,D6,تاریخ,header_or_template
+WH-.xlsm,کانبان,E6,نوع ,header_or_template
+WH-.xlsm,کانبان,F6,کد  محصول,header_or_template
+WH-.xlsm,کانبان,G6,جنس ,header_or_template
+WH-.xlsm,کانبان,H6,رنگ,header_or_template
+WH-.xlsm,کانبان,I6,تعداد سفارش,header_or_template
+WH-.xlsm,کانبان,J6,مقدار مورد نیاز,header_or_template
+WH-.xlsm,کانبان,K6,نرم معیار,header_or_template
+WH-.xlsm,کانبان,L6,تحویلی انبار,header_or_template
+WH-.xlsm,کانبان,N6,کد راهکاران,header_or_template
+WH-.xlsm,کانبان,P6,توضیحات,header_or_template
+WH-.xlsm,کانبان,L7,مقدار اصلی,header_or_template
+WH-.xlsm,کانبان,M7,مقدار مازاد,header_or_template
+WH-.xlsm,کانبان,T7,مازاد نرم برش,header_or_template
+WH-.xlsm,کاردکس تحویل,A1,تاریخ:,header_or_template
+WH-.xlsm,کاردکس تحویل,D1,عنوان:,header_or_template
+WH-.xlsm,کاردکس تحویل,G1,تعداد سفارش:,header_or_template
+WH-.xlsm,کاردکس تحویل,A2,نوع کالا,header_or_template
+WH-.xlsm,کاردکس تحویل,C2,مقدار تحویلی,header_or_template
+WH-.xlsm,کاردکس تحویل,E2,مقدار تحویلی(به حروف),header_or_template
+WH-.xlsm,کاردکس تحویل,H2,توضیحات,header_or_template
+جدول پیگیری تیغه.xlsx,Sheet1,A2,ردیف,header_or_template
+جدول پیگیری تیغه.xlsx,Sheet1,B2,کد,header_or_template
+جدول پیگیری تیغه.xlsx,Sheet1,C2,نوع محصول,header_or_template
+جدول پیگیری تیغه.xlsx,Sheet1,D2,تعداد,header_or_template
+جدول پیگیری تیغه.xlsx,Sheet1,E2,نوع تیغه,header_or_template
+جدول پیگیری تیغه.xlsx,Sheet1,F2,تامین کننده,header_or_template
+جدول پیگیری تیغه.xlsx,Sheet1,G2,نام فایل,header_or_template
+جدول پیگیری تیغه.xlsx,Sheet1,H2,تاریخ ارسال فایل,header_or_template
+جدول پیگیری تیغه.xlsx,Sheet1,I2,تاریخ دریافت تیغه,header_or_template
+جدول پیگیری تیغه.xlsx,Sheet1,J2,چک کننده,header_or_template
+جدول پیگیری تیغه.xlsx,Sheet1,K2,وضعیت,header_or_template
+جدول پیگیری تیغه.xlsx,Sheet1,L2,توضیحات,header_or_template
+جدول پیگیری تیغه.xlsx,Sheet1,M2,code,header_or_template
+جدول پیگیری تیغه.xlsx,Sheet2,A7,ردیف,header_or_template
+جدول پیگیری تیغه.xlsx,Sheet2,B7,کد محصول,header_or_template
+جدول پیگیری تیغه.xlsx,Sheet2,C7,نام فایل,header_or_template
+جدول پیگیری تیغه.xlsx,Sheet2,D7,نام تیغه,header_or_template
+جدول پیگیری تیغه.xlsx,Sheet2,E7,تعداد,header_or_template
+جدول پیگیری تیغه.xlsx,Sheet2,F7,نوع تیغه,header_or_template
+جدول پیگیری تیغه.xlsx,Sheet2,G7,تاریخ,header_or_template
+جدول پیگیری تیغه.xlsx,Sheet2,H7,کد عالیخان,header_or_template
+جدول پیگیری تیغه.xlsx,Sheet2,M7,کاردکس,header_or_template
+جدول پیگیری تیغه.xlsx,Sheet2,N7,تعداد,header_or_template
+جدول پیگیری تیغه.xlsx,Sheet3,A1,تاریخ,header_or_template
+جدول پیگیری تیغه.xlsx,Sheet3,B1,نوع,header_or_template
+جدول پیگیری تیغه.xlsx,Sheet3,C1,کد محصول,header_or_template
+جدول پیگیری تیغه.xlsx,Sheet3,D1,نام فایل,header_or_template
+جدول پیگیری تیغه.xlsx,Sheet3,E1,نام تیغه,header_or_template
+جدول پیگیری تیغه.xlsx,Sheet3,F1,نوع محصول,header_or_template
+جدول پیگیری تیغه.xlsx,Sheet3,G1,Code1,header_or_template
+جدول پیگیری تیغه.xlsx,Sheet3,H1,Code2,header_or_template
+جدول پیگیری تیغه.xlsx,Sheet3,I1,Code3,header_or_template
+جدول پیگیری تیغه.xlsx,Sheet3,J1,Code4,header_or_template
+جدول پیگیری تیغه.xlsx,Sheet3,L1,وضعیت تیغه,header_or_template
+جدول پیگیری تیغه.xlsx,Sheet3,M1,کد عالیخان,header_or_template
+جدول پیگیری تیغه.xlsx,Sheet3,P1,شرح عالیخان,header_or_template
+جدول پیگیری تیغه.xlsx,Sheet3,Q1,کد,header_or_template
+جدول پیگیری تیغه.xlsx,Sheet3,R1,نوع محصول,header_or_template
+جدول پیگیری تیغه.xlsx,Sheet3,S1,تعداد تیغه در کد,header_or_template
+جدول پیگیری تیغه.xlsx,Code search,A3,No.,header_or_template
+جدول پیگیری تیغه.xlsx,Code search,B3,تاریخ,header_or_template
+جدول پیگیری تیغه.xlsx,Code search,C3,نوع,header_or_template
+جدول پیگیری تیغه.xlsx,Code search,D3,کد محصول,header_or_template
+جدول پیگیری تیغه.xlsx,Code search,E3,نام فایل,header_or_template
+جدول پیگیری تیغه.xlsx,Code search,F3,نام تیغه,header_or_template
+جدول پیگیری تیغه.xlsx,Code search,G3,نوع محصول,header_or_template
+جدول پیگیری تیغه.xlsx,Code search,H3,کد عالیخان,header_or_template
+جدول پیگیری تیغه.xlsx,Code search,I3,شرح عالیخان,header_or_template
+جدول پیگیری تیغه.xlsx,Code search,J3,شرح راهکاران,header_or_template
+جدول پیگیری تیغه.xlsx,Code search,K3,عدم مطابقت با راهکاران,header_or_template
+جدول پیگیری تیغه.xlsx,خروجی تیغه راهکاران,A1,عنوان,header_or_template
+جدول پیگیری تیغه.xlsx,خروجی تیغه راهکاران,B1,کد,header_or_template
+جدول پیگیری تیغه.xlsx,خروجی تیغه راهکاران,D1,نوع,header_or_template
+جدول پیگیری تیغه.xlsx,خروجی تیغه راهکاران,E1,کد محصول,header_or_template

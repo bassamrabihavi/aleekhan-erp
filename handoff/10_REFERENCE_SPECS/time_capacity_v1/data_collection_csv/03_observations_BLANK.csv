@@ -1,0 +1,1 @@
+﻿observation_id,study_id,family,operation_code,style_revision,method,operation_uom,operator_ids,machine_id,batch_id,start_utc,end_utc,quantity_input,quantity_good,quantity_scrap,elapsed_active_seconds,person_active_seconds,machine_busy_seconds,waiting_seconds,setup_seconds,rating_method_if_approved,anomaly_flag,anomaly_reason,observer_id,source_hash,notes

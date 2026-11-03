@@ -1,0 +1,630 @@
+{
+  "project": "سراجی سنتی عالیخان",
+  "version": "0.1-demo",
+  "scope": "eight responsive screen prototypes, not production-ready",
+  "source_notes": {
+    "maghar279_v1_02.02.30.dxf": "1125 entities; 148 nasb, 62 boresh, 60 hak, 8 cnc (read-only geometric inventory; not count of jigs)",
+    "livis279_05.06.31 _foloter_V9 -.dxf": "603 entities; 95 hak, 2 hak charm, 1 boresh (not approved skiving regions)",
+    "planning": "Earlier Planning Prd.Form/listGH and WH were analyzed in prior packages; no new mapping here",
+    "demo_numbers": "all quantities, serials and statuses on these pages are illustrative unless explicitly sourced"
+  },
+  "ui_rules": {
+    "direction": "RTL",
+    "sidebar": "always right, autoexpand hover, optional pin; mobile drawer right",
+    "labels": "real Persian HTML text, no baked-in raster text",
+    "responsive_breakpoints": {
+      "desktop": "1201+",
+      "laptop": "901–1200",
+      "tablet": "651–900",
+      "mobile": "<=650"
+    },
+    "accessibility": "icon + label, focus visibility, large touch controls",
+    "dynamic_fields": "structured metadata + controlled layout slots, no arbitrary injection into critical forms"
+  },
+  "pages": [
+    {
+      "page_id": 13,
+      "title": "مدیریت مقر و جیگ",
+      "owner_module": "مهندسی و طراحی",
+      "route": "/engineering/jigs",
+      "fields": [
+        {
+          "key": "jig_id",
+          "label": "شناسه مقر",
+          "type": "UUID",
+          "source": "engineering.jig",
+          "requirement": "required",
+          "ui_zone": "details or table"
+        },
+        {
+          "key": "pattern_revision_id",
+          "label": "Revision الگو",
+          "type": "FK",
+          "source": "engineering.pattern_revision",
+          "requirement": "required",
+          "ui_zone": "details or table"
+        },
+        {
+          "key": "jig_revision",
+          "label": "Revision مقر",
+          "type": "string",
+          "source": "engineering.jig_revision",
+          "requirement": "required",
+          "ui_zone": "details or table"
+        },
+        {
+          "key": "jig_type",
+          "label": "نوع مقر",
+          "type": "enum",
+          "source": "engineering.jig_types",
+          "requirement": "required",
+          "ui_zone": "details or table"
+        },
+        {
+          "key": "dxf_file_id",
+          "label": "فایل فنی",
+          "type": "FK",
+          "source": "documents.file_revision",
+          "requirement": "required",
+          "ui_zone": "details or table"
+        },
+        {
+          "key": "physical_location",
+          "label": "مکان فیزیکی",
+          "type": "read-only API",
+          "source": "warehouse.tool_instance",
+          "requirement": "read-only",
+          "ui_zone": "details or table"
+        }
+      ],
+      "actions": [
+        "ایجاد پیش‌نویس مقر",
+        "مقایسه نسخه‌ها",
+        "درخواست ساخت"
+      ],
+      "status": "prototype-only",
+      "approval": "not approved for development",
+      "api": {
+        "GET": "/engineering/jigs",
+        "POST": "/engineering/jigs/draft",
+        "VALIDATE": "/engineering/jigs/validate"
+      },
+      "state_requirements": [
+        "تغییر در الگو ممکن است Revision مقر را منقضی کند.",
+        "هویت هندسه باید توسط مهندس تأیید شود."
+      ],
+      "source_of_truth": "refer to DATA_MODEL.md"
+    },
+    {
+      "page_id": 14,
+      "title": "نقشه و عملیات لیویس",
+      "owner_module": "مهندسی و طراحی",
+      "route": "/engineering/skiving",
+      "fields": [
+        {
+          "key": "piece_revision_id",
+          "label": "Revision قطعه",
+          "type": "FK",
+          "source": "engineering.piece_revision",
+          "requirement": "required",
+          "ui_zone": "details or table"
+        },
+        {
+          "key": "region_id",
+          "label": "شناسه ناحیه",
+          "type": "UUID",
+          "source": "engineering.skiving_region",
+          "requirement": "required",
+          "ui_zone": "details or table"
+        },
+        {
+          "key": "target_f",
+          "label": "هدف F",
+          "type": "decimal",
+          "source": "engineering.skiving_region",
+          "requirement": "required",
+          "ui_zone": "details or table"
+        },
+        {
+          "key": "zone_width",
+          "label": "عرض ناحیه",
+          "type": "decimal",
+          "source": "engineering.skiving_region",
+          "requirement": "required",
+          "ui_zone": "details or table"
+        },
+        {
+          "key": "skiving_kind",
+          "label": "نوع لیویس",
+          "type": "enum",
+          "source": "engineering.skiving_type",
+          "requirement": "required",
+          "ui_zone": "details or table"
+        },
+        {
+          "key": "execution_order",
+          "label": "ترتیب",
+          "type": "integer",
+          "source": "engineering.skiving_region",
+          "requirement": "required",
+          "ui_zone": "details or table"
+        }
+      ],
+      "actions": [
+        "افزودن ناحیه",
+        "کنترل اتصال قطعات",
+        "درخواست تأیید"
+      ],
+      "status": "prototype-only",
+      "approval": "not approved for development",
+      "api": {
+        "GET": "/engineering/skiving",
+        "POST": "/engineering/skiving/draft",
+        "VALIDATE": "/engineering/skiving/validate"
+      },
+      "state_requirements": [
+        "لیویس روی الگوی جدید دوباره ارزیابی شود.",
+        "هدف ضخامت به جنس واقعی وابسته است."
+      ],
+      "source_of_truth": "refer to DATA_MODEL.md"
+    },
+    {
+      "page_id": 15,
+      "title": "ویرایشگر BOM و کنترل معنایی",
+      "owner_module": "مهندسی و طراحی",
+      "route": "/engineering/boms",
+      "fields": [
+        {
+          "key": "bom_revision_id",
+          "label": "Revision BOM",
+          "type": "FK",
+          "source": "engineering.bom_revision",
+          "requirement": "required",
+          "ui_zone": "details or table"
+        },
+        {
+          "key": "material_id",
+          "label": "ماده استاندارد",
+          "type": "FK",
+          "source": "master.material",
+          "requirement": "required",
+          "ui_zone": "details or table"
+        },
+        {
+          "key": "material_role",
+          "label": "نقش متریال",
+          "type": "FK",
+          "source": "master.material_role",
+          "requirement": "required",
+          "ui_zone": "details or table"
+        },
+        {
+          "key": "net_qty",
+          "label": "مصرف خالص",
+          "type": "decimal",
+          "source": "engineering.bom_line",
+          "requirement": "required",
+          "ui_zone": "details or table"
+        },
+        {
+          "key": "uom_id",
+          "label": "واحد",
+          "type": "FK",
+          "source": "master.uom",
+          "requirement": "required",
+          "ui_zone": "details or table"
+        },
+        {
+          "key": "waste_rate",
+          "label": "پرت استاندارد",
+          "type": "decimal",
+          "source": "engineering.bom_line",
+          "requirement": "required",
+          "ui_zone": "details or table"
+        },
+        {
+          "key": "alternative_set_id",
+          "label": "جایگزین‌های مجاز",
+          "type": "FK",
+          "source": "engineering.material_alternative_set",
+          "requirement": "optional",
+          "ui_zone": "details or table"
+        }
+      ],
+      "actions": [
+        "افزودن متریال",
+        "اجرای کنترل BOM",
+        "مقایسه Revision",
+        "BOM تجمیعی"
+      ],
+      "status": "prototype-only",
+      "approval": "not approved for development",
+      "api": {
+        "GET": "/engineering/boms",
+        "POST": "/engineering/boms/draft",
+        "VALIDATE": "/engineering/boms/validate"
+      },
+      "state_requirements": [
+        "کد و عنوان ماده باید با Master یکسان باشد.",
+        "خطاهای ردیف مانع Release هستند."
+      ],
+      "source_of_truth": "refer to DATA_MODEL.md"
+    },
+    {
+      "page_id": 16,
+      "title": "مسیر عملیات و OPC",
+      "owner_module": "مهندسی و طراحی",
+      "route": "/engineering/opc",
+      "fields": [
+        {
+          "key": "opc_revision_id",
+          "label": "OPC Revision",
+          "type": "FK",
+          "source": "engineering.opc_revision",
+          "requirement": "required",
+          "ui_zone": "details or table"
+        },
+        {
+          "key": "operation_id",
+          "label": "عملیات",
+          "type": "UUID",
+          "source": "engineering.opc_operation",
+          "requirement": "required",
+          "ui_zone": "details or table"
+        },
+        {
+          "key": "operation_type_id",
+          "label": "نوع عملیات",
+          "type": "FK",
+          "source": "master.operation_type",
+          "requirement": "required",
+          "ui_zone": "details or table"
+        },
+        {
+          "key": "labor_minutes",
+          "label": "زمان نفر",
+          "type": "decimal",
+          "source": "engineering.opc_operation",
+          "requirement": "required",
+          "ui_zone": "details or table"
+        },
+        {
+          "key": "wait_minutes",
+          "label": "زمان انتظار",
+          "type": "decimal",
+          "source": "engineering.opc_operation",
+          "requirement": "optional",
+          "ui_zone": "details or table"
+        },
+        {
+          "key": "predecessors",
+          "label": "پیش‌نیازها",
+          "type": "FK[]",
+          "source": "engineering.opc_dependency",
+          "requirement": "optional",
+          "ui_zone": "details or table"
+        },
+        {
+          "key": "resource_requirements",
+          "label": "منابع موردنیاز",
+          "type": "relation",
+          "source": "engineering.opc_resource_requirement",
+          "requirement": "required",
+          "ui_zone": "details or table"
+        }
+      ],
+      "actions": [
+        "افزودن عملیات",
+        "اعتبارسنجی گراف",
+        "ثبت زمان‌سنجی"
+      ],
+      "status": "prototype-only",
+      "approval": "not approved for development",
+      "api": {
+        "GET": "/engineering/opc",
+        "POST": "/engineering/opc/draft",
+        "VALIDATE": "/engineering/opc/validate"
+      },
+      "state_requirements": [
+        "وابستگی حلقوی مجاز نیست.",
+        "Setup و Cure از Labor Time جدا هستند."
+      ],
+      "source_of_truth": "refer to DATA_MODEL.md"
+    },
+    {
+      "page_id": 17,
+      "title": "بسته فنی و آزادسازی مهندسی",
+      "owner_module": "مهندسی و طراحی",
+      "route": "/engineering/releases",
+      "fields": [
+        {
+          "key": "release_package_id",
+          "label": "شناسه بسته",
+          "type": "UUID",
+          "source": "engineering.release_package",
+          "requirement": "required",
+          "ui_zone": "details or table"
+        },
+        {
+          "key": "serial_id",
+          "label": "سریال",
+          "type": "FK",
+          "source": "core.serial",
+          "requirement": "required",
+          "ui_zone": "details or table"
+        },
+        {
+          "key": "bom_revision_id",
+          "label": "BOM Revision",
+          "type": "FK",
+          "source": "engineering.bom_revision",
+          "requirement": "required",
+          "ui_zone": "details or table"
+        },
+        {
+          "key": "opc_revision_id",
+          "label": "OPC Revision",
+          "type": "FK",
+          "source": "engineering.opc_revision",
+          "requirement": "required",
+          "ui_zone": "details or table"
+        },
+        {
+          "key": "pattern_revision_id",
+          "label": "Pattern Revision",
+          "type": "FK",
+          "source": "engineering.pattern_revision",
+          "requirement": "required",
+          "ui_zone": "details or table"
+        },
+        {
+          "key": "release_status",
+          "label": "وضعیت",
+          "type": "enum",
+          "source": "engineering.release_package",
+          "requirement": "required",
+          "ui_zone": "details or table"
+        }
+      ],
+      "actions": [
+        "بررسی سازگاری",
+        "درخواست تأیید",
+        "ایجاد Revision بسته"
+      ],
+      "status": "prototype-only",
+      "approval": "not approved for development",
+      "api": {
+        "GET": "/engineering/releases",
+        "POST": "/engineering/releases/draft",
+        "VALIDATE": "/engineering/releases/validate"
+      },
+      "state_requirements": [
+        "همه Revisionها باید با هم سازگار باشند.",
+        "بسته آزادشده قابل ویرایش نیست."
+      ],
+      "source_of_truth": "refer to DATA_MODEL.md"
+    },
+    {
+      "page_id": 18,
+      "title": "جداسازی و رزرو مواد",
+      "owner_module": "انبار و مواد",
+      "route": "/warehouse/separation",
+      "fields": [
+        {
+          "key": "separation_id",
+          "label": "پرونده جداسازی",
+          "type": "UUID",
+          "source": "warehouse.separation",
+          "requirement": "required",
+          "ui_zone": "details or table"
+        },
+        {
+          "key": "serial_id",
+          "label": "سریال",
+          "type": "FK",
+          "source": "core.serial",
+          "requirement": "required",
+          "ui_zone": "details or table"
+        },
+        {
+          "key": "material_id",
+          "label": "ماده",
+          "type": "FK",
+          "source": "master.material",
+          "requirement": "required",
+          "ui_zone": "details or table"
+        },
+        {
+          "key": "lot_id",
+          "label": "Lot قابل استفاده",
+          "type": "FK",
+          "source": "warehouse.material_lot",
+          "requirement": "required",
+          "ui_zone": "details or table"
+        },
+        {
+          "key": "quantity_reserved",
+          "label": "مقدار رزروشده",
+          "type": "decimal",
+          "source": "warehouse.reservation",
+          "requirement": "required",
+          "ui_zone": "details or table"
+        },
+        {
+          "key": "quality_eligibility",
+          "label": "انطباق گرید",
+          "type": "derived",
+          "source": "qa.material_eligibility",
+          "requirement": "required",
+          "ui_zone": "details or table"
+        }
+      ],
+      "actions": [
+        "رزرو منتخب",
+        "ثبت GAP",
+        "اسکن رول/بارکد",
+        "تأیید تحویل"
+      ],
+      "status": "prototype-only",
+      "approval": "not approved for development",
+      "api": {
+        "GET": "/warehouse/separation",
+        "POST": "/warehouse/separation/draft",
+        "VALIDATE": "/warehouse/separation/validate"
+      },
+      "state_requirements": [
+        "گرید Lot برای سفارش A+ باید قابل استفاده باشد.",
+        "موجودی Snapshot راهکاران ممکن است تأخیر داشته باشد."
+      ],
+      "source_of_truth": "refer to DATA_MODEL.md"
+    },
+    {
+      "page_id": 19,
+      "title": "کسری‌ها و پرونده GAP",
+      "owner_module": "انبار و مواد",
+      "route": "/warehouse/gaps",
+      "fields": [
+        {
+          "key": "gap_id",
+          "label": "شناسه کسری",
+          "type": "UUID",
+          "source": "warehouse.gap_case",
+          "requirement": "required",
+          "ui_zone": "details or table"
+        },
+        {
+          "key": "material_id",
+          "label": "کد ماده",
+          "type": "FK",
+          "source": "master.material",
+          "requirement": "required",
+          "ui_zone": "details or table"
+        },
+        {
+          "key": "serial_id",
+          "label": "سریال",
+          "type": "FK",
+          "source": "core.serial",
+          "requirement": "required",
+          "ui_zone": "details or table"
+        },
+        {
+          "key": "qty_open",
+          "label": "کسری باز",
+          "type": "decimal",
+          "source": "warehouse.gap_case",
+          "requirement": "required",
+          "ui_zone": "details or table"
+        },
+        {
+          "key": "supplier_eta",
+          "label": "وعده تأمین",
+          "type": "timestamp/versioned",
+          "source": "supply.promise_history",
+          "requirement": "read-only",
+          "ui_zone": "details or table"
+        },
+        {
+          "key": "receipt_confirmed",
+          "label": "تأیید دریافت",
+          "type": "FK",
+          "source": "warehouse.receipt_confirmation",
+          "requirement": "required",
+          "ui_zone": "details or table"
+        }
+      ],
+      "actions": [
+        "ایجاد GAP",
+        "ارجاع به تأمین",
+        "بررسی دریافت",
+        "نمایش تأخیر"
+      ],
+      "status": "prototype-only",
+      "approval": "not approved for development",
+      "api": {
+        "GET": "/warehouse/gaps",
+        "POST": "/warehouse/gaps/draft",
+        "VALIDATE": "/warehouse/gaps/validate"
+      },
+      "state_requirements": [
+        "بستن GAP منوط به تأیید انبار است.",
+        "وعده تأمین تاریخچه تغییر دارد."
+      ],
+      "source_of_truth": "refer to DATA_MODEL.md"
+    },
+    {
+      "page_id": 20,
+      "title": "نیازسنجی و تأمین تجمیعی",
+      "owner_module": "تأمین",
+      "route": "/supply/requirements",
+      "fields": [
+        {
+          "key": "program_id",
+          "label": "دوره سفارش",
+          "type": "FK",
+          "source": "planning.order_program",
+          "requirement": "required",
+          "ui_zone": "details or table"
+        },
+        {
+          "key": "material_id",
+          "label": "ماده",
+          "type": "FK",
+          "source": "master.material",
+          "requirement": "required",
+          "ui_zone": "details or table"
+        },
+        {
+          "key": "gross_requirement",
+          "label": "نیاز ناخالص",
+          "type": "decimal",
+          "source": "planning.mrp_projection",
+          "requirement": "derived",
+          "ui_zone": "details or table"
+        },
+        {
+          "key": "eligible_stock",
+          "label": "موجودی واجد شرایط",
+          "type": "decimal",
+          "source": "warehouse.stock_snapshot",
+          "requirement": "read-only",
+          "ui_zone": "details or table"
+        },
+        {
+          "key": "forecast_consumed",
+          "label": "مقدار Forecast مصرف‌شده",
+          "type": "decimal",
+          "source": "planning.forecast_consumption",
+          "requirement": "derived",
+          "ui_zone": "details or table"
+        },
+        {
+          "key": "net_requirement",
+          "label": "نیاز خالص",
+          "type": "decimal",
+          "source": "planning.mrp_projection",
+          "requirement": "derived",
+          "ui_zone": "details or table"
+        }
+      ],
+      "actions": [
+        "بازمحاسبه نیاز",
+        "ثبت برنامه خرید",
+        "مقایسه تأمین‌کنندگان",
+        "ذخیره Snapshot"
+      ],
+      "status": "prototype-only",
+      "approval": "not approved for development",
+      "api": {
+        "GET": "/supply/requirements",
+        "POST": "/supply/requirements/scenarios",
+        "VALIDATE": "/supply/requirements/validate"
+      },
+      "state_requirements": [
+        "Forecast و سفارش قطعی دوبار شمرده نشود.",
+        "قیمت و موجودی باید دارای تاریخ اعتبار باشد."
+      ],
+      "source_of_truth": "refer to DATA_MODEL.md"
+    }
+  ]
+}

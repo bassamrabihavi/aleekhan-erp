@@ -1,0 +1,36 @@
+﻿decision_id,priority,decision_gate,domain,issue,status,source,owner,affects_phase
+DEC-001,P0,Gate-0,Platform,تصویب Django/DRF یا جایگزین FastAPI و استراتژی Migration,PROPOSED,ADR_001_TECH_STACK,IT + کارفرما,PHASE_00
+DEC-002,P0,Gate-0,Platform,استقرار سرور داخل شرکت یا محیط خصوصی مورد تأیید و سیاست اینترنت,OPEN,architectural requirement,IT + کارفرما,PHASE_00
+DEC-003,P0,Gate-0,Security,مکانیزم کاربران/SSO/MFA، سطح دسترسی واحدها و تفکیک حقوق,OPEN,security baseline proposal,IT + HR + کارفرما,PHASE_00
+DEC-004,P0,Gate-0,Security,RPO/RTO، سیاست Backup/Restore و دسترسی incident,OPEN,risk model proposal,IT + کارفرما,PHASE_00
+DEC-005,P0,Phase-2,Identity,Golden Test قواعد NOrder/Codding/Sorce برای همه خانواده‌ها,OPEN,Planning--.xlsm,برنامه‌ریزی + بازرگانی,PHASE_02
+DEC-006,P0,Phase-2,Identity,قاعده دقیق namespace/فرمت Serial و رابطه order line,PROPOSED,user process + audit,برنامه‌ریزی,PHASE_02
+DEC-007,P0,Phase-3,Die,قرارداد دقیق محل و شیوه درج کاندیدای تیغه در Tracker,OPEN,user-confirmed workflow; AutoJ-BoM.py incomplete,مهندسی + برنامه‌ریزی,PHASE_03
+DEC-008,P0,Phase-3,Die,ستون‌ها و شرایط تخصیص کد ۱۴رقمی تیغه و شرح راهکاران در Tracker,OPEN,جدول پیگیری تیغه(1).xlsx,مهندسی + مالک راهکاران,PHASE_03
+DEC-009,P1,Phase-3,Cliche,بررسی کدهای تکراری کلیشه با ابعاد/شرح متعارض,OPEN,جدول کلیشه.xlsx,مهندسی,PHASE_03
+DEC-010,P0,Phase-4,Engineering,تأیید مسیر تفصیلی کفش/عملیات و وابستگی‌ها,OPEN,route currently proposal,مهندسی کفش,PHASE_04
+DEC-011,P0,Phase-4,Time Study,نحوه نمونه‌برداری زمان، allowance/rating، review authority,OPEN,time capacity spec proposed,مهندسی + تولید,PHASE_04
+DEC-012,P0,Phase-5,Capacity,تعریف رسمی SWU (پیشنهادی ۶۰ نفر-دقیقه استاندارد) و سیاست بازکاری,OPEN,time capacity spec proposed,مدیریت تولید + برنامه‌ریزی,PHASE_05
+DEC-013,P0,Phase-5,Capacity,تقویم و ساعات دقیق شیفت، استراحت، مهارت، تعطیلی/خرابی,OPEN,factory time data not supplied,منابع انسانی + تولید,PHASE_05
+DEC-014,P1,Phase-5,Planning,قانون FastTrack priority و جلوگیری از starvation,PROPOSED,planning architecture,برنامه‌ریزی,PHASE_05
+DEC-015,P0,Phase-6,Inventory,معنی موجودی آزاد/رزروشده/QA hold/منفی و مرجع وضعیت فیزیکی,OPEN,ListData (2).xlsx only aggregate,انبار + QA,PHASE_06
+DEC-016,P0,Phase-6,Integration,مدت اعتبار Snapshot راهکاران و سیاست reimport/تطبیق,OPEN,current import is Excel snapshot,انبار + IT,PHASE_06
+DEC-017,P0,Phase-6,UOM,جدول تبدیل واحدها فوت/متر/رول/جفت/عدد با owner,OPEN,inventory includes mixed units,انبار + مهندسی,PHASE_06
+DEC-018,P1,Phase-7,Production,سیاست Offline/Queue در سالن و QR/device policy,OPEN,production requirement,تولید + IT,PHASE_07
+DEC-019,P0,Phase-8,Quality,جدول گرید A+/A/B/C و مجوز انحراف مشتری به تفکیک Revision,OPEN,QC requirement,QA/QC + بازرگانی,PHASE_08
+DEC-020,P0,Phase-9,Dispatch,شرایط بستن Serial و تأیید دریافت مشتری,PROPOSED,user process,بازرگانی + انبار محصول,PHASE_09
+DEC-021,P1,Phase-10,Finance,جزئیات نرخ کار/ماشین/سربار/مواد و Costing,OPEN,business no verified rates,مالی + تولید,PHASE_10
+DEC-022,P0,Phase-10,HR,مشمولان دسترسی به داده حقوق و تصویب تغییرات,OPEN,privacy requirement,منابع انسانی + کارفرما,PHASE_10
+DEC-023,P0,Phase-11,AI,محیط و Provider مجاز برای AI و scope داده قابل استفاده,OPEN,AI privacy,IT + کارفرما,PHASE_11
+DEC-024,P1,Phase-11,Admin,فهرست Jobهای غیرقابل Force Kill و پروتکل Recovery,PROPOSED,safety requirement,IT,PHASE_11
+DEC-025,P1,Phase-12,Migration,نسخه صریح مپ تمام شیت‌ها و VBA با Golden Tests,OPEN,Planning/WH remain complex,Data Steward + برنامه‌ریزی,PHASE_12
+DEC-026,P0,Phase-13,Pilot,واحد/سریال‌های پایلوت و امضاهای پذیرش/UAT,OPEN,pilot must use real factory process,کارفرما + همه مالکان,PHASE_13
+DEC-027,P1,Phase-0,UI,صفحات ۱ و ۲ HTML مستقل ندارند؛ scope approval و Design System,OPEN,52 draft catalog manifest,کارفرما + UI Lead,PHASE_01
+DEC-028,P0,Phase-0,Privacy,اجازه استفاده از فایل‌های RAW در Codex/Claude محیط ابری یا فقط Local,OPEN,PRIVATE source package,IT + کارفرما,PHASE_00
+DEC-029,P1,Phase-3,CAD,معیار انتخاب Revision DXF به جای newest file modified,PROPOSED,AutoJ-BoM.py legacy flawed,مهندسی,PHASE_03
+DEC-030,P1,Phase-12,Integration,مالک Snapshot و تطبیق شرح‌های متفاوت راهکاران/Tracker,OPEN,source discrepancies prior audit,انبار + مهندسی,PHASE_12
+DEC-031,P1,Phase-4,BOM,تکلیف ستون‌های چندگانه متریال و رنگ/خررجکار/پرت,PROPOSED,user dynamic materials,مهندسی,PHASE_04
+DEC-032,P1,Phase-1,Workflow,الگوی maker-checker و دوره نگهداری Audit,PROPOSED,security policy,IT + کارفرما,PHASE_01
+DEC-033,P1,Phase-6,Supply,نحوه ثبت تأمین ساخت ابزار جدا از خرید ماده,PROPOSED,tool process user description,تأمین + مهندسی,PHASE_06
+DEC-034,P1,Phase-5,Shifts,دو شیفت چرخشی قابل نگاشت به ۱۰/۱۲ نفر؛ وضعیت واقعی و زمان شیفت,OPEN,factory staffing context not time table,تولید + HR,PHASE_05
+DEC-035,P0,Phase-12,Legacy,Macro behavior source form / sheet reference source mapping must be proved,OPEN,Excel unexecuted legacy,برنامه‌ریزی + IT,PHASE_12

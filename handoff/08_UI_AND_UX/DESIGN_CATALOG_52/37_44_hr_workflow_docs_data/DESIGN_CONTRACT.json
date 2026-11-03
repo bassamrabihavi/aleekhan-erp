@@ -1,0 +1,918 @@
+{
+  "schema_version": "0.1-draft",
+  "project": "ALEEKHAN-ERP",
+  "shared": {
+    "company": "سراجی سنتی عالیخان",
+    "status": "Prototype only — not a deployable implementation",
+    "display_locale": "fa-IR",
+    "direction": "rtl",
+    "numbers": "UI Persian, canonical storage typed",
+    "date_display": "Jalali in UI, UTC timestamp and business date in DB",
+    "devices": {
+      "desktop": {
+        "size": "1600x980",
+        "layout": "Sidebar right auto-hide/hover + 2-3 columns; tables may scroll inside panel"
+      },
+      "laptop": {
+        "size": "1366x850",
+        "layout": "Sidebar right auto-hide/hover + adaptive columns"
+      },
+      "tablet": {
+        "size": "820x1080",
+        "layout": "Right-side drawer + stacked major panels"
+      },
+      "mobile": {
+        "size": "390x844",
+        "layout": "Right-side drawer + single column, controls prioritized"
+      }
+    }
+  },
+  "pages": {
+    "37": {
+      "page_id": 37,
+      "title": "عملکرد کارکنان و خطوط",
+      "owner_module": "منابع انسانی و عملکرد",
+      "readers": [
+        "برنامه‌ریزی",
+        "سرپرست تولید",
+        "مدیرعامل"
+      ],
+      "primary_entities": [
+        "Employee",
+        "EmployeeSkill",
+        "Shift",
+        "Attendance",
+        "EmployeeTarget",
+        "TargetRevision",
+        "OperationExecution",
+        "EmployeePerformancePeriod",
+        "SWUMetricRevision"
+      ],
+      "fields": [
+        {
+          "key": "employee_id",
+          "label": "رابطه کارمند",
+          "type": "EmployeeRef",
+          "required": true,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "shift_id",
+          "label": "شیفت",
+          "type": "ShiftRef",
+          "required": true,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "period_from/to",
+          "label": "بازه گزارش",
+          "type": "DateRange",
+          "required": true,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "original_swu_target",
+          "label": "هدف اولیه",
+          "type": "Decimal",
+          "required": true,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "adjusted_swu_target",
+          "label": "هدف اصلاح‌شده",
+          "type": "Decimal",
+          "required": true,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "earned_standard_minutes",
+          "label": "دقایق استاندارد کسب‌شده",
+          "type": "Decimal",
+          "required": true,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "productive_minutes",
+          "label": "زمان مولد",
+          "type": "Decimal",
+          "required": true,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "excluded_downtime_minutes",
+          "label": "توقف خارج از کنترل",
+          "type": "Decimal",
+          "required": false,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "quality_acceptance_rate",
+          "label": "نرخ قبولی کیفیت",
+          "type": "Decimal",
+          "required": true,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "target_revision_reason",
+          "label": "دلیل تغییر هدف",
+          "type": "Enum+Text",
+          "required": false,
+          "ui_placement": "per prototype / detailed review pending"
+        }
+      ],
+      "commands": [
+        "RequestTargetRevision",
+        "ApproveTargetRevision",
+        "SavePerformanceReport"
+      ],
+      "queries": [
+        "GetEmployeePerformance",
+        "GetTargetHistory",
+        "GetShiftPerformance"
+      ],
+      "events": [
+        "EmployeeTargetRevised",
+        "OperationEarnedTimePosted"
+      ],
+      "invariants": [
+        "زمان خارج از کنترل بدون تایید دلیل از مخرج KPI کسر نشود",
+        "هدف اولیه هرگز بازنویسی نشود",
+        "حقوق و نرخ شخصی در پاسخ سرپرست نمایش داده نشود"
+      ],
+      "permissions": "Server-side RBAC + Scope + Field/Action permission; no front-end-only enforcement",
+      "status": "DRAFT_NOT_APPROVED",
+      "demo_data": "All screen-specific values are illustrative, not verified live records."
+    },
+    "38": {
+      "page_id": 38,
+      "title": "مهارت‌ها، آموزش و درخواست تغییر حقوق",
+      "owner_module": "منابع انسانی",
+      "readers": [
+        "سرپرست خط",
+        "مدیرعامل",
+        "برنامه‌ریزی"
+      ],
+      "primary_entities": [
+        "Employee",
+        "Skill",
+        "EmployeeSkill",
+        "Certification",
+        "TrainingRecord",
+        "SalaryHistory",
+        "SalaryChangeRequest",
+        "SalaryRecommendation",
+        "SalaryApproval"
+      ],
+      "fields": [
+        {
+          "key": "employee_id",
+          "label": "کارمند",
+          "type": "EmployeeRef",
+          "required": true,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "skill_id",
+          "label": "نوع مهارت",
+          "type": "SkillRef",
+          "required": true,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "skill_level",
+          "label": "سطح مهارت ۱ تا ۵",
+          "type": "SmallInt",
+          "required": true,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "valid_until",
+          "label": "اعتبار گواهی",
+          "type": "Date",
+          "required": false,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "training_record_id",
+          "label": "آموزش",
+          "type": "TrainingRef",
+          "required": false,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "salary_current",
+          "label": "حقوق فعلی",
+          "type": "ConfidentialMoney",
+          "required": false,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "effective_from",
+          "label": "تاریخ اثر تغییر حقوق",
+          "type": "Date",
+          "required": true,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "change_reason",
+          "label": "دلیل تغییر",
+          "type": "Text",
+          "required": true,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "approver_id",
+          "label": "تأییدکننده",
+          "type": "EmployeeRef",
+          "required": true,
+          "ui_placement": "per prototype / detailed review pending"
+        }
+      ],
+      "commands": [
+        "RequestSalaryReview",
+        "SubmitHRReview",
+        "ApproveSalaryChange",
+        "UpdateSkillCertificate"
+      ],
+      "queries": [
+        "GetEmployeeSkills",
+        "GetSalaryChangeQueue",
+        "GetSkillValidity"
+      ],
+      "events": [
+        "CertificateExpired",
+        "SalaryChangeApproved"
+      ],
+      "invariants": [
+        "مسیر تأیید حقوق حداقل از ارزیابی عملکرد و HR و مدیریت عبور کند",
+        "درخواست‌دهنده نمی‌تواند همان درخواست را تأیید کند",
+        "AI حق تغییر خودکار حقوق ندارد",
+        "حقوق برای کاربر فاقد مجوز از Response حذف شود"
+      ],
+      "permissions": "Server-side RBAC + Scope + Field/Action permission; no front-end-only enforcement",
+      "status": "DRAFT_NOT_APPROVED",
+      "demo_data": "All screen-specific values are illustrative, not verified live records."
+    },
+    "39": {
+      "page_id": 39,
+      "title": "صندوق کارها و تأییدهای سازمانی",
+      "owner_module": "گردش کار و همکاری سازمانی",
+      "readers": [
+        "همه واحدها"
+      ],
+      "primary_entities": [
+        "Task",
+        "TaskAssignment",
+        "TaskDependency",
+        "Approval",
+        "TaskSLA",
+        "TaskComment",
+        "Referral",
+        "Meeting",
+        "WorkflowDefinition"
+      ],
+      "fields": [
+        {
+          "key": "task_id",
+          "label": "شناسه تسک",
+          "type": "UUID",
+          "required": true,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "subject",
+          "label": "موضوع",
+          "type": "Text",
+          "required": true,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "entity_type/id",
+          "label": "موجودیت مرتبط",
+          "type": "EntityReference",
+          "required": true,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "owner_user_or_unit",
+          "label": "مسئول فرد/واحد",
+          "type": "AssignableRef",
+          "required": true,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "due_at",
+          "label": "سررسید",
+          "type": "DateTime",
+          "required": true,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "status",
+          "label": "وضعیت",
+          "type": "Enum",
+          "required": true,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "blocked_by_task",
+          "label": "وابستگی مانع",
+          "type": "TaskRef",
+          "required": false,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "reason",
+          "label": "دلیل انسداد/ارجاع",
+          "type": "Text",
+          "required": false,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "approval_requirement",
+          "label": "نوع تأیید",
+          "type": "WorkflowRule",
+          "required": true,
+          "ui_placement": "per prototype / detailed review pending"
+        }
+      ],
+      "commands": [
+        "CreateTask",
+        "AssignTask",
+        "CompleteTask",
+        "RequestReassignment",
+        "ApproveTaskClosure"
+      ],
+      "queries": [
+        "ListTaskInbox",
+        "GetTaskDependencies",
+        "GetPendingApprovals"
+      ],
+      "events": [
+        "TaskAssigned",
+        "TaskBlocked",
+        "TaskVerified"
+      ],
+      "invariants": [
+        "Completed با Closed یکی نیست",
+        "ارجاع بین واحدها ثبت دلیل و کنترل Scope داشته باشد",
+        "SLA Pause تنها بر اساس Rule با منبع مانع انجام شود"
+      ],
+      "permissions": "Server-side RBAC + Scope + Field/Action permission; no front-end-only enforcement",
+      "status": "DRAFT_NOT_APPROVED",
+      "demo_data": "All screen-specific values are illustrative, not verified live records."
+    },
+    "40": {
+      "page_id": 40,
+      "title": "مدیریت اسناد فنی و نسخه‌ها",
+      "owner_module": "سرویس اسناد و رسانه",
+      "readers": [
+        "مهندسی",
+        "برنامه‌ریزی",
+        "تولید",
+        "QA"
+      ],
+      "primary_entities": [
+        "Document",
+        "DocumentRevision",
+        "FileMetadata",
+        "FileHash",
+        "DocumentRelationship",
+        "CheckOutLock",
+        "Approval"
+      ],
+      "fields": [
+        {
+          "key": "document_id",
+          "label": "شناسه سند",
+          "type": "UUID",
+          "required": true,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "entity_scope",
+          "label": "متعلق به محصول/استایل/سریال",
+          "type": "EntityReference",
+          "required": true,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "document_type",
+          "label": "نوع سند",
+          "type": "Enum",
+          "required": true,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "revision",
+          "label": "نسخه",
+          "type": "RevisionId",
+          "required": true,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "status",
+          "label": "وضعیت تأیید",
+          "type": "Enum",
+          "required": true,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "unc_path",
+          "label": "مسیر UNC",
+          "type": "Path",
+          "required": true,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "sha256",
+          "label": "هش فایل",
+          "type": "SHA256",
+          "required": true,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "parent_revision",
+          "label": "والد نسخه",
+          "type": "RevisionRef",
+          "required": false,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "approved_by",
+          "label": "تایید کننده",
+          "type": "UserRef",
+          "required": false,
+          "ui_placement": "per prototype / detailed review pending"
+        }
+      ],
+      "commands": [
+        "CheckoutDocument",
+        "CheckinDocument",
+        "SubmitDocumentReview",
+        "ApproveRevision"
+      ],
+      "queries": [
+        "SearchDocumentRegistry",
+        "GetDocumentRevisions",
+        "ValidateFileHash"
+      ],
+      "events": [
+        "DocumentRevisionApproved",
+        "ApprovedFileHashMismatch"
+      ],
+      "invariants": [
+        "Approved Immutable",
+        "عدم انتخاب Latest از روی ModifiedDate",
+        "مسیر UNC نگهداری شود",
+        "جداکردن اسناد Master از Snapshot سریال"
+      ],
+      "permissions": "Server-side RBAC + Scope + Field/Action permission; no front-end-only enforcement",
+      "status": "DRAFT_NOT_APPROVED",
+      "demo_data": "All screen-specific values are illustrative, not verified live records."
+    },
+    "41": {
+      "page_id": 41,
+      "title": "مرکز استانداردسازی و کیفیت داده",
+      "owner_module": "حاکمیت داده / Steward تخصصی",
+      "readers": [
+        "تأمین",
+        "مهندسی",
+        "انبار",
+        "یکپارچه‌سازی"
+      ],
+      "primary_entities": [
+        "CanonicalTerm",
+        "MaterialAlias",
+        "OperationAlias",
+        "NormalizationSuggestion",
+        "DataQualityIssue",
+        "DoNotMergePair",
+        "MasterRevision"
+      ],
+      "fields": [
+        {
+          "key": "raw_value",
+          "label": "متن خام",
+          "type": "UnicodeText",
+          "required": true,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "normalized_value",
+          "label": "نسخه نوشتاری",
+          "type": "UnicodeText",
+          "required": true,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "canonical_id",
+          "label": "هویت Master پیشنهادی",
+          "type": "MasterRef",
+          "required": false,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "reference_code",
+          "label": "کد راهکاران",
+          "type": "Code14OrMaterialCode",
+          "required": false,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "confidence",
+          "label": "اطمینان پیشنهاد",
+          "type": "EnumOrDecimal",
+          "required": false,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "context",
+          "label": "خانواده ماده/نقش مصرف",
+          "type": "JSONSchema",
+          "required": false,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "decision",
+          "label": "تصمیم Steward",
+          "type": "Enum",
+          "required": false,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "reason",
+          "label": "دلیل تصمیم",
+          "type": "Text",
+          "required": false,
+          "ui_placement": "per prototype / detailed review pending"
+        }
+      ],
+      "commands": [
+        "ProposeAlias",
+        "ResolveDataQualityIssue",
+        "FlagDoNotMerge",
+        "RequestMasterCreation"
+      ],
+      "queries": [
+        "FindCanonicalCandidates",
+        "GetMaterialCodeConflict",
+        "ListQualityIssues"
+      ],
+      "events": [
+        "AliasApproved",
+        "MaterialNameConflictFound"
+      ],
+      "invariants": [
+        "Code↔Canonical conflict Block BOM release",
+        "Finglish semantic mapping بدون تایید حساس مجاز نیست",
+        "RawValue همیشه حفظ شود",
+        "درخواست ادغام دارای DoNotMerge ممنوع است"
+      ],
+      "permissions": "Server-side RBAC + Scope + Field/Action permission; no front-end-only enforcement",
+      "status": "DRAFT_NOT_APPROVED",
+      "demo_data": "All screen-specific values are illustrative, not verified live records."
+    },
+    "42": {
+      "page_id": 42,
+      "title": "مدیریت پارامترها و چیدمان صفحات",
+      "owner_module": "مدیریت سیستم / حاکمیت پیکربندی",
+      "readers": [
+        "طراح سیستم",
+        "Stewardهای واحد"
+      ],
+      "primary_entities": [
+        "ParameterDefinition",
+        "ParameterAssignment",
+        "TypedParameterValue",
+        "UIZone",
+        "LayoutRevision",
+        "ValidationRule",
+        "FieldAccessPolicy"
+      ],
+      "fields": [
+        {
+          "key": "system_key",
+          "label": "کلید فنی ثابت",
+          "type": "Slug",
+          "required": true,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "label_fa",
+          "label": "برچسب فارسی",
+          "type": "UnicodeText",
+          "required": true,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "entity_scope",
+          "label": "دامنه موجودیت",
+          "type": "EntityEnum",
+          "required": true,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "datatype",
+          "label": "نوع داده",
+          "type": "Enum",
+          "required": true,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "zone",
+          "label": "مکان فرم",
+          "type": "UIZoneRef",
+          "required": true,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "display_order",
+          "label": "ترتیب نمایش",
+          "type": "Int",
+          "required": true,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "required_if",
+          "label": "شرط اجباری",
+          "type": "RuleExpression",
+          "required": false,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "effective_from",
+          "label": "تاریخ اعتبار",
+          "type": "Date",
+          "required": true,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "security_class",
+          "label": "طبقه محرمانگی",
+          "type": "Enum",
+          "required": true,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "searchable",
+          "label": "قابل جستجو",
+          "type": "Boolean",
+          "required": true,
+          "ui_placement": "per prototype / detailed review pending"
+        }
+      ],
+      "commands": [
+        "CreateParameterDraft",
+        "ReorderLayoutFields",
+        "ValidateLayout",
+        "SubmitLayoutApproval",
+        "PublishLayoutRevision",
+        "RollbackLayout"
+      ],
+      "queries": [
+        "GetParameterCatalog",
+        "PreviewLayout",
+        "GetLayoutRevisionDiff"
+      ],
+      "events": [
+        "ParameterDefinitionCreated",
+        "UILayoutPublished"
+      ],
+      "invariants": [
+        "کلید فنی پس از ساخت تغییر نکند",
+        "چرخش فرمول و وابستگی حلقوی رد شود",
+        "فیلد اجباری جدید روی تاریخچه بدون Migration اعمال نشود",
+        "قبل از Publish تست و Approval الزامی است"
+      ],
+      "permissions": "Server-side RBAC + Scope + Field/Action permission; no front-end-only enforcement",
+      "status": "DRAFT_NOT_APPROVED",
+      "demo_data": "All screen-specific values are illustrative, not verified live records."
+    },
+    "43": {
+      "page_id": 43,
+      "title": "مرکز ورود فایل‌های راهکاران",
+      "owner_module": "یکپارچه‌سازی داده‌ها",
+      "readers": [
+        "انبار",
+        "برنامه‌ریزی",
+        "مالی",
+        "تأمین"
+      ],
+      "primary_entities": [
+        "ImportProfile",
+        "ImportBatch",
+        "SourceFile",
+        "RawExcelCell",
+        "StagingRow",
+        "HeaderMapping",
+        "ValidationFinding"
+      ],
+      "fields": [
+        {
+          "key": "profile_id",
+          "label": "پروفایل ورود",
+          "type": "ImportProfileRef",
+          "required": true,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "source_file_id",
+          "label": "شناسه فایل",
+          "type": "UUID",
+          "required": true,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "file_sha256",
+          "label": "Hash فایل",
+          "type": "SHA256",
+          "required": true,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "source_snapshot_at",
+          "label": "زمان Snapshot ERP",
+          "type": "Timestamp",
+          "required": true,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "sheet_name",
+          "label": "شیت منبع",
+          "type": "UnicodeText",
+          "required": true,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "cell_address",
+          "label": "نشانی سلول",
+          "type": "ExcelAddress",
+          "required": true,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "raw_value",
+          "label": "مقدار خام",
+          "type": "RawText",
+          "required": false,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "mapped_value",
+          "label": "مقدار مقصد",
+          "type": "Typed",
+          "required": false,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "validation_status",
+          "label": "وضعیت بررسی",
+          "type": "Enum",
+          "required": true,
+          "ui_placement": "per prototype / detailed review pending"
+        }
+      ],
+      "commands": [
+        "UploadRahkaranExport",
+        "ValidateImportBatch",
+        "MapSourceHeader",
+        "ApproveImportBatch"
+      ],
+      "queries": [
+        "ListImportProfiles",
+        "GetImportFindings",
+        "PreviewStagingBatch"
+      ],
+      "events": [
+        "ImportBatchValidated",
+        "RahkaranSnapshotReconciled"
+      ],
+      "invariants": [
+        "فقط خواندن، بدون Writeback",
+        "هیچ Import بدون Reconciliation/Control Totals عملیاتی نشود",
+        "Duplicate DocumentLine Idempotent",
+        "شماره‌سریال ممکن است در فیلد اضافی با Mapping پروفایل قرار گیرد"
+      ],
+      "permissions": "Server-side RBAC + Scope + Field/Action permission; no front-end-only enforcement",
+      "status": "DRAFT_NOT_APPROVED",
+      "demo_data": "All screen-specific values are illustrative, not verified live records."
+    },
+    "44": {
+      "page_id": 44,
+      "title": "مرکز مغایرت و تطبیق اطلاعات",
+      "owner_module": "یکپارچه‌سازی داده‌ها / امضای مالک واحد",
+      "readers": [
+        "انبار",
+        "QA",
+        "QC",
+        "برنامه‌ریزی",
+        "مالی"
+      ],
+      "primary_entities": [
+        "ReconciliationBatch",
+        "ReconciliationFinding",
+        "ControlTotal",
+        "SourceSnapshot",
+        "Resolution",
+        "OwnerSignoff"
+      ],
+      "fields": [
+        {
+          "key": "finding_id",
+          "label": "کد مغایرت",
+          "type": "UUID",
+          "required": true,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "entity_reference",
+          "label": "موجودیت مرتبط",
+          "type": "EntityReference",
+          "required": true,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "erp_snapshot_id",
+          "label": "شناسه Snapshot رسمی",
+          "type": "SourceRef",
+          "required": true,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "operational_value",
+          "label": "مقدار عملیاتی",
+          "type": "Typed",
+          "required": false,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "erp_value",
+          "label": "مقدار رسمی ERP",
+          "type": "Typed",
+          "required": false,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "uom",
+          "label": "واحد",
+          "type": "UOM",
+          "required": false,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "difference",
+          "label": "مقدار اختلاف",
+          "type": "Decimal",
+          "required": false,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "resolution_type",
+          "label": "نوع اصلاح",
+          "type": "Enum",
+          "required": false,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "evidence_doc_id",
+          "label": "مدرک",
+          "type": "DocumentRef",
+          "required": false,
+          "ui_placement": "per prototype / detailed review pending"
+        },
+        {
+          "key": "owner_signoff",
+          "label": "تأیید مسئول",
+          "type": "ApprovalRef",
+          "required": false,
+          "ui_placement": "per prototype / detailed review pending"
+        }
+      ],
+      "commands": [
+        "CreateReconciliation",
+        "RecordFindingDecision",
+        "RequestERPAdjustment",
+        "SignoffReconciliation"
+      ],
+      "queries": [
+        "GetReconciliationBatch",
+        "CompareSourceSnapshots",
+        "GetControlTotals"
+      ],
+      "events": [
+        "ReconciliationFindingResolved",
+        "ImportApprovedAfterReconciliation"
+      ],
+      "invariants": [
+        "بدون اختلاف صفر یا Signoff معتبر پرونده بسته نشود",
+        "اختلاف با بازنویسی تاریخچه رفع نشود",
+        "موجودی رسمی را Platform از خود اختراع نکند",
+        "Source Snapshot timestamp همیشه نمایش یابد"
+      ],
+      "permissions": "Server-side RBAC + Scope + Field/Action permission; no front-end-only enforcement",
+      "status": "DRAFT_NOT_APPROVED",
+      "demo_data": "All screen-specific values are illustrative, not verified live records."
+    }
+  }
+}

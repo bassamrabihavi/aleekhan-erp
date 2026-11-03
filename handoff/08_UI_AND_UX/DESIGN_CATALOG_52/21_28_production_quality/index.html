@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#f5f6f8"><title>صفحات ۲۱ تا ۲۸ | سراجی سنتی عالیخان</title><link rel="stylesheet" href="assets/styles.css"></head>
+<body>
+<aside id="sidebar" class="sidebar" aria-label="منوی اصلی">
+ <div class="brand"><div class="brand-emblem">ع</div><div class="brand-text"><strong>سراجی سنتی عالیخان</strong><small>ALEEKHAN TRADITIONAL LEATHER</small></div><button id="pinSidebar" class="tiny" aria-label="ثابت کردن سایدبار" title="ثابت کردن سایدبار">◉</button></div>
+ <nav class="mainnav" id="mainnav">
+ <a href="?page=21" data-nav="cutting"><span class="nav-ic">✂</span><span class="nav-txt">برش</span></a>
+ <a href="?page=22" data-nav="production"><span class="nav-ic">▤</span><span class="nav-txt">تولید و خطوط</span></a>
+ <a href="?page=23" data-nav="terminal"><span class="nav-ic">▣</span><span class="nav-txt">ترمینال اپراتور</span></a>
+ <a href="?page=24" data-nav="qa"><span class="nav-ic">◇</span><span class="nav-txt">تضمین کیفیت (QA)</span></a>
+ <a href="?page=25" data-nav="qc"><span class="nav-ic">✓</span><span class="nav-txt">کنترل کیفیت (QC)</span></a>
+ <a href="?page=26" data-nav="fg"><span class="nav-ic">▦</span><span class="nav-txt">انبار محصول</span></a>
+ <a href="?page=27" data-nav="shipping"><span class="nav-ic">⇥</span><span class="nav-txt">ارسال و تحویل</span></a>
+ <a href="?page=28" data-nav="supervisor"><span class="nav-ic">▥</span><span class="nav-txt">سرپرست خط</span></a>
+ </nav>
+ <div class="sidebar-bottom"><span class="nav-ic">⚙</span><span class="nav-txt">نمونه آزمایشی UI · v0.1</span></div>
+</aside>
+<div class="overlay" id="overlay"></div>
+<div class="shell" id="shell">
+<header class="topbar"><div class="topbar-right"><button id="menuToggle" class="menu-toggle" aria-label="بازکردن منو">☰</button><span class="org-mini">سراجی سنتی عالیخان</span><div class="breadcrumbs"><span id="breadcrumbOwner"></span><span class="sep"> / </span><strong id="breadcrumbTitle"></strong></div></div><div class="topbar-search"><span>⌕</span><input id="searchAll" type="search" placeholder="جستجو در همین صفحه، سریال، ماده یا کد…" aria-label="جستجو در صفحه"/><kbd>Ctrl K</kbd></div><div class="topbar-left"><span class="demo-pill"><i></i>داده نمایشی</span><span class="today">۱۰ آبان ۱۴۰۵</span><button class="bell" id="notifications" title="اعلان‌های نمونه">♧<em>۳</em></button><div class="avatar">م</div></div></header>
+<main class="content">
+ <div class="eyebrow"><span id="pageIndicator"></span><span class="info-dot">●</span><span>طرح مفهومی؛ گردش واقعی پس از اتصال Backend</span></div>
+ <section class="pagehead"><div class="titlezone"><div class="module-pill" id="modulePill"></div><h1 id="pageTitle"></h1><p id="pageIntro"></p></div><div class="head-actions"><button id="sourceButton" class="btn ghost">منبع و مالک داده</button><button id="guideButton" class="btn ghost">قواعد و کنترل‌ها</button><button id="mainAction" class="btn primary"></button></div></section>
+ <div class="pages-strip" id="pagesStrip" aria-label="صفحات این بسته"></div>
+ <section class="metric-grid" id="metrics"></section>
+ <div class="workspace"><div class="main-column">
+ <section class="panel"><div class="panel-h"><div><h2 id="processTitle">مسیر کار</h2><p id="processSub">مراحل مرتبط با این صفحه</p></div><span class="panel-hint" id="sourceTag">نمونه</span></div><div id="processViz" class="process-viz"></div></section>
+ <section class="panel worktable"><div class="panel-h"><div><h2 id="tableTitle"></h2><p id="tableSubtitle"></p></div><div class="table-actions"><button class="btn ghost" id="addRow">افزودن نمونه</button><button class="btn ghost" id="validatePage">کنترل داده‌ها</button></div></div>
+ <div class="filterbar"><label>جستجو در جدول<input id="filterRows" type="search" placeholder="عبارت یا شماره…"/></label><label>وضعیت<select id="statusSelect"><option value="">همه وضعیت‌ها</option><option>آماده</option><option>در حال انجام</option><option>در انتظار</option><option>نیازمند بررسی</option><option>مسدود</option><option>تکمیل</option><option>تأیید شده</option></select></label><span id="tableCounter"></span></div>
+ <div class="table-scroll"><table><thead id="tableHead"></thead><tbody id="tableBody"></tbody></table></div>
+ </section>
+ </div><div class="aux-column"><section class="panel focus-panel"><div class="panel-h"><div><h2 id="focusTitle"></h2><p id="focusSub">اطلاعات و کنترل‌های اصلی</p></div></div><div id="focusVisual"></div><div id="fieldList"></div></section><section class="panel alerts-panel"><div class="panel-h"><h2>هشدارها و تصمیم‌های لازم</h2><span class="warn-pill">قابل پیگیری</span></div><div id="warnings"></div></section></div></div>
+ <section class="lower-grid"><div class="panel"><div class="panel-h"><h2>تسک‌ها و رویدادهای اخیر</h2><button id="viewLog" class="link-button">مشاهده تاریخچه</button></div><div id="activityList"></div></div><div class="panel"><div class="panel-h"><h2>قواعد تخصصی این صفحه</h2><span class="panel-hint">الزام طراحی</span></div><div id="rulesList"></div></div></section>
+ <footer>سراجی سنتی عالیخان · طرح صفحات ۲۱ تا ۲۸ · بدون اتصال به راهکاران، دیتابیس یا خط تولید · همه مقادیر نمونه‌اند</footer>
+</main></div>
+<dialog id="actionDialog"><div class="dialog-title"><h2 id="dialogTitle">ثبت آزمایشی</h2><button class="tiny" id="closeDialog" aria-label="بستن پنجره">✕</button></div><p id="dialogDescription"></p><div class="dialog-grid"><label>تعداد / مقدار (آزمایشی)<input id="dialogQty" type="number" min="0" step="1" value="1"/></label><label>دلیل / توضیح<textarea id="dialogReason" rows="3" placeholder="برای درخواست حساس، دلیل الزامی است"></textarea></label></div><div class="dialog-foot"><button id="abortDialog" class="btn ghost">انصراف</button><button id="confirmDialog" class="btn primary">ثبت فقط در این نمونه</button></div></dialog>
+<div class="toast" id="toast" role="status"></div><script src="assets/app.js"></script></body></html>

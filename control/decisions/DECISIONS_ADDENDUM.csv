@@ -1,0 +1,9 @@
+decision_id,priority,decision_gate,domain,issue,status,source,owner,affects_phase
+DEC-036,P0,Gate-0,Governance,انتقال نقش ممیز از ChatGPT به ممیز مستقل Claude (subagent جدا با context تازه) + تأیید Gate فقط توسط کارفرما,PROPOSED,درخواست کارفرما در گفت‌وگو 2026-11-03,کارفرما,PHASE_00
+DEC-037,P1,Gate-0,Source,نسخه‌های جدید Planning--.xlsm و WH-.xlsm (هش متفاوت با Registry) و فایل جدید PSD.py: کدام نسخه مبنای Golden Test است؟,OPEN,آپلود کارفرما 2026-11-03,برنامه‌ریزی + انبار + مهندسی,PHASE_00
+DEC-038,P1,Gate-12,Pilot,گام‌های فاز ۱۳ و ۱۴ همان قالب عمومی ۸ گامی است (Database/Engine در پایلوت معنی ندارد)؛ برنامه گام اختصاصی پایلوت و Go-Live باید نوشته و تصویب شود,OPEN,ممیزی بسته 2026-11-03,کارفرما + مدیر پروژه,PHASE_12
+DEC-039,P1,Gate-0,Platform,ممیزی قبلی readiness پیشنهاد FastAPI داده ولی ADR_001 پیشنهاد Django دارد؛ در تصمیم DEC-001 صریحاً یکی انتخاب شود,OPEN,ADR_001 vs readiness_legacy_audit_v1/DEVELOPMENT_GATES_FA.md,IT + کارفرما,PHASE_00
+DEC-040,P1,Gate-0,Security,رمز فایل‌های Planning/WH در گفت‌وگو ارسال شده؛ فقط در متغیر محیطی ALEEKHAN_SRC_PASSWORD نگهداری و پس از مهاجرت تعویض شود,OPEN,پیام کارفرما 2026-11-03,IT,PHASE_00
+DEC-041,P0,Gate-0,Platform,مخزن Git مشترک برای کار از دو سیستم (ویندوز محل کار و اوبونتو خانه): GitHub خصوصی یا Gitea داخلی + VPN,OPEN,درخواست کارفرما 2026-11-03,کارفرما + IT,PHASE_00
+DEC-042,P0,Gate-0,Platform,محل میزبانی نسخه آنلاین (Production): سرور داخل شرکت با IP ثابت یا دیتاسنتر داخل ایران؛ و قاعده ورود از بیرون کارخانه,OPEN,درخواست کارفرما 2026-11-03: همه چیز تحت وب و آنلاین,کارفرما + IT,PHASE_00
+DEC-043,P0,Phase-1,Identity,درخت سلسله‌مراتب سازمانی (OrgUnit/Position/Reports-to) داخل سامانه؛ تعریف کاربران فقط توسط ادمین مالک سامانه,OPEN,درخواست کارفرما 2026-11-03؛ در بسته handoff پوشش ندارد,کارفرما,PHASE_01

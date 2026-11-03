@@ -1,0 +1,419 @@
+[
+  {
+    "phase": "PHASE_00",
+    "title_en": "Baseline & Architecture Lock",
+    "title_fa": "تثبیت قراردادهای مبنا و راه‌اندازی مخزن امن",
+    "pages": [
+      0
+    ],
+    "depends_on": [],
+    "state": "NOT_STARTED",
+    "gate": "BLOCKED_UNTIL_ACCEPTED",
+    "required_substeps": [
+      "00.1",
+      "00.2",
+      "00.3",
+      "00.4",
+      "00.5",
+      "00.6",
+      "00.7",
+      "00.8"
+    ]
+  },
+  {
+    "phase": "PHASE_01",
+    "title_en": "Platform & Identity",
+    "title_fa": "هسته سازمانی، امنیت، اسناد و گردش کار",
+    "pages": [
+      36,
+      39,
+      40,
+      42,
+      46
+    ],
+    "depends_on": [
+      "PHASE_00"
+    ],
+    "state": "NOT_STARTED",
+    "gate": "BLOCKED_UNTIL_ACCEPTED",
+    "required_substeps": [
+      "01.1",
+      "01.2",
+      "01.3",
+      "01.4",
+      "01.5",
+      "01.6",
+      "01.7",
+      "01.8"
+    ]
+  },
+  {
+    "phase": "PHASE_02",
+    "title_en": "Order & Product Identity",
+    "title_fa": "مشتری، محصول، استایل، ثبت سفارش و سریال",
+    "pages": [
+      1,
+      2,
+      4,
+      29,
+      33
+    ],
+    "depends_on": [
+      "PHASE_01"
+    ],
+    "state": "NOT_STARTED",
+    "gate": "BLOCKED_UNTIL_ACCEPTED",
+    "required_substeps": [
+      "02.1",
+      "02.2",
+      "02.3",
+      "02.4",
+      "02.5",
+      "02.6",
+      "02.7",
+      "02.8"
+    ]
+  },
+  {
+    "phase": "PHASE_03",
+    "title_en": "Engineering Tools & DXF",
+    "title_fa": "تیغه، کلیشه، مقر، لیویس و بسته فنی",
+    "pages": [
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      17
+    ],
+    "depends_on": [
+      "PHASE_01",
+      "PHASE_02"
+    ],
+    "state": "NOT_STARTED",
+    "gate": "BLOCKED_UNTIL_ACCEPTED",
+    "required_substeps": [
+      "03.1",
+      "03.2",
+      "03.3",
+      "03.4",
+      "03.5",
+      "03.6",
+      "03.7",
+      "03.8"
+    ]
+  },
+  {
+    "phase": "PHASE_04",
+    "title_en": "BOM, OPC & Time Study",
+    "title_fa": "ساختار مواد، قطعه، مسیر عملیات، استاندارد زمان",
+    "pages": [
+      5,
+      6,
+      15,
+      16
+    ],
+    "depends_on": [
+      "PHASE_02",
+      "PHASE_03"
+    ],
+    "state": "NOT_STARTED",
+    "gate": "BLOCKED_UNTIL_ACCEPTED",
+    "required_substeps": [
+      "04.1",
+      "04.2",
+      "04.3",
+      "04.4",
+      "04.5",
+      "04.6",
+      "04.7",
+      "04.8"
+    ]
+  },
+  {
+    "phase": "PHASE_05",
+    "title_en": "Planning & Finite Capacity",
+    "title_fa": "تقاضا، تعهد، سناریوی ظرفیت و زمان‌بندی",
+    "pages": [
+      3,
+      30,
+      31,
+      32,
+      33,
+      51
+    ],
+    "depends_on": [
+      "PHASE_02",
+      "PHASE_04"
+    ],
+    "state": "NOT_STARTED",
+    "gate": "BLOCKED_UNTIL_ACCEPTED",
+    "required_substeps": [
+      "05.1",
+      "05.2",
+      "05.3",
+      "05.4",
+      "05.5",
+      "05.6",
+      "05.7",
+      "05.8"
+    ]
+  },
+  {
+    "phase": "PHASE_06",
+    "title_en": "Warehouse, Supply & ERP Snapshot",
+    "title_fa": "انبار مواد، راهکاران، تفکیک و GAP",
+    "pages": [
+      18,
+      19,
+      20,
+      24,
+      43,
+      44,
+      49
+    ],
+    "depends_on": [
+      "PHASE_01",
+      "PHASE_02",
+      "PHASE_04"
+    ],
+    "state": "NOT_STARTED",
+    "gate": "BLOCKED_UNTIL_ACCEPTED",
+    "required_substeps": [
+      "06.1",
+      "06.2",
+      "06.3",
+      "06.4",
+      "06.5",
+      "06.6",
+      "06.7",
+      "06.8"
+    ]
+  },
+  {
+    "phase": "PHASE_07",
+    "title_en": "Cutting & Production MES",
+    "title_fa": "برش، خطوط، بچ، اپراتور و توقف‌ها",
+    "pages": [
+      21,
+      22,
+      23,
+      28,
+      48,
+      51
+    ],
+    "depends_on": [
+      "PHASE_03",
+      "PHASE_04",
+      "PHASE_05",
+      "PHASE_06"
+    ],
+    "state": "NOT_STARTED",
+    "gate": "BLOCKED_UNTIL_ACCEPTED",
+    "required_substeps": [
+      "07.1",
+      "07.2",
+      "07.3",
+      "07.4",
+      "07.5",
+      "07.6",
+      "07.7",
+      "07.8"
+    ]
+  },
+  {
+    "phase": "PHASE_08",
+    "title_en": "QA / QC / NCR / CAPA",
+    "title_fa": "کیفیت مواد و محصول، گرید و بازکاری",
+    "pages": [
+      24,
+      25,
+      50
+    ],
+    "depends_on": [
+      "PHASE_04",
+      "PHASE_06",
+      "PHASE_07"
+    ],
+    "state": "NOT_STARTED",
+    "gate": "BLOCKED_UNTIL_ACCEPTED",
+    "required_substeps": [
+      "08.1",
+      "08.2",
+      "08.3",
+      "08.4",
+      "08.5",
+      "08.6",
+      "08.7",
+      "08.8"
+    ]
+  },
+  {
+    "phase": "PHASE_09",
+    "title_en": "Finished Goods & Dispatch",
+    "title_fa": "انبار محصول، ارسال جزئی و بستن سریال",
+    "pages": [
+      26,
+      27
+    ],
+    "depends_on": [
+      "PHASE_02",
+      "PHASE_07",
+      "PHASE_08"
+    ],
+    "state": "NOT_STARTED",
+    "gate": "BLOCKED_UNTIL_ACCEPTED",
+    "required_substeps": [
+      "09.1",
+      "09.2",
+      "09.3",
+      "09.4",
+      "09.5",
+      "09.6",
+      "09.7",
+      "09.8"
+    ]
+  },
+  {
+    "phase": "PHASE_10",
+    "title_en": "Cost, HR & BI",
+    "title_fa": "بهای تمام‌شده، منابع انسانی و داشبورد",
+    "pages": [
+      34,
+      35,
+      37,
+      38
+    ],
+    "depends_on": [
+      "PHASE_04",
+      "PHASE_05",
+      "PHASE_07",
+      "PHASE_09"
+    ],
+    "state": "NOT_STARTED",
+    "gate": "BLOCKED_UNTIL_ACCEPTED",
+    "required_substeps": [
+      "10.1",
+      "10.2",
+      "10.3",
+      "10.4",
+      "10.5",
+      "10.6",
+      "10.7",
+      "10.8"
+    ]
+  },
+  {
+    "phase": "PHASE_11",
+    "title_en": "AI, Rules & Administration",
+    "title_fa": "دستیار AI، قوانین پویا و مانیتورینگ",
+    "pages": [
+      36,
+      42,
+      45,
+      47
+    ],
+    "depends_on": [
+      "PHASE_01",
+      "PHASE_02",
+      "PHASE_06",
+      "PHASE_07"
+    ],
+    "state": "NOT_STARTED",
+    "gate": "BLOCKED_UNTIL_ACCEPTED",
+    "required_substeps": [
+      "11.1",
+      "11.2",
+      "11.3",
+      "11.4",
+      "11.5",
+      "11.6",
+      "11.7",
+      "11.8"
+    ]
+  },
+  {
+    "phase": "PHASE_12",
+    "title_en": "Migration & Integration Dress Rehearsal",
+    "title_fa": "مهاجرت و آزمون سرتاسری روی داده امن",
+    "pages": [
+      40,
+      43,
+      44
+    ],
+    "depends_on": [
+      "PHASE_01",
+      "PHASE_02",
+      "PHASE_03",
+      "PHASE_04",
+      "PHASE_05",
+      "PHASE_06",
+      "PHASE_07",
+      "PHASE_08",
+      "PHASE_09",
+      "PHASE_10",
+      "PHASE_11"
+    ],
+    "state": "NOT_STARTED",
+    "gate": "BLOCKED_UNTIL_ACCEPTED",
+    "required_substeps": [
+      "12.1",
+      "12.2",
+      "12.3",
+      "12.4",
+      "12.5",
+      "12.6",
+      "12.7",
+      "12.8"
+    ]
+  },
+  {
+    "phase": "PHASE_13",
+    "title_en": "Factory Pilot & Fix Loop",
+    "title_fa": "پایلوت عملیاتی کنترل‌شده و بازخورد",
+    "pages": [
+      52
+    ],
+    "depends_on": [
+      "PHASE_12"
+    ],
+    "state": "NOT_STARTED",
+    "gate": "BLOCKED_UNTIL_ACCEPTED",
+    "required_substeps": [
+      "13.1",
+      "13.2",
+      "13.3",
+      "13.4",
+      "13.5",
+      "13.6",
+      "13.7",
+      "13.8"
+    ]
+  },
+  {
+    "phase": "PHASE_14",
+    "title_en": "Go Live & Support",
+    "title_fa": "بهره‌برداری کنترل‌شده و پشتیبانی",
+    "pages": [
+      52
+    ],
+    "depends_on": [
+      "PHASE_13"
+    ],
+    "state": "NOT_STARTED",
+    "gate": "BLOCKED_UNTIL_ACCEPTED",
+    "required_substeps": [
+      "14.1",
+      "14.2",
+      "14.3",
+      "14.4",
+      "14.5",
+      "14.6",
+      "14.7",
+      "14.8"
+    ]
+  }
+]

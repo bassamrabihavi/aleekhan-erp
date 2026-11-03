@@ -1,0 +1,22 @@
+{
+  "release": "v1.0",
+  "reference_as_of": "2026-11-01",
+  "pages": 52,
+  "ui_html_refs": 50,
+  "ui_without_html": [
+    1,
+    2
+  ],
+  "phase_count": 15,
+  "substep_count": 120,
+  "source_count": 46,
+  "source_bytes": 97841670,
+  "decision_count": 35,
+  "acceptance_cases": 42,
+  "status": "HANDOFF_READY_GATE_0_ONLY",
+  "business_approvals": "NOT_ALL_APPROVED",
+  "code_written": "NO_NEW_APPLICATION_CODE",
+  "source_hashes_verified": true,
+  "ui_reference_paths_verified": true,
+  "reviewer_note": "No phase implementation or production security audit performed by this package"
+}

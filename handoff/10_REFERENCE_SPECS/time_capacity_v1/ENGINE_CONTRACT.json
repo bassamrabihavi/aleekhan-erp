@@ -1,0 +1,443 @@
+{
+  "schema_version": "1.0.0",
+  "status": "PROPOSED_FOR_REVIEW_NOT_APPROVED",
+  "scope": "Time study, approved operation standards and finite capacity planning for Aleekhan",
+  "software_implementation_authority": "Codex_or_Claude_Code_only",
+  "product_families": [
+    {
+      "code": "BAG",
+      "output_uom": "each",
+      "operations": [
+        {
+          "code": "BAG-010",
+          "title_fa": "مواد و پیش‌نیاز",
+          "provenance": "PROPOSED",
+          "std_person_min": null,
+          "std_machine_min": null,
+          "std_setup_min": null
+        },
+        {
+          "code": "BAG-020",
+          "title_fa": "لمینت",
+          "provenance": "LEGACY_ROUTE",
+          "std_person_min": null,
+          "std_machine_min": null,
+          "std_setup_min": null
+        },
+        {
+          "code": "BAG-030",
+          "title_fa": "دایکات/نوار",
+          "provenance": "LEGACY_ROUTE",
+          "std_person_min": null,
+          "std_machine_min": null,
+          "std_setup_min": null
+        },
+        {
+          "code": "BAG-040",
+          "title_fa": "داغی/کلیشه",
+          "provenance": "CONDITIONAL",
+          "std_person_min": null,
+          "std_machine_min": null,
+          "std_setup_min": null
+        },
+        {
+          "code": "BAG-050",
+          "title_fa": "رنگ لبه/خشک‌شدن",
+          "provenance": "CONDITIONAL",
+          "std_person_min": null,
+          "std_machine_min": null,
+          "std_setup_min": null
+        },
+        {
+          "code": "BAG-060",
+          "title_fa": "قطعه‌سازی",
+          "provenance": "LEGACY_ROUTE",
+          "std_person_min": null,
+          "std_machine_min": null,
+          "std_setup_min": null
+        },
+        {
+          "code": "BAG-070",
+          "title_fa": "کلاف/مونتاژ",
+          "provenance": "LEGACY_ROUTE",
+          "std_person_min": null,
+          "std_machine_min": null,
+          "std_setup_min": null
+        },
+        {
+          "code": "BAG-080",
+          "title_fa": "QC",
+          "provenance": "LEGACY_ROUTE",
+          "std_person_min": null,
+          "std_machine_min": null,
+          "std_setup_min": null
+        },
+        {
+          "code": "BAG-090",
+          "title_fa": "بسته‌بندی",
+          "provenance": "PROPOSED",
+          "std_person_min": null,
+          "std_machine_min": null,
+          "std_setup_min": null
+        }
+      ]
+    },
+    {
+      "code": "SHOE",
+      "output_uom": "pair",
+      "operations": [
+        {
+          "code": "SHOE-010",
+          "title_fa": "کنترل الگو/مواد",
+          "provenance": "PROPOSED",
+          "std_person_min": null,
+          "std_machine_min": null,
+          "std_setup_min": null
+        },
+        {
+          "code": "SHOE-020",
+          "title_fa": "برش رویه/آستر",
+          "provenance": "PROPOSED",
+          "std_person_min": null,
+          "std_machine_min": null,
+          "std_setup_min": null
+        },
+        {
+          "code": "SHOE-030",
+          "title_fa": "لیویس/آماده‌سازی",
+          "provenance": "PROPOSED",
+          "std_person_min": null,
+          "std_machine_min": null,
+          "std_setup_min": null
+        },
+        {
+          "code": "SHOE-040",
+          "title_fa": "دوخت رویه",
+          "provenance": "PROPOSED",
+          "std_person_min": null,
+          "std_machine_min": null,
+          "std_setup_min": null
+        },
+        {
+          "code": "SHOE-050",
+          "title_fa": "کارکشی/قالب",
+          "provenance": "PROPOSED",
+          "std_person_min": null,
+          "std_machine_min": null,
+          "std_setup_min": null
+        },
+        {
+          "code": "SHOE-060",
+          "title_fa": "اتصال زیره",
+          "provenance": "PROPOSED",
+          "std_person_min": null,
+          "std_machine_min": null,
+          "std_setup_min": null
+        },
+        {
+          "code": "SHOE-070",
+          "title_fa": "تکمیل",
+          "provenance": "PROPOSED",
+          "std_person_min": null,
+          "std_machine_min": null,
+          "std_setup_min": null
+        },
+        {
+          "code": "SHOE-080",
+          "title_fa": "QC جفت",
+          "provenance": "PROPOSED",
+          "std_person_min": null,
+          "std_machine_min": null,
+          "std_setup_min": null
+        },
+        {
+          "code": "SHOE-090",
+          "title_fa": "بسته‌بندی",
+          "provenance": "PROPOSED",
+          "std_person_min": null,
+          "std_machine_min": null,
+          "std_setup_min": null
+        }
+      ]
+    },
+    {
+      "code": "BELT",
+      "output_uom": "each",
+      "operations": [
+        {
+          "code": "BLT-010",
+          "title_fa": "لمینت",
+          "provenance": "LEGACY_ROUTE",
+          "std_person_min": null,
+          "std_machine_min": null,
+          "std_setup_min": null
+        },
+        {
+          "code": "BLT-020",
+          "title_fa": "آرایش/پانچ",
+          "provenance": "LEGACY_ROUTE",
+          "std_person_min": null,
+          "std_machine_min": null,
+          "std_setup_min": null
+        },
+        {
+          "code": "BLT-030",
+          "title_fa": "رنگ لبه",
+          "provenance": "LEGACY_ROUTE",
+          "std_person_min": null,
+          "std_machine_min": null,
+          "std_setup_min": null
+        },
+        {
+          "code": "BLT-040",
+          "title_fa": "پل/برگ",
+          "provenance": "LEGACY_ROUTE",
+          "std_person_min": null,
+          "std_machine_min": null,
+          "std_setup_min": null
+        },
+        {
+          "code": "BLT-050",
+          "title_fa": "مونتاژ سگک",
+          "provenance": "LEGACY_ROUTE",
+          "std_person_min": null,
+          "std_machine_min": null,
+          "std_setup_min": null
+        },
+        {
+          "code": "BLT-060",
+          "title_fa": "QC",
+          "provenance": "LEGACY_ROUTE",
+          "std_person_min": null,
+          "std_machine_min": null,
+          "std_setup_min": null
+        },
+        {
+          "code": "BLT-070",
+          "title_fa": "بسته‌بندی",
+          "provenance": "PROPOSED",
+          "std_person_min": null,
+          "std_machine_min": null,
+          "std_setup_min": null
+        }
+      ]
+    },
+    {
+      "code": "POCKET",
+      "output_uom": "each",
+      "operations": [
+        {
+          "code": "PCK-010",
+          "title_fa": "پیش‌نیاز",
+          "provenance": "LEGACY_ROUTE",
+          "std_person_min": null,
+          "std_machine_min": null,
+          "std_setup_min": null
+        },
+        {
+          "code": "PCK-020",
+          "title_fa": "پیش‌قطعه",
+          "provenance": "LEGACY_ROUTE",
+          "std_person_min": null,
+          "std_machine_min": null,
+          "std_setup_min": null
+        },
+        {
+          "code": "PCK-030",
+          "title_fa": "قطعه‌سازی",
+          "provenance": "LEGACY_ROUTE",
+          "std_person_min": null,
+          "std_machine_min": null,
+          "std_setup_min": null
+        },
+        {
+          "code": "PCK-040",
+          "title_fa": "رنگ لبه",
+          "provenance": "LEGACY_ROUTE",
+          "std_person_min": null,
+          "std_machine_min": null,
+          "std_setup_min": null
+        },
+        {
+          "code": "PCK-050",
+          "title_fa": "کلاف/مونتاژ",
+          "provenance": "LEGACY_ROUTE",
+          "std_person_min": null,
+          "std_machine_min": null,
+          "std_setup_min": null
+        },
+        {
+          "code": "PCK-060",
+          "title_fa": "QC",
+          "provenance": "LEGACY_ROUTE",
+          "std_person_min": null,
+          "std_machine_min": null,
+          "std_setup_min": null
+        },
+        {
+          "code": "PCK-070",
+          "title_fa": "بسته‌بندی",
+          "provenance": "PROPOSED",
+          "std_person_min": null,
+          "std_machine_min": null,
+          "std_setup_min": null
+        }
+      ]
+    }
+  ],
+  "time_study": {
+    "study_statuses": [
+      "NOT_STUDIED",
+      "STUDY_PLANNED",
+      "COLLECTING",
+      "DRAFT",
+      "UNDER_REVIEW",
+      "APPROVED",
+      "PUBLISHED",
+      "SUPERSEDED",
+      "REVALIDATION_REQUIRED"
+    ],
+    "types": [
+      "REPETITIVE_UNIT",
+      "BATCH",
+      "SETUP",
+      "MANUAL",
+      "MACHINE_ACTIVE",
+      "WAIT",
+      "REWORK",
+      "SCRAP",
+      "DOWNTIME"
+    ],
+    "observation_required": [
+      "study_id",
+      "operation_id",
+      "style_revision",
+      "method",
+      "observer_id",
+      "operation_uom",
+      "quantity_input",
+      "quantity_good",
+      "quantity_scrap",
+      "raw_elapsed_seconds",
+      "operator_ids",
+      "resource_ids",
+      "start_utc",
+      "end_utc",
+      "anomaly_flag",
+      "source_hash"
+    ],
+    "approved_standard_required": [
+      "operation_id",
+      "standard_revision",
+      "style_scope",
+      "method",
+      "uom",
+      "approved_basic_person_minutes_per_unit",
+      "allowance_policy_version",
+      "standard_person_minutes_per_unit",
+      "standard_machine_minutes_per_unit",
+      "setup_person_minutes_per_batch",
+      "setup_machine_minutes_per_batch",
+      "wait_calendar_minutes",
+      "source_observation_set_hash",
+      "reviewer_id",
+      "approver_id",
+      "effective_from"
+    ],
+    "allowance_default": null,
+    "performance_rating_default": null,
+    "sample_size_default": null,
+    "calculate": {
+      "person_std": "approved_basic_person_min_per_unit * (1 + approved_allowance_fraction) when allowance_mode=BASIC_PERCENT",
+      "machine_std": "approved_observed_machine_busy_min_per_unit * approved_machine_factor",
+      "effort": "sum(actual active person seconds across operators) / 60",
+      "setup": "record separately per batch (do not fold into repeating cycle for scheduling)"
+    }
+  },
+  "capacity": {
+    "level_1": "eligible available resource minutes / approved per-unit resource demand (screening bound only)",
+    "level_2": "finite-capacity scheduling with precedence, shared resources, skill, shifts, machine downtime, setup, hold, WIP",
+    "calendar": "UTC stored; Asia/Tehran displayed with Persian calendar optional",
+    "hard_constraints": [
+      "no_resource_double_booking",
+      "skill_eligible",
+      "machine_available",
+      "shift_compliant",
+      "approved_OPC_revision",
+      "quality_release",
+      "material_release",
+      "tool_available",
+      "line_transfer_approval"
+    ],
+    "default_durations_for_unstudied_style": null,
+    "no_auto_commit_when_unapproved": true
+  },
+  "swu": {
+    "definition_status": "PENDING_FACTORY_APPROVAL",
+    "candidate_scale_approved_person_minutes_per_SWU": 60,
+    "credit_source": "unique accepted operation completion ledger",
+    "rework_credit_policy": "PENDING_FACTORY_APPROVAL",
+    "setup_credit_policy": "PENDING_FACTORY_APPROVAL"
+  },
+  "ownership": {
+    "standards": "Engineering",
+    "scenarios": "Planning",
+    "execution_events": "Production",
+    "skills": "HR",
+    "machine_availability": "Maintenance",
+    "material_availability": "Warehouse",
+    "quality_holds": "QA_QC",
+    "IT_security": "IT"
+  },
+  "ui_page_mapping": {
+    "16": "OPC time study",
+    "32": "Capacity scenarios",
+    "31": "Gantt",
+    "22": "Line loading",
+    "23": "Operator terminal",
+    "28": "Supervisor",
+    "37": "Person performance",
+    "51": "Maintenance",
+    "48": "Shopfloor board",
+    "36": "Solver jobs"
+  },
+  "security_gates": [
+    "field_scope_access",
+    "two_person_standard_publish",
+    "audit_append_only",
+    "raw_observations_immutable",
+    "source_hash",
+    "server_timestamp",
+    "machine_person_collision_check",
+    "safe_solver_cancel",
+    "untrusted_import_staging",
+    "secret_management",
+    "backup_restore_test"
+  ],
+  "acceptance_test_count": 24,
+  "explicitly_not_approved": [
+    "shoe_route",
+    "swu_scale",
+    "allowance_percentage",
+    "performance_factor",
+    "reference_sample_size",
+    "machine_resource_inventory",
+    "operator_calendars",
+    "worker_certification_rules",
+    "solver_objective_weights"
+  ],
+  "sources": [
+    {
+      "type": "project_prior_confirmed",
+      "description": "پیش‌تر در گفتگوی پروژه: مسیرهای کیف/کمربند/جیبی و دو شیفت چرخشی"
+    },
+    {
+      "type": "external",
+      "url": "https://www.iso.org/obp/ui/?_escaped_fragment_=iso%253Astd%253A54497%253Aen"
+    },
+    {
+      "type": "external",
+      "url": "https://developers.google.com/optimization/scheduling/job_shop"
+    }
+  ]
+}
