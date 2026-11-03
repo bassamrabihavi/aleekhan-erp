@@ -19,13 +19,13 @@
       "steps": {
         "00.1": {
           "name": "Discovery & Contract",
-          "state": "IN_REVIEW",
+          "state": "PASS",
           "commit": "57f4500e87bb936c1b8a622faaee5bb4a657e1d6",
           "report": "reports/phase-00/step-1/REPORT.md",
-          "review": null,
+          "review": "reports/phase-00/step-1/REVIEW.md",
           "rework_cycles": 0,
           "started_at": "2026-11-03T15:21:49+00:00",
-          "done_at": null
+          "done_at": "2026-11-03T15:39:10+00:00"
         },
         "00.2": {
           "name": "Database",
@@ -2237,7 +2237,16 @@
       "status": "APPROVED",
       "by": "کارفرما",
       "note": "گزینه B: یک‌بار بازگردانی بایت‌های CRLF برای ۱۳ CSV در handoff/ (استثنای مجاز بر «handoff ویرایش نشود»)؛ هش PACKAGE_MANIFEST.json به‌عنوان نقص شناخته‌شده بسته مستند می‌ماند؛ C فقط اگر بسته جدید صادر شد"
+    },
+    {
+      "at": "2026-11-03T15:39:10+00:00",
+      "kind": "step",
+      "phase": "PHASE_00",
+      "step": "00.1",
+      "state": "PASS",
+      "note": null,
+      "commit": null
     }
   ],
-  "updated_at": "2026-11-03T15:36:59+00:00"
+  "updated_at": "2026-11-03T15:39:10+00:00"
 }
