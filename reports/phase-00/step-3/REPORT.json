@@ -1,0 +1,83 @@
+{
+  "phase": "PHASE_00",
+  "step": "00.3",
+  "commit_sha": "a6efb53cff09aefdacb50ef48e092ec0041ced6f",
+  "status": "COMPLETE",
+  "scope": [
+    "error catalogue",
+    "unit of work audit+outbox",
+    "idempotency",
+    "optimistic concurrency",
+    "outbox dispatcher",
+    "rule gate",
+    "REV-0005/0006/0007"
+  ],
+  "changes": [
+    "backend/platform_core/engine/",
+    "backend/platform_core/tests/",
+    "docs/engine/",
+    "docs/api/openapi-draft.yaml",
+    "docs/db/README.md",
+    "docs/discovery/STATE_TRANSITIONS.md",
+    "backend/pyproject.toml",
+    "ruff.toml",
+    "backend/requirements-dev.txt"
+  ],
+  "migrations": [],
+  "test_evidence": [
+    {
+      "command": "ruff check . + format --check .",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-3/logs/orch_ruff.log"
+    },
+    {
+      "command": "mypy strict",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-3/logs/orch_mypy.log"
+    },
+    {
+      "command": "pytest 175",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-3/logs/orch_pytest.log"
+    },
+    {
+      "command": "race tests x3",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-3/logs/orch_race_repeat.log"
+    },
+    {
+      "command": "unittest tools/tests",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-3/logs/orch_tools.log"
+    },
+    {
+      "command": "verify_handoff.py",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-3/logs/orch_verify_handoff.log"
+    },
+    {
+      "command": "db_roundtrip.sh",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-3/logs/db_roundtrip.log"
+    }
+  ],
+  "security_evidence": [
+    "redaction of sensitive audit keys",
+    "outbox rejects sensitive payload",
+    "test publisher refused outside test env",
+    "no secrets in logs"
+  ],
+  "decisions": [],
+  "risks": [
+    "technical defaults to confirm in 00.7",
+    "failed-attempt audit in 00.4",
+    "no broker yet",
+    "transitive deps unlocked"
+  ],
+  "evidence_paths": [
+    "reports/phase-00/step-3/logs/",
+    "docs/engine/"
+  ],
+  "rollback": "git revert a6efb53cff09aefdacb50ef48e092ec0041ced6f",
+  "review_request": "PASS"
+}
