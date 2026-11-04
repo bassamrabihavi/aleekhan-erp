@@ -8,5 +8,5 @@
 - The logo replaces the placeholder emblem «ع» in the app shell header (`frontend/src/components/AppShell.tsx`). Wiring is scheduled with the next UI-touching step (00.6) and goes through implementer + reviewer.
 - Always render with a Persian `alt` text: «لوگوی سراجی سنتی عالیخان».
 - Do not recolour, crop or stretch; keep the aspect ratio.
-- Logo colour is dark green, while the current design tokens use blue as the primary colour and gold for the emblem (`docs/ui/DESIGN_TOKENS.md`). Whether to align the palette with the logo is an open employer question, not decided by the agent.
+- Palette (employer choice, 2026-11-04): the logo's dark green becomes the primary brand colour (buttons, links, active nav, focus), replacing the current blue `--color-primary` in `docs/ui/DESIGN_TOKENS.md`. The exact hex values are sampled from the logo and every text/background pair is re-checked for WCAG AA contrast during the implementing step; status colours (success/warning/danger) must stay distinguishable from the new primary.
 - Source is a 300 px raster; a vector (SVG) master from the designer is preferred for print and large screens.
