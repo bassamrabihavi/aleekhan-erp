@@ -9,3 +9,4 @@ DEC-042,P0,Gate-0,Platform,محل میزبانی نسخه آنلاین (Producti
 DEC-043,P0,Phase-1,Identity,درخت سلسله‌مراتب سازمانی (OrgUnit/Position/Reports-to) داخل سامانه؛ تعریف کاربران فقط توسط ادمین مالک سامانه,OPEN,درخواست کارفرما 2026-11-03؛ در بسته handoff پوشش ندارد,کارفرما,PHASE_01
 DEC-044,P1,Gate-0,Governance,استثنای سلامت بسته handoff: هش اشتباه PACKAGE_MANIFEST.json و پایان خط ۱۳ فایل CSV,OPEN,گام 00.1 (REV-00.1-A/B) 2026-11-03,کارفرما,PHASE_00
 DEC-045,P0,Gate-0,Platform,محل اجرای CI و محیط آزمایشی/تمرین بازیابی Gate-0,OPEN,گام 00.1 2026-11-03,کارفرما + IT,PHASE_00
+DEC-046,P0,Gate-0,Platform,نمایانی مخزن GitHub: عمومی به‌جای خصوصی (اصلاح بخش «private» از DEC-041؛ REV-0701),OPEN,کارفرما 2026-11-04 (پاسخ به REV-0701),کارفرما,PHASE_00
