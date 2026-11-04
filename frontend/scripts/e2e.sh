@@ -8,7 +8,9 @@
 #
 # Connection: libpq env (PGHOST/PGPORT/PGUSER/PGPASSWORD or ~/.pgpass). The password is never printed.
 # Env: PG_BIN (dir with psql), E2E_DB (default aleekhan_e2e), E2E_PYTHON (default ../.venv python),
-#      PLAYWRIGHT_BROWSERS_PATH (browsers outside the repo), E2E_HTML_REPORT / E2E_OUTPUT_DIR (artefacts).
+#      PLAYWRIGHT_BROWSERS_PATH (browsers outside the repo), E2E_HTML_REPORT / E2E_OUTPUT_DIR (artefacts),
+#      E2E_BROWSER_CHANNEL (unset = bundled Chromium; msedge/chrome = installed browser; frontend/README.md).
+# REV-0603: the environment and browser versions are printed first; a missing browser fails with exit 2.
 set -uo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -35,6 +37,15 @@ port_busy() {
 for p in 8000 5173; do
   if port_busy "$p"; then echo "port $p is already in use - stop that server first" >&2; exit 2; fi
 done
+
+# REV-0603: record the reproduction environment (names / yes-no only; no passwords, no home paths) and fail
+# early with a clear message if the Playwright browser is not available.
+echo "== e2e environment"
+echo "PGHOST=${PGHOST} PGPORT=${PGPORT} PGPASSWORD set: $([ -n "${PGPASSWORD:-}" ] && echo yes || echo no) (value never printed)"
+echo "PG_BIN set: $([ -n "${PG_BIN:-}" ] && echo yes || echo no) | E2E_DB=$DB | E2E_PYTHON: $(basename "$E2E_PYTHON")"
+echo "E2E_BROWSER_CHANNEL=${E2E_BROWSER_CHANNEL:-(unset: bundled chromium)}"
+echo "E2E_SCREENSHOT_DIR set: $([ -n "${E2E_SCREENSHOT_DIR:-}" ] && echo yes || echo no) | E2E_HTML_REPORT set: $([ -n "${E2E_HTML_REPORT:-}" ] && echo yes || echo no) | E2E_OUTPUT_DIR set: $([ -n "${E2E_OUTPUT_DIR:-}" ] && echo yes || echo no)"
+(cd "$HERE" && node scripts/browser-preflight.mjs) || exit 2
 
 cleanup() {
   echo "== drop throw-away database $DB"

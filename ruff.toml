@@ -6,15 +6,27 @@ line-length = 110
 extend-exclude = ["handoff", ".venv", "control", "frontend"]  # frontend/ is linted by eslint + tsc (frontend/package.json)
 
 [lint]
-select = ["E", "F", "W", "I", "B", "UP", "RUF", "DJ"]
+# "S" = flake8-bandit security rules (SAST, 00.7 / SECURITY_BASELINE 5).
+select = ["E", "F", "W", "I", "B", "UP", "RUF", "DJ", "S"]
 # RUF012 flags Django `class Meta` lists (constraints/indexes) - a framework idiom, not shared mutable state.
-ignore = ["RUF012"]
+# S101: `assert` is used only for type-narrowing invariants (never for authorization/validation, which raise
+# typed errors); reviewed in 00.7, tests rely on assert by design.
+ignore = ["RUF012", "S101"]
 
 [lint.per-file-ignores]
 # Django-generated migrations: long lines are the generator's style.
 "backend/*/migrations/*.py" = ["E501"]
 # Persian user-facing texts (message_fa): Arabic-script letters are intended, not confusables.
 "backend/platform_core/engine/errors.py" = ["RUF001"]
+# Persian sensitive-key deny-list and its tests (REV-0602): Persian letters are intended.
+"backend/platform_core/engine/redaction.py" = ["RUF001", "RUF002", "RUF003"]
+"backend/platform_core/tests/test_redaction_persian.py" = ["RUF001", "RUF002", "RUF003"]
+
+# Tests use synthetic secret-like literals on purpose (redaction / log tests).
+"backend/platform_core/tests/*.py" = ["S105", "S106", "S603"]
+"tools/tests/*.py" = ["S105", "S106", "S603", "S607"]
+# Repository tools call the `git` CLI with fixed argument lists (no shell, no untrusted input).
+"tools/secret_scan.py" = ["S603", "S607"]
 
 [lint.isort]
 known-first-party = ["aleekhan", "platform_core"]

@@ -1,0 +1,133 @@
+# Aleekhan CI (PHASE_00 / 00.7, DEC-045 option A: GitHub-hosted runners, SYNTHETIC fixtures only).
+#
+# Every stage is the same command as on the developer machines: `bash tools/ci_local.sh <out> <stage>`
+# (REPOSITORY_AND_RELEASE_CONTRACT_FA order: lint -> type -> unit/integration -> migration -> API contracts
+# -> authorization -> E2E -> security scan -> build/artifacts). A stage that cannot run prints
+# "SKIPPED: <reason>" into its log and summary.md.
+#
+# No repository secrets are used. The PostgreSQL service container is throw-away and uses trust auth on the
+# runner-local port, so there is no database password at all (nothing for the secret scanner to flag).
+#
+# Action pins: major tags (v4/v5). FOLLOW-UP (00.7 report): pin every action to a full commit SHA once the
+# SHAs are verified from the official repositories (not guessed).
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pipeline:
+    name: lint, type, tests, migration, contracts, authz, frontend, e2e, perf, security, ops, artifacts
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      ALEEKHAN_ENV: test
+      ALEEKHAN_MACHINE: github-actions
+      PGHOST: 127.0.0.1
+      PGPORT: "5432"
+      PGUSER: postgres
+      PG_BIN: /usr/lib/postgresql/17/bin
+      CI_OUT: ${{ github.workspace }}/ci-artifacts
+      CI_APPEND: "1"
+      PYTHONIOENCODING: utf-8
+    steps:
+      - name: Checkout (full history for the secret scan)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: PostgreSQL 17 client tools (pg_dump/pg_restore must match the server major)
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q postgresql-common
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
+          sudo apt-get install -y -q postgresql-client-17
+          "$PG_BIN/psql" --version
+          "$PG_BIN/psql" -d postgres -Atc "SHOW server_version"
+
+      - name: Python venv (exact pins)
+        run: |
+          python -m venv .venv
+          .venv/bin/python -m pip install --quiet -r backend/requirements-dev.txt
+          .venv/bin/python -m pip freeze > "$RUNNER_TEMP/pip-freeze.txt"
+
+      - name: "[1] lint (ruff check + format)"
+        run: bash tools/ci_local.sh "$CI_OUT" lint
+      - name: "[2] type (mypy strict)"
+        run: bash tools/ci_local.sh "$CI_OUT" type
+      - name: "[3] tools unit tests"
+        run: bash tools/ci_local.sh "$CI_OUT" tools
+      - name: "[4] unit + integration (pytest, PostgreSQL 17)"
+        run: bash tools/ci_local.sh "$CI_OUT" unit
+      - name: "[5] migration round-trip + makemigrations --check"
+        run: bash tools/ci_local.sh "$CI_OUT" migration
+      - name: "[6] API contract tests (OpenAPI 3.1)"
+        run: bash tools/ci_local.sh "$CI_OUT" contract
+      - name: "[7] authorization (deny-by-default route parity, log redaction)"
+        run: bash tools/ci_local.sh "$CI_OUT" authz
+      - name: "[8] frontend (npm ci, eslint, tsc, vitest, build)"
+        run: bash tools/ci_local.sh "$CI_OUT" frontend
+      - name: Playwright bundled Chromium (Linux)
+        working-directory: frontend
+        run: npx playwright install --with-deps chromium
+      - name: "[9] E2E (Playwright, real Django + PostgreSQL)"
+        run: bash tools/ci_local.sh "$CI_OUT" e2e
+      - name: "[10] perf smoke (TECHNICAL DEFAULT budget)"
+        run: bash tools/ci_local.sh "$CI_OUT" perf
+      - name: "[11] security scan (secrets, pip-audit, npm audit)"
+        run: bash tools/ci_local.sh "$CI_OUT" security
+      - name: "[12] ops (least-privilege roles, backup/restore drill)"
+        run: bash tools/ci_local.sh "$CI_OUT" ops
+      - name: "[13] build artifacts (SBOMs, dist hashes)"
+        run: bash tools/ci_local.sh "$CI_OUT" artifacts
+
+      - name: CI summary
+        if: always()
+        # summary.md is rewritten by tools/ci_local.sh after every stage (CI_APPEND=1 keeps earlier stages)
+        run: |
+          if [ -f "$CI_OUT/summary.md" ]; then cat "$CI_OUT/summary.md" | tee -a "$GITHUB_STEP_SUMMARY"; else echo "no summary (pipeline stopped before the first stage)"; fi
+
+      - name: Upload evidence (logs, junit, screenshots, reports)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-evidence-${{ github.sha }}
+          path: ci-artifacts/
+          retention-days: 30
+          if-no-files-found: warn

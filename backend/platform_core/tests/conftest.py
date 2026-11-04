@@ -45,7 +45,13 @@ def audit_cleanup(transactional_db: None) -> Iterator[None]:
 
 @pytest.fixture
 def clear_cache() -> Iterator[None]:
-    """Rate-limit counters live in the (local-memory) cache: isolate API tests from each other."""
+    """Rate-limit counters live in the (local-memory) cache: isolate API tests from each other.
+
+    Also resets the per-process readiness migrations-check cache (REV-0016)."""
+    from platform_core.api.views import reset_migrations_check_cache
+
     cache.clear()
+    reset_migrations_check_cache()
     yield
     cache.clear()
+    reset_migrations_check_cache()

@@ -2,7 +2,11 @@
 
 ``last_success_at`` is set when a batch of the source is VALIDATED with at least one structurally valid row
 (``imports.validate_batch``). A duplicate import of the same file does not refresh it (it brings no new
-evidence, WH-01). Classification against the source's ``staleness_threshold``:
+evidence, WH-01). Provenance never moves backwards (REV-0601, ``imports.supersedes_freshness``): an older
+or undated snapshot validated after a newer one does not change ``last_success_at`` / ``last_success_batch``
+/ ``last_as_of``. **Basis:** age is measured from *import time* (``last_success_at``), not from the snapshot
+date (``last_as_of``) - TECHNICAL DEFAULT pending DEC-016; the API always returns ``last_as_of`` next to the
+classification so the UI can show the data date. Classification against the source's ``staleness_threshold``:
 
 * ``never``  no successful import yet;
 * ``fresh``  ``now - last_success_at <= threshold`` (a timestamp in the future counts as age 0);

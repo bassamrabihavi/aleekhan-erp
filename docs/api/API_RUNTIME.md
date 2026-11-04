@@ -75,7 +75,7 @@ bodies, headers or query strings. Rule for all code: no secrets or personal data
 | `ALEEKHAN_BUILD_COMMIT` | staging/prod | `0000000` (= unknown build, dev/test only) | hex git sha, 7–40 chars; shown truncated to 12 |
 | `DJANGO_DEBUG` | no | `0` | honoured only in dev/test |
 | `ALEEKHAN_RATE_ANON` / `_PRINCIPAL` / `_HEALTH` | no | `60/min` / `600/min` / `120/min` | `<n>/<s\|m\|h\|d>` |
-| `ALEEKHAN_NUM_PROXIES` | no | `0` | trusted reverse proxies for `X-Forwarded-For`; `0` = use `REMOTE_ADDR` only (XFF ignored) |
+| `ALEEKHAN_NUM_PROXIES` | staging/prod behind the proxy: `1` | `0` | trusted reverse proxies for `X-Forwarded-For`; `0` = use `REMOTE_ADDR` only (XFF ignored). REV-0015 (00.7): staging/prod refuse to start with `ALEEKHAN_TRUST_PROXY_TLS_HEADER=1` and `NUM_PROXIES=0` (all clients would share the proxy's rate-limit bucket) |
 | `ALEEKHAN_REDIS_URL` | recommended staging/prod | unset → local memory | shared rate-limit counters (see §5) |
 | `ALEEKHAN_TRUST_PROXY_TLS_HEADER` | no | `0` | trust `X-Forwarded-Proto: https` from the proxy |
 | `ALEEKHAN_SSL_REDIRECT` | no | `1` in staging/prod | `/api/v1/health/*` exempt (internal probes) |
@@ -83,8 +83,13 @@ bodies, headers or query strings. Rule for all code: no secrets or personal data
 | `ALEEKHAN_HSTS_INCLUDE_SUBDOMAINS` | no | `0` | |
 | `ALEEKHAN_MAX_BODY_BYTES` | no | `1048576` | |
 
-`backend/.env.example` should list these names with placeholders (not updated in 00.4: the file is outside
-this step's readable scope — orchestrator follow-up).
+`backend/.env.example` should list these names with placeholders. REV-0014 is still open after 00.7: the
+implementing agent is denied access to that file; `test_settings_env.py::test_env_example_lists_every_settings_variable`
+(currently skipped with that reason) checks it once the orchestrator has updated the file.
+
+`/health/ready` caches the migrations check per process for 10 s (REV-0016, `views.MIGRATIONS_CHECK_TTL_SECONDS`,
+TECHNICAL DEFAULT): building the migration executor loads the migration graph from disk. Failures are never
+cached. Database and cache checks still run on every call.
 
 ## 5. Cache backend
 

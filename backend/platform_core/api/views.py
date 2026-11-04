@@ -8,6 +8,8 @@ from __future__ import annotations
 import logging
 import re
 import secrets
+import threading
+import time
 from datetime import UTC, datetime
 from typing import Any, Final
 
@@ -55,10 +57,37 @@ def _check_database() -> str:
     return "up" if row == (1,) else "down"
 
 
-def _check_migrations() -> str:
+# REV-0016: building a MigrationExecutor loads the whole migration graph from disk; the public readiness probe
+# caches the result per process for a short time. TECHNICAL DEFAULT (10 s), not a business rule.
+MIGRATIONS_CHECK_TTL_SECONDS: Final = 10.0
+_migrations_lock = threading.Lock()
+_migrations_cached: tuple[float, str] | None = None
+_monotonic = time.monotonic  # indirection for tests
+
+
+def _compute_migrations_status() -> str:
     executor = MigrationExecutor(connections[DEFAULT_DB_ALIAS])
     plan = executor.migration_plan(executor.loader.graph.leaf_nodes())
     return "up" if not plan else "down"
+
+
+def reset_migrations_check_cache() -> None:
+    global _migrations_cached
+    with _migrations_lock:
+        _migrations_cached = None
+
+
+def _check_migrations() -> str:
+    """Cached for :data:`MIGRATIONS_CHECK_TTL_SECONDS`; failures are never cached (they raise)."""
+    global _migrations_cached
+    with _migrations_lock:
+        now = _monotonic()
+        cached = _migrations_cached
+        if cached is not None and now - cached[0] < MIGRATIONS_CHECK_TTL_SECONDS:
+            return cached[1]
+        status = _compute_migrations_status()
+        _migrations_cached = (now, status)
+        return status
 
 
 def _check_cache() -> str:

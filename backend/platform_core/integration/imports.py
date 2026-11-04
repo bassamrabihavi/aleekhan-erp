@@ -19,7 +19,9 @@ policy).
 * :func:`stage_rows` - RECEIVED -> STAGED: stores rows (sheet, row number, JSON payload, payload SHA-256).
   Rows with sensitive keys (password/salary/...) are refused before anything is stored (DEC-028).
 * :func:`validate_batch` - STAGED -> VALIDATED: structural checks (``EMPTY_ROW``, ``DUPLICATE_PAYLOAD``) plus
-  optional per-source validators (none is approved in PHASE_00). Updates source freshness.
+  optional per-source validators (none is approved in PHASE_00). Updates source freshness monotonically:
+  never backwards (REV-0601, :func:`supersedes_freshness`); age is measured from import time, a TECHNICAL
+  DEFAULT until DEC-016 decides whether the snapshot date (``source_as_of``) is the basis.
 * :func:`reject_batch` - by an identified user with a reason.
 
 Every transition = one unit of work (state + audit + outbox event).
@@ -390,17 +392,19 @@ def validate_batch(
         )
         batch.refresh_from_db(using=using)
         valid_rows = batch.row_count - error_rows
-        if valid_rows > 0:
-            IntegrationSource.objects.using(using).filter(pk=batch.source_id).update(
-                last_success_at=now, last_success_batch=batch, last_as_of=batch.source_as_of
-            )
+        freshness_advanced = valid_rows > 0 and _advance_freshness(batch, now, using)
         uow.audit(
             action="platform.integration.batch.validate",
             resource_type="platform.import_batch",
             resource_id=str(batch.id),
             resource_version=batch.row_version,
             before={"status": B.STAGED},
-            after={"status": B.VALIDATED, "row_count": batch.row_count, "error_row_count": error_rows},
+            after={
+                "status": B.VALIDATED,
+                "row_count": batch.row_count,
+                "error_row_count": error_rows,
+                "freshness_advanced": freshness_advanced,
+            },
             scope={"source_code": batch.source.code},
         )
         uow.emit(
@@ -411,6 +415,45 @@ def validate_batch(
             payload=_event_payload(batch, row_count=batch.row_count, error_row_count=error_rows),
         )
     return batch
+
+
+def supersedes_freshness(
+    current_as_of: datetime | None, has_current: bool, candidate_as_of: datetime | None
+) -> bool:
+    """REV-0601: may a newly validated batch replace the source's freshness provenance?
+
+    Freshness provenance never moves backwards (TECHNICAL DEFAULT until DEC-016 decides snapshot validity):
+
+    * no previous success -> yes;
+    * dated candidate -> yes if the current provenance is undated or not newer (``>=``: same snapshot date,
+      later import);
+    * undated candidate -> only if the current provenance is undated too (then import order decides).
+    """
+    if not has_current:
+        return True
+    if candidate_as_of is None:
+        return current_as_of is None
+    return current_as_of is None or candidate_as_of >= current_as_of
+
+
+def _advance_freshness(batch: ImportBatch, now: datetime, using: str) -> bool:
+    """Monotonic freshness update under a row lock on the source (concurrent validations serialise here).
+
+    ``last_success_at`` / ``last_success_batch`` / ``last_as_of`` change together (DB check
+    ``ck_integration_source_last_success_pair``) and only when :func:`supersedes_freshness` allows it. An
+    older or undated snapshot validated after a newer one leaves them untouched (the batch itself is still
+    VALIDATED and audited with ``freshness_advanced=false``). ``last_success_at`` never decreases.
+    """
+    source = IntegrationSource.objects.using(using).select_for_update().get(pk=batch.source_id)
+    has_current = source.last_success_batch_id is not None
+    if not supersedes_freshness(source.last_as_of, has_current, batch.source_as_of):
+        return False
+    previous = source.last_success_at
+    success_at = now if previous is None or now >= previous else previous
+    IntegrationSource.objects.using(using).filter(pk=source.pk).update(
+        last_success_at=success_at, last_success_batch=batch, last_as_of=batch.source_as_of
+    )
+    return True
 
 
 # ---------------------------------------------------------------------------------------- reject / gated

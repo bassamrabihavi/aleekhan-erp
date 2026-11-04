@@ -24,4 +24,6 @@ django_settings_module = "aleekhan.settings_test"  # explicit test env (REV-0011
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "aleekhan.settings_test"  # explicit test env (REV-0011)
 testpaths = ["platform_core/tests"]
-addopts = "-ra --strict-markers"
+# perf smoke (00.7) is deselected by default; run it explicitly with `pytest -m perf` (a later -m wins).
+addopts = "-ra --strict-markers -m \"not perf\""
+markers = ["perf: latency smoke on synthetic data (00.7); TECHNICAL DEFAULT budget, run with -m perf"]

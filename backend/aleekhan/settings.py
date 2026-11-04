@@ -61,7 +61,7 @@ def _env_int(name: str, default: int, *, minimum: int = 0) -> int:
 DEBUG = _env_bool("DJANGO_DEBUG", False) and not DEPLOYED
 
 _secret = os.environ.get("DJANGO_SECRET_KEY", "")
-if _secret == "CHANGE_ME":  # placeholder from .env.example is never a real key
+if _secret == "CHANGE_ME":  # noqa: S105 - placeholder from .env.example is never a real key
     _secret = ""
 if not _secret:
     if DEPLOYED:
@@ -187,7 +187,8 @@ CSRF_COOKIE_SAMESITE = "Lax"
 CSRF_FAILURE_VIEW = "platform_core.api.problems.csrf_failure"
 # TLS terminates at the internal reverse proxy (DEC-042). Trust X-Forwarded-Proto only when the operator says
 # the proxy sets it (otherwise a client could spoof "https").
-if _env_bool("ALEEKHAN_TRUST_PROXY_TLS_HEADER", False):
+_TRUST_PROXY_TLS_HEADER = _env_bool("ALEEKHAN_TRUST_PROXY_TLS_HEADER", False)
+if _TRUST_PROXY_TLS_HEADER:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SECURE_SSL_REDIRECT = _env_bool("ALEEKHAN_SSL_REDIRECT", DEPLOYED)
 # Probes from the proxy/orchestrator on the private network may use plain HTTP.
@@ -219,6 +220,15 @@ ALEEKHAN_THROTTLE_RATES: dict[str, str] = {
     "health": _env_rate("ALEEKHAN_RATE_HEALTH", "120/min"),
 }
 
+# REV-0015: behind the DEC-042 reverse proxy every client would share the proxy's IP bucket if NUM_PROXIES
+# stayed 0. Trusting the proxy's X-Forwarded-Proto while ignoring its X-Forwarded-For is inconsistent, so a
+# deployed environment refuses that combination (staging/prod config sets ALEEKHAN_NUM_PROXIES=1).
+_NUM_PROXIES = _env_int("ALEEKHAN_NUM_PROXIES", 0)
+if DEPLOYED and _TRUST_PROXY_TLS_HEADER and _NUM_PROXIES == 0:
+    raise ImproperlyConfigured(
+        "ALEEKHAN_TRUST_PROXY_TLS_HEADER=1 requires ALEEKHAN_NUM_PROXIES >= 1 in staging/prod"
+    )
+
 REST_FRAMEWORK: dict[str, Any] = {
     # No authentication backend exists in PHASE_00 (login is PHASE_01; DEC-003: local users only).
     "DEFAULT_AUTHENTICATION_CLASSES": [],
@@ -237,7 +247,7 @@ REST_FRAMEWORK: dict[str, Any] = {
     "PAGE_SIZE": 25,
     "EXCEPTION_HANDLER": "platform_core.api.problems.exception_handler",
     # Number of trusted reverse proxies in front of the app (X-Forwarded-For); 0 = use REMOTE_ADDR only.
-    "NUM_PROXIES": _env_int("ALEEKHAN_NUM_PROXIES", 0),
+    "NUM_PROXIES": _NUM_PROXIES,
     "UNICODE_JSON": True,
     "COMPACT_JSON": True,
     "STRICT_JSON": True,

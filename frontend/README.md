@@ -19,6 +19,14 @@ npm run e2e                  # scripts/e2e.sh: throwaway PostgreSQL DB + migrate
 E2E environment: libpq variables (`PGHOST`, `PGPORT`, `PGUSER`, `PGPASSWORD`; never committed), optional
 `PG_BIN` (dir with `psql`), `PLAYWRIGHT_BROWSERS_PATH` (browsers outside the repo). If the Playwright browser
 CDN is unreachable, `E2E_BROWSER_CHANNEL=msedge` (or `chrome`) uses an installed Chromium browser.
+
+`E2E_BROWSER_CHANNEL` (REV-0603): unset = Playwright's bundled Chromium (`npx playwright install chromium`;
+used on CI / Linux); `msedge` / `chrome` = an installed browser (used on the Windows work machine, where the
+Playwright CDN is blocked). `scripts/e2e.sh` first prints the environment it runs with (host/port, channel,
+which artefact dirs are set - never the password) and runs `scripts/browser-preflight.mjs`, which prints the
+Playwright, Node and browser versions and stops with exit code 2 and a fix hint when the browser is missing.
+Example (Windows work machine):
+`PG_BIN=<pg bin dir> E2E_BROWSER_CHANNEL=msedge PLAYWRIGHT_BROWSERS_PATH=<dir outside repo> bash scripts/e2e.sh`.
 `E2E_HTML_REPORT` / `E2E_OUTPUT_DIR` move Playwright artefacts outside the repo. Screenshots go to the
 untracked `frontend/test-results/screenshots/` by default (REV-0501: a plain run never overwrites committed
 evidence); for acceptance evidence pass the report folder explicitly, e.g.

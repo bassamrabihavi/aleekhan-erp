@@ -9,6 +9,7 @@ import uuid
 from typing import Any
 
 import pytest
+from django.db.migrations.executor import MigrationExecutor
 from django.test import Client, override_settings
 from hypothesis import given
 from hypothesis import strategies as st
@@ -73,6 +74,50 @@ def test_readiness_pending_migration_is_not_ready(client: Client, monkeypatch: p
     r = client.get(f"{API}/health/ready")
     assert r.status_code == 503
     assert {"name": "migrations", "status": "down"} in _json(r)["components"]
+
+
+@pytest.mark.django_db
+def test_readiness_caches_migrations_check_within_ttl(
+    client: Client, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """REV-0016: a second probe within the TTL does not rebuild the MigrationExecutor."""
+    built: list[int] = []
+    real = MigrationExecutor
+
+    def counting(*args: Any, **kwargs: Any) -> Any:
+        built.append(1)
+        return real(*args, **kwargs)
+
+    clock = [1000.0]
+    monkeypatch.setattr(views, "MigrationExecutor", counting)
+    monkeypatch.setattr(views, "_monotonic", lambda: clock[0])
+    views.reset_migrations_check_cache()
+    assert client.get(f"{API}/health/ready").status_code == 200
+    clock[0] += views.MIGRATIONS_CHECK_TTL_SECONDS - 0.5
+    assert client.get(f"{API}/health/ready").status_code == 200
+    assert len(built) == 1
+    clock[0] += 1.0  # TTL expired -> rebuilt once
+    assert client.get(f"{API}/health/ready").status_code == 200
+    assert len(built) == 2
+
+
+@pytest.mark.django_db
+def test_readiness_does_not_cache_failures(monkeypatch: pytest.MonkeyPatch) -> None:
+    calls: list[int] = []
+
+    def flaky() -> str:
+        calls.append(1)
+        if len(calls) == 1:
+            raise RuntimeError("SYNTHETIC")
+        return "up"
+
+    monkeypatch.setattr(views, "_compute_migrations_status", flaky)
+    views.reset_migrations_check_cache()
+    with pytest.raises(RuntimeError):
+        views._check_migrations()
+    assert views._check_migrations() == "up"
+    assert views._check_migrations() == "up"
+    assert len(calls) == 2
 
 
 # ------------------------------------------------------------------------------------------- version (C-17)
@@ -243,6 +288,16 @@ def test_x_forwarded_for_is_not_trusted_without_proxies() -> None:
     c = Client(REMOTE_ADDR="10.0.0.9")
     assert c.get(f"{API}/health/live", HTTP_X_FORWARDED_FOR="1.1.1.1").status_code == 200
     assert c.get(f"{API}/health/live", HTTP_X_FORWARDED_FOR="2.2.2.2").status_code == 429
+
+
+def test_x_forwarded_for_with_one_trusted_proxy_separates_clients(settings: Any) -> None:
+    """REV-0015: behind one reverse proxy (NUM_PROXIES=1) each client gets its own bucket."""
+    settings.ALEEKHAN_THROTTLE_RATES = {"anon": "1/min", "principal": "1/min", "health": "1/min"}
+    settings.REST_FRAMEWORK = {**settings.REST_FRAMEWORK, "NUM_PROXIES": 1}
+    proxy = Client(REMOTE_ADDR="10.0.0.10")
+    assert proxy.get(f"{API}/health/live", HTTP_X_FORWARDED_FOR="1.1.1.1").status_code == 200
+    assert proxy.get(f"{API}/health/live", HTTP_X_FORWARDED_FOR="2.2.2.2").status_code == 200
+    assert proxy.get(f"{API}/health/live", HTTP_X_FORWARDED_FOR="1.1.1.1").status_code == 429
 
 
 # ------------------------------------------------------------------------------------------- logging

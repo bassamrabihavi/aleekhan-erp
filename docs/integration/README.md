@@ -129,6 +129,14 @@ staleness_threshold_seconds, threshold_basis, policy_decision_id`, plus `checked
 `source_code`; strong `ETag` over items + page (not `checked_at`); `Cache-Control: no-cache`. UI rule (SOURCE_MAPPING
 §7): show `as_of`/freshness; never present stale or `TECHNICAL_DEFAULT`-judged data as real time.
 
+Monotonic provenance (REV-0601, 00.7): `validate_batch` locks the source row (`SELECT … FOR UPDATE`) and
+advances `last_success_at / last_success_batch / last_as_of` only if the batch is not older
+(`imports.supersedes_freshness`): a dated batch replaces an undated or not-newer `last_as_of`; an undated batch
+replaces only an undated one; `last_success_at` never decreases. A batch that does not advance freshness is
+still VALIDATED; its audit row carries `freshness_advanced=false`. **Basis = import time** (`last_success_at`),
+a TECHNICAL DEFAULT until **DEC-016** decides whether the snapshot date (`source_as_of`) should drive staleness;
+until then the UI must show `last_as_of` next to `fresh`.
+
 ## 6. Conflict queue (`integration/conflicts.py`)
 
 `OPEN → RESOLVED | DISMISSED` (terminal; a recurrence opens a new item).

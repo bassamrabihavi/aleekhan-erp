@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -105,6 +106,66 @@ def test_dev_defaults() -> None:
     assert s["ALLOWED_HOSTS"] == ["127.0.0.1", "localhost"]
     assert s["ALEEKHAN_BUILD_COMMIT"] == "0000000"
     assert s["SESSION_COOKIE_SECURE"] is False
+
+
+# ------------------------------------------------------------------------------------------- REV-0015
+@pytest.mark.parametrize("env", ["staging", "prod"])
+def test_deployed_refuses_trusted_tls_header_without_proxies(env: str) -> None:
+    base = {"ALEEKHAN_ENV": env, **DEPLOY_OK, "ALEEKHAN_TRUST_PROXY_TLS_HEADER": "1"}
+    assert "ALEEKHAN_NUM_PROXIES" in _settings(base)["error"]
+    assert "ALEEKHAN_NUM_PROXIES" in _settings({**base, "ALEEKHAN_NUM_PROXIES": "0"})["error"]
+    ok = _settings({**base, "ALEEKHAN_NUM_PROXIES": "1"})
+    assert "error" not in ok and ok["REST_FRAMEWORK"]["NUM_PROXIES"] == 1
+
+
+def test_dev_allows_tls_header_without_proxies() -> None:
+    s = _settings({"ALEEKHAN_ENV": "dev", "ALEEKHAN_TRUST_PROXY_TLS_HEADER": "1"})
+    assert "error" not in s and s["REST_FRAMEWORK"]["NUM_PROXIES"] == 0
+
+
+# ------------------------------------------------------------------------------------------- REV-0014
+SETTINGS_PY = BACKEND / "aleekhan" / "settings.py"
+ENV_EXAMPLE = BACKEND / ".env.example"
+_ENV_READ_RE = re.compile(
+    r"""(?:os\.environ\.get|os\.getenv|_env_bool|_env_int|_env_rate)\(\s*["']((?:ALEEKHAN|DJANGO)_[A-Z0-9_]+)["']"""
+)
+
+
+def settings_env_names() -> set[str]:
+    """Every ALEEKHAN_* / DJANGO_* variable name read by settings.py."""
+    return set(_ENV_READ_RE.findall(SETTINGS_PY.read_text(encoding="utf-8")))
+
+
+def test_settings_env_names_are_discovered() -> None:
+    names = settings_env_names()
+    expected_subset = {
+        "ALEEKHAN_ENV",
+        "DJANGO_SECRET_KEY",
+        "DJANGO_ALLOWED_HOSTS",
+        "ALEEKHAN_BUILD_COMMIT",
+        "ALEEKHAN_NUM_PROXIES",
+        "ALEEKHAN_TRUST_PROXY_TLS_HEADER",
+        "ALEEKHAN_REDIS_URL",
+        "ALEEKHAN_RATE_ANON",
+    }
+    assert expected_subset <= names, sorted(expected_subset - names)
+
+
+@pytest.mark.skip(
+    reason=(
+        "REV-0014 pending: backend/.env.example could not be updated by the 00.7 agent (file access "
+        "denied by the agent permission rules). The orchestrator/employer adds the placeholders, then "
+        "removes this skip."
+    )
+)
+def test_env_example_lists_every_settings_variable() -> None:
+    declared = {
+        line.split("=", 1)[0].strip().removeprefix("export ").strip()
+        for line in ENV_EXAMPLE.read_text(encoding="utf-8").splitlines()
+        if "=" in line and not line.lstrip().startswith("#")
+    }
+    missing = sorted(settings_env_names() - declared)
+    assert not missing, f".env.example is missing: {missing}"  # names only, never values
 
 
 # ------------------------------------------------------------------------------------------- REV-0008
