@@ -151,13 +151,6 @@ def test_settings_env_names_are_discovered() -> None:
     assert expected_subset <= names, sorted(expected_subset - names)
 
 
-@pytest.mark.skip(
-    reason=(
-        "REV-0014 pending: backend/.env.example could not be updated by the 00.7 agent (file access "
-        "denied by the agent permission rules). The orchestrator/employer adds the placeholders, then "
-        "removes this skip."
-    )
-)
 def test_env_example_lists_every_settings_variable() -> None:
     declared = {
         line.split("=", 1)[0].strip().removeprefix("export ").strip()

@@ -83,9 +83,10 @@ bodies, headers or query strings. Rule for all code: no secrets or personal data
 | `ALEEKHAN_HSTS_INCLUDE_SUBDOMAINS` | no | `0` | |
 | `ALEEKHAN_MAX_BODY_BYTES` | no | `1048576` | |
 
-`backend/.env.example` should list these names with placeholders. REV-0014 is still open after 00.7: the
-implementing agent is denied access to that file; `test_settings_env.py::test_env_example_lists_every_settings_variable`
-(currently skipped with that reason) checks it once the orchestrator has updated the file.
+`backend/.env.example` lists these names with placeholders (empty = built-in default). REV-0014 was closed at
+Gate-0 (2026-11-04) after the employer narrowed the agent read-deny rule to real `.env` files;
+`test_settings_env.py::test_env_example_lists_every_settings_variable` now runs and fails if `settings.py` reads
+an `ALEEKHAN_*`/`DJANGO_*` name the example does not declare.
 
 `/health/ready` caches the migrations check per process for 10 s (REV-0016, `views.MIGRATIONS_CHECK_TTL_SECONDS`,
 TECHNICAL DEFAULT): building the migration executor loads the migration graph from disk. Failures are never
