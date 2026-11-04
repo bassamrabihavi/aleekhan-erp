@@ -69,12 +69,12 @@
         },
         "00.6": {
           "name": "Integration",
-          "state": "TODO",
-          "commit": null,
-          "report": null,
+          "state": "IN_REVIEW",
+          "commit": "d7b444a8f2e907b8bb6c730faf15a5b455dc5e9e",
+          "report": "reports/phase-00/step-6/REPORT.md",
           "review": null,
           "rework_cycles": 0,
-          "started_at": null,
+          "started_at": "2026-11-04T04:23:33+00:00",
           "done_at": null
         },
         "00.7": {
@@ -2384,7 +2384,25 @@
       "kind": "test_result",
       "id": "T-001",
       "result": "PASS"
+    },
+    {
+      "at": "2026-11-04T04:23:33+00:00",
+      "kind": "step",
+      "phase": "PHASE_00",
+      "step": "00.6",
+      "state": "IN_PROGRESS",
+      "note": null,
+      "commit": null
+    },
+    {
+      "at": "2026-11-04T05:03:43+00:00",
+      "kind": "step",
+      "phase": "PHASE_00",
+      "step": "00.6",
+      "state": "IN_REVIEW",
+      "note": null,
+      "commit": "d7b444a8f2e907b8bb6c730faf15a5b455dc5e9e"
     }
   ],
-  "updated_at": "2026-11-04T04:19:00+00:00"
+  "updated_at": "2026-11-04T05:03:43+00:00"
 }
