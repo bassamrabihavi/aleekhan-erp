@@ -6,7 +6,7 @@ PHASE: PHASE_00
 STEP: 00.8 (phase report over 00.1-00.8)
 COMMIT SHA: 3c0ea1c03e0582d4a5e0d3e5e0fa76e151a659ed (00.8; orchestrator full CI re-run on this commit: reports/phase-00/step-8/logs/ci/summary.md, 13/13 PASS)
 BRANCH/PR: main (GitHub, public per DEC-046)
-STATUS: PARTIAL - all engineering scope done and reviewed; Gate items that need the employer are open (section 7)
+STATUS: PARTIAL - all engineering scope done; step 00.8 IN_REVIEW (PASS pending the REV-0801..0803 doc fixes); Gate items that need the employer are open (section 7)
 TIME OF REPORT (UTC): 2026-11-04
 IMPLEMENTER: Claude Code (aleekhan-implementer), machine work-windows
 SOURCE BASELINE: handoff v1.0 (verify_handoff: OK=300, KNOWN_DEFECT=1 PACKAGE_MANIFEST.json per DEC-044, EXCLUDED=46, failures=0 - reports/phase-00/step-8/logs/impl/verify_handoff.log)
@@ -38,7 +38,7 @@ Traceability of every scope item, Gate criterion, mandatory output, decision and
 | 00.5 | `frontend/` system status page, tokens, states, Playwright | `fbd4218e8330226d3677583a054a42e9d1f20fff` |
 | 00.6 | `integration/`, migrations 0004-0006, consumers/inbox/compensation, freshness, conflict queue, logo | `d7b444a8f2e907b8bb6c730faf15a5b455dc5e9e` |
 | 00.7 | `.github/workflows/ci.yml`, `tools/ci_local.sh`, `tools/secret_scan.py`, `ops/db`, `ops/backup`, `docs/ops`, `docs/security` | `d6b6de96784d8d4d715e5978a2552c3531798faa` |
-| 00.8 | `tools/secret_scan.py` + tests (REV-0702), threat delta + checklist (REV-0703), action SHA pins + `docs/ops/CI.md` (REV-0704), `CHANGELOG.md`, `docs/db/ERD.md`, `docs/db/README.md` (pointer), `docs/adr/ADR-001.md`, `docs/discovery/CONFLICTS.md` (C-02/C-14/C-15), `reports/phase-00/TRACE_MAP.md`, `PHASE_REPORT.md/.json` | uncommitted |
+| 00.8 | `tools/secret_scan.py` + tests (REV-0702), threat delta + checklist (REV-0703), action SHA pins + `docs/ops/CI.md` (REV-0704), `CHANGELOG.md`, `docs/db/ERD.md`, `docs/db/README.md` (pointer), `docs/adr/ADR-001.md`, `docs/discovery/CONFLICTS.md` (C-02/C-14/C-15), `reports/phase-00/TRACE_MAP.md`, `PHASE_REPORT.md/.json` | `3c0ea1c03e0582d4a5e0d3e5e0fa76e151a659ed` |
 
 - API: `/api/v1/health/live`, `/health/ready`, `/version`, `/access-gate/check`, integration read endpoints (deny by
   default); contract `docs/api/openapi-draft.yaml` (unchanged in 00.8).
@@ -62,47 +62,51 @@ Traceability of every scope item, Gate criterion, mandatory output, decision and
 ## 4. Security evidence
 
 - Auth: no login in PHASE_00 (PHASE_01, DEC-003); every route deny-by-default, route parity generated from the
-  URLconf (S8 `reports/phase-00/step-8/logs/impl/07_authz.log`: 166 passed). MFA: N/A until PHASE_01.
+  URLconf (S8 `reports/phase-00/step-8/logs/ci/07_authz.log`: 166 passed). MFA: N/A until PHASE_01.
 - Secrets: `tools/secret_scan.py` over tracked + untracked files and full history; REV-0702 tightened the
-  placeholder rule to whole values (`fullmatch`). S8 `11_secret_scan.log`: 544 text files, 53 commits,
+  placeholder rule to whole values (`fullmatch`). S8 `reports/phase-00/step-8/logs/ci/11_security.log`: 566 text files, 54 commits,
   env_values_checked=1, 1 allowlisted fingerprint (00.7 test fixture), findings=0. The stricter rule produced
   no new history hit after the fix (one documentation false positive on the scanner's own docstring was handled
   by ignoring surrounding backticks, not by an allowlist entry).
-- Dependency scan / SBOM: S7 `reports/phase-00/step-7/logs/ci/11_security.log` (pip-audit: no known
-  vulnerabilities; npm audit: 0 vulnerabilities), SBOMs in S7.
+- Dependency scan / SBOM: S8 `reports/phase-00/step-8/logs/ci/11_security.log` (pip-audit: no known
+  vulnerabilities; npm audit: 0 vulnerabilities); SBOMs `sbom-python-runtime.cdx.json`, `sbom-frontend.cdx.json`
+  in the same folder (same results in S7).
 - CI supply chain: actions pinned to full commit SHAs (REV-0704,
   `reports/phase-00/step-8/logs/rev0704_action_shas.log`); `permissions: contents: read`;
-  `persist-credentials: false`; no secrets; `pull_request` only (fork runs read-only).
+  `persist-credentials: false`; no secrets; `pull_request` only (fork runs read-only). The pinned workflow ran
+  green on GitHub (run 41820871101 on `043cdff`).
 - Threat model: `docs/discovery/RISKS.md`, `docs/security/THREAT_MODEL_DELTA_00.6_00.7.md` (T-60..T-78; public
   repository threats T-75..T-78 added in 00.8). Checklist: `docs/security/PHASE_00_SECURITY_CHECKLIST.md`
   (unsigned).
-- Known risks: repository is public (DEC-046); detection of private data is pattern-based (T-78).
+- Known risks: repository is public (DEC-046); detection of private data is pattern-based (T-78); a value that
+  declares itself synthetic with the prefix `example-` / `synthetic-` / `not-a-real-` is exempt from the scanner
+  (accepted residual risk, T-78 / checklist 2.1).
 
 ## 5. Test evidence
 
-S8 = `bash tools/ci_local.sh reports/phase-00/step-8/logs/impl lint type tools unit migration contract authz`
-on work-windows, test PostgreSQL env loaded (password not printed), working tree = HEAD `3fd18db` + 00.8 changes.
-S7 = 00.7 full run on `d6b6de9` (`reports/phase-00/step-7/logs/ci/summary.md`) + GitHub run 41790868012.
+S8 = orchestrator full run `bash tools/ci_local.sh reports/phase-00/step-8/logs/ci` on the 00.8 commit
+`3c0ea1c03e0582d4a5e0d3e5e0fa76e151a659ed` (work-windows, test PostgreSQL env loaded, password not printed;
+`summary.md` 13/13 PASS). Hosted: GitHub Actions run 41820871101 on `043cdff` (same code + report/status
+commits, includes the SHA pins) `success`, evidence artifact present; earlier run 41790868012 on `b5397b6`
+`success`. The GitHub artifact needs a login to download, so the in-repo evidence is S8 `summary.md`.
+S7 = 00.7 full run on `d6b6de9` (`reports/phase-00/step-7/logs/ci/summary.md`).
 
-| Check | Result | Log |
+| Check | Result | Log (S8 = `reports/phase-00/step-8/logs/ci/`) |
 |---|---|---|
 | ruff check + format | PASS (All checks passed) | S8 `01_lint.log` |
 | mypy strict | PASS (no issues in 86 source files) | S8 `02_type.log` |
 | tools unittest | PASS (39 tests) | S8 `03_tools.log` |
 | pytest unit + integration | PASS (488 passed, 1 skipped = REV-0014 with reason, 1 deselected = perf stage) | S8 `04_unit.log`, `pytest-unit-integration.xml` |
-| migration up / zero / up | PASS (schema diff EMPTY, 953 lines; ROUNDTRIP OK; makemigrations --check no changes) | S8 `05_migration.log`, `migration/` |
+| migration up / zero / up | PASS (schema diff EMPTY, 953 lines; ROUNDTRIP OK) | S8 `05_migration.log`, `migration/` |
 | API contract | PASS (18 passed) | S8 `06_contract.log` |
 | authorization | PASS (166 passed) | S8 `07_authz.log` |
-| secret scan (tree + history) | PASS (findings=0) | S8 `11_secret_scan.log`, `secret_scan.json` |
-| handoff hashes | PASS (failures=0, 1 known defect) | S8 `verify_handoff.log` |
-| vitest | PASS (23 passed) - not re-run in 00.8 | S7 `08_frontend.log` |
-| Playwright E2E (real backend), screenshots 1440/1180/768/390 | PASS (12 passed + 1 passed) - not re-run in 00.8 | S7 `09_e2e.log`, `screenshots/` |
-| perf smoke | PASS (1 passed) - not re-run | S7 `10_perf.log` |
-| pip-audit, npm audit | PASS - not re-run | S7 `11_security.log` |
-| DB roles, backup/restore drill | PASS (roles passed=26 failed=0; drill PASS) - not re-run | S7 `12_ops.log` |
-
-Why not re-run in 00.8: no frontend, backend, ops or dependency file changed in 00.8; only `tools/secret_scan.py`,
-its tests, the workflow pins and docs. The workflow change (SHA pins) is verified only by the next GitHub run.
+| vitest | PASS (23 passed, 3 files) | S8 `08_frontend.log` |
+| Playwright E2E (real backend), screenshots 1440/1180/768/390 | PASS (12 passed + 1 passed) | S8 `09_e2e.log`, `screenshots/` |
+| perf smoke | PASS (1 passed) | S8 `10_perf.log` |
+| secret scan (tree + history), pip-audit, npm audit | PASS (findings=0; no known vulnerabilities; 0 vulnerabilities) | S8 `11_security.log` |
+| DB roles, backup/restore drill | PASS (roles passed=26 failed=0; drill PASS) | S8 `12_ops.log` |
+| build artifacts (SBOMs, dist hashes) | PASS | S8 `13_artifacts.log` |
+| handoff hashes | PASS (OK=300, KNOWN_DEFECT=1, failures=0) | `reports/phase-00/step-8/logs/impl/verify_handoff.log` (`handoff/` unchanged by 3c0ea1c) |
 
 ## 6. Demo
 
@@ -122,7 +126,6 @@ No open P0/P1 defect. Open items (details in TRACE_MAP sections 4 and 7):
 | G8 Permission Matrix approval (`ROLE_PERMISSION_MATRIX_FA.md` is "proposed"; DEC-032 PROPOSED) | employer | Gate general condition | PHASE_00 is deny-all |
 | G9 security checklist signature | employer + auditor + IT | 00.7 step text | - |
 | REV-0014 `backend/.env.example` | employer (or grant agent access) | 1 explained SKIP | test skipped with reason |
-| G10 attach GitHub run `summary.md` artifact to the Gate packet | orchestrator | PASS vs SKIPPED per stage on GitHub | local `summary.md` S7 |
 | C-17 `/version` public | employer acknowledgement | info disclosure (minimal) | returns version, short commit, env name only |
 | DEC-016 OPEN (P0, PHASE_06) | employer | freshness basis | TECHNICAL DEFAULT thresholds, import-time basis |
 | REV-0013 401 without `WWW-Authenticate` | PHASE_01 | RFC conformance | - |
@@ -133,12 +136,12 @@ New decisions in PHASE_00: DEC-044, DEC-045, DEC-046 (`control/decisions/DECISIO
 
 ## 8. Rollback
 
-- 00.8 is code/docs only (no migration): revert the 00.8 commit (`git revert <sha>`). Reverting the workflow
+- 00.8 is code/docs only (no migration): revert the 00.8 commit (`git revert 3c0ea1c`). Reverting the workflow
   restores major-tag action references; reverting the scanner restores the weaker placeholder rule (not
   recommended).
 - Database: `docs/db/README.md` §4 and `docs/ops/ROLLBACK.md` (reverse migrations newest first; backup first;
   below 0002 removes audit protection, below 0001 drops platform tables). Backup/restore procedure and drill:
-  `docs/ops/BACKUP_RESTORE.md`, S7 `12_ops.log`.
+  `docs/ops/BACKUP_RESTORE.md`, S8 `12_ops.log`.
 - No destructive change in 00.8.
 
 ## 9. Review request
@@ -146,10 +149,11 @@ New decisions in PHASE_00: DEC-044, DEC-045, DEC-046 (`control/decisions/DECISIO
 Request **PASS** for 00.8. Check:
 1. REV-0702: `tools/secret_scan.py` `is_placeholder` (fullmatch) and `tools/tests/test_secret_scan.py`
    (`test_placeholder_words_inside_a_real_looking_value_are_findings`, `test_whole_value_placeholders`); S8
-   `03_tools.log`, `11_secret_scan.log`.
+   `03_tools.log`, `11_security.log`.
 2. REV-0703: `docs/security/THREAT_MODEL_DELTA_00.6_00.7.md` (component table, T-67, T-68, T-75..T-78, section
    3) and checklist 2.1 / 3.13 / section 5.
-3. REV-0704: `.github/workflows/ci.yml` `uses:` lines vs `reports/phase-00/step-8/logs/rev0704_action_shas.log`.
+3. REV-0704: `.github/workflows/ci.yml` `uses:` lines vs `reports/phase-00/step-8/logs/rev0704_action_shas.log`;
+   GitHub run 41820871101 (`success`).
 4. `reports/phase-00/TRACE_MAP.md` against PHASE_00.md, `docs/db/ERD.md` against the schema dump, `CHANGELOG.md`
    SHAs against `git log`.
 

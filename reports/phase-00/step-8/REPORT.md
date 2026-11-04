@@ -54,6 +54,8 @@ I re-ran `tools/ci_local.sh reports/phase-00/step-8/logs/ci` on 3c0ea1c03e0582d4
 
 The full table is in `reports/phase-00/step-8/logs/ci/summary.md`. The implementer's earlier partial run is in `step-8/logs/impl/`.
 
+`logs/ci/worktree_modified_files.txt` = 1: the one modified tracked file during the run was `control/PROJECT_STATUS.json` (step 00.8 set to IN_PROGRESS through `status.py`), not code under test (REV-0802).
+
 ## 6. Demo
 None. These are documents, and the Gate packet is `reports/phase-00/GATE_PACKET_FA.md`.
 
