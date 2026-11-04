@@ -11,7 +11,7 @@
       "pages": [],
       "deps": [],
       "est_weeks": 2,
-      "state": "ACTIVE",
+      "state": "BLOCKED",
       "started_at": "2026-11-03T15:20:43+00:00",
       "gate_pending_at": null,
       "accepted_at": null,
@@ -79,7 +79,7 @@
         },
         "00.7": {
           "name": "Security & Ops",
-          "state": "IN_REVIEW",
+          "state": "BLOCKED",
           "commit": "d6b6de96784d8d4d715e5978a2552c3531798faa",
           "report": "reports/phase-00/step-7/REPORT.md",
           "review": null,
@@ -2450,7 +2450,16 @@
       "state": "IN_REVIEW",
       "note": null,
       "commit": "d6b6de96784d8d4d715e5978a2552c3531798faa"
+    },
+    {
+      "at": "2026-11-04T09:18:54+00:00",
+      "kind": "step",
+      "phase": "PHASE_00",
+      "step": "00.7",
+      "state": "BLOCKED",
+      "note": null,
+      "commit": null
     }
   ],
-  "updated_at": "2026-11-04T07:14:01+00:00"
+  "updated_at": "2026-11-04T09:18:54+00:00"
 }
