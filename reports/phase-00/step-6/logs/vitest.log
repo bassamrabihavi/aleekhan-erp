@@ -1,0 +1,13 @@
+
+> aleekhan-frontend@0.0.0 test
+> vitest run
+
+
+ RUN  v5.0.5 F:/aleekhan/aleekhan-erp/frontend
+
+
+ Test Files  3 passed (3)
+      Tests  23 passed (23)
+   Start at  08:31:32
+   Duration  3.00s (environment 68%, setup 13%, tests 12%, import 5%, transform 1%, worker 1%)
+

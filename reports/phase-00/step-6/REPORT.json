@@ -1,0 +1,122 @@
+{
+  "phase": "PHASE_00",
+  "step": "00.6",
+  "commit_sha": "d7b444a8f2e907b8bb6c730faf15a5b455dc5e9e",
+  "status": "COMPLETE",
+  "scope": [
+    "read-only source registry",
+    "import staging + batch state machine",
+    "outbox retries/backoff",
+    "consumer inbox + compensation",
+    "freshness",
+    "conflict queue",
+    "logo + logo-green palette (employer request)"
+  ],
+  "changes": [
+    "backend/platform_core/integration/",
+    "backend/platform_core/engine/",
+    "backend/platform_core/api/",
+    "backend/platform_core/migrations/0004-0006",
+    "docs/integration/",
+    "docs/api/openapi-draft.yaml",
+    "docs/ui/",
+    "frontend/",
+    "tools/sample_logo_colors.py"
+  ],
+  "migrations": [
+    "platform_core.0004_integration",
+    "platform_core.0005_integration_triggers",
+    "platform_core.0006_seed_integration_sources"
+  ],
+  "test_evidence": [
+    {
+      "command": "ruff check + format",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-6/logs/ruff.log"
+    },
+    {
+      "command": "mypy strict",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-6/logs/mypy.log"
+    },
+    {
+      "command": "makemigrations --check",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-6/logs/makemigrations_check.log"
+    },
+    {
+      "command": "pytest 384",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-6/logs/pytest.log"
+    },
+    {
+      "command": "db_roundtrip up/zero/up",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-6/logs/db_roundtrip.log"
+    },
+    {
+      "command": "tools unittest 16",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-6/logs/tools_tests.log"
+    },
+    {
+      "command": "verify_handoff",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-6/logs/verify_handoff.log"
+    },
+    {
+      "command": "npm run lint",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-6/logs/eslint.log"
+    },
+    {
+      "command": "npm run typecheck",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-6/logs/tsc.log"
+    },
+    {
+      "command": "vitest 23",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-6/logs/vitest.log"
+    },
+    {
+      "command": "npm run build",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-6/logs/vite_build.log"
+    },
+    {
+      "command": "npm audit --omit=dev",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-6/logs/npm_audit_prod.log"
+    },
+    {
+      "command": "scripts/e2e.sh 12+1",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-6/logs/e2e.log"
+    }
+  ],
+  "security_evidence": [
+    "READ_ONLY direction enforced by DB CHECK and service",
+    "sensitive fields refused at staging",
+    "deny-by-default endpoints",
+    "0 prod npm vulnerabilities",
+    "no secrets in logs"
+  ],
+  "decisions": [
+    "DEC-016 OPEN (freshness threshold, supersede rule)",
+    "DEC-025 vs DEC-035 mapping to confirm"
+  ],
+  "risks": [
+    "no worker process yet",
+    "technical-default retry/freshness values",
+    "raster logo only"
+  ],
+  "evidence_paths": [
+    "reports/phase-00/step-6/screenshots/",
+    "reports/phase-00/step-6/logs/",
+    "docs/integration/README.md",
+    "docs/ui/DESIGN_TOKENS.md"
+  ],
+  "rollback": "git revert d7b444a8f2e907b8bb6c730faf15a5b455dc5e9e; manage.py migrate platform_core 0003",
+  "review_request": "PASS"
+}

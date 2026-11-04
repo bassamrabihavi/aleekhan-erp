@@ -1,0 +1,16 @@
+
+> aleekhan-frontend@0.0.0 build
+> tsc --noEmit -p tsconfig.json && vite build
+
+[36mvite v8.3.4 [32mbuilding client environment for production...[36m[39m
+transforming...
+✓ 76 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                               0.48 kB │ gzip:  0.33 kB
+dist/assets/aleekhan-logo-8GxSDCSH.png       61.75 kB
+dist/assets/Vazirmatn_wght_-BeciDpKm.woff2  111.15 kB
+dist/assets/index-BRmip1CP.css                9.46 kB │ gzip:  2.62 kB
+dist/assets/index-BDxIWu8A.js               272.71 kB │ gzip: 84.81 kB
+
+[32m✓ built in 236ms[39m
