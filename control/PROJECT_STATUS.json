@@ -11,11 +11,11 @@
       "pages": [],
       "deps": [],
       "est_weeks": 2,
-      "state": "GATE_PENDING",
+      "state": "ACCEPTED",
       "started_at": "2026-11-03T15:20:43+00:00",
       "gate_pending_at": "2026-11-04T11:34:20+00:00",
-      "accepted_at": null,
-      "accepted_by": null,
+      "accepted_at": "2026-11-04T14:41:21+00:00",
+      "accepted_by": "بسام ربیهاوی",
       "steps": {
         "00.1": {
           "name": "Discovery & Contract",
@@ -2574,7 +2574,15 @@
       "status": "APPROVED",
       "by": "بسام ربیهاوی (کارفرما)",
       "note": "Gate-0: حالت همه دسترسی‌ها بسته (deny-all) پذیرفته شد؛ ماتریس نقش‌ها و DEC-032 در گام ۰۱.۱ همراه کاربران/نقش‌ها/نمودار سازمانی (DEC-003، DEC-043) نهایی و تأیید می‌شود."
+    },
+    {
+      "at": "2026-11-04T14:41:21+00:00",
+      "kind": "gate",
+      "phase": "PHASE_00",
+      "verdict": "ACCEPTED",
+      "by": "بسام ربیهاوی",
+      "note": "همه بندهای Gate بسته شد"
     }
   ],
-  "updated_at": "2026-11-04T12:36:27+00:00"
+  "updated_at": "2026-11-04T14:41:21+00:00"
 }
