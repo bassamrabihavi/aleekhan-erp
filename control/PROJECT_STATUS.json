@@ -11,9 +11,9 @@
       "pages": [],
       "deps": [],
       "est_weeks": 2,
-      "state": "ACTIVE",
+      "state": "GATE_PENDING",
       "started_at": "2026-11-03T15:20:43+00:00",
-      "gate_pending_at": null,
+      "gate_pending_at": "2026-11-04T11:34:20+00:00",
       "accepted_at": null,
       "accepted_by": null,
       "steps": {
@@ -89,13 +89,13 @@
         },
         "00.8": {
           "name": "Report & Review",
-          "state": "IN_REVIEW",
+          "state": "PASS",
           "commit": "3c0ea1c03e0582d4a5e0d3e5e0fa76e151a659ed",
           "report": "reports/phase-00/step-8/REPORT.md",
-          "review": null,
+          "review": "reports/phase-00/step-8/REVIEW.md",
           "rework_cycles": 0,
           "started_at": "2026-11-04T11:00:30+00:00",
-          "done_at": null
+          "done_at": "2026-11-04T11:34:20+00:00"
         }
       }
     },
@@ -2532,7 +2532,21 @@
       "state": "IN_REVIEW",
       "note": null,
       "commit": "3c0ea1c03e0582d4a5e0d3e5e0fa76e151a659ed"
+    },
+    {
+      "at": "2026-11-04T11:34:20+00:00",
+      "kind": "gate_pending",
+      "phase": "PHASE_00"
+    },
+    {
+      "at": "2026-11-04T11:34:20+00:00",
+      "kind": "step",
+      "phase": "PHASE_00",
+      "step": "00.8",
+      "state": "PASS",
+      "note": null,
+      "commit": null
     }
   ],
-  "updated_at": "2026-11-04T11:26:09+00:00"
+  "updated_at": "2026-11-04T11:34:20+00:00"
 }
