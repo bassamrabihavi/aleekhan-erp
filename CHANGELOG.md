@@ -102,4 +102,4 @@ Review verdicts are in `reports/phase-00/step-N/REVIEW.md`. No version number is
   `CONTRACT_VERSION`; contract tests compare route parity with implemented paths only; new
   `test_api_contract_planned.py`.
 - No migration, no business code, no real data.
-- Implementation: PENDING (orchestrator fills the SHA after commit).
+- Implementation: 89e5f0d.

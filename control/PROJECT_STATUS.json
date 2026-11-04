@@ -122,13 +122,13 @@
       "steps": {
         "01.1": {
           "name": "Discovery & Contract",
-          "state": "IN_PROGRESS",
-          "commit": null,
-          "report": null,
-          "review": null,
+          "state": "PASS",
+          "commit": "89e5f0d",
+          "report": "reports/phase-01/step-1/REPORT.md",
+          "review": "reports/phase-01/step-1/REVIEW.md",
           "rework_cycles": 0,
           "started_at": "2026-11-04T14:44:12+00:00",
-          "done_at": null
+          "done_at": "2026-11-04T15:37:37+00:00"
         },
         "01.2": {
           "name": "Database",
@@ -2218,6 +2218,104 @@
       "resolution": "Gate-0: حالت همه دسترسی‌ها بسته (deny-all) پذیرفته شد؛ ماتریس نقش‌ها و DEC-032 در گام ۰۱.۱ همراه کاربران/نقش‌ها/نمودار سازمانی (DEC-003، DEC-043) نهایی و تأیید می‌شود.",
       "decided_by": "بسام ربیهاوی (کارفرما)",
       "decided_at": "2026-11-04T12:36:27+00:00"
+    },
+    {
+      "id": "DEC-048",
+      "priority": "P0",
+      "gate": "Phase-1",
+      "domain": "Identity",
+      "issue": "جزئیات درخت سازمانی (ادامه DEC-043): انواع و سطوح واحد؛ سمت اصلی/سرپرست موقت؛ reports-to بین سمت‌ها یا افراد؛ آیا مسیر تأیید از درخت پیروی کند؛ چه کسی درخت را ویرایش کند؛ نمایش نام افراد",
+      "status": "APPROVED",
+      "owner": "کارفرما",
+      "phase": "PHASE_01",
+      "source": "گام 01.1 2026-11-04 (DEC-043؛ CONFLICTS C-37)",
+      "resolution": "پاسخ کارفرما ۲۰۲۶-۱۱-۰۴: (۴) مسیر تأیید ترکیبی (گزینه C)، ولی در فاز ۱ همه گردش‌ها فقط نقش + دامنه واحد (A)؛ هر ماژول مسیرش را در فاز خودش تصویب می‌کند. (۱) سطوح ثابت قابل افزایش توسط ادمین: COMPANY, DEPARTMENT, SECTION, LINE، حداکثر ۶ سطح. (۲) یک سمت اصلی + ACTING با تاریخ پایان؛ بدون سمت اضافی در فاز ۱. (۳) reports-to بین سمت‌ها. (۵) ویرایش فقط کارفرما/ادمین در فاز ۱. (۶) نام واحد/سمت/فرد برای همه کاربران داخلی؛ بدون اطلاعات تماس. (۷) تاریخچه با تاریخ اثر.",
+      "decided_by": "بسام ربیهاوی",
+      "decided_at": "2026-11-04T15:15:38+00:00"
+    },
+    {
+      "id": "DEC-049",
+      "priority": "P0",
+      "gate": "Phase-1",
+      "domain": "Security",
+      "issue": "تصویب ماتریس دسترسی فاز ۱ (docs/security/PERMISSION_MATRIX_DRAFT.md نسخه v0.1: ۱۱ نقش و ۴۳ مجوز پلتفرم) در ادامه DEC-047",
+      "status": "APPROVED",
+      "owner": "کارفرما",
+      "phase": "PHASE_01",
+      "source": "گام 01.1 2026-11-04 (DEC-047)",
+      "resolution": "matrix v0.1 approved (2026-11-04). پاسخ‌ها: (۱) هر ۱۱ نقش ساخته شوند. (۲) it_ops هم قفل کاربر را باز کند (با MFA و Audit؛ بدون تغییر رمز). (۴) کارفرما در شروع فقط owner_admin دارد؛ نقش‌های کسب‌وکار بعداً و صریح با علامت خودانتسابی. (۵) MFA تازه برای همه ردیف‌های MFA حتی داخل شبکه کارخانه. (۳) سطح دیدن اسناد جدا پرسیده نشد: پیش‌فرض v0.1 (EMP: S1، MGR/MGT: S1–S2) اجرا می‌شود و کارفرما می‌تواند تغییر دهد.",
+      "decided_by": "بسام ربیهاوی",
+      "decided_at": "2026-11-04T15:24:17+00:00"
+    },
+    {
+      "id": "DEC-050",
+      "priority": "P0",
+      "gate": "Phase-1",
+      "domain": "Security",
+      "issue": "روش ورود دومرحله‌ای (TOTP/پیامک/ایمیل/کلید سخت‌افزاری) و روش بازیابی آن (کد بازیابی؛ بازنشانی توسط ادمین)",
+      "status": "APPROVED",
+      "owner": "کارفرما + IT",
+      "phase": "PHASE_01",
+      "source": "گام 01.1 2026-11-04 (DEC-003؛ DEC-042)",
+      "resolution": "پاسخ کارفرما ۲۰۲۶-۱۱-۰۴: عامل دوم = TOTP (برنامه کد روی گوشی، مثل Google/Microsoft Authenticator)؛ کلید سخت‌افزاری/passkey بعداً اختیاری. بازیابی = ۱۰ کد بازیابی یک‌بارمصرف + بازنشانی توسط ادمین با دلیل، MFA ادمین و Audit (R1+R2)؛ بازیابی مالک طبق DEC-054. پنجره step-up در DEC-051.",
+      "decided_by": "بسام ربیهاوی",
+      "decided_at": "2026-11-04T15:37:27+00:00"
+    },
+    {
+      "id": "DEC-051",
+      "priority": "P0",
+      "gate": "Phase-1",
+      "domain": "Security",
+      "issue": "سیاست رمز عبور و رمز اولیه؛ قفل حساب پس از ورود ناموفق؛ زمان بی‌کاری و حداکثر جلسه؛ جلسه همزمان؛ پنجره step-up",
+      "status": "OPEN",
+      "owner": "کارفرما + IT",
+      "phase": "PHASE_01",
+      "source": "گام 01.1 2026-11-04 (SECURITY_BASELINE §1)",
+      "resolution": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "id": "DEC-052",
+      "priority": "P0",
+      "gate": "Phase-1",
+      "domain": "Security",
+      "issue": "تعریف شبکه داخل کارخانه (محدوده IP؛ VPN؛ حالت نامعلوم) و مدل حساب اپراتور (شخصی یا مشترک ایستگاه)",
+      "status": "OPEN",
+      "owner": "IT + کارفرما",
+      "phase": "PHASE_01",
+      "source": "گام 01.1 2026-11-04 (DEC-042؛ RISKS R-08)",
+      "resolution": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "id": "DEC-053",
+      "priority": "P0",
+      "gate": "Phase-1",
+      "domain": "Security",
+      "issue": "بارگذاری فایل: انواع و حجم مجاز؛ ابزار ضدبدافزار؛ محل نگهداری رمزگذاری‌شده؛ مدت قرنطینه فایل ردشده (SEC-03)",
+      "status": "OPEN",
+      "owner": "IT + کارفرما + مهندسی",
+      "phase": "PHASE_01",
+      "source": "گام 01.1 2026-11-04 (SEC-03؛ ADR-001 D5)",
+      "resolution": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "id": "DEC-054",
+      "priority": "P1",
+      "gate": "Phase-1",
+      "domain": "Security",
+      "issue": "دسترسی اضطراری (Break Glass) و بازیابی ادمین تنها (حساب مهروموم؛ ادمین دوم؛ دستور کنسول سرور)",
+      "status": "OPEN",
+      "owner": "کارفرما + IT",
+      "phase": "PHASE_01",
+      "source": "گام 01.1 2026-11-04 (SECURITY_BASELINE §1؛ RISKS R-21)",
+      "resolution": null,
+      "decided_by": null,
+      "decided_at": null
     }
   ],
   "ready_for_test": [
@@ -2597,7 +2695,91 @@
       "state": "IN_PROGRESS",
       "note": null,
       "commit": null
+    },
+    {
+      "at": "2026-11-04T15:13:07+00:00",
+      "kind": "decision_added",
+      "id": "DEC-048",
+      "status": "OPEN"
+    },
+    {
+      "at": "2026-11-04T15:13:07+00:00",
+      "kind": "decision_added",
+      "id": "DEC-049",
+      "status": "OPEN"
+    },
+    {
+      "at": "2026-11-04T15:13:07+00:00",
+      "kind": "decision_added",
+      "id": "DEC-050",
+      "status": "OPEN"
+    },
+    {
+      "at": "2026-11-04T15:13:07+00:00",
+      "kind": "decision_added",
+      "id": "DEC-051",
+      "status": "OPEN"
+    },
+    {
+      "at": "2026-11-04T15:13:08+00:00",
+      "kind": "decision_added",
+      "id": "DEC-052",
+      "status": "OPEN"
+    },
+    {
+      "at": "2026-11-04T15:13:08+00:00",
+      "kind": "decision_added",
+      "id": "DEC-053",
+      "status": "OPEN"
+    },
+    {
+      "at": "2026-11-04T15:13:08+00:00",
+      "kind": "decision_added",
+      "id": "DEC-054",
+      "status": "OPEN"
+    },
+    {
+      "at": "2026-11-04T15:13:08+00:00",
+      "kind": "step",
+      "phase": "PHASE_01",
+      "step": "01.1",
+      "state": "IN_REVIEW",
+      "note": null,
+      "commit": "89e5f0d"
+    },
+    {
+      "at": "2026-11-04T15:15:38+00:00",
+      "kind": "decision",
+      "id": "DEC-048",
+      "status": "APPROVED",
+      "by": "بسام ربیهاوی",
+      "note": "پاسخ کارفرما ۲۰۲۶-۱۱-۰۴: (۴) مسیر تأیید ترکیبی (گزینه C)، ولی در فاز ۱ همه گردش‌ها فقط نقش + دامنه واحد (A)؛ هر ماژول مسیرش را در فاز خودش تصویب می‌کند. (۱) سطوح ثابت قابل افزایش توسط ادمین: COMPANY, DEPARTMENT, SECTION, LINE، حداکثر ۶ سطح. (۲) یک سمت اصلی + ACTING با تاریخ پایان؛ بدون سمت اضافی در فاز ۱. (۳) reports-to بین سمت‌ها. (۵) ویرایش فقط کارفرما/ادمین در فاز ۱. (۶) نام واحد/سمت/فرد برای همه کاربران داخلی؛ بدون اطلاعات تماس. (۷) تاریخچه با تاریخ اثر."
+    },
+    {
+      "at": "2026-11-04T15:24:17+00:00",
+      "kind": "decision",
+      "id": "DEC-049",
+      "status": "APPROVED",
+      "by": "بسام ربیهاوی",
+      "note": "matrix v0.1 approved (2026-11-04). پاسخ‌ها: (۱) هر ۱۱ نقش ساخته شوند. (۲) it_ops هم قفل کاربر را باز کند (با MFA و Audit؛ بدون تغییر رمز). (۴) کارفرما در شروع فقط owner_admin دارد؛ نقش‌های کسب‌وکار بعداً و صریح با علامت خودانتسابی. (۵) MFA تازه برای همه ردیف‌های MFA حتی داخل شبکه کارخانه. (۳) سطح دیدن اسناد جدا پرسیده نشد: پیش‌فرض v0.1 (EMP: S1، MGR/MGT: S1–S2) اجرا می‌شود و کارفرما می‌تواند تغییر دهد."
+    },
+    {
+      "at": "2026-11-04T15:37:27+00:00",
+      "kind": "decision",
+      "id": "DEC-050",
+      "status": "APPROVED",
+      "by": "بسام ربیهاوی",
+      "note": "پاسخ کارفرما ۲۰۲۶-۱۱-۰۴: عامل دوم = TOTP (برنامه کد روی گوشی، مثل Google/Microsoft Authenticator)؛ کلید سخت‌افزاری/passkey بعداً اختیاری. بازیابی = ۱۰ کد بازیابی یک‌بارمصرف + بازنشانی توسط ادمین با دلیل، MFA ادمین و Audit (R1+R2)؛ بازیابی مالک طبق DEC-054. پنجره step-up در DEC-051."
+    },
+    {
+      "at": "2026-11-04T15:37:37+00:00",
+      "kind": "step",
+      "phase": "PHASE_01",
+      "step": "01.1",
+      "state": "PASS",
+      "note": null,
+      "commit": null
     }
   ],
-  "updated_at": "2026-11-04T14:44:12+00:00"
+  "updated_at": "2026-11-04T15:37:37+00:00"
 }
