@@ -69,13 +69,13 @@
         },
         "00.6": {
           "name": "Integration",
-          "state": "IN_REVIEW",
+          "state": "PASS",
           "commit": "d7b444a8f2e907b8bb6c730faf15a5b455dc5e9e",
           "report": "reports/phase-00/step-6/REPORT.md",
-          "review": null,
+          "review": "reports/phase-00/step-6/REVIEW.md",
           "rework_cycles": 0,
           "started_at": "2026-11-04T04:23:33+00:00",
-          "done_at": null
+          "done_at": "2026-11-04T05:11:56+00:00"
         },
         "00.7": {
           "name": "Security & Ops",
@@ -2201,6 +2201,15 @@
       "since": "2026-11-03T20:09:25+00:00",
       "result": "PASS",
       "note": "Employer UAT on work-windows 2026-11-04: system status page OK (brand, RTL, Vazirmatn, responsive)"
+    },
+    {
+      "id": "T-002",
+      "phase": "PHASE_00",
+      "what": "T-002 لوگو و رنگ سبز عالیخان روی صفحه وضعیت سامانه",
+      "how": "از Claude بخواهید «سرور تست را روشن کن»؛ سپس http://127.0.0.1:5173 را در Edge/Chrome باز کنید: لوگوی عالیخان بالای صفحه (جای «ع»)، دکمه «بررسی مجدد» سبز تیره هم‌رنگ لوگو، برچسب‌های «سالم» سبز روشن‌تر با تیک؛ پنجره را کوچک/بزرگ کنید (موبایل تا دسکتاپ). نتیجه: /test-result T-002 PASS یا FAIL",
+      "since": "2026-11-04T05:11:57+00:00",
+      "result": null,
+      "note": null
     }
   ],
   "events": [
@@ -2402,7 +2411,22 @@
       "state": "IN_REVIEW",
       "note": null,
       "commit": "d7b444a8f2e907b8bb6c730faf15a5b455dc5e9e"
+    },
+    {
+      "at": "2026-11-04T05:11:56+00:00",
+      "kind": "step",
+      "phase": "PHASE_00",
+      "step": "00.6",
+      "state": "PASS",
+      "note": null,
+      "commit": null
+    },
+    {
+      "at": "2026-11-04T05:11:57+00:00",
+      "kind": "test_ready",
+      "id": "T-002",
+      "phase": "PHASE_00"
     }
   ],
-  "updated_at": "2026-11-04T05:03:43+00:00"
+  "updated_at": "2026-11-04T05:11:57+00:00"
 }
