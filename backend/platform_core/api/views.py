@@ -1,4 +1,7 @@
-"""PHASE_00 endpoints (openapi-draft): liveness, readiness, version, access-gate stub. No business data."""
+"""PHASE_00 endpoints (openapi-draft): liveness, readiness, version, access-gate stub. No business data.
+
+Integration endpoints (00.6) live in ``integration_views.py``.
+"""
 
 from __future__ import annotations
 
@@ -24,7 +27,7 @@ from .request_id import request_id_of
 from .throttling import HealthIpThrottle
 
 # Version of docs/api/openapi-draft.yaml (``info.version``); a contract test keeps them equal.
-CONTRACT_VERSION: Final = "0.3.0-draft"
+CONTRACT_VERSION: Final = "0.4.0-draft"
 API_VERSION: Final = "v1"
 _ENVIRONMENT_NAMES: Final = {"dev": "dev", "test": "test", "staging": "staging", "prod": "production"}
 NO_STORE: Final = {"Cache-Control": "no-store"}

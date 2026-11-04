@@ -11,6 +11,9 @@ has no business endpoints and no authentication backend.
 * :class:`SyntheticScopePolicy` - allows two synthetic actions and scopes outbox rows by ``aggregate_id``.
 * Synthetic resource = ``platform_outbox_event`` rows created by the tests (the only versioned table in
   PHASE_00); ``aggregate_id`` plays the role of the record scope.
+* 00.6: :class:`IntegrationHarnessPolicy` grants only the actions listed in ``X-Test-Actions: a,b`` and scopes
+  integration sources / conflict items by source code (``X-Test-Scope``), so the explicit-permission and
+  out-of-scope (404) behaviour of the production integration views is exercised over HTTP.
 """
 
 from __future__ import annotations
@@ -26,6 +29,7 @@ from rest_framework.authentication import BaseAuthentication
 from rest_framework.request import Request
 from rest_framework.response import Response
 
+from platform_core.api import integration_views as iv
 from platform_core.api.base import AleekhanAPIView
 from platform_core.api.concurrency import expected_version, with_row_etag
 from platform_core.api.idempotent import idempotent_response
@@ -47,6 +51,7 @@ UPDATE = "platform.synthetic.update"
 class SyntheticPrincipal:
     actor_id: uuid.UUID
     scope: frozenset[str] = field(default_factory=frozenset)
+    actions: frozenset[str] = field(default_factory=frozenset)
     is_authenticated: bool = True
 
     @property
@@ -60,7 +65,8 @@ class HeaderTestAuthentication(BaseAuthentication):
         if not raw:
             return None
         scope = frozenset(s for s in request.headers.get("X-Test-Scope", "").split(",") if s)
-        return SyntheticPrincipal(uuid.UUID(raw), scope), None
+        actions = frozenset(s for s in request.headers.get("X-Test-Actions", "").split(",") if s)
+        return SyntheticPrincipal(uuid.UUID(raw), scope, actions), None
 
 
 class SyntheticScopePolicy:
@@ -77,6 +83,48 @@ class SyntheticScopePolicy:
         self, principal: Principal, action: str, queryset: models.QuerySet[M]
     ) -> models.QuerySet[M]:
         return queryset.filter(aggregate_id__in=sorted(self._scope(principal)))
+
+
+class IntegrationHarnessPolicy:
+    """Grants exactly the actions in ``X-Test-Actions``; record scope = source codes in ``X-Test-Scope``."""
+
+    def _scope(self, principal: Principal) -> frozenset[str]:
+        return getattr(principal, "scope", frozenset())
+
+    def allows_action(self, principal: Principal, action: str) -> bool:
+        return action in getattr(principal, "actions", frozenset())
+
+    def allows_record(self, principal: Principal, action: str, obj: Any) -> bool:
+        code = getattr(obj, "code", None) or getattr(getattr(obj, "source", None), "code", None)
+        return code in self._scope(principal)
+
+    def scope_queryset[M: models.Model](
+        self, principal: Principal, action: str, queryset: models.QuerySet[M]
+    ) -> models.QuerySet[M]:
+        scope = sorted(self._scope(principal))
+        if queryset.model.__name__ == "IntegrationSource":
+            return queryset.filter(code__in=scope)
+        return queryset.filter(source__code__in=scope)
+
+
+class HarnessFreshnessView(iv.IntegrationFreshnessView):
+    authentication_classes = [HeaderTestAuthentication]
+    access_policy = IntegrationHarnessPolicy()
+
+
+class HarnessConflictListView(iv.ConflictListView):
+    authentication_classes = [HeaderTestAuthentication]
+    access_policy = IntegrationHarnessPolicy()
+
+
+class HarnessConflictDetailView(iv.ConflictDetailView):
+    authentication_classes = [HeaderTestAuthentication]
+    access_policy = IntegrationHarnessPolicy()
+
+
+class HarnessConflictResolveView(iv.ConflictResolveView):
+    authentication_classes = [HeaderTestAuthentication]
+    access_policy = IntegrationHarnessPolicy()
 
 
 class OutboxRowSerializer(serializers.ModelSerializer[OutboxEvent]):
@@ -191,6 +239,10 @@ test_patterns: list[URLPattern] = [
     path("default-permission", DefaultPermissionView.as_view()),
     path("errors/<str:kind>", ErrorView.as_view()),
     path("access-gate/check", HarnessAccessGateView.as_view()),
+    path("integration/freshness", HarnessFreshnessView.as_view()),
+    path("integration/conflicts", HarnessConflictListView.as_view()),
+    path("integration/conflicts/<uuid:conflict_id>", HarnessConflictDetailView.as_view()),
+    path("integration/conflicts/<uuid:conflict_id>/resolve", HarnessConflictResolveView.as_view()),
 ]
 
 urlpatterns: list[URLPattern | URLResolver] = [

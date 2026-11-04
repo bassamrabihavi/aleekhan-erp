@@ -75,7 +75,8 @@ export function SystemStatusPage({ status }: { status: SystemStatus }) {
             {readiness.data ? (
               <StatusChip
                 testId="ready-chip"
-                tone={readiness.data.status === "ready" ? "success" : "danger"}
+                // REV-0503: while the shown answer is stale the chip is neutral (last known value, not a live "OK")
+                tone={readinessStale ? "neutral" : readiness.data.status === "ready" ? "success" : "danger"}
                 label={readiness.data.status === "ready" ? "آماده" : "آماده نیست"}
               />
             ) : null}
@@ -124,7 +125,10 @@ export function SystemStatusPage({ status }: { status: SystemStatus }) {
                           <code dir="ltr">{c.name}</code>
                         </td>
                         <td data-label="وضعیت">
-                          <StatusChip tone={COMPONENT_STATE[c.status].tone} label={COMPONENT_STATE[c.status].label} />
+                          <StatusChip
+                            tone={readinessStale ? "neutral" : COMPONENT_STATE[c.status].tone}
+                            label={COMPONENT_STATE[c.status].label}
+                          />
                         </td>
                       </tr>
                     ))}
@@ -138,7 +142,9 @@ export function SystemStatusPage({ status }: { status: SystemStatus }) {
         <section className="panel" aria-labelledby="h-live" aria-busy={liveness.isFetching}>
           <div className="panel__head">
             <h2 id="h-live">زنده بودن سرویس</h2>
-            {liveness.data ? <StatusChip testId="live-chip" tone="success" label="پاسخ‌گو" /> : null}
+            {liveness.data ? (
+              <StatusChip testId="live-chip" tone={livenessStale ? "neutral" : "success"} label="پاسخ‌گو" />
+            ) : null}
           </div>
           {livenessStale ? (
             <StaleBadge updatedAt={liveness.dataUpdatedAt} now={now} reason={livenessStale} />

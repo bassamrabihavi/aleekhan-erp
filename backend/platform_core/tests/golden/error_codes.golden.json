@@ -1,5 +1,5 @@
 {
-  "_note": "Golden snapshot of the stable error-code contract (PHASE_00 / 00.3). Changing a code, status or exception class is a breaking API change: update docs/api/openapi-draft.yaml, docs/engine/ERROR_CODES.md and this file in the same reviewed commit.",
+  "_note": "Golden snapshot of the stable error-code contract (PHASE_00 / 00.3; SOURCE_READ_ONLY and SOURCE_DISABLED added in 00.6). Changing a code, status or exception class is a breaking API change: update docs/api/openapi-draft.yaml, docs/engine/ERROR_CODES.md and this file in the same reviewed commit.",
   "error_codes": [
     {"code": "VALIDATION_FAILED", "http_status": 400, "exception": "ValidationFailed"},
     {"code": "AUTHENTICATION_REQUIRED", "http_status": 401, "exception": "AuthenticationRequired"},
@@ -14,6 +14,8 @@
     {"code": "IDEMPOTENCY_IN_PROGRESS", "http_status": 409, "exception": "IdempotencyInProgress"},
     {"code": "RULE_NOT_APPROVED", "http_status": 409, "exception": "RuleNotApproved"},
     {"code": "STATE_TRANSITION_NOT_ALLOWED", "http_status": 409, "exception": "StateTransitionNotAllowed"},
+    {"code": "SOURCE_READ_ONLY", "http_status": 409, "exception": "SourceReadOnly"},
+    {"code": "SOURCE_DISABLED", "http_status": 409, "exception": "SourceDisabled"},
     {"code": "RATE_LIMITED", "http_status": 429, "exception": "RateLimited"},
     {"code": "PAYLOAD_TOO_LARGE", "http_status": 413, "exception": "PayloadTooLarge"},
     {"code": "DEPENDENCY_UNAVAILABLE", "http_status": 503, "exception": "DependencyUnavailable"},

@@ -12,6 +12,7 @@
 
 from __future__ import annotations
 
+import re
 import uuid
 from typing import Any
 
@@ -74,8 +75,13 @@ def _production_routes() -> list[tuple[str, Any]]:
     return _walk(list(get_resolver("aleekhan.urls").url_patterns))
 
 
+def _as_template(route: str) -> str:
+    """Django ``<uuid:conflict_id>`` -> OpenAPI ``{conflict_id}``."""
+    return re.sub(r"<(?:[a-z]+:)?([a-z_]+)>", lambda m: "{" + m.group(1) + "}", route)
+
+
 def test_route_parity_with_openapi() -> None:
-    routes = {path for path, _ in _production_routes()}
+    routes = {_as_template(path) for path, _ in _production_routes()}
     spec_paths = {"api/v1" + p for p in oc.spec()["paths"]}
     assert routes == spec_paths
 
@@ -98,7 +104,8 @@ ALLOWED_PERMISSIONS = {
 
 def test_production_views_use_allowlisted_permissions_and_default_policy() -> None:
     op_ids = {"api/v1" + p: op["operationId"] for p, _m, op in oc.operations()}
-    for path, callback in _production_routes():
+    for raw_path, callback in _production_routes():
+        path = _as_template(raw_path)
         view_cls = callback.view_class
         perms = set(view_cls.permission_classes)
         assert perms <= ALLOWED_PERMISSIONS, (path, perms)

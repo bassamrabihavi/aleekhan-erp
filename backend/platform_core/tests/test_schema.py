@@ -15,6 +15,13 @@ PLATFORM_TABLES = [
     "platform_outbox_event",
     "platform_idempotency_record",
     "platform_schema_meta",
+    # 00.6 integration framework
+    "platform_inbox_event",
+    "platform_compensation_record",
+    "platform_integration_source",
+    "platform_import_batch",
+    "platform_import_staging_row",
+    "platform_conflict_item",
 ]
 
 

@@ -94,18 +94,13 @@ code {
   align-items: center;
   gap: var(--space-3);
 }
-.emblem {
-  width: 37px;
-  height: 37px;
-  display: grid;
-  place-items: center;
+/* official logo (docs/ui/brand): never recoloured, cropped or stretched - height fixed, width from the ratio */
+.brand__logo {
+  display: block;
   flex: none;
-  border: 1px solid var(--color-brand-gold-line);
-  border-radius: 11px;
-  background: var(--color-brand-gold-bg);
-  color: var(--color-brand-gold);
-  font-family: serif;
-  font-size: 1.4rem;
+  height: 44px;
+  width: auto;
+  aspect-ratio: 300 / 298;
 }
 .brand__text {
   display: flex;
@@ -279,6 +274,16 @@ h2 {
   background: var(--color-success-tint);
   color: var(--color-success);
 }
+/* shape cue: success shows a check mark instead of a dot, so it never relies on the green hue alone */
+.chip--success .chip__dot {
+  width: 5px;
+  height: 9px;
+  border-radius: 0;
+  background: transparent;
+  border: solid currentColor;
+  border-width: 0 2px 2px 0;
+  transform: translateY(-1px) rotate(45deg);
+}
 .chip--warning {
   background: var(--color-warning-tint);
   color: var(--color-warning);
@@ -436,6 +441,10 @@ h2 {
   .grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+  /* REV-0504: with two columns an odd number of normal panels leaves an empty cell - the last one spans */
+  .grid > .panel:not(.panel--wide):last-child:nth-child(even) {
+    grid-column: 1 / -1;
+  }
 }
 
 @media (max-width: 900px) {
@@ -463,6 +472,9 @@ h2 {
   }
   .grid {
     grid-template-columns: minmax(0, 1fr);
+  }
+  .brand__logo {
+    height: 38px;
   }
   .panel {
     padding: var(--space-3);

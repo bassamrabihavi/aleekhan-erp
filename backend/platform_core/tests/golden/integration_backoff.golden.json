@@ -1,0 +1,40 @@
+{
+  "_note": "Golden snapshot of the 00.6 TECHNICAL DEFAULT integration retry policy (engine/outbox.py INTEGRATION_POLICY). Not a business rule; ops to confirm in 00.7. Jitter values use the default sha256 jitter source with event_id = UUID(int=0).",
+  "policy": {
+    "max_attempts": 8,
+    "base_delay_seconds": 5.0,
+    "factor": 2,
+    "max_delay_seconds": 1800.0,
+    "jitter_permille": 250,
+    "lease_seconds": 300.0,
+    "batch_size": 50
+  },
+  "attempt_to_delay_seconds_without_jitter": {
+    "1": 5.0,
+    "2": 10.0,
+    "3": 20.0,
+    "4": 40.0,
+    "5": 80.0,
+    "6": 160.0,
+    "7": 320.0,
+    "8": 640.0,
+    "9": 1280.0,
+    "10": 1800.0,
+    "11": 1800.0,
+    "12": 1800.0
+  },
+  "attempt_to_delay_seconds_sha256_jitter_key_uuid0": {
+    "1": 4.089069,
+    "2": 9.970132,
+    "3": 19.234113,
+    "4": 37.389997,
+    "5": 63.521314,
+    "6": 152.148848,
+    "7": 278.235163,
+    "8": 598.766936,
+    "9": 1235.819231,
+    "10": 1421.763039,
+    "11": 1399.953344,
+    "12": 1640.851521
+  }
+}

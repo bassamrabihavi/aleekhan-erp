@@ -1,0 +1,14 @@
+{
+  "_note": "Golden snapshot of the platform import-batch state machine (PHASE_00 / 00.6, docs/integration/README.md section 2). Edges in source_policy_gated always raise RULE_NOT_APPROVED with the source's policy_decision_id until that decision is approved.",
+  "transitions": {
+    "APPLIED": ["COMPENSATED"],
+    "COMPENSATED": [],
+    "RECEIVED": ["REJECTED", "STAGED"],
+    "REJECTED": [],
+    "STAGED": ["REJECTED", "VALIDATED"],
+    "SUPERSEDED": [],
+    "VALIDATED": ["APPLIED", "REJECTED", "SUPERSEDED"]
+  },
+  "source_policy_gated": ["APPLIED->COMPENSATED", "VALIDATED->APPLIED", "VALIDATED->SUPERSEDED"],
+  "terminal": ["COMPENSATED", "REJECTED", "SUPERSEDED"]
+}

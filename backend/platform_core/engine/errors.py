@@ -37,6 +37,8 @@ class ErrorCode(StrEnum):
     IDEMPOTENCY_IN_PROGRESS = "IDEMPOTENCY_IN_PROGRESS"
     RULE_NOT_APPROVED = "RULE_NOT_APPROVED"
     STATE_TRANSITION_NOT_ALLOWED = "STATE_TRANSITION_NOT_ALLOWED"
+    SOURCE_READ_ONLY = "SOURCE_READ_ONLY"
+    SOURCE_DISABLED = "SOURCE_DISABLED"
     RATE_LIMITED = "RATE_LIMITED"
     PAYLOAD_TOO_LARGE = "PAYLOAD_TOO_LARGE"
     DEPENDENCY_UNAVAILABLE = "DEPENDENCY_UNAVAILABLE"
@@ -106,6 +108,18 @@ _SPECS: tuple[ErrorSpec, ...] = (
         409,
         "State transition not allowed",
         "این تغییر وضعیت از وضعیت فعلی مجاز نیست.",
+    ),
+    ErrorSpec(
+        ErrorCode.SOURCE_READ_ONLY,
+        409,
+        "Source is read-only",
+        "این سامانه منبع فقط‌خواندنی است؛ نوشتن در آن (مثلاً راهکاران) مجاز نیست.",
+    ),
+    ErrorSpec(
+        ErrorCode.SOURCE_DISABLED,
+        409,
+        "Source disabled",
+        "دریافت داده از این منبع فعلاً غیرفعال است.",
     ),
     ErrorSpec(
         ErrorCode.RATE_LIMITED, 429, "Too many requests", "تعداد درخواست‌ها زیاد است؛ کمی بعد تلاش کنید."
@@ -265,6 +279,16 @@ class RuleNotApproved(ConflictError):
 
 class StateTransitionNotAllowed(ConflictError):
     code = ErrorCode.STATE_TRANSITION_NOT_ALLOWED
+
+
+class SourceReadOnly(ConflictError):
+    """Any attempt to write to an external source system (Rahkaran is read-only, ADR-001)."""
+
+    code = ErrorCode.SOURCE_READ_ONLY
+
+
+class SourceDisabled(ConflictError):
+    code = ErrorCode.SOURCE_DISABLED
 
 
 class RateLimited(ClientError):

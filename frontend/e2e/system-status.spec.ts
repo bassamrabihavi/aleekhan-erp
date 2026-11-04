@@ -24,6 +24,30 @@ async function expectNoAxeViolations(page: Page): Promise<void> {
 }
 
 test.describe("system status page - real backend", () => {
+  test("shows the official logo with Persian alt text, unscaled ratio, served from the app origin", async ({
+    page,
+  }) => {
+    await openReady(page);
+    const logo = page.getByTestId("brand-logo");
+    await expect(logo).toBeVisible();
+    await expect(logo).toHaveAttribute("alt", "لوگوی سراجی سنتی عالیخان");
+    const dims = await logo.evaluate((el) => {
+      const img = el as HTMLImageElement;
+      const r = img.getBoundingClientRect();
+      return { nw: img.naturalWidth, nh: img.naturalHeight, w: r.width, h: r.height, src: img.currentSrc };
+    });
+    expect([dims.nw, dims.nh]).toEqual([300, 298]);
+    expect(Math.abs(dims.w / dims.h - 300 / 298)).toBeLessThan(0.02);
+    expect(dims.src.startsWith("http://127.0.0.1:5173/")).toBe(true);
+    await expect(page.getByText("ع", { exact: true })).toHaveCount(0); // placeholder emblem removed
+  });
+
+  test("brand primary is the logo green (design token wired)", async ({ page }) => {
+    await openReady(page);
+    const bg = await page.getByTestId("refresh").evaluate((el) => getComputedStyle(el).backgroundColor);
+    expect(bg).toBe("rgb(1, 57, 45)"); // #01392d sampled from the logo (docs/ui/DESIGN_TOKENS.md section 5)
+  });
+
   test("loads as Farsi RTL with the Persian font bundled locally", async ({ page }) => {
     const external: string[] = [];
     page.on("request", (r) => {
@@ -67,6 +91,7 @@ test.describe("system status page - real backend", () => {
       await expect(page.getByTestId(`component-${name}`)).toContainText("سالم");
     }
     await expect(page.getByTestId("live-chip")).toHaveText("پاسخ‌گو");
+    await expect(page.getByTestId("ready-chip")).toHaveAttribute("data-tone", "success");
     await expect(page.getByTestId("live-region")).toHaveText("سامانه آماده است.");
     // Jalali date with Persian digits, no Latin digits in the server check time.
     await expect(page.getByTestId("ready-checked-at")).not.toHaveText(/[0-9]/);
@@ -127,6 +152,17 @@ test.describe("system status page - real backend", () => {
       await expect(page.getByTestId("version-build")).toBeVisible();
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
       expect(overflow, `no horizontal scroll at ${vp.width}px`).toBeLessThanOrEqual(0);
+      // REV-0504: no empty grid cell - the panels of the last row together fill the grid's width
+      const gap = await page.evaluate(() => {
+        const grid = document.querySelector(".grid");
+        if (!grid) return -1;
+        const panels = [...grid.children].map((c) => c.getBoundingClientRect());
+        const lastTop = Math.max(...panels.map((r) => r.top));
+        const lastRow = panels.filter((r) => Math.abs(r.top - lastTop) < 2);
+        const used = lastRow.reduce((sum, r) => sum + r.width, 0);
+        return grid.getBoundingClientRect().width - used;
+      });
+      expect(gap, `last grid row is filled at ${vp.width}px`).toBeLessThanOrEqual(32);
       await page.screenshot({
         path: path.join(SCREENSHOT_DIR, `system-status_real_${vp.name}.png`),
         fullPage: true,
@@ -176,6 +212,9 @@ test.describe("system status page - [simulated failure] states (network intercep
     await expect(stale).toContainText("داده قدیمی");
     await expect(stale).toContainText("آخرین بررسی ناموفق بود");
     await expect(page.getByTestId("ready-chip")).toHaveText("آماده");
+    // REV-0503: the last known "ready" is shown neutral while stale, not as a green live status
+    await expect(page.getByTestId("ready-chip")).toHaveAttribute("data-tone", "neutral");
+    await expect(page.getByTestId("component-database").locator(".chip")).toHaveAttribute("data-tone", "neutral");
     await expect(page.getByTestId("state-error").first().getByTestId("error-code")).toHaveText("NETWORK");
     await expect(page.getByTestId("live-region")).toHaveText(/قدیمی است/);
     await page.evaluate(() => document.fonts.ready);
@@ -195,6 +234,7 @@ test.describe("system status page - [simulated failure] states (network intercep
     await expect(stale).toContainText("داده قدیمی");
     await expect(stale).toContainText("به‌روزرسانی انجام نشده");
     await expect(page.getByTestId("ready-chip")).toHaveText("آماده");
+    await expect(page.getByTestId("ready-chip")).toHaveAttribute("data-tone", "neutral");
     await page.unrouteAll({ behavior: "ignoreErrors" });
   });
 });

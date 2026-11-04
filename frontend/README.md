@@ -19,8 +19,10 @@ npm run e2e                  # scripts/e2e.sh: throwaway PostgreSQL DB + migrate
 E2E environment: libpq variables (`PGHOST`, `PGPORT`, `PGUSER`, `PGPASSWORD`; never committed), optional
 `PG_BIN` (dir with `psql`), `PLAYWRIGHT_BROWSERS_PATH` (browsers outside the repo). If the Playwright browser
 CDN is unreachable, `E2E_BROWSER_CHANNEL=msedge` (or `chrome`) uses an installed Chromium browser.
-`E2E_HTML_REPORT` / `E2E_OUTPUT_DIR` move Playwright artefacts outside the repo. Screenshots go to
-`reports/phase-00/step-5/screenshots/` (override `E2E_SCREENSHOT_DIR`).
+`E2E_HTML_REPORT` / `E2E_OUTPUT_DIR` move Playwright artefacts outside the repo. Screenshots go to the
+untracked `frontend/test-results/screenshots/` by default (REV-0501: a plain run never overwrites committed
+evidence); for acceptance evidence pass the report folder explicitly, e.g.
+`E2E_SCREENSHOT_DIR=../reports/phase-00/step-6/screenshots bash scripts/e2e.sh` (relative to `frontend/`).
 
 Tests named `[simulated failure] …` intercept network traffic to produce error/stale states; every other E2E
 test reads real backend responses. The `@backend-down` test runs with Django stopped (real failure).

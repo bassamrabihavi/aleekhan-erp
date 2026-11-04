@@ -12,7 +12,13 @@ against it). Code: `backend/platform_core/api/`. Error codes: [../engine/ERROR_C
 | `getVersion` | `GET /version` | public | see §6 (C-17) |
 | `checkAccess` | `GET /access-gate/check` | `sessionCookie` (PHASE_01) | no principal → 401 `AUTHENTICATION_REQUIRED`. PHASE_00 has no authentication backend, so production always answers 401. With a principal (test harness only): parameters validated (400), decision always `DENY` / `POLICY_NOT_DEFINED`. No code path returns `ALLOW` |
 
-There are no business endpoints and no users/roles in PHASE_00 (PHASE_01; DEC-003: users only created
+| `listIntegrationFreshness` | `GET /integration/freshness` | `sessionCookie` + `platform.integration.freshness.read` | 00.6, per-source fresh/stale/never, cursor by `source_code`, ETag; [../integration/README.md](../integration/README.md) §5 |
+| `listIntegrationConflicts` | `GET /integration/conflicts` | `sessionCookie` + `platform.integration.conflict.read` | 00.6, conflict queue, `status`/`source_code` filters, cursor |
+| `getIntegrationConflict` | `GET /integration/conflicts/{conflict_id}` | `sessionCookie` + `platform.integration.conflict.read` | 00.6, ETag = row version, out of scope → 404 |
+| `resolveIntegrationConflict` | `POST /integration/conflicts/{conflict_id}/resolve` | `sessionCookie` + `platform.integration.conflict.resolve` | 00.6, `If-Match` + `Idempotency-Key`; records the human decision only (no business write) |
+
+The integration endpoints answer 401 in PHASE_00 production (no authentication backend); their behaviour is
+tested through the test-only harness. There are no business endpoints and no users/roles in PHASE_00 (PHASE_01; DEC-003: users only created
 inside the system by the owner/admin, never AD/LDAP/SSO).
 
 ## 2. Cross-cutting behaviour

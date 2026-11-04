@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import type { UseQueryResult } from "@tanstack/react-query";
 
 import type { VersionInfo } from "../api/types";
+import logoUrl from "../assets/brand/aleekhan-logo.png";
 import { useOnline } from "../lib/hooks";
 import { ENVIRONMENT_LABELS } from "../lib/labels";
 
@@ -24,9 +25,15 @@ export function AppShell({ version, children }: Props) {
       </a>
       <header className="topbar">
         <div className="brand">
-          <span className="emblem" aria-hidden="true">
-            ع
-          </span>
+          {/* Official logo (docs/ui/brand/README.md): same bytes, no recolouring; intrinsic size keeps the ratio. */}
+          <img
+            className="brand__logo"
+            src={logoUrl}
+            alt="لوگوی سراجی سنتی عالیخان"
+            width={300}
+            height={298}
+            data-testid="brand-logo"
+          />
           <span className="brand__text">
             <span className="brand__name">سراجی سنتی عالیخان</span>
             <span className="brand__sub">سامانه یکپارچه کارخانه</span>

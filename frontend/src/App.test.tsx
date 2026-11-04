@@ -34,6 +34,8 @@ describe("System status page", () => {
     expect(screen.getByTestId("live-region")).toHaveTextContent("در حال بررسی وضعیت سامانه");
 
     expect(await screen.findByTestId("ready-chip")).toHaveTextContent("آماده");
+    expect(screen.getByTestId("ready-chip")).toHaveAttribute("data-tone", "success");
+    expect(screen.getByRole("img", { name: "لوگوی سراجی سنتی عالیخان" })).toBeInTheDocument();
     expect(screen.getByTestId("live-region")).toHaveTextContent("سامانه آماده است.");
     const table = screen.getByTestId("components-table");
     expect(within(table).getByText("پایگاه داده")).toBeInTheDocument();
@@ -117,6 +119,7 @@ describe("System status page", () => {
     expect(stale[0]).toHaveTextContent("داده قدیمی");
     expect(stale[0]).toHaveTextContent("آخرین بررسی ناموفق بود");
     expect(screen.getByTestId("ready-chip")).toBeInTheDocument();
+    expect(screen.getByTestId("ready-chip")).toHaveAttribute("data-tone", "neutral"); // REV-0503
     expect(screen.getByTestId("state-error")).toBeInTheDocument();
     await waitFor(() => {
       expect(screen.getByTestId("live-region")).toHaveTextContent("وضعیت نمایش‌داده‌شده قدیمی است");

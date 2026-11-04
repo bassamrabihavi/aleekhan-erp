@@ -1,4 +1,4 @@
-# Design tokens — DRAFT (PHASE_00 / 00.5)
+# Design tokens — DRAFT (PHASE_00 / 00.5; brand colours 00.6)
 
 Status: **DRAFT**. Derived from the DRAFT design catalog, which is *not approved page by page*
 (`handoff/08_UI_AND_UX/DESIGN_CATALOG_52/manifest.json`: `"approval": "NOT approved page-by-page"`). Precedence:
@@ -31,11 +31,11 @@ properties) and [`frontend/src/styles/base.css`](../../frontend/src/styles/base.
 | `--color-ink` | `#1b293b` | S1 `--ink` | body text |
 | `--color-muted` | `#5f7186` | S1 `--muted` `#697d91` **darkened** | D1 |
 | `--color-line` | `#e5eaf0` | S1 `--line`, S3 `--line` | borders |
-| `--color-primary` | `#2164ae` | S1 `--blue` | primary buttons, links, focus |
-| `--color-primary-hover` | `#1b5796` | derived (≈10% darker) | |
-| `--color-primary-tint` | `#edf4ff` | S1 `.sidebar nav a.active` | |
-| `--color-brand-gold` / `-bg` / `-line` | `#875d22` / `#f7f1e6` / `#e4d5bd` | S1 `.emblem` | brand emblem "ع", eyebrow |
-| `--color-success` / `-tint` | `#0b7a62` / `#e7f7f1` | S1 `--teal` `#0f987b` **darkened**; tint S4 `--lightgreen` | D1 |
+| `--color-primary` | `#01392d` | **logo sample** (§5, 00.6; was S1 `--blue` `#2164ae`) | primary buttons, links, focus, skip link, spinner |
+| `--color-primary-hover` | `#0a4d3e` | derived: same hue 167°, lightness 11 % → 17 % (lighter, so the hover is visible on a near-black green) | |
+| `--color-primary-tint` | `#e8f2ef` | derived: logo hue at ≈93 % lightness | |
+| `--color-brand-gold` / `-bg` / `-line` | `#875d22` / `#f7f1e6` / `#e4d5bd` | S1 `.emblem` | eyebrow, env-banner border (the «ع» emblem was replaced by the logo in 00.6) |
+| `--color-success` / `-tint` | `#1f7a35` / `#e9f6ec` | 00.6: moved from `#0b7a62`/`#e7f7f1` (hue 167° = the logo's hue) to leaf green hue 135° (D4) | D1, D4 |
 | `--color-warning` / `-tint` | `#8a5a12` / `#fff6eb` | S1 `--amber` `#af761d` **darkened**; tint S4 `--goldbg` | D1 |
 | `--color-danger` / `-tint` | `#b23c35` / `#fff0f1` | S1 `--red` `#c74d45` **darkened**; tint S4 `--redbg` | D1 |
 | `--color-info` / `-tint` | `#2164ae` / `#f0f5fb` | S1 `--blue`, `--light` | |
@@ -61,7 +61,7 @@ properties) and [`frontend/src/styles/base.css`](../../frontend/src/styles/base.
 | `--tap-target` | 44px | WCAG 2.5.5 / mobile use (S1 `.btn` min-height 35px raised) |
 | `--content-max` | 1280px | layout choice for 1440 width |
 | `--duration-fast/base` | 140 / 230 ms | S1 transitions (.14s / .23s); 0 with `prefers-reduced-motion` |
-| `--focus-ring` | white 3px + primary 2px | not defined in catalog — added (WCAG 2.4.7) |
+| `--focus-ring` | white 3px + primary 2px (`#01392d`) | not defined in catalog — added (WCAG 2.4.7) |
 
 ### Breakpoints
 `1200px` (laptop), `900px` (tablet), `600px` (mobile) from S1/S2 `@media`. CSS variables cannot be used inside
@@ -80,6 +80,12 @@ properties) and [`frontend/src/styles/base.css`](../../frontend/src/styles/base.
   `node_modules/vazirmatn/OFL.txt`). It is imported from the npm package and served from the app origin by the
   bundler — **no CDN at runtime** (E2E asserts that no request leaves the app origin). Catalog fonts remain in
   the fallback stack.
+- **D4 — success vs brand green (00.6).** The logo green (hue 167°) has exactly the hue of the old success
+  colour `#0b7a62`, so a green button and a green "OK" chip would read as the same signal. Success moved to hue
+  135° (`#1f7a35`, lightness 30 % vs the primary's 11 %; the two colours differ 2.4:1 in luminance) **and** success
+  chips show a check-mark shape instead of the round dot (`.chip--success .chip__dot`), so status never depends on
+  hue alone. `--color-info` stays blue `#2164ae` on purpose: it is a status colour (not brand), and turning it green
+  would collide with both primary and success.
 - **D3 — base size 14px instead of 12px.** Catalog body text is 12px (S1 `html,body{font-size:12px}`); too
   small for shop-floor/tablet reading. Small meta text still uses 12–13px.
 
@@ -97,3 +103,43 @@ properties) and [`frontend/src/styles/base.css`](../../frontend/src/styles/base.
 - Operational data shows its as-of time; stale data gets a "داده قدیمی" badge (MOCK_UI_BINDING §2 rule 5).
 - Non-production environments show the banner "محیط … — داده ساختگی" driven by `GET /version.environment`
   (MOCK_UI_BINDING §2 rule 6).
+- While a shown status is stale (last refresh failed, or older than the freshness window) its chips are rendered
+  `neutral` with the same text (REV-0503, 00.6): the last known value is not presented as a live green "OK".
+
+## 5. Brand colour from the logo (00.6)
+
+Employer decision 2026-11-04 (docs/ui/brand/README.md): the logo's dark green becomes the primary colour.
+
+**Sampling.** `python tools/sample_logo_colors.py` decodes `docs/ui/brand/aleekhan-logo.png` with the Python
+standard library only (zlib + struct; no Pillow), keeps opaque pixels, drops white/grey, buckets the rest and
+prints the average colour per bucket. Result (2026-11-04, sha256 `ef3fa9d1…4c64b33`): 300×298 px, 6 801 opaque
+chromatic pixels; dominant bucket **`#01392d`** (6 613 px, hsl(167°, 97 %, 11 %)); second `#053c30` (188 px,
+anti-aliasing edge of the same green). `--color-primary` is the dominant sample, unchanged. The app shows the logo
+from `frontend/src/assets/brand/aleekhan-logo.png` (byte-identical copy, same sha256), height 44 px (38 px ≤ 600 px),
+width from the 300:298 ratio, alt «لوگوی سراجی سنتی عالیخان», no recolouring.
+
+**Contrast (WCAG 2.1 relative luminance; AA = 4.5:1 normal text, 3:1 large text / UI components).** All pairs
+used by the shell and the system-status page:
+
+| Use | Pair | Ratio | AA |
+|---|---|---|---|
+| text on primary button / skip link | `#ffffff` on `#01392d` | 12.93:1 | pass |
+| text on primary hover | `#ffffff` on `#0a4d3e` | 9.79:1 | pass |
+| primary text (secondary button, links) on surface | `#01392d` on `#ffffff` | 12.93:1 | pass |
+| primary text on page background | `#01392d` on `#f5f6f8` | 11.96:1 | pass |
+| primary text on primary tint | `#01392d` on `#e8f2ef` | 11.31:1 | pass |
+| focus ring (UI, 3:1) vs surface / page bg | `#01392d` on `#ffffff` / `#f5f6f8` | 12.93:1 / 11.96:1 | pass |
+| success chip text on success tint | `#1f7a35` on `#e9f6ec` | 4.84:1 | pass |
+| success text on surface | `#1f7a35` on `#ffffff` | 5.39:1 | pass |
+| ink on page bg / surface | `#1b293b` on `#f5f6f8` / `#ffffff` | 13.61:1 / 14.72:1 | pass |
+| muted on surface / page bg | `#5f7186` on `#ffffff` / `#f5f6f8` | 5.01:1 / 4.63:1 | pass |
+| warning on warning tint | `#8a5a12` on `#fff6eb` | 5.53:1 | pass |
+| danger on danger tint | `#b23c35` on `#fff0f1` | 5.29:1 | pass |
+| info on info tint | `#2164ae` on `#f0f5fb` | 5.48:1 | pass |
+| neutral on neutral tint (incl. stale chips) | `#4f5f72` on `#eef1f5` | 5.77:1 | pass |
+| brand-gold eyebrow on page bg | `#875d22` on `#f5f6f8` | 5.37:1 | pass |
+| primary vs success (distinguishability only, not a text pair) | `#01392d` vs `#1f7a35` | 2.40:1 | — (plus hue 167° vs 135° and the check-mark shape, D4) |
+
+Ratios computed with `tools/sample_logo_colors.contrast`; the E2E suite additionally runs axe (wcag2a/aa,
+wcag21a/aa) on the ready, error and backend-down states and asserts the primary button's computed colour is
+`rgb(1, 57, 45)`.

@@ -106,7 +106,13 @@ decision. Only the platform outbox machine is defined in PHASE_00.
   `sha256(event_id:attempt)`. Default policy (technical, tune in 00.6): base 2 s, factor 2, cap 1 h,
   max 10 attempts, lease 5 min, batch 100 — golden in `tests/golden/backoff.golden.json`.
 - No broker is wired in PHASE_00. `engine.testing.InMemoryTestPublisher` is a **test double** and refuses to
-  start outside `ALEEKHAN_ENV` dev/test. Celery/Redis wiring: 00.6.
+  start outside `ALEEKHAN_ENV` dev/test.
+- 00.6 additions (docs/integration/README.md §3–4): `engine.consumers` (handler registry, inbox dedupe
+  `platform_inbox_event`, `RegistryPublisher`, compensation records on DEAD_LETTER, `sweep_dead_letters`);
+  injectable jitter source (`OutboxPolicy.jitter_source`) and clock (`now=` on `claim_batch`, `mark_failed`,
+  `dispatch_once`, `recover_stale`); `on_dead_letter` hook; `INTEGRATION_POLICY` technical default
+  (golden `tests/golden/integration_backoff.golden.json`). Celery/Redis worker wiring is still not done
+  (no worker process in PHASE_00; see docs/integration/README.md §8).
 
 ## 6. Tests
 

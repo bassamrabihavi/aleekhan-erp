@@ -25,6 +25,7 @@ Implemented in 00.3 (`platform_core/engine/idempotency.py`): retention 24 h and 
 
 ### 1.6 Import batch (PHASE_01 framework, PHASE_06/12 use)
 `RECEIVED → QUARANTINED (scan) → PARSED → VALIDATED → PENDING_REVIEW → APPROVED | REJECTED`; `APPROVED → COMPENSATED` (rollback-with-compensation). Row statuses: `PENDING_REVIEW, ERROR, MATCHED, REJECTED, APPROVED` (ARCHITECTURE_OVERVIEW §کیفیت داده). Snapshot freshness/reimport policy **BLOCKED (DEC-016)**.
+Implemented as a platform framework in 00.6 (`platform_core/integration/imports.py`, golden `tests/golden/import_batch_machine.golden.json`): `RECEIVED → STAGED → VALIDATED → APPLIED → COMPENSATED`, `RECEIVED|STAGED|VALIDATED → REJECTED`, `VALIDATED → SUPERSEDED`. Mapping to the proposal above: PARSED = STAGED; PENDING_REVIEW = VALIDATED (awaiting review); APPROVED = APPLIED. `QUARANTINED` (file scan) is not implemented: there is no file upload/storage path in PHASE_00 (SEC-03 is PHASE_01; scan tooling 00.7). APPLIED / SUPERSEDED / COMPENSATED are gated per source by `policy_decision_id` (DEC-016 Rahkaran, DEC-025 legacy workbooks) → always `RULE_NOT_APPROVED` in PHASE_00. Row status `NEW` added for "staged, not yet validated". Conflict queue: `OPEN → RESOLVED | DISMISSED` (docs/integration/README.md §6).
 
 ## 2. Business machines (from contract, PROPOSED)
 

@@ -39,12 +39,15 @@ Contract: `docs/api/openapi-draft.yaml` (`components.schemas.ErrorCode`, `compon
 | `IDEMPOTENCY_IN_PROGRESS` | 409 | `IdempotencyInProgress` | Same key + same request while the first one is still running; also a holder whose lease was taken over | همین درخواست هنوز در حال پردازش است؛ کمی بعد دوباره تلاش کنید. |
 | `RULE_NOT_APPROVED` | 409 | `RuleNotApproved` | The action depends on a business rule whose decision (`decision_id`, `DEC-###`) is not approved | قاعده کسب‌وکاری این کار هنوز تصویب نشده است و سامانه آن را انجام نمی‌دهد. |
 | `STATE_TRANSITION_NOT_ALLOWED` | 409 | `StateTransitionNotAllowed` | Transition not listed in the state machine | این تغییر وضعیت از وضعیت فعلی مجاز نیست. |
+| `SOURCE_READ_ONLY` | 409 | `SourceReadOnly` | Any attempt to write to an external source system (every PHASE_00 source is READ_ONLY; Rahkaran write-back needs its own ADR) — `integration.sources.require_writable` | این سامانه منبع فقط‌خواندنی است؛ نوشتن در آن (مثلاً راهکاران) مجاز نیست. |
+| `SOURCE_DISABLED` | 409 | `SourceDisabled` | Import from a source whose `is_enabled` is false | دریافت داده از این منبع فعلاً غیرفعال است. |
 | `RATE_LIMITED` | 429 | `RateLimited` | Too many requests (with `Retry-After`, step 00.4) | تعداد درخواست‌ها زیاد است؛ کمی بعد تلاش کنید. |
 | `PAYLOAD_TOO_LARGE` | 413 | `PayloadTooLarge` | Body above the size limit | حجم داده ارسالی بیش از حد مجاز است. |
 | `DEPENDENCY_UNAVAILABLE` | 503 | `DependencyUnavailable` | A required dependency (DB, cache, broker) is down | یکی از سرویس‌های لازم در دسترس نیست؛ کمی بعد تلاش کنید. |
 | `INTERNAL_ERROR` | 500 | `InternalError` | Anything unexpected (including `EngineContractError`, which is a programming error, not a client error) | خطای داخلی رخ داد؛ موضوع ثبت شد. |
 
-`IDEMPOTENCY_IN_PROGRESS` is new in 00.3 (OpenAPI draft bumped to `0.2.0-draft`). The brief's working names
+`IDEMPOTENCY_IN_PROGRESS` is new in 00.3 (OpenAPI draft bumped to `0.2.0-draft`). `SOURCE_READ_ONLY` and
+`SOURCE_DISABLED` are new in 00.6 (OpenAPI draft `0.4.0-draft`; additive, no existing code changed). The brief's working names
 `CONFLICT_VERSION` and `PERMISSION_DENIED` correspond to the already-published OpenAPI codes
 `VERSION_CONFLICT` and `ACCESS_DENIED`; the published names were kept to avoid breaking the 00.1 contract.
 
@@ -57,13 +60,22 @@ AleekhanError (code, http_status, message_fa, detail, errors, decision_id, to_pr
 │   │   PreconditionRequired, VersionConflict, IdempotencyKeyRequired, IdempotencyKeyReused,
 │   │   RateLimited, PayloadTooLarge
 │   └── ConflictError (409)
-│       └── IdempotencyInProgress, RuleNotApproved (decision_id required), StateTransitionNotAllowed
+│       └── IdempotencyInProgress, RuleNotApproved (decision_id required), StateTransitionNotAllowed,
+│           SourceReadOnly, SourceDisabled (00.6)
 └── ServerError (5xx)
     └── DependencyUnavailable, InternalError
 EngineContractError (RuntimeError) – engine misuse by code; mapped to INTERNAL_ERROR by the API layer.
 ```
 
 Mapping exceptions to HTTP responses (DRF exception handler, `X-Request-ID`, `Retry-After`) is step 00.4.
+
+## Row-level import codes (00.6, not API error codes)
+
+Staging rows carry machine codes in `error_codes[]` (pattern `^[A-Z][A-Z0-9_]{2,63}$`): `EMPTY_ROW`,
+`DUPLICATE_PAYLOAD` (structural, `integration/imports.py`) plus codes returned by per-source validators (none
+approved in PHASE_00). Rows refused before staging are reported as `VALIDATION_FAILED` with `errors[].code`:
+`SENSITIVE_FIELD`, `DUPLICATE_POSITION`, `OUT_OF_RANGE`, `TOO_LARGE`, `NOT_JSON`, `NOT_AN_OBJECT`, `INVALID`;
+file-level `EMPTY_FILE`; `TIMEZONE_REQUIRED` for a naive `source_as_of`. See docs/integration/README.md.
 
 ## RULE_NOT_APPROVED
 

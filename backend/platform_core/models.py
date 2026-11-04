@@ -3,7 +3,11 @@
 * ``AuditEvent``        append-only audit trail (DB trigger rejects UPDATE/DELETE/TRUNCATE).
 * ``OutboxEvent``       transactional outbox; dispatcher reads PENDING/FAILED rows by ``next_attempt_at``.
 * ``IdempotencyRecord`` stored outcome of a mutating request per (actor_id, key).
-* ``SchemaMeta``        single-row, non-sensitive schema/contract marker (the only seed data).
+* ``SchemaMeta``        single-row, non-sensitive schema/contract marker (seed, migration 0003).
+* ``InboxEvent``        (00.6) consumer-side dedupe per (consumer, event_id); ``engine/consumers.py``.
+* ``CompensationRecord`` (00.6) append-only record of a permanent consumer failure (mechanism only).
+* Integration tables (00.6): ``platform_core/integration/models.py`` (source registry seeded in 0006 with
+  metadata of three read-only sources, import batch, staging row, conflict item).
 
 No business tables and no users/roles here (PHASE_01). ``actor_id`` columns are plain UUIDs for now;
 the FK to the user table is added in PHASE_01 when that table exists.
@@ -276,3 +280,101 @@ class SchemaMeta(models.Model):
 
     def __str__(self) -> str:
         return f"schema {self.schema_contract}"
+
+
+# ---------------------------------------------------------------------------------------------- 00.6
+# Consumer side of the outbox (step 00.6, docs/integration/README.md section 3/4).
+
+
+class InboxEvent(models.Model):
+    """Consumer-side dedupe: one row per (consumer, event_id) that a handler processed successfully.
+
+    Inserted in the *same* transaction as the handler's own writes, so either both commit or neither does;
+    a redelivered event (at-least-once outbox) finds the row and is skipped.
+    """
+
+    id = models.BigAutoField(primary_key=True)
+    consumer = models.CharField(max_length=150)
+    event_id = models.UUIDField()
+    event_type = models.CharField(max_length=150)
+    attempt = models.IntegerField()
+    processed_at = models.DateTimeField(db_default=Now())
+
+    class Meta:
+        db_table = "platform_inbox_event"
+        constraints = [
+            UniqueConstraint(fields=["consumer", "event_id"], name="uq_inbox_event_consumer_event"),
+            CheckConstraint(
+                condition=Q(consumer__regex=DOTTED_NAME_PATTERN), name="ck_inbox_event_consumer_fmt"
+            ),
+            CheckConstraint(
+                condition=Q(event_type__regex=DOTTED_NAME_PATTERN), name="ck_inbox_event_type_fmt"
+            ),
+            CheckConstraint(condition=Q(attempt__gte=1), name="ck_inbox_event_attempt_pos"),
+        ]
+        indexes = [models.Index(fields=["event_id"], name="ix_inbox_event_event")]
+
+    def __str__(self) -> str:
+        return f"{self.consumer} <- {self.event_id}"
+
+
+class CompensationOutcome(models.TextChoices):
+    MANUAL_REQUIRED = "MANUAL_REQUIRED", "No hook: manual compensation required"
+    COMPLETED = "COMPLETED", "Hook completed"
+    HOOK_FAILED = "HOOK_FAILED", "Hook failed: manual compensation required"
+
+
+class CompensationTrigger(models.TextChoices):
+    DEAD_LETTER = "DEAD_LETTER", "Event dead-lettered (permanent failure)"
+
+
+class CompensationRecord(models.Model):
+    """What happened when an event failed permanently for a consumer (mechanism only, no business logic)."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    event_id = models.UUIDField()
+    event_type = models.CharField(max_length=150)
+    consumer = models.CharField(max_length=150)
+    aggregate_type = models.CharField(max_length=100)
+    aggregate_id = models.CharField(max_length=64)
+    trigger = models.CharField(max_length=16, choices=CompensationTrigger.choices)
+    failure_code = models.CharField(
+        max_length=500
+    )  # safe code only (outbox last_error), never exception text
+    outcome = models.CharField(max_length=16, choices=CompensationOutcome.choices)
+    hook_error = models.CharField(max_length=150, blank=True, default="")  # exception class name only
+    recorded_at = models.DateTimeField(db_default=Now())
+
+    class Meta:
+        db_table = "platform_compensation_record"
+        constraints = [
+            UniqueConstraint(fields=["consumer", "event_id"], name="uq_compensation_record_consumer_event"),
+            CheckConstraint(
+                condition=Q(consumer__regex=DOTTED_NAME_PATTERN), name="ck_compensation_record_consumer_fmt"
+            ),
+            CheckConstraint(
+                condition=Q(event_type__regex=DOTTED_NAME_PATTERN), name="ck_compensation_record_type_fmt"
+            ),
+            CheckConstraint(
+                condition=Q(trigger__in=CompensationTrigger.values), name="ck_compensation_record_trigger"
+            ),
+            CheckConstraint(
+                condition=Q(outcome__in=CompensationOutcome.values), name="ck_compensation_record_outcome"
+            ),
+            CheckConstraint(
+                condition=~Q(outcome=CompensationOutcome.HOOK_FAILED) | ~Q(hook_error=""),
+                name="ck_compensation_record_hook_error",
+            ),
+        ]
+        indexes = [
+            models.Index(fields=["event_id"], name="ix_compensation_record_event"),
+            models.Index(fields=["outcome", "recorded_at"], name="ix_compensation_record_outcome"),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.consumer} {self.event_id} [{self.outcome}]"
+
+
+# Integration tables (sources, import batches, staging, conflict queue) live in their own module of this app
+# (platform_core.integration.models) and are registered here so Django's app loading sees them.
+from platform_core.integration import models as _integration_models  # noqa: E402,F401

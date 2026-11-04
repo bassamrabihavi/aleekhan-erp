@@ -2,8 +2,8 @@ openapi: 3.1.0
 jsonSchemaDialect: https://spec.openapis.org/oas/3.1/dialect/base
 info:
   title: Aleekhan Factory Platform API
-  version: 0.3.0-draft
-  summary: PHASE_00 draft contract (steps 00.1-00.4). Platform endpoints only, NO business writes.
+  version: 0.4.0-draft
+  summary: PHASE_00 draft contract (steps 00.1-00.6). Platform endpoints only, NO business writes.
   description: |
     Status: DRAFT (PHASE_00 / 00.1 Discovery & Contract, implemented in 00.4). Not approved. This hand-written
     document is the contract (contract-first): the backend is tested against it (route parity, security
@@ -15,8 +15,11 @@ info:
     within v1. Security is declared top-level (`sessionCookie`, deny by default); only the platform probes
     override it with `security: []` (REV-0001).
 
-    Scope of this draft (PHASE_00 only): liveness, readiness, version, and an access-gate stub that
-    DENIES BY DEFAULT. Authentication (login/session/MFA) is PHASE_01 (users created only inside the
+    Scope of this draft (PHASE_00 only): liveness, readiness, version, an access-gate stub that
+    DENIES BY DEFAULT, and (0.4.0, step 00.6) the read-only integration framework: per-source freshness and
+    the conflict queue (resolution records a human decision only, never a business write;
+    docs/integration/README.md). Every integration endpoint requires an authenticated principal AND an
+    explicit action permission; in PHASE_00 production there is no login and the policy denies everything. Authentication (login/session/MFA) is PHASE_01 (users created only inside the
     system by the owner/admin, DEC-003; no AD/LDAP/SSO). Business resources (customers, products, serials,
     stock, ...) are intentionally absent.
 
@@ -53,6 +56,10 @@ tags:
     description: Health, readiness and version. No business data.
   - name: access
     description: Access-gate stub. Deny-by-default until PHASE_01 implements auth/RBAC.
+  - name: integration
+    description: |
+      Read-only source integration framework (00.6): source freshness and conflict queue. Sources are
+      READ_ONLY (Rahkaran = Excel import only, ADR-001). Deny by default (explicit permission per action).
 paths:
   /health/live:
     get:
@@ -223,6 +230,187 @@ paths:
           $ref: '#/components/responses/AuthenticationRequired'
         '429':
           $ref: '#/components/responses/RateLimited'
+  /integration/freshness:
+    get:
+      tags: [integration]
+      operationId: listIntegrationFreshness
+      summary: Freshness of every source in the caller's scope (fresh / stale / never)
+      description: |
+        Requires permission `platform.integration.freshness.read` (deny by default; record scope = source).
+        `freshness` compares `last_success_at` (last batch VALIDATED with at least one valid row) with the
+        source's `staleness_threshold_seconds`. `threshold_basis: TECHNICAL_DEFAULT` means the threshold is a
+        technical default awaiting the owner decision `policy_decision_id` (DEC-016 for Rahkaran): the UI must
+        not present stale or unconfirmed data as real time. `last_as_of` is the snapshot time claimed by the
+        importer (unverified evidence). Ordered by `source_code`.
+      parameters:
+        - $ref: '#/components/parameters/RequestId'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: One page of source freshness
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+            ETag:
+              $ref: '#/components/headers/ETag'
+            Cache-Control:
+              $ref: '#/components/headers/Cache-Control'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FreshnessPage'
+              example:
+                items:
+                  - source_code: rahkaran_excel
+                    name_fa: راهکاران — خروجی اکسل (فقط‌خواندنی)
+                    kind: EXCEL_FILE
+                    direction: READ_ONLY
+                    is_enabled: true
+                    freshness: never
+                    last_success_at: null
+                    last_as_of: null
+                    staleness_threshold_seconds: 86400
+                    threshold_basis: TECHNICAL_DEFAULT
+                    policy_decision_id: DEC-016
+                page: {page_size: 25, next_cursor: null}
+                checked_at: '2026-11-04T08:00:00Z'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /integration/conflicts:
+    get:
+      tags: [integration]
+      operationId: listIntegrationConflicts
+      summary: Conflict queue (items needing a human decision)
+      description: |
+        Requires permission `platform.integration.conflict.read`; only items of sources in the caller's scope
+        are listed. Ordered by creation (internal sequence). `details` are redacted and carry identifiers only.
+      parameters:
+        - $ref: '#/components/parameters/RequestId'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/PageSize'
+        - name: status
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/ConflictStatus'
+        - name: source_code
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/SourceCode'
+      responses:
+        '200':
+          description: One page of conflict items
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+            Cache-Control:
+              $ref: '#/components/headers/Cache-Control-NoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConflictPage'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /integration/conflicts/{conflict_id}:
+    parameters:
+      - $ref: '#/components/parameters/ConflictId'
+    get:
+      tags: [integration]
+      operationId: getIntegrationConflict
+      summary: One conflict item (ETag = row version)
+      description: Requires `platform.integration.conflict.read`. Outside the caller's scope -> 404 (BOLA/IDOR).
+      parameters:
+        - $ref: '#/components/parameters/RequestId'
+      responses:
+        '200':
+          description: The conflict item
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+            ETag:
+              $ref: '#/components/headers/ETag'
+            Cache-Control:
+              $ref: '#/components/headers/Cache-Control-NoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConflictItem'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /integration/conflicts/{conflict_id}/resolve:
+    parameters:
+      - $ref: '#/components/parameters/ConflictId'
+    post:
+      tags: [integration]
+      operationId: resolveIntegrationConflict
+      summary: Close an OPEN conflict as RESOLVED or DISMISSED (records the human decision only)
+      description: |
+        Requires permission `platform.integration.conflict.resolve` and an identified user. Writes the item,
+        an audit record and the outbox event `platform.integration.conflict_resolved` in one transaction.
+        It NEVER applies any business change (the owning module does that in its own phase, after its rules
+        are approved). Not OPEN -> 409 STATE_TRANSITION_NOT_ALLOWED.
+      parameters:
+        - $ref: '#/components/parameters/RequestId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConflictResolveRequest'
+      responses:
+        '200':
+          description: Closed conflict item (also returned on an idempotent replay with `Idempotent-Replayed`)
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+            ETag:
+              $ref: '#/components/headers/ETag'
+            Idempotent-Replayed:
+              $ref: '#/components/headers/Idempotent-Replayed'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConflictItem'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '412':
+          $ref: '#/components/responses/VersionConflict'
+        '422':
+          $ref: '#/components/responses/IdempotencyKeyReused'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+        '429':
+          $ref: '#/components/responses/RateLimited'
 components:
   securitySchemes:
     sessionCookie:
@@ -265,6 +453,13 @@ components:
       schema:
         type: string
         maxLength: 512
+    ConflictId:
+      name: conflict_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
     PageSize:
       name: page_size
       in: query
@@ -289,6 +484,16 @@ components:
       schema:
         type: integer
         minimum: 1
+    Cache-Control:
+      description: Cache directive (`no-cache` = revalidate with the ETag).
+      schema:
+        type: string
+        enum: [no-cache, no-store]
+    Idempotent-Replayed:
+      description: '`true` when the response is the stored response of an earlier request with the same key.'
+      schema:
+        type: string
+        const: 'true'
     Cache-Control-NoStore:
       description: Always `no-store` for health/access responses.
       schema:
@@ -330,6 +535,60 @@ components:
             code: AUTHENTICATION_REQUIRED
             message_fa: برای این کار باید وارد سامانه شوید.
             request_id: 3f1c2a9e-6b1d-4c8e-9a51-0d2f6f0b7c11
+    AccessDenied:
+      description: Authenticated but the action is not permitted
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/X-Request-ID'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    NotFound:
+      description: Missing, or outside the caller's scope (BOLA/IDOR)
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/X-Request-ID'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    Conflict:
+      description: STATE_TRANSITION_NOT_ALLOWED, RULE_NOT_APPROVED, IDEMPOTENCY_IN_PROGRESS, SOURCE_READ_ONLY or SOURCE_DISABLED
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/X-Request-ID'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    VersionConflict:
+      description: If-Match is stale or weak
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/X-Request-ID'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    PreconditionRequired:
+      description: If-Match or Idempotency-Key missing
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/X-Request-ID'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    IdempotencyKeyReused:
+      description: Same Idempotency-Key used for a different request
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/X-Request-ID'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
     RateLimited:
       description: Too many requests
       headers:
@@ -473,6 +732,8 @@ components:
         - IDEMPOTENCY_IN_PROGRESS
         - RULE_NOT_APPROVED
         - STATE_TRANSITION_NOT_ALLOWED
+        - SOURCE_READ_ONLY
+        - SOURCE_DISABLED
         - RATE_LIMITED
         - PAYLOAD_TOO_LARGE
         - DEPENDENCY_UNAVAILABLE
@@ -492,6 +753,128 @@ components:
       type: string
       enum: [product_code, die_code]
       description: Namespaces are independent; no shared sequence (DOMAIN_ENTITY_CATALOG.md). Cliche codes are alphanumeric and NOT Code14.
+    SourceCode:
+      type: string
+      pattern: '^[a-z][a-z0-9_]{2,63}$'
+    SourceFreshness:
+      type: object
+      additionalProperties: false
+      required: [source_code, name_fa, kind, direction, is_enabled, freshness, last_success_at, last_as_of,
+                 staleness_threshold_seconds, threshold_basis, policy_decision_id]
+      properties:
+        source_code:
+          $ref: '#/components/schemas/SourceCode'
+        name_fa:
+          type: string
+        kind:
+          type: string
+          enum: [EXCEL_FILE, XLSM_FILE]
+        direction:
+          type: string
+          const: READ_ONLY
+          description: Every PHASE_00 source is read-only (DB CHECK); write-back needs its own ADR.
+        is_enabled:
+          type: boolean
+        freshness:
+          type: string
+          enum: [fresh, stale, never]
+        last_success_at:
+          oneOf:
+            - $ref: '#/components/schemas/UtcTimestamp'
+            - type: 'null'
+        last_as_of:
+          oneOf:
+            - $ref: '#/components/schemas/UtcTimestamp'
+            - type: 'null'
+        staleness_threshold_seconds:
+          type: integer
+          minimum: 1
+        threshold_basis:
+          type: string
+          enum: [TECHNICAL_DEFAULT, OWNER_APPROVED]
+        policy_decision_id:
+          type: string
+          pattern: '^DEC-[0-9]{3}$'
+    FreshnessPage:
+      type: object
+      additionalProperties: false
+      required: [items, page, checked_at]
+      properties:
+        items:
+          type: array
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/SourceFreshness'
+        page:
+          $ref: '#/components/schemas/PageMeta'
+        checked_at:
+          $ref: '#/components/schemas/UtcTimestamp'
+    ConflictStatus:
+      type: string
+      enum: [OPEN, RESOLVED, DISMISSED]
+    ConflictItem:
+      type: object
+      additionalProperties: false
+      required: [conflict_id, source_code, batch_id, kind, conflict_key, details, status, raised_at, resolved_at,
+                 resolution_note, row_version]
+      properties:
+        conflict_id:
+          type: string
+          format: uuid
+        source_code:
+          $ref: '#/components/schemas/SourceCode'
+        batch_id:
+          type: [string, 'null']
+          format: uuid
+        kind:
+          type: string
+          pattern: '^[a-z][a-z0-9_]{2,63}$'
+        conflict_key:
+          type: string
+          minLength: 1
+          maxLength: 200
+        details:
+          type: object
+          description: Redacted; identifiers only (no personal data, secrets or salary).
+        status:
+          $ref: '#/components/schemas/ConflictStatus'
+        raised_at:
+          $ref: '#/components/schemas/UtcTimestamp'
+        resolved_at:
+          oneOf:
+            - $ref: '#/components/schemas/UtcTimestamp'
+            - type: 'null'
+        resolution_note:
+          type: [string, 'null']
+          maxLength: 500
+        row_version:
+          type: integer
+          minimum: 1
+    ConflictPage:
+      type: object
+      additionalProperties: false
+      required: [items, page]
+      properties:
+        items:
+          type: array
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/ConflictItem'
+        page:
+          $ref: '#/components/schemas/PageMeta'
+    ConflictResolveRequest:
+      type: object
+      additionalProperties: false
+      required: [outcome, note]
+      properties:
+        outcome:
+          type: string
+          enum: [RESOLVED, DISMISSED]
+        note:
+          type: string
+          minLength: 1
+          maxLength: 500
+          description: Short justification without personal data (stored with the item and in the audit trail).
     PageMeta:
       type: object
       additionalProperties: false
@@ -518,6 +901,8 @@ x-aleekhan-conventions:
     IDEMPOTENCY_IN_PROGRESS: 409
     RULE_NOT_APPROVED: 409
     STATE_TRANSITION_NOT_ALLOWED: 409
+    SOURCE_READ_ONLY: 409
+    SOURCE_DISABLED: 409
     RATE_LIMITED: 429
     INTERNAL_ERROR: 500
     DEPENDENCY_UNAVAILABLE: 503

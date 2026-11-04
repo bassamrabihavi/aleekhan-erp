@@ -1,6 +1,7 @@
 /*
- * Aleekhan design tokens - DRAFT (PHASE_00 / 00.5).
+ * Aleekhan design tokens - DRAFT (PHASE_00 / 00.5; brand green from the official logo in 00.6).
  * Derived from the DRAFT design catalog (handoff/08_UI_AND_UX/DESIGN_CATALOG_52, not approved page by page).
+ * Primary = dark green sampled from docs/ui/brand/aleekhan-logo.png (employer choice 2026-11-04).
  * Every token, its catalog source and any deviation (WCAG AA contrast, base font size) are documented in
  * docs/ui/DESIGN_TOKENS.md. Change tokens there first, then here.
  */
@@ -13,17 +14,18 @@
   --color-muted: #5f7186;
   --color-line: #e5eaf0;
 
-  /* colour - brand */
-  --color-primary: #2164ae;
-  --color-primary-hover: #1b5796;
-  --color-primary-tint: #edf4ff;
+  /* colour - brand (logo green; tools/sample_logo_colors.py) */
+  --color-primary: #01392d;
+  --color-primary-hover: #0a4d3e;
+  --color-primary-tint: #e8f2ef;
   --color-brand-gold: #875d22;
   --color-brand-gold-bg: #f7f1e6;
   --color-brand-gold-line: #e4d5bd;
 
   /* colour - status (text on tint pairs meet WCAG AA 4.5:1) */
-  --color-success: #0b7a62;
-  --color-success-tint: #e7f7f1;
+  /* success hue 135deg (leaf green), kept apart from the primary's 167deg; chips add a check-mark shape */
+  --color-success: #1f7a35;
+  --color-success-tint: #e9f6ec;
   --color-warning: #8a5a12;
   --color-warning-tint: #fff6eb;
   --color-danger: #b23c35;
@@ -34,7 +36,7 @@
   --color-neutral-tint: #eef1f5;
 
   /* focus */
-  --focus-ring: 0 0 0 3px #ffffff, 0 0 0 5px #2164ae;
+  --focus-ring: 0 0 0 3px #ffffff, 0 0 0 5px #01392d;
 
   /* typography */
   --font-sans: "Vazirmatn", "Noto Sans Arabic UI", "Noto Sans Arabic", Tahoma, sans-serif;

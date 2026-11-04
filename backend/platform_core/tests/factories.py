@@ -9,6 +9,7 @@ from typing import Any
 
 from django.utils import timezone
 
+from platform_core.integration.models import IntegrationSource
 from platform_core.models import (
     ActorType,
     AuditEvent,
@@ -57,3 +58,16 @@ def idempotency_record(**over: Any) -> IdempotencyRecord:
     }
     data.update(over)
     return IdempotencyRecord.objects.create(**data)
+
+
+def integration_source(**over: Any) -> IntegrationSource:
+    """SYNTHETIC source (code prefix ``synthetic_``); never one of the real seeded systems."""
+    data: dict[str, Any] = {
+        "code": f"synthetic_{uuid.uuid4().hex[:12]}",
+        "name_fa": "منبع ساختگی آزمایشی",
+        "kind": "EXCEL_FILE",
+        "policy_decision_id": "DEC-016",
+        "staleness_threshold": timedelta(hours=24),
+    }
+    data.update(over)
+    return IntegrationSource.objects.create(**data)

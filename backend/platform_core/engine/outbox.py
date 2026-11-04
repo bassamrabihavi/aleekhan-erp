@@ -14,9 +14,14 @@ Delivery is *at least once*: a crash after ``publish`` and before the ACK leaves
 lease, :func:`recover_stale` counts it as a failed attempt and it is published again. Consumers dedupe by
 ``event_id`` (contract: "Handlers idempotent").
 
-No broker is wired in PHASE_00: callers pass an :class:`OutboxPublisher`. The only implementation shipped is
-the test double in ``platform_core.engine.testing`` (refused outside dev/test). Retry/backoff numbers in
-:class:`OutboxPolicy` are technical defaults, not business rules; integration tuning is step 00.6.
+No broker is wired in PHASE_00: callers pass an :class:`OutboxPublisher`. Shipped implementations: the
+in-process consumer registry ``platform_core.engine.consumers.RegistryPublisher`` (step 00.6: handlers + inbox
+dedupe + compensation hook) and the test double in ``platform_core.engine.testing`` (refused outside
+dev/test). Retry/backoff numbers in :class:`OutboxPolicy` are technical defaults, not business rules
+(``INTEGRATION_POLICY`` below = 00.6 defaults, docs/integration/README.md section 3).
+
+Determinism for tests (00.6): the jitter source is injectable (``OutboxPolicy.jitter_source``) and every
+dispatcher entry point accepts ``now=`` (an explicit clock instead of the database clock).
 """
 
 from __future__ import annotations
@@ -24,7 +29,7 @@ from __future__ import annotations
 import hashlib
 import itertools
 import uuid
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from typing import Any, Protocol
@@ -62,6 +67,16 @@ def _assert_path(*states: str) -> None:
 
 
 # ---------------------------------------------------------------------------------------------- backoff
+JitterSource = Callable[[str, int], int]
+"""``(jitter_key, attempt) -> int in [0, 2**64)``; the default is :func:`sha256_jitter` (deterministic)."""
+
+JITTER_SPACE = 2**64
+
+
+def sha256_jitter(jitter_key: str, attempt: int) -> int:
+    return int.from_bytes(hashlib.sha256(f"{jitter_key}:{attempt}".encode()).digest()[:8], "big")
+
+
 def backoff_delay(
     attempt: int,
     *,
@@ -70,12 +85,14 @@ def backoff_delay(
     cap: timedelta,
     jitter_permille: int = 0,
     jitter_key: str = "",
+    jitter_source: JitterSource | None = None,
 ) -> timedelta:
     """Deterministic exponential backoff after ``attempt`` failed attempts (attempt >= 1).
 
     ``delay = min(cap, base * factor ** (attempt - 1))`` in integer microseconds, then an optional
-    *deterministic* jitter that shortens the delay by up to ``jitter_permille``/1000, derived from
-    ``sha256(jitter_key:attempt)`` (same inputs -> same delay; different events spread out).
+    jitter that shortens the delay by up to ``jitter_permille``/1000. The jitter sample comes from
+    ``jitter_source(jitter_key, attempt)`` (default ``sha256(jitter_key:attempt)``: same inputs -> same delay,
+    different events spread out); tests may inject a fixed source.
     """
     if attempt < 1:
         raise ValueError("attempt must be >= 1")
@@ -94,8 +111,10 @@ def backoff_delay(
         delay_us *= factor
     delay_us = min(delay_us, cap_us)
     if jitter_permille:
-        h = int.from_bytes(hashlib.sha256(f"{jitter_key}:{attempt}".encode()).digest()[:8], "big")
-        delay_us -= (delay_us * jitter_permille * h) // (1000 * 2**64)
+        h = (jitter_source or sha256_jitter)(jitter_key, attempt)
+        if not 0 <= h < JITTER_SPACE:
+            raise ValueError("jitter_source must return an int in [0, 2**64)")
+        delay_us -= (delay_us * jitter_permille * h) // (1000 * JITTER_SPACE)
     return timedelta(microseconds=delay_us)
 
 
@@ -112,6 +131,7 @@ class OutboxPolicy:
     jitter_permille: int = 0
     lease: timedelta = timedelta(minutes=5)
     batch_size: int = 100
+    jitter_source: JitterSource | None = field(default=None, compare=False, repr=False)
 
     def __post_init__(self) -> None:
         if self.max_attempts < 1 or self.batch_size < 1:
@@ -128,7 +148,23 @@ class OutboxPolicy:
             cap=self.max_delay,
             jitter_permille=self.jitter_permille,
             jitter_key=str(event_id),
+            jitter_source=self.jitter_source,
         )
+
+
+# TECHNICAL DEFAULT retry policy for integration consumers (00.6; not a business rule, ops to confirm in
+# 00.7):
+# 8 attempts, 5 s * 2^(n-1) capped at 30 min, up to 25 % deterministic jitter, 5 min lease, batches of 50.
+# Back-off before DEAD_LETTER (no jitter): 5+10+20+40+80+160+320 s = 635 s (~10.6 min) plus processing time.
+INTEGRATION_POLICY = OutboxPolicy(
+    max_attempts=8,
+    base_delay=timedelta(seconds=5),
+    factor=2,
+    max_delay=timedelta(minutes=30),
+    jitter_permille=250,
+    lease=timedelta(minutes=5),
+    batch_size=50,
+)
 
 
 # ---------------------------------------------------------------------------------------------- publisher
@@ -198,13 +234,16 @@ def _envelope(row: OutboxEvent, attempt: int) -> EventEnvelope:
     )
 
 
-def claim_batch(policy: OutboxPolicy, *, using: str = "default") -> list[ClaimedEvent]:
+def claim_batch(
+    policy: OutboxPolicy, *, using: str = "default", now: datetime | None = None
+) -> list[ClaimedEvent]:
     """Claim due PENDING/FAILED rows with ``FOR UPDATE SKIP LOCKED`` and mark them DISPATCHED.
 
-    Concurrent dispatchers never claim the same row (each locked row is skipped by the others).
+    Concurrent dispatchers never claim the same row (each locked row is skipped by the others). ``now``
+    overrides the database clock (tests / deterministic simulations).
     """
     with transaction.atomic(using=using):
-        now = db_now(using)
+        now = now if now is not None else db_now(using)
         rows = list(
             OutboxEvent.objects.using(using)
             .select_for_update(skip_locked=True)
@@ -236,9 +275,17 @@ def mark_delivered(claimed: ClaimedEvent, *, using: str = "default") -> bool:
 
 
 def mark_failed(
-    claimed: ClaimedEvent, error: str, policy: OutboxPolicy, *, using: str = "default"
+    claimed: ClaimedEvent,
+    error: str,
+    policy: OutboxPolicy,
+    *,
+    using: str = "default",
+    now: datetime | None = None,
 ) -> str | None:
-    """DISPATCHED -> FAILED (backoff) or -> FAILED -> DEAD_LETTER. Returns the new status, None if lost."""
+    """DISPATCHED -> FAILED (backoff) or -> FAILED -> DEAD_LETTER. Returns the new status, None if lost.
+
+    ``next_attempt_at = now + backoff``; ``now`` defaults to the statement clock of the UPDATE itself.
+    """
     attempt = claimed.envelope.attempt
     if attempt >= policy.max_attempts:
         _assert_path(S.DISPATCHED, S.FAILED, S.DEAD_LETTER)
@@ -249,8 +296,12 @@ def mark_failed(
         new_status = S.FAILED
         delay = policy.delay_after(attempt, claimed.envelope.event_id)
     # next_attempt_at = statement_timestamp() + delay: same clock and instant as the trigger's updated_at
-    next_at = ExpressionWrapper(
-        Now() + Value(delay, output_field=DurationField()), output_field=DateTimeField()
+    next_at: Any = (
+        now + delay
+        if now is not None
+        else ExpressionWrapper(
+            Now() + Value(delay, output_field=DurationField()), output_field=DateTimeField()
+        )
     )
     updated = (
         OutboxEvent.objects.using(using)
@@ -267,24 +318,50 @@ class DispatchStats:
     failed: int = 0
     dead_lettered: int = 0
     lost: int = 0
+    compensation_errors: int = 0
     errors: list[str] = field(default_factory=list)
 
 
+DeadLetterHook = Callable[[EventEnvelope, str], object]
+"""Called after an event became DEAD_LETTER (``envelope``, safe failure code). See ``engine.consumers``."""
+
+
+def _after_dead_letter(
+    hook: DeadLetterHook | None, envelope: EventEnvelope, error: str, stats: DispatchStats
+) -> None:
+    if hook is None:
+        return
+    try:
+        hook(envelope, error)
+    except Exception as exc:  # never crash the dispatcher; consumers.sweep_dead_letters() retries later
+        stats.compensation_errors += 1
+        stats.errors.append(f"COMPENSATION_FAILED:{type(exc).__name__}")
+
+
 def dispatch_once(
-    publisher: OutboxPublisher, policy: OutboxPolicy, *, using: str = "default"
+    publisher: OutboxPublisher,
+    policy: OutboxPolicy,
+    *,
+    using: str = "default",
+    now: datetime | None = None,
+    on_dead_letter: DeadLetterHook | None = None,
 ) -> DispatchStats:
-    """One pass: claim a batch, publish each event outside the claim transaction, record the outcome."""
+    """One pass: claim a batch, publish each event outside the claim transaction, record the outcome.
+
+    ``on_dead_letter`` runs after an event reached DEAD_LETTER (compensation hook, step 00.6).
+    """
     stats = DispatchStats()
-    for claimed in claim_batch(policy, using=using):
+    for claimed in claim_batch(policy, using=using, now=now):
         stats.claimed += 1
         try:
             publisher.publish(claimed.envelope)
         except Exception as exc:
             error = _safe_error(exc)
             stats.errors.append(error)
-            status = mark_failed(claimed, error, policy, using=using)
+            status = mark_failed(claimed, error, policy, using=using, now=now)
             if status == S.DEAD_LETTER:
                 stats.dead_lettered += 1
+                _after_dead_letter(on_dead_letter, claimed.envelope, error, stats)
             elif status == S.FAILED:
                 stats.failed += 1
             else:
@@ -297,10 +374,21 @@ def dispatch_once(
     return stats
 
 
-def recover_stale(policy: OutboxPolicy, *, using: str = "default") -> int:
-    """DISPATCHED rows older than the lease (dispatcher crashed) count as a failed attempt."""
+def recover_stale(
+    policy: OutboxPolicy,
+    *,
+    using: str = "default",
+    now: datetime | None = None,
+    on_dead_letter: DeadLetterHook | None = None,
+) -> int:
+    """DISPATCHED rows older than the lease (dispatcher crashed) count as a failed attempt.
+
+    A recovered row that reaches ``max_attempts`` becomes DEAD_LETTER; ``on_dead_letter`` then runs after the
+    recovery transaction committed.
+    """
+    dead: list[EventEnvelope] = []
     with transaction.atomic(using=using):
-        cutoff = db_now(using) - policy.lease
+        cutoff = (now if now is not None else db_now(using)) - policy.lease
         rows = list(
             OutboxEvent.objects.using(using)
             .select_for_update(skip_locked=True)
@@ -310,8 +398,14 @@ def recover_stale(policy: OutboxPolicy, *, using: str = "default") -> int:
         recovered = 0
         for row in rows:
             claimed = ClaimedEvent(row.pk, row.row_version, _envelope(row, row.attempts))
-            if mark_failed(claimed, "LEASE_EXPIRED", policy, using=using) is not None:
+            status = mark_failed(claimed, "LEASE_EXPIRED", policy, using=using, now=now)
+            if status is not None:
                 recovered += 1
+            if status == S.DEAD_LETTER:
+                dead.append(claimed.envelope)
+    stats = DispatchStats()
+    for envelope in dead:
+        _after_dead_letter(on_dead_letter, envelope, "LEASE_EXPIRED", stats)
     return recovered
 
 

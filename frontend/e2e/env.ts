@@ -5,9 +5,14 @@ export const BACKEND_URL = "http://127.0.0.1:8000";
 export const FRONTEND_URL = "http://127.0.0.1:5173";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-/** Acceptance screenshots (PHASE_00 report). Override with E2E_SCREENSHOT_DIR. */
-export const SCREENSHOT_DIR =
-  process.env.E2E_SCREENSHOT_DIR ?? path.resolve(here, "../../reports/phase-00/step-5/screenshots");
+/**
+ * Screenshots. Default = untracked frontend/test-results/screenshots (REV-0501: a plain run must never overwrite
+ * committed evidence). Acceptance evidence is produced by passing the report folder explicitly, e.g.
+ * E2E_SCREENSHOT_DIR=../reports/phase-00/step-6/screenshots.
+ */
+export const SCREENSHOT_DIR = process.env.E2E_SCREENSHOT_DIR
+  ? path.resolve(process.env.E2E_SCREENSHOT_DIR)
+  : path.resolve(here, "../test-results/screenshots");
 
 /** Acceptance widths (UI_HANDOFF_INSTRUCTIONS_FA: 1440, 1180, 768, 390). */
 export const VIEWPORTS = [
