@@ -47,7 +47,8 @@ class ScanLineTests(unittest.TestCase):
             J(['password = "', "synthetic-not-a-secret", '"']),
             J(['"DJANGO_SECRET_', 'KEY": "CHANGE_ME"']),
             J(['password: "<your-password>"']),
-            J(['password = "${PGPASS', 'WORD}"']),
+            # split before the opening quote: the raw source line itself must not look like a literal
+            J(["password = ", '"${PGPASS', 'WORD}"']),
             "postgres://user:pass@host:5432/dbname",
             "postgres://user:${PGPASSWORD}@host/db",
             J(["$env:ALEEKHAN_SRC_", "PASSWORD = Read-Host -AsSecureString"]),
@@ -108,6 +109,72 @@ class RepoScanTests(unittest.TestCase):
             self.assertEqual(rc, 1)
             self.assertNotIn(AWS, out.getvalue())
             self.assertIn("aws-access-key", out.getvalue())
+
+
+SHA_A = "a" * 40
+SHA_B = "b" * 40
+
+
+class AllowlistTests(unittest.TestCase):
+    def _write(self, text: str) -> Path:
+        tmp = tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False, encoding="utf-8")
+        tmp.write(text)
+        tmp.close()
+        self.addCleanup(os.unlink, tmp.name)
+        return Path(tmp.name)
+
+    def test_only_the_exact_fingerprint_matches(self) -> None:
+        allow = ss.load_allowlist(self._write(f"# c\n{SHA_A} tools/x.py password-literal reviewed reason\n"))
+        self.assertTrue(ss.is_allowed(SHA_A, "tools/x.py", "password-literal", allow))
+        self.assertFalse(ss.is_allowed(SHA_B, "tools/x.py", "password-literal", allow))  # other commit
+        self.assertFalse(ss.is_allowed(SHA_A[:12], "tools/x.py", "password-literal", allow))  # short sha
+        self.assertFalse(ss.is_allowed(SHA_A, "tools/y.py", "password-literal", allow))  # other path
+        self.assertFalse(ss.is_allowed(SHA_A, "tools/x.py", "aws-access-key", allow))  # other rule
+
+    def test_malformed_entries_are_rejected(self) -> None:
+        for bad in (
+            "abc tools/x.py password-literal reason",  # not a full sha
+            f"{SHA_A} tools/x.py no-such-rule reason",
+            f"{SHA_A} tools/x.py password-literal",  # no reason
+        ):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                ss.load_allowlist(self._write(bad + "\n"))
+
+    def test_committed_allowlist_is_valid_and_pinned(self) -> None:
+        allow = ss.load_allowlist()
+        self.assertTrue(all(len(e.commit) == 40 for e in allow))
+        self.assertLessEqual(len(allow), 5, "the allowlist must stay exceptional")
+
+
+class UntrackedScanTests(unittest.TestCase):
+    def test_untracked_non_ignored_files_are_scanned(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            _git(root, "init", "-q")
+            (root / ".gitignore").write_text("ignored.cfg\n", encoding="utf-8")
+            (root / "new.cfg").write_text(f"aws={AWS}\n", encoding="utf-8")  # never git-added
+            (root / "ignored.cfg").write_text(f"aws={AWS}\n", encoding="utf-8")
+            tree, _ = ss.scan_worktree(root)
+            self.assertEqual(tree, [ss.Finding("new.cfg:1", "aws-access-key")])
+
+    def test_history_allowlist_suppresses_only_its_commit(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            _git(root, "init", "-q")
+            (root / "a.cfg").write_text(f"k={AWS}\n", encoding="utf-8")
+            _git(root, "add", "-A")
+            _git(root, "commit", "-q", "-m", "one")
+            first = subprocess.run(
+                ["git", "-C", str(root), "rev-parse", "HEAD"], capture_output=True, text=True, check=True
+            ).stdout.strip()
+            (root / "a.cfg").write_text(f"k={AWS}\nk2={AWS}\n", encoding="utf-8")
+            _git(root, "commit", "-q", "-am", "two")
+            allow = frozenset({ss.AllowEntry(first, "a.cfg", "aws-access-key")})
+            suppressed: list[ss.Finding] = []
+            hist, _ = ss.scan_history(root, 100, (), allow, suppressed)
+            self.assertEqual([f.where.split(":")[0] for f in suppressed], [first[:12]])
+            self.assertEqual(len(hist), 1)  # the second commit is still reported
+            self.assertNotEqual(hist[0].where.split(":")[0], first[:12])
 
 
 if __name__ == "__main__":

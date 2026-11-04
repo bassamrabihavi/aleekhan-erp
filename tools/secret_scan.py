@@ -24,6 +24,14 @@ Placeholders are not findings: values containing ``synthetic``, ``example``, ``p
 ``xxxx`` or the literal words ``pass``/``password``/``secret``. A line may opt out explicitly with the
 pragma ``secret-scan: allow`` (reviewed like any other change).
 
+The working-tree scan covers tracked AND untracked, non-ignored files (``git ls-files --cached --others
+--exclude-standard``), so a finding is caught before ``git add``.
+
+History allowlist (``tools/secret_scan_allowlist.txt``): published history cannot be rewritten, so a reviewed
+false positive in an old commit is suppressed only by an exact fingerprint ``<full 40-char commit sha> <path>
+<rule> <reason>``. It never applies to the working tree or to any other commit, path or rule. Suppressed
+entries are counted in the output.
+
 Usage::
 
     python tools/secret_scan.py [--history] [--max-commits N] [--json OUT] [--root DIR]
@@ -82,12 +90,43 @@ RULES: tuple[tuple[str, re.Pattern[str], int | None], ...] = (
 )
 
 ENV_SECRET_VARS = ("ALEEKHAN_SRC_PASSWORD", "PGPASSWORD")
+RULE_IDS = frozenset([r[0] for r in RULES] + ["env-file", "env-secret-value"])
+ALLOWLIST_FILE = Path(__file__).resolve().parent / "secret_scan_allowlist.txt"
+_SHA_RE = re.compile(r"[0-9a-f]{40}")
 
 
 @dataclass(frozen=True)
 class Finding:
-    where: str  # "path:line" or "commit:path"
+    where: str  # "path:line" or "commit12:path"
     rule: str
+
+
+@dataclass(frozen=True)
+class AllowEntry:
+    commit: str  # full 40-char sha
+    path: str
+    rule: str
+
+
+def load_allowlist(path: Path = ALLOWLIST_FILE) -> frozenset[AllowEntry]:
+    """``<sha40> <path> <rule> <reason...>`` per line, ``#`` comments. A malformed line is an error."""
+    if not path.is_file():
+        return frozenset()
+    out = set()
+    for no, raw in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+        line = raw.strip()
+        if not line or line.startswith("#"):
+            continue
+        parts = line.split(maxsplit=3)
+        if len(parts) < 4 or not _SHA_RE.fullmatch(parts[0]) or parts[2] not in RULE_IDS:
+            raise ValueError(f"{path.name}:{no}: expected '<sha40> <path> <rule> <reason>'")
+        out.add(AllowEntry(parts[0], parts[1], parts[2]))
+    return frozenset(out)
+
+
+def is_allowed(commit: str, path: str, rule: str, allow: frozenset[AllowEntry]) -> bool:
+    """Exact fingerprint match only (full commit sha + path + rule)."""
+    return AllowEntry(commit, path, rule) in allow
 
 
 def is_placeholder(value: str) -> bool:
@@ -141,7 +180,9 @@ def _git(root: Path, *args: str) -> str:
 
 
 def tracked_files(root: Path) -> list[str]:
-    return [p for p in _git(root, "ls-files", "-z").split("\0") if p]
+    """Tracked plus untracked-but-not-ignored files (a leak is caught before ``git add``)."""
+    out = _git(root, "ls-files", "-z", "--cached", "--others", "--exclude-standard")
+    return sorted({p for p in out.split("\0") if p})
 
 
 def scan_worktree(root: Path, env_values: Iterable[str] = ()) -> tuple[list[Finding], int]:
@@ -167,8 +208,17 @@ def scan_worktree(root: Path, env_values: Iterable[str] = ()) -> tuple[list[Find
     return findings, scanned
 
 
-def scan_history(root: Path, max_commits: int, env_values: Iterable[str] = ()) -> tuple[list[Finding], int]:
-    """Added lines of every commit on every ref (newest ``max_commits``); one finding per commit/file/rule."""
+def scan_history(
+    root: Path,
+    max_commits: int,
+    env_values: Iterable[str] = (),
+    allow: frozenset[AllowEntry] = frozenset(),
+    suppressed: list[Finding] | None = None,
+) -> tuple[list[Finding], int]:
+    """Added lines of every commit on every ref (newest ``max_commits``); one finding per commit/file/rule.
+
+    Findings whose exact (full sha, path, rule) fingerprint is in ``allow`` go to ``suppressed`` instead.
+    """
     log = _git(root, "log", "--all", "-p", "--no-color", "-U0", "--no-ext-diff", f"--max-count={max_commits}",
                "--format=commit %H")  # fmt: skip
     values = [v for v in env_values if v]
@@ -177,17 +227,26 @@ def scan_history(root: Path, max_commits: int, env_values: Iterable[str] = ()) -
     commit = ""
     path = ""
     commits = 0
+
+    def add(rule: str) -> None:
+        f = Finding(f"{commit[:12]}:{path}", rule)
+        if f in seen:
+            return
+        seen.add(f)
+        if is_allowed(commit, path, rule, allow):
+            if suppressed is not None:
+                suppressed.append(f)
+        else:
+            findings.append(f)
+
     for raw in log.splitlines():
         if raw.startswith("commit ") and len(raw) == 47:
-            commit, commits = raw[7:19], commits + 1
+            commit, commits = raw[7:47], commits + 1
             continue
         if raw.startswith("+++ "):
             path = raw[6:] if raw.startswith("+++ b/") else raw[4:]
             if is_env_file(path):
-                f = Finding(f"{commit}:{path}", "env-file")
-                if f not in seen:
-                    seen.add(f)
-                    findings.append(f)
+                add("env-file")
             continue
         if not raw.startswith("+") or path.lower().endswith(SKIP_EXT):
             continue
@@ -196,10 +255,7 @@ def scan_history(root: Path, max_commits: int, env_values: Iterable[str] = ()) -
         if values and ALLOW_PRAGMA not in line and any(v in line for v in values):
             rules.append("env-secret-value")
         for rule in rules:
-            f = Finding(f"{commit}:{path}", rule)
-            if f not in seen:
-                seen.add(f)
-                findings.append(f)
+            add(rule)
     return findings, commits
 
 
@@ -209,21 +265,29 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--history", action="store_true", help="also scan added lines of the git history")
     ap.add_argument("--max-commits", type=int, default=5000)
     ap.add_argument("--json", dest="json_out", help="write findings as JSON (locations + rule ids only)")
+    ap.add_argument("--allowlist", default=str(ALLOWLIST_FILE), help="history allowlist (exact fingerprints)")
     args = ap.parse_args(argv)
     root = Path(args.root)
     env_values = _env_secret_values()
+    suppressed: list[Finding] = []
     try:
+        allow = load_allowlist(Path(args.allowlist))
         tree, scanned = scan_worktree(root, env_values)
-        hist, commits = scan_history(root, args.max_commits, env_values) if args.history else ([], 0)
-    except RuntimeError as exc:
+        hist, commits = (
+            scan_history(root, args.max_commits, env_values, allow, suppressed) if args.history else ([], 0)
+        )
+    except (RuntimeError, ValueError) as exc:
         print(f"secret_scan: {exc}", file=sys.stderr)
         return 2
     print(
-        f"secret_scan: rules={len(RULES) + 2} tracked_text_files={scanned} "
+        f"secret_scan: rules={len(RULE_IDS)} text_files={scanned} (tracked + untracked non-ignored) "
         f"env_values_checked={len(env_values)}"
     )
     if args.history:
         print(f"secret_scan: history commits scanned={commits} (max {args.max_commits})")
+        print(f"secret_scan: history allowlist entries={len(allow)} suppressed={len(suppressed)}")
+        for f in suppressed:
+            print(f"ALLOWLISTED history {f.where} {f.rule}")
     else:
         print("secret_scan: history scan skipped (pass --history)")
     for f in tree:
@@ -238,6 +302,7 @@ def main(argv: list[str] | None = None) -> int:
                     "history_commits": commits,
                     "worktree": [asdict(f) for f in tree],
                     "history": [asdict(f) for f in hist],
+                    "history_allowlisted": [asdict(f) for f in suppressed],
                 },
                 indent=2,
             ),

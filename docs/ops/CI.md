@@ -22,6 +22,17 @@ first GitHub run.
 | 12 | `ops` | `ops/db/roles_check.sh` (least privilege) + `ops/backup/drill.sh` (backup/restore drill) |
 | 13 | `artifacts` | commit id, CycloneDX SBOMs (python runtime, frontend prod), sha256 of `frontend/dist` |
 
+Secret scan: the working tree includes untracked, non-ignored files (caught before `git add`); history findings in
+commits that cannot be rewritten are suppressed only by exact `<sha40> <path> <rule> <reason>` entries in
+`tools/secret_scan_allowlist.txt` (counted and listed as `ALLOWLISTED` in the log).
+
+Network (flaky PyPI/registry): `pip-audit` calls retry on network errors only (`PIP_AUDIT_ATTEMPTS`, default 3;
+`PIP_AUDIT_TIMEOUT`, default 60 s; `PIP_AUDIT_CACHE_DIR`). Security stage: runtime-lock audit and `npm audit` are
+gates - unreachable service after retries = FAIL with "dependency scan NOT performed". Whole-venv audit: one
+attempt, informational. Artifacts stage: if the pip-audit SBOM cannot be produced for network reasons, an offline
+inventory SBOM is written from the lock (`tools/offline_sbom.py`, `sbom-python-runtime.offline.cdx.json`, labelled
+`sbom-source=offline-lock`) and the log says FALLBACK.
+
 Each stage writes `<out>/NN_<stage>.log` (through `tools/redact_paths.py`: no home paths / account names) and a
 line in `<out>/summary.tsv` / `summary.md` with PASS / FAIL / SKIPPED and, for SKIPPED, the printed reason.
 `CI_SKIP="e2e" CI_SKIP_REASON="..."` skips stages explicitly (the reason is recorded).

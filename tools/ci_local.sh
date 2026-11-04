@@ -41,6 +41,27 @@ skip() { echo "SKIPPED: $*"; return 77; }
 need_pg() { have_pg || skip "no PostgreSQL libpq env (PGHOST/PGPORT/PGUSER) - load the test DB env first"; }
 need_node() { have_node || skip "node/npm not on PATH (Node 24 LTS required)"; }
 
+# pip-audit with retries for NETWORK errors only (PyPI / OSV). Return codes:
+#   0 = completed, no vulnerabilities; 1 = completed with findings (or a non-network error);
+#   75 = network unavailable after all attempts (caller decides: gate -> FAIL, SBOM -> offline fallback).
+# Env: PIP_AUDIT_ATTEMPTS (default 3), PIP_AUDIT_TIMEOUT (seconds per request, default 60), PIP_AUDIT_CACHE_DIR.
+NET_ERR_RE='ConnectionError|ConnectTimeout|ReadTimeout|RemoteDisconnected|Max retries exceeded|Read timed out|Temporary failure in name resolution|NewConnectionError|SSLError'
+pip_audit_retry() {
+  local attempts="${PIP_AUDIT_ATTEMPTS:-3}" i rc errf
+  errf="$(mktemp)"
+  for ((i = 1; i <= attempts; i++)); do
+    "$PYTHON" -m pip_audit --progress-spinner off --timeout "${PIP_AUDIT_TIMEOUT:-60}" \
+      ${PIP_AUDIT_CACHE_DIR:+--cache-dir "$PIP_AUDIT_CACHE_DIR"} "$@" 2>"$errf"
+    rc=$?
+    if [ "$rc" -eq 0 ]; then grep -v -E '^WARNING:pip_audit' "$errf" >&2; rm -f "$errf"; return 0; fi
+    if ! grep -q -E "$NET_ERR_RE" "$errf"; then cat "$errf" >&2; rm -f "$errf"; return 1; fi
+    echo "pip-audit: network error on attempt $i/$attempts: $(grep -o -E "$NET_ERR_RE" "$errf" | head -n1)" >&2
+    [ "$i" -lt "$attempts" ] && sleep $((i * 10))
+  done
+  rm -f "$errf"
+  return 75
+}
+
 # ------------------------------------------------------------------------------------------------ stages
 stage_lint() {
   "$PYTHON" -m ruff --version && "$PYTHON" -m ruff check . && "$PYTHON" -m ruff format --check .
@@ -98,19 +119,29 @@ stage_security() {
   echo "== pip-audit: runtime lock (backend/requirements.lock)"
   if "$PYTHON" -m pip_audit --version >/dev/null 2>&1; then
     "$PYTHON" -m pip_audit --version
-    "$PYTHON" -m pip_audit -r backend/requirements.lock --no-deps --disable-pip --progress-spinner off --timeout 60 --strict \
-      -f json -o "$OUT/pip_audit_runtime.json" || rc=1
-    "$PYTHON" -m pip_audit -r backend/requirements.lock --no-deps --disable-pip --progress-spinner off --timeout 60 || rc=1
+    # GATE: a vulnerability or an unreachable vulnerability service is a FAIL (never a silent pass)
+    pip_audit_retry -r backend/requirements.lock --no-deps --disable-pip --strict -f json -o "$OUT/pip_audit_runtime.json"
+    case $? in
+      0) echo "pip-audit runtime lock: PASS (no known vulnerabilities)" ;;
+      75) echo "FAIL: pip-audit runtime lock could not reach the vulnerability service after ${PIP_AUDIT_ATTEMPTS:-3} attempts - dependency scan NOT performed"; rc=1 ;;
+      *) echo "FAIL: pip-audit runtime lock reported vulnerabilities or an error (see above)"; rc=1 ;;
+    esac
     echo "== pip-audit: whole dev/QA venv (INFORMATIONAL: tooling is not shipped; findings are listed but do"
     echo "   not fail this stage - the runtime lock above is the gate)"
-    "$PYTHON" -m pip_audit --progress-spinner off --timeout 60 --skip-editable || echo "INFO: dev/QA venv audit reported findings or could not complete (see above); not a gate"
+    PIP_AUDIT_ATTEMPTS=1 pip_audit_retry --skip-editable  # informational: a single attempt
+    case $? in
+      0) echo "INFO: dev/QA venv: no known vulnerabilities" ;;
+      75) echo "INFO: dev/QA venv audit NOT performed: network unavailable after retries (not a gate)" ;;
+      *) echo "INFO: dev/QA venv audit reported findings or an error (see above); not a gate" ;;
+    esac
   else
     echo "SKIPPED (sub-check): pip-audit not installed in $PYTHON (pip install -r backend/requirements-dev.txt)"
     rc=1
   fi
   echo "== npm audit (production dependencies)"
   if have_node; then
-    (cd frontend && "$NPM" audit --omit=dev --audit-level=low) || rc=1
+    (cd frontend && "$NPM" audit --omit=dev --audit-level=low) \
+      || { echo "FAIL: npm audit reported vulnerabilities or could not reach the registry (see above)"; rc=1; }
   else
     echo "SKIPPED (sub-check): node/npm not on PATH"
     rc=1
@@ -133,12 +164,24 @@ stage_artifacts() {
   git rev-parse HEAD > "$OUT/commit.txt"
   git status --porcelain --untracked-files=no | wc -l | tr -d ' ' > "$OUT/worktree_modified_files.txt"
   echo "commit $(cat "$OUT/commit.txt"), modified tracked files: $(cat "$OUT/worktree_modified_files.txt")"
+  # SBOM: pip-audit CycloneDX (needs PyPI); if the network is unavailable after retries, an offline inventory
+  # SBOM from the lock (tools/offline_sbom.py, labelled sbom-source=offline-lock) - the vulnerability gate is
+  # the security stage, not this one.
+  local sbom_rc=75
   if "$PYTHON" -m pip_audit --version >/dev/null 2>&1; then
-    "$PYTHON" -m pip_audit -r backend/requirements.lock --no-deps --disable-pip --progress-spinner off --timeout 60 \
-      -f cyclonedx-json -o "$OUT/sbom-python-runtime.cdx.json" && echo "SBOM python: sbom-python-runtime.cdx.json" || rc=1
+    pip_audit_retry -r backend/requirements.lock --no-deps --disable-pip -f cyclonedx-json -o "$OUT/sbom-python-runtime.cdx.json"
+    sbom_rc=$?
   else
-    echo "SKIPPED (sub-check): python SBOM needs pip-audit"; rc=1
+    echo "pip-audit not installed in $PYTHON"
   fi
+  case "$sbom_rc" in
+    0) echo "SBOM python: sbom-python-runtime.cdx.json (pip-audit CycloneDX)" ;;
+    75)
+      echo "FALLBACK (sub-check): pip-audit SBOM unavailable (network or pip-audit missing) -> offline inventory SBOM from backend/requirements.lock"
+      "$PYTHON" tools/offline_sbom.py "$OUT/sbom-python-runtime.offline.cdx.json" \
+        && echo "SBOM python: sbom-python-runtime.offline.cdx.json (offline, no vulnerability data)" || rc=1 ;;
+    *) echo "FAIL: pip-audit SBOM generation failed (non-network error, see above)"; rc=1 ;;
+  esac
   if have_node && [ -d frontend/node_modules ]; then
     (cd frontend && "$NPM" sbom --sbom-format cyclonedx --omit dev > "$OUT/sbom-frontend.cdx.json") \
       && echo "SBOM frontend: sbom-frontend.cdx.json" || rc=1
