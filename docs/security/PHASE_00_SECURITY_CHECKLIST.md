@@ -82,10 +82,10 @@ Known open items in PHASE_00 scope (no P0/P1 identified by the implementer; the 
 (REV-0014), 3.4 CSP, 3.10 artifact signing, staging drill. Closed in 00.8: action SHA pinning (REV-0704), public
 visibility threats (REV-0703), whole-value placeholder rule (REV-0702); first GitHub Actions run done (00.7 REVIEW.md).
 
-## Sign-off (left blank on purpose - to be completed by the employer / independent auditor, not by an agent)
+## Sign-off (each row is filled only from the signer's own statement; the orchestrator records it)
 
 | Role | Name | Decision (accept / reject / accept with conditions) | Date | Signature |
 |---|---|---|---|---|
-| Employer (کارفرما) | | | | |
+| Employer (کارفرما) | بسام ربیهاوی | accept with conditions (پذیرش با شرط): all OPEN and PARTIAL items (2.3, 2.6, 2.7, 3.4, 3.7, 3.10, 4.7) are closed before deployment on the production server and before the Pilot | 2026-11-04 | given by the employer in the Claude Code session (answer to Gate packet item 4-c); recorded by the orchestrator |
 | Security reviewer / auditor | | | | |
 | IT (operations) | | | | |
