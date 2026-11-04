@@ -11,7 +11,7 @@
       "pages": [],
       "deps": [],
       "est_weeks": 2,
-      "state": "BLOCKED",
+      "state": "ACTIVE",
       "started_at": "2026-11-03T15:20:43+00:00",
       "gate_pending_at": null,
       "accepted_at": null,
@@ -79,13 +79,13 @@
         },
         "00.7": {
           "name": "Security & Ops",
-          "state": "BLOCKED",
+          "state": "PASS",
           "commit": "d6b6de96784d8d4d715e5978a2552c3531798faa",
           "report": "reports/phase-00/step-7/REPORT.md",
-          "review": null,
+          "review": "reports/phase-00/step-7/REVIEW.md",
           "rework_cycles": 0,
           "started_at": "2026-11-04T05:58:10+00:00",
-          "done_at": null
+          "done_at": "2026-11-04T09:26:55+00:00"
         },
         "00.8": {
           "name": "Report & Review",
@@ -2487,7 +2487,34 @@
       "status": "APPROVED",
       "by": "کارفرما",
       "note": "مخزن GitHub عمومی بماند (اصلاح DEC-041 فقط در نمایانی). قواعد DEC-041 پابرجاست: هیچ داده خصوصی کارخانه، رمز یا داده مشتری در مخزن. پیامد پذیرفته‌شده: کد، handoff، گزارش‌ها، وضعیت و ایمیل commitها برای همه قابل خواندن است؛ اسکن راز در CI گیت است."
+    },
+    {
+      "at": "2026-11-04T09:26:54+00:00",
+      "kind": "step",
+      "phase": "PHASE_00",
+      "step": "00.7",
+      "state": "IN_PROGRESS",
+      "note": null,
+      "commit": null
+    },
+    {
+      "at": "2026-11-04T09:26:55+00:00",
+      "kind": "step",
+      "phase": "PHASE_00",
+      "step": "00.7",
+      "state": "IN_REVIEW",
+      "note": null,
+      "commit": "d6b6de96784d8d4d715e5978a2552c3531798faa"
+    },
+    {
+      "at": "2026-11-04T09:26:55+00:00",
+      "kind": "step",
+      "phase": "PHASE_00",
+      "step": "00.7",
+      "state": "PASS",
+      "note": null,
+      "commit": null
     }
   ],
-  "updated_at": "2026-11-04T09:24:54+00:00"
+  "updated_at": "2026-11-04T09:26:55+00:00"
 }
