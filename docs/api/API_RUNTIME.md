@@ -114,3 +114,16 @@ SameSite=Lax session cookie (`aleekhan_session`), secure CSRF cookie, HSTS (prod
 `X-Frame-Options: DENY`, `Referrer-Policy: same-origin`, COOP `same-origin`, CSRF middleware (failure →
 403 problem). `manage.py check --deploy` with prod settings leaves only W005 (HSTS include-subdomains) and W021
 (HSTS preload), both deliberate for an internal host. Full hardening and scans: 00.7.
+
+## 8. PHASE_01 planned operations (contract 0.5.0-draft, step 01.1)
+
+`openapi-draft.yaml` 0.5.0-draft adds 97 PLANNED operations on 78 paths (auth, me, admin-identity, org, workflow,
+audit, jobs, documents, parameters). They are marked `x-aleekhan-status: planned` + `x-aleekhan-step: '01.4'`
+and are **not served**: `test_route_parity_with_openapi` compares the production URLconf with the implemented
+paths only and asserts that no planned path is routed; `test_api_contract_planned.py` pins the rules for planned
+operations (session security, `x-aleekhan-permission`, Idempotency-Key except the six authentication ceremonies
+of `idempotency_exempt`, If-Match on PATCH, 409 on blocked operations, unique operation ids). The only planned
+public operations are `getLoginContext` and `login` (CONFLICTS C-26). `CONTRACT_VERSION` in
+`platform_core/api/views.py` is `0.5.0-draft`, so `/version` reports the document version; the behaviour of the
+eight implemented endpoints is unchanged. New error codes needed later are listed in
+`x-aleekhan-conventions.planned_error_codes` and are not part of `ErrorCode` until the engine implements them.

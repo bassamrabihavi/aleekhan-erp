@@ -90,3 +90,16 @@ Review verdicts are in `reports/phase-00/step-N/REVIEW.md`. No version number is
 - Added: `CHANGELOG.md`, `docs/db/ERD.md` (all platform tables, migrations 0001-0006),
   `reports/phase-00/TRACE_MAP.md`, `reports/phase-00/PHASE_REPORT.md` + `PHASE_REPORT.json`, `docs/adr/ADR-001.md` (PROPOSED, for signature); CONFLICTS C-02/C-14/C-15 refreshed.
 - No migration, no API or UI change in 00.8.
+
+## PHASE_01 - Platform & Identity (started by the employer 2026-11-04)
+
+### 01.1 Discovery & Contract
+- Added: PHASE_01 sections in `docs/discovery/CONFLICTS.md` (C-26..C-46), `DATA_TABLE.md`, `STATE_TRANSITIONS.md`
+  (section 4), `MOCK_UI_BINDING.md` (section 6: pages 36/39/40/42/46 + org tree), `RISKS.md` (R-21..R-35);
+  `docs/security/PERMISSION_MATRIX_DRAFT.md` (PROPOSED v0.1); decision packets DEC-032, DEC-048..DEC-054 and
+  addendum rows DEC-048..DEC-054.
+- Changed: OpenAPI `0.4.0-draft` -> `0.5.0-draft` (additive: 97 planned operations, not served);
+  `CONTRACT_VERSION`; contract tests compare route parity with implemented paths only; new
+  `test_api_contract_planned.py`.
+- No migration, no business code, no real data.
+- Implementation: PENDING (orchestrator fills the SHA after commit).

@@ -46,9 +46,31 @@ def validator(schema: dict[str, Any]) -> OAS31Validator:
     return OAS31Validator({**schema, "components": spec()["components"]}, format_checker=oas31_format_checker)
 
 
-def operations() -> list[tuple[str, str, dict[str, Any]]]:
+# 0.5.0-draft (01.1): path items marked ``x-aleekhan-status: planned`` are contract drafts for a later step
+# and are NOT served yet. Route parity uses ``implemented_paths()``; ``test_api_contract_planned``
+# pins the rules.
+PLANNED_MARKER = "x-aleekhan-status"
+PLANNED_VALUE = "planned"
+
+
+def is_planned(path: str) -> bool:
+    return bool(spec()["paths"][path].get(PLANNED_MARKER) == PLANNED_VALUE)
+
+
+def implemented_paths() -> set[str]:
+    return {p for p in spec()["paths"] if not is_planned(p)}
+
+
+def planned_paths() -> set[str]:
+    return {p for p in spec()["paths"] if is_planned(p)}
+
+
+def operations(*, planned: bool | None = None) -> list[tuple[str, str, dict[str, Any]]]:
+    """All operations; ``planned=False`` only implemented ones, ``planned=True`` only planned ones."""
     out = []
     for path, item in spec()["paths"].items():
+        if planned is not None and is_planned(path) is not planned:
+            continue
         for method in HTTP_METHODS:
             if method in item:
                 out.append((path, method, item[method]))

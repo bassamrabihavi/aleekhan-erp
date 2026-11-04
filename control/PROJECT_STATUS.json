@@ -122,12 +122,12 @@
       "steps": {
         "01.1": {
           "name": "Discovery & Contract",
-          "state": "TODO",
+          "state": "IN_PROGRESS",
           "commit": null,
           "report": null,
           "review": null,
           "rework_cycles": 0,
-          "started_at": null,
+          "started_at": "2026-11-04T14:44:12+00:00",
           "done_at": null
         },
         "01.2": {
@@ -2588,7 +2588,16 @@
       "kind": "phase_started",
       "phase": "PHASE_01",
       "by": "بسام ربیهاوی"
+    },
+    {
+      "at": "2026-11-04T14:44:12+00:00",
+      "kind": "step",
+      "phase": "PHASE_01",
+      "step": "01.1",
+      "state": "IN_PROGRESS",
+      "note": null,
+      "commit": null
     }
   ],
-  "updated_at": "2026-11-04T14:42:30+00:00"
+  "updated_at": "2026-11-04T14:44:12+00:00"
 }

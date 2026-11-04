@@ -38,6 +38,11 @@ def test_contract_version_matches_code() -> None:
     assert oc.spec()["info"]["version"] == views.CONTRACT_VERSION
 
 
+# Planned pre-login operations (not routed yet); any new public operation must be added here AND to
+# ``x-aleekhan-conventions.planned_public_operations`` in a reviewed commit (CONFLICTS C-26).
+PLANNED_PUBLIC_OPERATIONS = {"getLoginContext", "login"}
+
+
 def _effective_security(op: dict[str, Any]) -> list[Any]:
     sec: list[Any] = op.get("security", oc.spec().get("security", []))
     return sec
@@ -47,16 +52,19 @@ def test_every_non_public_operation_declares_security() -> None:
     """REV-0001 regression test."""
     schemes = set(oc.spec()["components"]["securitySchemes"])
     assert oc.spec().get("security"), "top-level default security must be declared"
-    public = set()
+    public: set[str] = set()
+    planned_public: set[str] = set()
     for path, method, op in oc.operations():
         sec = _effective_security(op)
         if sec == []:
-            public.add(op["operationId"])
+            (planned_public if oc.is_planned(path) else public).add(op["operationId"])
             continue
         for requirement in sec:
             assert requirement, f"{method} {path}: empty security requirement object"
             assert set(requirement) <= schemes, f"{method} {path}: unknown scheme"
     assert public == set(permissions.PUBLIC_OPERATIONS)
+    # planned (not yet served) public operations are pinned separately (0.5.0-draft, CONFLICTS C-26)
+    assert planned_public == PLANNED_PUBLIC_OPERATIONS
     gate = oc.operation("/access-gate/check", "get")
     assert gate["security"] == [{"sessionCookie": []}]
 
@@ -82,8 +90,10 @@ def _as_template(route: str) -> str:
 
 def test_route_parity_with_openapi() -> None:
     routes = {_as_template(path) for path, _ in _production_routes()}
-    spec_paths = {"api/v1" + p for p in oc.spec()["paths"]}
+    spec_paths = {"api/v1" + p for p in oc.implemented_paths()}
     assert routes == spec_paths
+    # planned paths (0.5.0-draft) must not be served before their step implements them
+    assert not routes & {"api/v1" + p for p in oc.planned_paths()}
 
 
 def test_no_test_harness_in_production_urlconf() -> None:

@@ -1,0 +1,109 @@
+{
+  "phase": "PHASE_01",
+  "step": "01.1",
+  "commit_sha": "PENDING",
+  "status": "COMPLETE",
+  "scope": [
+    "conflicts",
+    "data table",
+    "state transitions",
+    "OpenAPI draft 0.5.0",
+    "mock/UI binding pages 36/39/40/42/46 + org tree",
+    "risks",
+    "permission matrix draft",
+    "P0 decision packets"
+  ],
+  "changes": [
+    "docs/discovery/CONFLICTS.md",
+    "docs/discovery/DATA_TABLE.md",
+    "docs/discovery/STATE_TRANSITIONS.md",
+    "docs/discovery/MOCK_UI_BINDING.md",
+    "docs/discovery/RISKS.md",
+    "docs/api/openapi-draft.yaml",
+    "docs/api/API_RUNTIME.md",
+    "docs/security/PERMISSION_MATRIX_DRAFT.md",
+    "backend/platform_core/api/views.py",
+    "backend/platform_core/tests/openapi_contract.py",
+    "backend/platform_core/tests/test_api_contract.py",
+    "backend/platform_core/tests/test_api_contract_planned.py",
+    "control/decisions/DEC-032_PACKET.md",
+    "control/decisions/DEC-048_PACKET.md",
+    "control/decisions/DEC-049_PACKET.md",
+    "control/decisions/DEC-050_PACKET.md",
+    "control/decisions/DEC-051_PACKET.md",
+    "control/decisions/DEC-052_PACKET.md",
+    "control/decisions/DEC-053_PACKET.md",
+    "control/decisions/DEC-054_PACKET.md",
+    "control/decisions/DECISIONS_ADDENDUM.csv",
+    "CHANGELOG.md"
+  ],
+  "migrations": [],
+  "test_evidence": [
+    {
+      "command": "ruff check + ruff format --check + mypy (4 changed/new Python files)",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-1/logs/ruff_mypy.log"
+    },
+    {
+      "command": "cd backend && pytest -m \"not perf\" platform_core/tests -q -k \"contract or openapi\"",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-1/logs/pytest_contract.log"
+    },
+    {
+      "command": "cd backend && pytest -m \"not perf\" platform_core/tests -q",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-1/logs/pytest_full_not_perf.log"
+    },
+    {
+      "command": "openapi_spec_validator.validate(docs/api/openapi-draft.yaml)",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-1/logs/openapi_validate.log"
+    },
+    {
+      "command": ".venv/Scripts/python.exe tools/verify_handoff.py",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-1/logs/verify_handoff.log"
+    },
+    {
+      "command": ".venv/Scripts/python.exe tools/secret_scan.py",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-1/logs/secret_scan.log"
+    },
+    {
+      "command": ".venv/Scripts/python.exe tools/secret_scan.py --history",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-1/logs/secret_scan_history.log"
+    }
+  ],
+  "security_evidence": [
+    "production URLconf unchanged; route parity compares implemented paths and asserts no planned path is routed",
+    "only two planned public operations (getLoginContext, login), pinned by test (C-26)",
+    "every other planned operation requires sessionCookie; 31 MFA step-up; 18 blocked by OPEN decisions",
+    "TECHNICAL roles cannot hold business_approval permissions (DATA_TABLE, PERMISSION_MATRIX_DRAFT)",
+    "no secrets; no private sources read; no legacy file executed; prototypes read as text only"
+  ],
+  "decisions": [
+    "DEC-032 packet (maker-checker + audit retention; existing P1)",
+    "DEC-048 packet (org tree details, approval routing) - new P0",
+    "DEC-049 packet (permission matrix v0.1 approval) - new P0",
+    "DEC-050 packet (MFA factor and recovery) - new P0",
+    "DEC-051 packet (password, lockout, session policy) - new P0",
+    "DEC-052 packet (inside-factory network, operator accounts) - new P0",
+    "DEC-053 packet (upload types/size/AV/storage, SEC-03) - new P0",
+    "DEC-054 packet (break-glass, single admin recovery) - new P1"
+  ],
+  "risks": [
+    "R-21 single administrator",
+    "R-22 P0 identity decisions pending block 01.4 endpoints and Gate-1",
+    "R-32 97 planned operations for 01.4/01.5"
+  ],
+  "evidence_paths": [
+    "reports/phase-01/step-1/logs/",
+    "docs/discovery/",
+    "docs/api/openapi-draft.yaml",
+    "docs/security/PERMISSION_MATRIX_DRAFT.md",
+    "control/decisions/"
+  ],
+  "rollback": "git revert <commit> (docs, contract and contract tests only; no data or schema)",
+  "review_request": "PASS"
+}

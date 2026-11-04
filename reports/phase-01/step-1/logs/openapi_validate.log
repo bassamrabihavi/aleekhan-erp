@@ -1,0 +1,9 @@
+openapi-spec-validator 0.9.0: VALID (OpenAPI 3.1.0)
+info.version = 0.5.0-draft
+implemented paths = 8 ['/access-gate/check', '/health/live', '/health/ready', '/integration/conflicts', '/integration/conflicts/{conflict_id}', '/integration/conflicts/{conflict_id}/resolve', '/integration/freshness', '/version']
+planned paths = 78 planned operations = 97
+planned operations by tag = {'auth': 10, 'me': 2, 'admin-identity': 23, 'org': 14, 'workflow': 19, 'audit': 3, 'jobs': 5, 'documents': 11, 'parameters': 10}
+public operations (all) = ['getLiveness', 'getLoginContext', 'getReadiness', 'getVersion', 'login']
+blocked planned operations = 18
+blocking decisions = ['DEC-032', 'DEC-048', 'DEC-049', 'DEC-050', 'DEC-051', 'DEC-053']
+mfa step-up planned operations = 31

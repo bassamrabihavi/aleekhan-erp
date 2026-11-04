@@ -1,0 +1,9 @@
+$ ruff check platform_core/tests/openapi_contract.py platform_core/tests/test_api_contract.py platform_core/tests/test_api_contract_planned.py platform_core/api/views.py
+All checks passed!
+exit=0
+$ ruff format --check platform_core/tests/openapi_contract.py platform_core/tests/test_api_contract.py platform_core/tests/test_api_contract_planned.py platform_core/api/views.py
+4 files already formatted
+exit=0
+$ mypy platform_core/tests/openapi_contract.py platform_core/tests/test_api_contract.py platform_core/tests/test_api_contract_planned.py platform_core/api/views.py
+Success: no issues found in 4 source files
+exit=0

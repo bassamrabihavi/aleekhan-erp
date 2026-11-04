@@ -46,3 +46,144 @@ Unspecified in the contract (must be asked of the owner in the phase's xx.1, not
 
 ## 3. Project control (phase/step) — governance, not product
 Enforced by `control/tools/status.py` `STEP_TRANSITIONS` (not part of the product): `TODO → IN_PROGRESS | BLOCKED`; `IN_PROGRESS → IN_REVIEW | BLOCKED`; `IN_REVIEW → PASS | REWORK | BLOCKED`; `REWORK → IN_PROGRESS | BLOCKED`; `BLOCKED → IN_PROGRESS | TODO`; `PASS → REWORK` (only via a recorded REV issue). 3 rework cycles → BLOCKED/escalate (CLAUDE.md). Phase states `NOT_STARTED, ACTIVE, GATE_PENDING, ACCEPTED, BLOCKED`; ACCEPTED only with employer signature (DEC-036). Open P0 decisions block phase start.
+
+## 4. PHASE_01 platform machines (01.1, PROPOSED — implemented in 01.3)
+
+Status: DRAFT/PROPOSED. Refines §1.3 (Job), §1.4 (ApprovalTask → split into §4.3 WorkTask and §4.4
+ApprovalRequest, CONFLICTS C-30; `OPEN` of §1.4 is `PENDING` here) and §1.5 (User → §4.1). The general rules at
+the top of this file apply to every machine (one transaction = state + audit + outbox; If-Match; idempotency
+key except the authentication ceremonies of `x-aleekhan-conventions.idempotency_exempt`; illegal move →
+409 `STATE_TRANSITION_NOT_ALLOWED`). A guard that depends on an unapproved rule is **BLOCKED (DEC-xxx)**: the
+engine refuses with 409 `RULE_NOT_APPROVED` + `decision_id` and changes nothing. "TECH" marks a technical
+default (no business meaning, ops-confirmable). Every transition records actor, reason (where listed),
+request_id and session handle in the audit event.
+
+### 4.1 User account
+| From | To | Trigger / actor | Guards |
+|---|---|---|---|
+| — | CREATED | `createUser` (holder of `platform.identity.user.create`, MFA step-up) or the console bootstrap command for the first owner (audited as system bootstrap) | username unique; reason; initial one-time credential **BLOCKED (DEC-051)** |
+| CREATED | ACTIVE | first successful login + password changed | password policy **BLOCKED (DEC-051)**; MFA enrolment if MFA is required for the user (role list DEC-049, outside access DEC-042) — factor **BLOCKED (DEC-050)** |
+| ACTIVE | LOCKED | system, after N failed logins / MFA codes in a window | thresholds **BLOCKED (DEC-051)**; until approved TECH default for tests only, never enabled in production config |
+| LOCKED | ACTIVE | `unlockUser` (reason, MFA step-up) or automatic expiry of `locked_until` | auto-expiry rule **BLOCKED (DEC-051)** |
+| CREATED, ACTIVE, LOCKED | DISABLED | `disableUser` (reason, MFA step-up) | revokes all sessions in the same transaction; refused if the target is the last ACTIVE holder of `platform.identity.user.disable` (lock-out protection, TECH) |
+| DISABLED | ACTIVE | `enableUser` (reason, MFA step-up) | sessions stay revoked; `must_change` set if the credential is older than policy (DEC-051) |
+
+No delete, no self-registration, no directory sync (DEC-003). `resetUserPassword` / `resetUserMfa` do not change
+the state; they revoke sessions and set `must_change` / remove the factor (BLOCKED DEC-051 / DEC-050).
+
+### 4.2 Session
+| From | To | Trigger | Guards / notes |
+|---|---|---|---|
+| — | ACTIVE | `login` when MFA does not apply | network policy: OPERATOR_TERMINAL / INTERNAL_ONLY accounts from EXTERNAL or UNKNOWN zone → 403 `NETWORK_POLICY_DENIED`, no session (DEC-042; zone definition **BLOCKED (DEC-052)** — until approved every zone is UNKNOWN and internal-only accounts cannot log in) |
+| — | MFA_PENDING | `login` when MFA applies (role list or outside login) | MFA_PENDING accepts only `verifyMfa` and `logout` |
+| MFA_PENDING | ACTIVE | `verifyMfa` | factor **BLOCKED (DEC-050)**; session id rotated |
+| MFA_PENDING | EXPIRED | timeout | TECH 5 min |
+| ACTIVE | EXPIRED | idle or absolute timeout | durations **BLOCKED (DEC-051)** |
+| ACTIVE, MFA_PENDING | LOGGED_OUT | `logout` | — |
+| ACTIVE, MFA_PENDING | REVOKED | `revokeMySession`, `revokeUserSessions`, user DISABLED, password change/reset, MFA reset | reason stored for admin revoke |
+
+Step-up (operations with `x-aleekhan-mfa-step-up`) does not change the state; it updates `mfa_verified_at`.
+Window **BLOCKED (DEC-051)**. Concurrent session limit: **BLOCKED (DEC-051)** (until then unlimited, all listed).
+
+### 4.3 WorkTask (operational task, page 39)
+| From | To | Trigger | Guards |
+|---|---|---|---|
+| — | OPEN / ASSIGNED | `createTask` (ASSIGNED when the assignee is a user) | assignee within the creator's scope |
+| OPEN, ASSIGNED, IN_PROGRESS, BLOCKED | ASSIGNED | `reassignTask` | reason; new assignee within scope; cross-unit reassignment recorded with both units |
+| OPEN, ASSIGNED | IN_PROGRESS | `startTask` by the assignee (or a member of the assigned unit) | — |
+| IN_PROGRESS | BLOCKED | `blockTask` | reason; optional blocking reference |
+| BLOCKED | IN_PROGRESS | `unblockTask` | — |
+| IN_PROGRESS | DONE | `completeTask` | DONE ≠ CLOSED (catalog invariant) |
+| DONE | CLOSED | `verifyCloseTask` | verifier ≠ completer; verifier holds `platform.workflow.task.verify` in scope |
+| any non-terminal | CANCELLED | `cancelTask` | reason; tasks owned by a workflow instance are cancelled only through §4.5 |
+
+Terminal: CLOSED, CANCELLED. Reopen of DONE by the verifier is not in the 0.5.0 contract (proposal for 01.3 if the
+owner asks). SLA clock and SLA pause: no approved rule exists (catalog: "Pause only per approved rule") → not
+implemented in PHASE_01; `due_at` is informational only.
+
+### 4.4 ApprovalRequest (maker-checker)
+| From | To | Trigger | Guards |
+|---|---|---|---|
+| — | PENDING | raised by the owning use case (document approval, parameter publish, role grant if DEC-032 requires) | one PENDING per (resource, revision, action); which actions require it **BLOCKED (DEC-032)**; approver route **BLOCKED (DEC-048)** |
+| PENDING | APPROVED | `approveRequest` | decider ≠ requester (403 `SELF_APPROVAL_FORBIDDEN`); decider in the resolved route and holds `platform.workflow.approval.decide` in scope; technical-admin roles never qualify (DEC-003); `resource_revision` equals the request revision; MFA step-up; one-time |
+| PENDING | REJECTED | `rejectRequest` | same decider rules; note mandatory |
+| PENDING | WITHDRAWN | `withdrawRequest` by the requester, or the owning workflow is cancelled | — |
+| PENDING | SUPERSEDED | system: the resource got a new revision | approval never carries over to a new revision |
+| PENDING | EXPIRED | system at `expires_at` | expiry period **BLOCKED (DEC-032)** (until approved: no expiry) |
+
+Terminal: all except PENDING. Single-person deadlock (requester is the only eligible approver, e.g. the owner):
+the request stays PENDING; any bypass rule **BLOCKED (DEC-032 item 1-d)**. Never auto-approve.
+
+### 4.5 WorkflowInstance and cancellation
+| From | To | Trigger | Guards / effects |
+|---|---|---|---|
+| — | RUNNING | owning use case starts a definition | definition ACTIVE; instance pins the definition version |
+| RUNNING | WAITING | step waits for a task/approval | — |
+| WAITING | RUNNING | the awaited task CLOSED / approval decided | — |
+| RUNNING, WAITING | COMPLETED | last step done | — |
+| RUNNING, WAITING | CANCEL_REQUESTED | `cancelWorkflowInstance` | reason; `platform.workflow.instance.cancel` in scope; MFA step-up |
+| CANCEL_REQUESTED | COMPENSATING | definition has compensation steps for completed steps | in the same transaction: PENDING approvals → WITHDRAWN, open tasks → CANCELLED |
+| CANCEL_REQUESTED, COMPENSATING | CANCELLED | no (more) compensation | completed side effects are reversed only by compensation steps (new records), never by deleting rows |
+| RUNNING, WAITING, COMPENSATING | FAILED | unrecoverable error | failure + partial compensation recorded; visible on page 36; manual resolution task created |
+
+PHASE_01 ships no business workflow definition; definitions for module flows arrive with their phases. The
+cancellation machine is implemented and tested with a synthetic test-only definition.
+
+### 4.6 Document revision and upload quarantine (SEC-03)
+Scan status (file safety), independent of the approval status:
+
+| From | To | Trigger | Guards |
+|---|---|---|---|
+| — | QUARANTINED | `uploadDocumentRevision` | stored under a random key in private storage, sha256 computed server-side, never executed/rendered; type allowlist, size limit **BLOCKED (DEC-053)** |
+| QUARANTINED | SCANNING | scanner job picks it up | scanner **BLOCKED (DEC-053)**; scanner unavailable → stays QUARANTINED (never auto-CLEAN) |
+| SCANNING | CLEAN | scanner verdict clean + magic-bytes type matches the allowlist | — |
+| SCANNING | REJECTED | malware/type mismatch/parser bomb | finding stored (no file content in the finding); file bytes purged after the quarantine period (DEC-053) |
+
+Revision status (business approval):
+
+| From | To | Trigger | Guards |
+|---|---|---|---|
+| — | WORKING | upload accepted | — |
+| WORKING | IN_REVIEW | `submitDocumentRevision` | scan_status CLEAN |
+| IN_REVIEW | APPROVED | `approveDocumentRevision` (raises/uses §4.4) | approver ≠ uploader; MFA step-up; who approves which document type **BLOCKED (DEC-032)** |
+| IN_REVIEW | REJECTED | `rejectDocumentRevision` | reason |
+| WORKING | REJECTED | system when scan REJECTED | — |
+| APPROVED | SUPERSEDED | system when a newer revision of the same document is APPROVED | approved bytes and metadata immutable |
+
+Download (`downloadDocumentRevision`) only when scan_status = CLEAN; otherwise 409 `FILE_NOT_RELEASED`.
+
+### 4.7 Job run (page 36; Gate-1 "Job kill تحت مجوز و دلیل")
+| From | To | Trigger | Guards |
+|---|---|---|---|
+| — | QUEUED | system / owning use case | unique task key (idempotent enqueue) |
+| QUEUED | RUNNING | worker start | — |
+| RUNNING | SUCCEEDED / FAILED | worker end | error_code only, no exception text |
+| QUEUED | CANCELLED | `requestJobCancel` before start | as below |
+| RUNNING | CANCEL_REQUESTED | `requestJobCancel` | `platform.ops.job.cancel`; reason (≥ 3 chars); MFA step-up; job type `cancellable` and not `protected` (else 409 `JOB_PROTECTED`) |
+| CANCEL_REQUESTED | CANCELLED | job reaches its next checkpoint and stops safely | — |
+| CANCEL_REQUESTED | SUCCEEDED / FAILED | job ended before a checkpoint | outcome recorded as "cancel too late" |
+
+Force kill: not in the contract; **BLOCKED (DEC-024)**, PHASE_11 (SEC-02). Protected types (migrations,
+restore, backup) are seeded `protected=true`; the complete protected list is DEC-024. A retry is a new run
+(new `job_id`), not a transition.
+
+### 4.8 Role and RoleAssignment
+| Machine | Transitions | Guards |
+|---|---|---|
+| Role | DRAFT → ACTIVE → RETIRED | ACTIVE only if the permission set is in the approved matrix **BLOCKED (DEC-049)**; TECHNICAL roles never contain business-approval permissions (DEC-003); RETIRED requires no ACTIVE assignment |
+| RoleAssignment | — → ACTIVE, or — → PENDING_APPROVAL → ACTIVE / REVOKED; ACTIVE → EXPIRED (system at `valid_to`); ACTIVE → REVOKED (`revokeRoleAssignment`, reason) | role ACTIVE; reason; self-assignment allowed only explicitly and always flagged (DEC-003); second approver for business/MFA roles **BLOCKED (DEC-032 item 1-c)** |
+
+### 4.9 Parameter value revision (page 42)
+`DRAFT → PENDING_APPROVAL → PUBLISHED | REJECTED`; `PUBLISHED → SUPERSEDED` (a newer revision becomes
+effective). TECHNICAL parameters: whether publish needs a second person **BLOCKED (DEC-032)**. BUSINESS_RULE
+parameters: publish **BLOCKED** by their own `decision_id` (e.g. DEC-016 thresholds) until that decision is
+APPROVED. History is never rewritten; `effective_from` in the past is refused (TECH).
+
+### 4.10 Org unit / position (effective-dated)
+`ACTIVE → INACTIVE` (deactivate with effective date; unit must have no ACTIVE position; position must have no
+current holder). `moveOrgUnit` closes the current parent link and opens a new one at `effective_from` (acyclic
+check). Unit types/levels, multiple or acting holders: **BLOCKED (DEC-048)**. No transition grants a permission.
+
+### 4.11 Unspecified (ask the owner, do not assume)
+Reopen of a DONE task; SLA clocks; delegation of approvals during absence (out of office); emergency access
+(break-glass) states — **DEC-054**; notification channels outside the app.
