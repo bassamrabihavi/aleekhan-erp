@@ -110,6 +110,8 @@ flowchart LR
 
 ## آخرین رویدادها
 
+- `2026-11-04T12:36:27+00:00` decision id=DEC-047 status=APPROVED by=بسام ربیهاوی (کارفرما) note=Gate-0: حالت همه دسترسی‌ها بسته (deny-all) پذیرفته شد؛ ماتریس نقش‌ها و DEC-032 در گام ۰۱.۱ همراه کاربران/نقش‌ها/نمودار سازمانی (DEC-003، DEC-043) نهایی و تأیید می‌شود.
+- `2026-11-04T12:36:27+00:00` decision_added id=DEC-047 status=OPEN
 - `2026-11-04T11:34:20+00:00` step phase=PHASE_00 step=00.8 state=PASS
 - `2026-11-04T11:34:20+00:00` gate_pending phase=PHASE_00
 - `2026-11-04T11:26:09+00:00` step phase=PHASE_00 step=00.8 state=IN_REVIEW commit=3c0ea1c03e0582d4a5e0d3e5e0fa76e151a659ed
@@ -123,5 +125,3 @@ flowchart LR
 - `2026-11-04T07:14:01+00:00` step phase=PHASE_00 step=00.7 state=IN_REVIEW commit=d6b6de96784d8d4d715e5978a2552c3531798faa
 - `2026-11-04T05:58:10+00:00` step phase=PHASE_00 step=00.7 state=IN_PROGRESS
 - `2026-11-04T05:57:48+00:00` test_result id=T-002 result=PASS
-- `2026-11-04T05:11:57+00:00` test_ready id=T-002 phase=PHASE_00
-- `2026-11-04T05:11:56+00:00` step phase=PHASE_00 step=00.6 state=PASS
