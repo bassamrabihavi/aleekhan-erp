@@ -1,0 +1,75 @@
+# stage ops | 2026-11-04T11:24:49Z | machine work-windows | MINGW64_NT-10.0-22000
+== least-privilege DB roles
+== server: 17.9
+== throw-away database aleekhan_roles_check, roles owner/app/ro with suffix 7899abee (NOLOGIN, no password)
+NOTICE:  database "aleekhan_roles_check" does not exist, skipping
+== migrate as the owner role
+PASS all tables owned by the owner role
+== app role: allowed runtime path
+PASS app: INSERT audit row
+PASS app: SELECT audit
+PASS app: UPDATE integration source (DML)
+PASS app: unit of work (audit + outbox) via Django
+PASS app: manage.py outbox_status
+== app role: audit bypass and DDL must be refused
+PASS app: DELETE audit rows  (ERROR:  permission denied for table platform_audit_event)
+PASS app: UPDATE audit rows  (ERROR:  permission denied for table platform_audit_event)
+PASS app: TRUNCATE audit  (ERROR:  permission denied for table platform_audit_event)
+PASS app: DISABLE audit trigger  (ERROR:  must be owner of table platform_audit_event)
+PASS app: DISABLE TRIGGER ALL  (ERROR:  must be owner of table platform_audit_event)
+PASS app: DROP audit trigger  (ERROR:  must be owner of relation platform_audit_event)
+PASS app: session_replication_role=replica (skips triggers)  (ERROR:  permission denied to set parameter "session_replication_role")
+PASS app: DELETE compensation rows  (ERROR:  permission denied for table platform_compensation_record)
+PASS app: write django_migrations  (ERROR:  permission denied for table django_migrations)
+PASS app: CREATE TABLE  (ERROR:  permission denied for schema public)
+PASS app: CREATE FUNCTION  (ERROR:  permission denied for schema public)
+PASS app: DROP TABLE  (ERROR:  must be owner of table platform_outbox_event)
+PASS app: ALTER TABLE ADD COLUMN  (ERROR:  must be owner of table platform_outbox_event)
+== readonly role
+PASS ro: SELECT audit
+PASS ro: SELECT outbox
+PASS ro: INSERT audit  (ERROR:  permission denied for table platform_audit_event)
+PASS ro: UPDATE integration source  (ERROR:  permission denied for table platform_integration_source)
+PASS ro: DELETE outbox  (ERROR:  permission denied for table platform_outbox_event)
+== audit trigger still enabled and rows intact
+PASS audit triggers enabled  (trg_audit_event_append_only=O,trg_audit_event_no_truncate=O)
+PASS audit rows written by app are intact (2)
+== roles check: passed=26 failed=0
+== cleanup: drop aleekhan_roles_check and roles *_7899abee
+== backup / restore drill
+== server 17.9 | pg_dump (PostgreSQL) 17.9 | machine work-windows | rows 500
+== [1] create + migrate + seed aleekhan_drill_src
+drill_seed: seeded n=500 source=synthetic_drill_13e5ea7a
+== [2] fingerprint before
+django_migrations 6 a6f0985144c2a0367ca61ca877b83c4a
+platform_audit_event 504 29cf0e103741456c3c30bedc521dc614
+platform_compensation_record 0 d41d8cd98f00b204e9800998ecf8427e
+platform_conflict_item 1 66f5ce9a1a13be0c58e10eafbee1a840
+platform_idempotency_record 0 d41d8cd98f00b204e9800998ecf8427e
+platform_import_batch 1 332024792200f4f51c4c78dcefdb8abc
+platform_import_staging_row 500 0da6aede37dfb78cc34a094f76413214
+platform_inbox_event 0 d41d8cd98f00b204e9800998ecf8427e
+platform_integration_source 4 0212c9e3741e35ddb782ea2fdfda4a1b
+platform_outbox_event 504 328a4c474ef877f390db8e8abba548d2
+platform_schema_meta 1 ebca356362a379ff0a69964020edb4b1
+triggers platform_audit_event.trg_audit_event_append_only=O,platform_audit_event.trg_audit_event_no_truncate=O,platform_compensation_record.trg_compensation_record_append_only=O,platform_conflict_item.trg_conflict_item_touch=O,platform_idempotency_record.trg_idempotency_record_touch=O,platform_import_batch.trg_import_batch_provenance=O,platform_import_batch.trg_import_batch_touch=O,platform_import_staging_row.trg_staging_row_payload=O,platform_import_staging_row.trg_staging_row_touch=O,platform_inbox_event.trg_inbox_event_no_update=O,platform_integration_source.trg_integration_source_touch=O,platform_outbox_event.trg_outbox_event_touch=O
+functions 5
+== [3] pg_dump -Fc
+dump sha256=9ff3bc3b353397a14dfd7729ad422f3d97a97081b875d9c347a4f203a4bdaacc bytes=124432
+== [4] drop source database (simulated loss)
+PASS source database dropped before restore
+== [5] verify dump checksum, restore into aleekhan_drill_restored
+PASS dump sha256 unchanged before restore
+PASS pg_restore --single-transaction --exit-on-error
+== [6] verify restored database
+PASS fingerprint of restored database readable
+PASS fingerprint covers all public tables (11)
+PASS row counts + table checksums + triggers + functions identical  (11 tables)
+PASS migrations state: 6 applied, migrate --check clean
+PASS audit append-only trigger enforced after restore
+PASS synthetic labelled outbox rows restored (500)
+PASS application reads restored DB (outbox_status)
+== drill PASS: dump 360 ms, restore 796 ms, verify 6240 ms, total 16757 ms, dump 124432 bytes sha256 9ff3bc3b353397a14dfd7729ad422f3d97a97081b875d9c347a4f203a4bdaacc
+== cleanup: drop aleekhan_drill_src, aleekhan_drill_restored; delete work dir
+== outbox monitoring command (on a throw-away migrated DB is covered by the drill; here: help)
+outbox_status: available

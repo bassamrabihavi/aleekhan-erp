@@ -1,0 +1,174 @@
+{
+  "$schema": "http://cyclonedx.org/schema/bom-1.5.schema.json",
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "serialNumber": "urn:uuid:57ced1f3-7731-4b5a-896f-228c581a7d67",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2026-11-04T11:25:28.554Z",
+    "lifecycles": [
+      {
+        "phase": "build"
+      }
+    ],
+    "tools": [
+      {
+        "vendor": "npm",
+        "name": "cli",
+        "version": "11.19.0"
+      }
+    ],
+    "component": {
+      "bom-ref": "aleekhan-frontend@0.0.0",
+      "type": "library",
+      "name": "frontend",
+      "version": "0.0.0",
+      "scope": "required",
+      "description": "Aleekhan factory platform web UI (PHASE_00 / 00.5 smoke shell). Farsi RTL.",
+      "purl": "pkg:npm/aleekhan-frontend@0.0.0",
+      "properties": [
+        {
+          "name": "cdx:npm:package:private",
+          "value": "true"
+        }
+      ],
+      "externalReferences": []
+    }
+  },
+  "components": [
+    {
+      "bom-ref": "@tanstack/query-core@5.104.5",
+      "type": "library",
+      "name": "@tanstack/query-core",
+      "version": "5.104.5",
+      "scope": "required",
+      "author": "tannerlinsley",
+      "description": "The framework agnostic core that powers TanStack Query",
+      "purl": "pkg:npm/%40tanstack/query-core@5.104.5",
+      "properties": [],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/@tanstack/query-core/-/query-core-5.104.5.tgz"
+        },
+        {
+          "type": "vcs",
+          "url": "git+https://github.com/TanStack/query.git"
+        },
+        {
+          "type": "website",
+          "url": "https://tanstack.com/query"
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "43de2023c3a977e09b75534e763f190b257c5aa2d88adac3ab5b7de9773c5994fa958d2be6246724b5d80f131ec7b1047f6bfe997be7e05723681292c57650f4"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "bom-ref": "@tanstack/react-query@5.104.5",
+      "type": "library",
+      "name": "@tanstack/react-query",
+      "version": "5.104.5",
+      "scope": "required",
+      "author": "tannerlinsley",
+      "description": "Hooks for managing, caching and syncing asynchronous and remote data in React",
+      "purl": "pkg:npm/%40tanstack/react-query@5.104.5",
+      "properties": [],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/@tanstack/react-query/-/react-query-5.104.5.tgz"
+        },
+        {
+          "type": "vcs",
+          "url": "git+https://github.com/TanStack/query.git"
+        },
+        {
+          "type": "website",
+          "url": "https://tanstack.com/query"
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "44e46015ed39d94fbddf079a36eaa0eea1eaeef3553735cdfd5ad7a83e1b6c0b9009652a3a5da5579522f5f956939095bccc8bfc1876ed05a1cf01f469a3b1f6"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "bom-ref": "vazirmatn@33.0.3",
+      "type": "library",
+      "name": "vazirmatn",
+      "version": "33.0.3",
+      "scope": "required",
+      "author": "Saber Rastikerdar <saber.rastikerdar@gmail.com>",
+      "description": "Vazirmatn is a Persian/Arabic font. وزیرمتن یک فونت فارسی/عربی است",
+      "purl": "pkg:npm/vazirmatn@33.0.3",
+      "properties": [],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/vazirmatn/-/vazirmatn-33.0.3.tgz"
+        },
+        {
+          "type": "vcs",
+          "url": "git+https://github.com/rastikerdar/vazirmatn"
+        },
+        {
+          "type": "website",
+          "url": "https://github.com/rastikerdar/vazirmatn#readme"
+        },
+        {
+          "type": "issue-tracker",
+          "url": "https://github.com/rastikerdar/vazirmatn/issues"
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "7db8cd73408c8dacd9a487a05b3cfd3871b323500f15ba13fb1ed979c5e5502b437bf9e4cb1ee0b424d99d64bff9e7971bb7db7d7ca608f28923c12c9ccde2ab"
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "ref": "aleekhan-frontend@0.0.0",
+      "dependsOn": [
+        "@tanstack/react-query@5.104.5",
+        "vazirmatn@33.0.3"
+      ]
+    },
+    {
+      "ref": "@tanstack/query-core@5.104.5",
+      "dependsOn": []
+    },
+    {
+      "ref": "@tanstack/react-query@5.104.5",
+      "dependsOn": [
+        "@tanstack/query-core@5.104.5"
+      ]
+    },
+    {
+      "ref": "vazirmatn@33.0.3",
+      "dependsOn": []
+    }
+  ]
+}

@@ -1,0 +1,151 @@
+{
+  "phase": "PHASE_00",
+  "step": "00.8",
+  "commit_sha": "3c0ea1c03e0582d4a5e0d3e5e0fa76e151a659ed",
+  "status": "PARTIAL",
+  "scope": [
+    "PHASE_00 phase report over steps 00.1-00.8 (DEVELOPER_REPORT_TEMPLATE sections 1-10)",
+    "REV-0702 secret-scan whole-value placeholder rule + regression tests",
+    "REV-0703 threat model + checklist updated for public repository (DEC-046)",
+    "REV-0704 GitHub Actions pinned to full commit SHAs",
+    "CHANGELOG, ERD with migration IDs 0001-0006, TRACE_MAP"
+  ],
+  "changes": [
+    "tools/secret_scan.py",
+    "tools/tests/test_secret_scan.py",
+    ".github/workflows/ci.yml",
+    "docs/ops/CI.md",
+    "docs/security/THREAT_MODEL_DELTA_00.6_00.7.md",
+    "docs/security/PHASE_00_SECURITY_CHECKLIST.md",
+    "docs/db/ERD.md",
+    "docs/db/README.md",
+    "CHANGELOG.md",
+    "reports/phase-00/TRACE_MAP.md",
+    "reports/phase-00/PHASE_REPORT.md",
+    "reports/phase-00/PHASE_REPORT.json",
+    "reports/phase-00/step-8/logs/",
+    "docs/adr/ADR-001.md",
+    "docs/discovery/CONFLICTS.md"
+  ],
+  "migrations": [
+    "platform_core.0001_initial",
+    "platform_core.0002_db_triggers",
+    "platform_core.0003_seed_schema_meta",
+    "platform_core.0004_integration",
+    "platform_core.0005_integration_triggers",
+    "platform_core.0006_seed_integration_sources"
+  ],
+  "test_evidence": [
+    {
+      "command": "ruff check + format (ci_local lint)",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-8/logs/impl/01_lint.log"
+    },
+    {
+      "command": "mypy strict (ci_local type)",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-8/logs/impl/02_type.log"
+    },
+    {
+      "command": "tools unittest: 39 tests",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-8/logs/impl/03_tools.log"
+    },
+    {
+      "command": "pytest unit+integration: 488 passed, 1 skipped (REV-0014), 1 deselected (perf)",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-8/logs/impl/04_unit.log"
+    },
+    {
+      "command": "migration round-trip up/zero/up + makemigrations --check",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-8/logs/impl/05_migration.log"
+    },
+    {
+      "command": "API contract: 18 passed",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-8/logs/impl/06_contract.log"
+    },
+    {
+      "command": "authorization: 166 passed",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-8/logs/impl/07_authz.log"
+    },
+    {
+      "command": "python tools/secret_scan.py --history: findings=0",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-8/logs/impl/11_secret_scan.log"
+    },
+    {
+      "command": "python tools/verify_handoff.py: failures=0, 1 known defect",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-8/logs/impl/verify_handoff.log"
+    },
+    {
+      "command": "test_env_example_lists_every_settings_variable (REV-0014, reason recorded)",
+      "outcome": "SKIPPED",
+      "log_path": "reports/phase-00/step-8/logs/impl/04_unit.log"
+    },
+    {
+      "command": "frontend vitest 23 (00.7 run on d6b6de9, not re-run in 00.8)",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-7/logs/ci/08_frontend.log"
+    },
+    {
+      "command": "Playwright E2E real backend (00.7 run, not re-run in 00.8)",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-7/logs/ci/09_e2e.log"
+    },
+    {
+      "command": "perf smoke (00.7 run, not re-run)",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-7/logs/ci/10_perf.log"
+    },
+    {
+      "command": "pip-audit + npm audit (00.7 run, not re-run)",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-7/logs/ci/11_security.log"
+    },
+    {
+      "command": "DB roles check + backup/restore drill (00.7 run, not re-run)",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-7/logs/ci/12_ops.log"
+    }
+  ],
+  "security_evidence": [
+    "secret scan tree + 53 commits + env value check: findings=0 (reports/phase-00/step-8/logs/impl/11_secret_scan.log)",
+    "REV-0702: placeholders exempt only as whole values (tools/secret_scan.py is_placeholder fullmatch)",
+    "REV-0704: actions pinned to full SHAs (reports/phase-00/step-8/logs/rev0704_action_shas.log)",
+    "threat delta T-60..T-78 incl. public repository threats (docs/security/THREAT_MODEL_DELTA_00.6_00.7.md)",
+    "deny-by-default route parity 166 passed (reports/phase-00/step-8/logs/impl/07_authz.log)",
+    "security checklist docs/security/PHASE_00_SECURITY_CHECKLIST.md - unsigned (employer/auditor/IT)"
+  ],
+  "decisions": [
+    "DEC-044 APPROVED",
+    "DEC-045 APPROVED",
+    "DEC-046 APPROVED",
+    "DEC-032 PROPOSED (Permission Matrix / maker-checker) - employer",
+    "DEC-016 OPEN (P0, PHASE_06) - freshness basis TECHNICAL DEFAULT"
+  ],
+  "risks": [
+    "G4: docs/adr/ADR-001.md is PROPOSED; employer/auditor/IT signature pending",
+    "G8: Permission Matrix not approved",
+    "G9: security checklist not signed",
+    "REV-0014: backend/.env.example not updated (agent access denied)",
+    "Workflow SHA pins verified only by the next GitHub Actions run",
+    "Public repository (DEC-046): private-data detection is pattern-based"
+  ],
+  "evidence_paths": [
+    "reports/phase-00/TRACE_MAP.md",
+    "reports/phase-00/PHASE_REPORT.md",
+    "CHANGELOG.md",
+    "docs/db/ERD.md",
+    "reports/phase-00/step-8/logs/impl/summary.md",
+    "reports/phase-00/step-7/logs/ci/summary.md",
+    "reports/phase-00/step-8/logs/rev0704_action_shas.log",
+    "reports/phase-00/step-7/logs/ci/screenshots/",
+    "docs/adr/ADR-001.md"
+  ],
+  "rollback": "00.8 has no migration: git revert <00.8 commit>. DB rollback per docs/db/README.md section 4 and docs/ops/ROLLBACK.md.",
+  "review_request": "PASS"
+}

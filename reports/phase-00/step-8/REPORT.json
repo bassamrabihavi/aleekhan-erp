@@ -1,0 +1,69 @@
+{
+  "phase": "PHASE_00",
+  "step": "00.8",
+  "commit_sha": "3c0ea1c03e0582d4a5e0d3e5e0fa76e151a659ed",
+  "status": "COMPLETE",
+  "scope": [
+    "phase report set",
+    "trace map",
+    "changelog",
+    "ERD",
+    "ADR-001 for signature",
+    "REV-0702/0703/0704"
+  ],
+  "changes": [
+    "tools/secret_scan.py",
+    "tools/tests/test_secret_scan.py",
+    ".github/workflows/ci.yml",
+    "docs/security/",
+    "docs/adr/ADR-001.md",
+    "docs/db/ERD.md",
+    "docs/discovery/CONFLICTS.md",
+    "CHANGELOG.md",
+    "reports/phase-00/TRACE_MAP.md",
+    "reports/phase-00/PHASE_REPORT.md"
+  ],
+  "migrations": [],
+  "test_evidence": [
+    {
+      "command": "tools/ci_local.sh (13 stages)",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-8/logs/ci/summary.md"
+    },
+    {
+      "command": "pytest 488 passed 1 skipped",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-8/logs/ci/04_unit.log"
+    },
+    {
+      "command": "e2e 12+1",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-8/logs/ci/09_e2e.log"
+    },
+    {
+      "command": "secret scan + audits",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-8/logs/ci/11_security.log"
+    }
+  ],
+  "security_evidence": [
+    "secret scan 0 findings (tree + history)",
+    "actions pinned by SHA",
+    "public-repo threats T-75..T-78"
+  ],
+  "decisions": [
+    "G4/G8/G9 need employer signature/approval",
+    "REV-0014",
+    "C-17"
+  ],
+  "risks": [
+    "DEC-032 permission matrix still PROPOSED"
+  ],
+  "evidence_paths": [
+    "reports/phase-00/TRACE_MAP.md",
+    "reports/phase-00/PHASE_REPORT.md",
+    "reports/phase-00/step-8/logs/ci/"
+  ],
+  "rollback": "git revert 3c0ea1c03e0582d4a5e0d3e5e0fa76e151a659ed",
+  "review_request": "PASS"
+}

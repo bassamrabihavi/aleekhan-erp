@@ -1,0 +1,33 @@
+{
+  "server_version": "17.9",
+  "passed": 26,
+  "failed": 0,
+  "checks": [
+    {"check": "all tables owned by the owner role", "result": "PASS"},
+    {"check": "app: INSERT audit row", "result": "PASS"},
+    {"check": "app: SELECT audit", "result": "PASS"},
+    {"check": "app: UPDATE integration source (DML)", "result": "PASS"},
+    {"check": "app: unit of work (audit + outbox) via Django", "result": "PASS"},
+    {"check": "app: manage.py outbox_status", "result": "PASS"},
+    {"check": "app: DELETE audit rows", "result": "PASS"},
+    {"check": "app: UPDATE audit rows", "result": "PASS"},
+    {"check": "app: TRUNCATE audit", "result": "PASS"},
+    {"check": "app: DISABLE audit trigger", "result": "PASS"},
+    {"check": "app: DISABLE TRIGGER ALL", "result": "PASS"},
+    {"check": "app: DROP audit trigger", "result": "PASS"},
+    {"check": "app: session_replication_role=replica (skips triggers)", "result": "PASS"},
+    {"check": "app: DELETE compensation rows", "result": "PASS"},
+    {"check": "app: write django_migrations", "result": "PASS"},
+    {"check": "app: CREATE TABLE", "result": "PASS"},
+    {"check": "app: CREATE FUNCTION", "result": "PASS"},
+    {"check": "app: DROP TABLE", "result": "PASS"},
+    {"check": "app: ALTER TABLE ADD COLUMN", "result": "PASS"},
+    {"check": "ro: SELECT audit", "result": "PASS"},
+    {"check": "ro: SELECT outbox", "result": "PASS"},
+    {"check": "ro: INSERT audit", "result": "PASS"},
+    {"check": "ro: UPDATE integration source", "result": "PASS"},
+    {"check": "ro: DELETE outbox", "result": "PASS"},
+    {"check": "audit triggers enabled", "result": "PASS"},
+    {"check": "audit rows written by app are intact (2)", "result": "PASS"}
+  ]
+}

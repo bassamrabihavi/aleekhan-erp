@@ -1,0 +1,32 @@
+{
+  "drill": "backup-restore",
+  "status": "PASS",
+  "started_at": "2026-11-04T11:25:03Z",
+  "finished_at": "2026-11-04T11:25:20Z",
+  "machine": "work-windows",
+  "commit": "3c0ea1c03e0582d4a5e0d3e5e0fa76e151a659ed",
+  "worktree_modified_files": 1,
+  "server_version": "17.9",
+  "pg_dump": "pg_dump (PostgreSQL) 17.9",
+  "synthetic_rows": 500,
+  "source_db_bytes": 10032819,
+  "dump_format": "custom (-Fc -Z 6)",
+  "dump_bytes": 124432,
+  "dump_toc_entries": 98,
+  "dump_sha256": "9ff3bc3b353397a14dfd7729ad422f3d97a97081b875d9c347a4f203a4bdaacc",
+  "dump_sha256_verified_before_restore": true,
+  "timings_ms": {"dump": 360, "restore": 796, "verify": 6240, "recovery_restore_plus_verify": 7036, "total": 16757},
+  "targets": {"rpo": "1h (DEC-004)", "rto": "4h (DEC-004)", "note": "tiny synthetic dataset; RTO for production size must be re-measured on staging; RPO needs scheduled backups/WAL archiving (docs/ops/BACKUP_RESTORE.md)"},
+  "checks": [
+    {"check": "source database dropped before restore", "result": "PASS"},
+    {"check": "dump sha256 unchanged before restore", "result": "PASS"},
+    {"check": "pg_restore --single-transaction --exit-on-error", "result": "PASS"},
+    {"check": "fingerprint of restored database readable", "result": "PASS"},
+    {"check": "fingerprint covers all public tables (11)", "result": "PASS"},
+    {"check": "row counts + table checksums + triggers + functions identical", "result": "PASS"},
+    {"check": "migrations state: 6 applied, migrate --check clean", "result": "PASS"},
+    {"check": "audit append-only trigger enforced after restore", "result": "PASS"},
+    {"check": "synthetic labelled outbox rows restored (500)", "result": "PASS"},
+    {"check": "application reads restored DB (outbox_status)", "result": "PASS"}
+  ]
+}

@@ -79,7 +79,8 @@ Review verdicts are in `reports/phase-00/step-N/REVIEW.md`. No version number is
   review BLOCKED `b312dc8e9f62680d869bda3f8c0d00c344b51fe9`; DEC-046 `513153b4641d956d8f7ae3c4b15d5bb718625732`;
   re-review PASS `a45973c407208b66cc3ea4ced11f45a214f3eb31`.
 
-### 00.8 Report & Review (this step; commit SHA added by the orchestrator when committed)
+### 00.8 Report & Review
+- Commit `3c0ea1c03e0582d4a5e0d3e5e0fa76e151a659ed`; orchestrator CI 13/13 PASS (`reports/phase-00/step-8/logs/ci/summary.md`).
 - Fixed REV-0702 [P2]: `tools/secret_scan.py` treats a value as a placeholder only when the WHOLE value is a
   placeholder form (`fullmatch`); regression tests in `tools/tests/test_secret_scan.py`.
 - Fixed REV-0703 [P3]: threat model and security checklist updated for the public repository (DEC-046): T-67

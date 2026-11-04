@@ -1,0 +1,52 @@
+# stage tools | 2026-11-04T11:19:21Z | machine work-windows | MINGW64_NT-10.0-22000
+test_committed_lock_matches_this_venv (test_lock_runtime.LockTests.test_committed_lock_matches_this_venv)
+The lock covers every runtime requirement installed here (same check as CI ``--check``). ... ok
+test_entries_skip_other_platform_markers (test_lock_runtime.LockTests.test_entries_skip_other_platform_markers) ... ok
+test_render_is_sorted_and_keeps_markers (test_lock_runtime.LockTests.test_render_is_sorted_and_keeps_markers) ... ok
+test_bad_line_is_an_error (test_offline_sbom.OfflineSbomTests.test_bad_line_is_an_error) ... ok
+test_committed_lock_parses (test_offline_sbom.OfflineSbomTests.test_committed_lock_parses) ... ok
+test_components_have_purls_and_markers (test_offline_sbom.OfflineSbomTests.test_components_have_purls_and_markers) ... ok
+test_document_is_labelled_offline (test_offline_sbom.OfflineSbomTests.test_document_is_labelled_offline) ... ok
+test_account_name_is_replaced_and_other_text_kept (test_redact_paths.RedactTests.test_account_name_is_replaced_and_other_text_kept) ... ok
+test_home_paths_are_replaced (test_redact_paths.RedactTests.test_home_paths_are_replaced) ... ok
+test_short_names_are_ignored (test_redact_paths.RedactTests.test_short_names_are_ignored) ... ok
+test_contrast_known_values (test_sample_logo_colors.SampleLogoColorsTest.test_contrast_known_values) ... ok
+test_decode_synthetic_png_with_filters (test_sample_logo_colors.SampleLogoColorsTest.test_decode_synthetic_png_with_filters) ... ok
+test_logo_dominant_colour_is_the_primary_token (test_sample_logo_colors.SampleLogoColorsTest.test_logo_dominant_colour_is_the_primary_token) ... ok
+test_rejects_non_png_and_unsupported (test_sample_logo_colors.SampleLogoColorsTest.test_rejects_non_png_and_unsupported) ... ok
+test_committed_allowlist_is_valid_and_pinned (test_secret_scan.AllowlistTests.test_committed_allowlist_is_valid_and_pinned) ... ok
+test_malformed_entries_are_rejected (test_secret_scan.AllowlistTests.test_malformed_entries_are_rejected) ... ok
+test_only_the_exact_fingerprint_matches (test_secret_scan.AllowlistTests.test_only_the_exact_fingerprint_matches) ... ok
+test_worktree_and_history_findings_without_values (test_secret_scan.RepoScanTests.test_worktree_and_history_findings_without_values) ... ok
+test_allow_pragma (test_secret_scan.ScanLineTests.test_allow_pragma) ... ok
+test_detects_each_rule (test_secret_scan.ScanLineTests.test_detects_each_rule) ... ok
+test_env_file_names (test_secret_scan.ScanLineTests.test_env_file_names) ... ok
+test_env_secret_value_is_reported_but_never_printed (test_secret_scan.ScanLineTests.test_env_secret_value_is_reported_but_never_printed) ... ok
+test_placeholder_words_inside_a_real_looking_value_are_findings (test_secret_scan.ScanLineTests.test_placeholder_words_inside_a_real_looking_value_are_findings)
+REV-0702: a placeholder word only exempts a value that is a placeholder AS A WHOLE. ... ok
+test_placeholders_and_prompts_are_not_findings (test_secret_scan.ScanLineTests.test_placeholders_and_prompts_are_not_findings) ... ok
+test_whole_value_placeholders (test_secret_scan.ScanLineTests.test_whole_value_placeholders) ... ok
+test_history_allowlist_suppresses_only_its_commit (test_secret_scan.UntrackedScanTests.test_history_allowlist_suppresses_only_its_commit) ... ok
+test_untracked_non_ignored_files_are_scanned (test_secret_scan.UntrackedScanTests.test_untracked_non_ignored_files_are_scanned) ... ok
+test_cli_exit_codes (test_verify_handoff.VerifyHandoffTest.test_cli_exit_codes) ... ok
+test_content_change_is_mismatch (test_verify_handoff.VerifyHandoffTest.test_content_change_is_mismatch) ... ok
+test_crlf_registered_lf_on_disk_is_eol_only (test_verify_handoff.VerifyHandoffTest.test_crlf_registered_lf_on_disk_is_eol_only) ... ok
+test_exact_match_ok (test_verify_handoff.VerifyHandoffTest.test_exact_match_ok) ... ok
+test_known_defect_only_with_exact_observed_hash (test_verify_handoff.VerifyHandoffTest.test_known_defect_only_with_exact_observed_hash) ... ok
+test_lf_registered_crlf_on_disk_is_eol_only (test_verify_handoff.VerifyHandoffTest.test_lf_registered_crlf_on_disk_is_eol_only) ... ok
+test_missing_non_private_fails (test_verify_handoff.VerifyHandoffTest.test_missing_non_private_fails) ... ok
+test_private_entries_absent_are_excluded (test_verify_handoff.VerifyHandoffTest.test_private_entries_absent_are_excluded) ... ok
+test_private_file_present_fails (test_verify_handoff.VerifyHandoffTest.test_private_file_present_fails) ... ok
+test_unlisted_file_fails (test_verify_handoff.VerifyHandoffTest.test_unlisted_file_fails) ... ok
+test_unsafe_path_rejected (test_verify_handoff.VerifyHandoffTest.test_unsafe_path_rejected) ... ok
+test_windows_drive_path_rejected (test_verify_handoff.VerifyHandoffTest.test_windows_drive_path_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 39 tests in 1.473s
+
+OK
+lock_runtime: requirements.lock matches the venv (9 packages for this platform)
+EOL_ONLY        t.csv
+summary: EOL_ONLY=1 | failures=0
+EOL_ONLY        t.csv
+summary: EOL_ONLY=1 | failures=1 (strict)

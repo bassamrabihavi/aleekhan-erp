@@ -1,0 +1,7 @@
+lint	PASS	1	01_lint.log	
+type	PASS	3	02_type.log	
+tools	PASS	2	03_tools.log	
+unit	PASS	26	04_unit.log	
+migration	PASS	17	05_migration.log	
+contract	PASS	4	06_contract.log	
+authz	PASS	4	07_authz.log	
