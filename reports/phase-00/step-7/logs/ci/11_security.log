@@ -1,0 +1,19 @@
+# stage security | 2026-11-04T07:10:19Z | machine work-windows | MINGW64_NT-10.0-22000
+== secret scan (tracked files + git history)
+secret_scan: rules=11 text_files=499 (tracked + untracked non-ignored) env_values_checked=1
+secret_scan: history commits scanned=47 (max 5000)
+secret_scan: history allowlist entries=1 suppressed=1
+ALLOWLISTED history 5f3f5c3aca57:tools/tests/test_secret_scan.py password-literal
+secret_scan: findings=0 -> PASS
+== runtime lock matches the venv
+lock_runtime: requirements.lock matches the venv (9 packages for this platform)
+== pip-audit: runtime lock (backend/requirements.lock)
+pip-audit 2.10.1
+No known vulnerabilities found
+pip-audit runtime lock: PASS (no known vulnerabilities)
+== pip-audit: whole dev/QA venv (INFORMATIONAL: tooling is not shipped; findings are listed but do
+   not fail this stage - the runtime lock above is the gate)
+pip-audit: network error on attempt 1/1: ReadTimeout
+INFO: dev/QA venv audit NOT performed: network unavailable after retries (not a gate)
+== npm audit (production dependencies)
+found 0 vulnerabilities

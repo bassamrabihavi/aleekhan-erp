@@ -1,0 +1,35 @@
+# stage perf | 2026-11-04T07:10:13Z | machine work-windows | MINGW64_NT-10.0-22000
+.                                                                        [100%]
+1 passed in 2.92s
+{
+  "iterations": 200,
+  "warmup": 10,
+  "p95_budget_ms": 250.0,
+  "budget_basis": "TECHNICAL_DEFAULT (gross-regression guard, in-process test client, not an SLA)",
+  "results": {
+    "health_live": {
+      "n": 200.0,
+      "p50_ms": 0.542,
+      "p95_ms": 0.692,
+      "max_ms": 1.029
+    },
+    "health_ready": {
+      "n": 200.0,
+      "p50_ms": 0.898,
+      "p95_ms": 1.327,
+      "max_ms": 1.874
+    },
+    "version": {
+      "n": 200.0,
+      "p50_ms": 0.594,
+      "p95_ms": 0.793,
+      "max_ms": 0.972
+    },
+    "integration_freshness_page25": {
+      "n": 200.0,
+      "p50_ms": 2.991,
+      "p95_ms": 3.643,
+      "max_ms": 4.438
+    }
+  }
+}

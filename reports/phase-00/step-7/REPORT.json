@@ -1,0 +1,120 @@
+{
+  "phase": "PHASE_00",
+  "step": "00.7",
+  "commit_sha": "d6b6de96784d8d4d715e5978a2552c3531798faa",
+  "status": "COMPLETE",
+  "scope": [
+    "GitHub Actions CI (DEC-045 A) + local CI runner",
+    "secret scan",
+    "dependency scan + SBOM",
+    "deny-by-default route parity",
+    "log redaction incl. Persian keys",
+    "DB least-privilege roles",
+    "backup/restore drill",
+    "outbox monitoring",
+    "perf smoke",
+    "security checklist (unsigned)",
+    "REV-0015/0016/0502/0601/0602/0603 fixes"
+  ],
+  "changes": [
+    ".github/workflows/ci.yml",
+    "tools/",
+    "ops/",
+    "backend/",
+    "docs/ops/",
+    "docs/security/",
+    "frontend/scripts/",
+    "ruff.toml"
+  ],
+  "migrations": [],
+  "test_evidence": [
+    {
+      "command": "ruff",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-7/logs/ci/01_lint.log"
+    },
+    {
+      "command": "mypy",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-7/logs/ci/02_type.log"
+    },
+    {
+      "command": "tools unittest 37",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-7/logs/ci/03_tools.log"
+    },
+    {
+      "command": "pytest 488 passed 1 skipped",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-7/logs/ci/04_unit.log"
+    },
+    {
+      "command": "db roundtrip",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-7/logs/ci/05_migration.log"
+    },
+    {
+      "command": "contract 18",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-7/logs/ci/06_contract.log"
+    },
+    {
+      "command": "authz 166",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-7/logs/ci/07_authz.log"
+    },
+    {
+      "command": "frontend lint/tsc/vitest 23/build",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-7/logs/ci/08_frontend.log"
+    },
+    {
+      "command": "e2e 12+1",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-7/logs/ci/09_e2e.log"
+    },
+    {
+      "command": "perf smoke",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-7/logs/ci/10_perf.log"
+    },
+    {
+      "command": "secret scan + pip-audit + npm audit",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-7/logs/ci/11_security.log"
+    },
+    {
+      "command": "db roles 26/0 + backup/restore drill",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-7/logs/ci/12_ops.log"
+    },
+    {
+      "command": "sbom + dist hashes",
+      "outcome": "PASS",
+      "log_path": "reports/phase-00/step-7/logs/ci/13_artifacts.log"
+    }
+  ],
+  "security_evidence": [
+    "secret scan 0 findings (1 pinned allowlist)",
+    "pip-audit runtime lock: no known vulnerabilities",
+    "npm audit prod: 0",
+    "app role cannot alter/delete audit or disable triggers",
+    "no home paths in logs"
+  ],
+  "decisions": [
+    "DEC-016 OPEN (freshness basis)",
+    "REV-0014 needs employer (agent access to backend/.env.example denied)"
+  ],
+  "risks": [
+    "first GitHub Actions run not yet observed",
+    "actions pinned by major tag",
+    "drill on local PG not staging"
+  ],
+  "evidence_paths": [
+    "reports/phase-00/step-7/logs/ci/",
+    "docs/security/PHASE_00_SECURITY_CHECKLIST.md",
+    "docs/ops/"
+  ],
+  "rollback": "git revert d6b6de9 5f3f5c3 (no migrations)",
+  "review_request": "PASS"
+}

@@ -1,0 +1,6 @@
+# stage artifacts | 2026-11-04T07:13:01Z | machine work-windows | MINGW64_NT-10.0-22000
+commit d6b6de96784d8d4d715e5978a2552c3531798faa, modified tracked files: 1
+No known vulnerabilities found
+SBOM python: sbom-python-runtime.cdx.json (pip-audit CycloneDX)
+SBOM frontend: sbom-frontend.cdx.json
+frontend dist files hashed: 5

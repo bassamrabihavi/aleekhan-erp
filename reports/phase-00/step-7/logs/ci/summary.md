@@ -1,0 +1,19 @@
+# CI summary
+
+Commit `d6b6de96784d8d4d715e5978a2552c3531798faa` | machine work-windows | 2026-11-04T07:13:07Z
+
+| Stage | Result | Seconds | Log | Skip reason |
+|---|---|---|---|---|
+| lint | PASS | 1 | 01_lint.log |  |
+| type | PASS | 2 | 02_type.log |  |
+| tools | PASS | 2 | 03_tools.log |  |
+| unit | PASS | 26 | 04_unit.log |  |
+| migration | PASS | 18 | 05_migration.log |  |
+| contract | PASS | 6 | 06_contract.log |  |
+| authz | PASS | 5 | 07_authz.log |  |
+| frontend | PASS | 121 | 08_frontend.log |  |
+| e2e | PASS | 72 | 09_e2e.log |  |
+| perf | PASS | 5 | 10_perf.log |  |
+| security | PASS | 128 | 11_security.log |  |
+| ops | PASS | 34 | 12_ops.log |  |
+| artifacts | PASS | 6 | 13_artifacts.log |  |
