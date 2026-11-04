@@ -114,8 +114,8 @@
         "PHASE_00"
       ],
       "est_weeks": 3,
-      "state": "NOT_STARTED",
-      "started_at": null,
+      "state": "ACTIVE",
+      "started_at": "2026-11-04T14:42:30+00:00",
       "gate_pending_at": null,
       "accepted_at": null,
       "accepted_by": null,
@@ -2582,7 +2582,13 @@
       "verdict": "ACCEPTED",
       "by": "بسام ربیهاوی",
       "note": "همه بندهای Gate بسته شد"
+    },
+    {
+      "at": "2026-11-04T14:42:30+00:00",
+      "kind": "phase_started",
+      "phase": "PHASE_01",
+      "by": "بسام ربیهاوی"
     }
   ],
-  "updated_at": "2026-11-04T14:41:21+00:00"
+  "updated_at": "2026-11-04T14:42:30+00:00"
 }
