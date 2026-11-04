@@ -58,6 +58,39 @@ class ScanLineTests(unittest.TestCase):
             with self.subTest(line=line):
                 self.assertEqual(ss.scan_line(line), [])
 
+    def test_placeholder_words_inside_a_real_looking_value_are_findings(self) -> None:
+        """REV-0702: a placeholder word only exempts a value that is a placeholder AS A WHOLE."""
+        values = (
+            J(["Q7", "Sample", "2026"]),
+            J(["my", "example", "Pw9"]),
+            J(["Fake", "Pass!42"]),
+            J(["k9", "Synthetic", "Zz"]),
+            J(["pw-", "redacted", "-7Hk"]),
+            J(["dummy", "Value1"]),
+            J(["CHANGE", "_ME", "now5"]),
+            J(["real", "${X}"]),  # a literal with an interpolation is not a single reference
+            J(["<a>", "Tail9"]),
+        )
+        for value in values:
+            with self.subTest(value_len=len(value)):
+                self.assertFalse(ss.is_placeholder(value))
+                self.assertIn("password-literal", ss.scan_line(J(["db_pass", 'word = "', value, '"'])))
+                conn = J(["postgres://app:", value, "@db:5432/x"])
+                self.assertIn("conn-string-password", ss.scan_line(conn))
+                self.assertIn("src-password-assign", ss.scan_line(J(["ALEEKHAN_SRC_", "PASSWORD=", value])))
+
+    def test_whole_value_placeholders(self) -> None:
+        for value in (
+            "synthetic", "Example", "placeholder", "CHANGE_ME", "change-me", "changeme", "dummy", "REDACTED",
+            "fake", "sample", "pass", "password", "secret", "xxxx", "XXX", "****",
+            J(["synthetic", "-not-a-secret"]), J(["example", "-token-1"]), J(["not-a-real", "-value"]),
+            "<your-password>", J(["${PG", "PASSWORD}"]), J(["$", "PGPASSWORD"]), "$(cat /run/x)", "%(pw)s",
+            "{{pw}}", J(["`<", "literal>`"]),
+        ):  # fmt: skip
+            with self.subTest(value=value):
+                self.assertTrue(ss.is_placeholder(value))
+                self.assertEqual(ss.scan_line(J(["db_pass", 'word = "', value, '"'])), [])
+
     def test_allow_pragma(self) -> None:
         self.assertEqual(ss.scan_line(f"{AWS}  # secret-scan: allow"), [])
 

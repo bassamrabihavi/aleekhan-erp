@@ -19,10 +19,13 @@ Rules (extends ``control/tools/precommit_guard.py``):
 * ``env-secret-value``     the *value* of ``ALEEKHAN_SRC_PASSWORD`` / ``PGPASSWORD`` from the current
   environment appears in a file (checked only when set and >= 8 characters; never printed)
 
-Placeholders are not findings: values containing ``synthetic``, ``example``, ``placeholder``, ``change_me``,
-``dummy``, ``redacted``, ``not-a-real``, ``<...>``, ``${...}``, ``$(...)``, ``%(...)s``, ``{{...}}``, ``***``,
-``xxxx`` or the literal words ``pass``/``password``/``secret``. A line may opt out explicitly with the
-pragma ``secret-scan: allow`` (reviewed like any other change).
+Placeholders are not findings, but only when the WHOLE value is a placeholder (REV-0702, ``fullmatch``):
+one template reference (``<...>``, ``${...}``, ``$(...)``, ``$VAR``, ``%(...)s``, ``{{...}}``), a mask
+(``***``, ``xxx``), exactly one of the words ``synthetic``, ``example``, ``placeholder``, ``change_me``,
+``dummy``, ``redacted``, ``fake``, ``sample``, ``pass``, ``password``, ``secret``, or a value with the
+explicit marker prefix ``synthetic-`` / ``example-`` / ``not-a-real-``. A value that merely CONTAINS such a
+word is still a finding. A line may opt out explicitly with the pragma ``secret-scan: allow`` (reviewed like
+any other change).
 
 The working-tree scan covers tracked AND untracked, non-ignored files (``git ls-files --cached --others
 --exclude-standard``), so a finding is caught before ``git add``.
@@ -58,9 +61,19 @@ SKIP_EXT = (
 )  # fmt: skip
 MAX_FILE_BYTES = 5 * 1024 * 1024
 
+# REV-0702: a value is a placeholder only when the WHOLE value is a placeholder form (``fullmatch``). A
+# real-looking literal that merely contains a word such as "sample" or "example" is still a finding.
 _PLACEHOLDER_RE = re.compile(
-    r"synthetic|example|placeholder|change_?me|dummy|redacted|not-a-real|fake|sample|"
-    r"<[^>]*>|\$\{[^}]*\}|\$\([^)]*\)|%\([^)]*\)s|\{\{[^}]*\}\}|\*{3,}|x{4,}|^(?:pass|password|secret)$",
+    r"(?:"
+    # template / interpolation forms: the whole value is one reference, never a literal
+    r"<[^<>]*>|\$\{[^{}]*\}|\$\([^()]*\)|%\([^()]*\)s|\{\{[^{}]*\}\}|\$[A-Za-z_][A-Za-z0-9_]*"
+    # masks
+    r"|\*{3,}|x{3,}"
+    # placeholder words, exactly
+    r"|synthetic|example|placeholder|change[_-]?me|dummy|redacted|fake|sample|pass|password|secret"
+    # explicit marker prefixes (the value declares itself synthetic)
+    r"|(?:synthetic|example|not-a-real)-[A-Za-z0-9_.-]*"
+    r")",
     re.I,
 )
 
@@ -130,7 +143,13 @@ def is_allowed(commit: str, path: str, rule: str, allow: frozenset[AllowEntry]) 
 
 
 def is_placeholder(value: str) -> bool:
-    return bool(_PLACEHOLDER_RE.search(value))
+    """True only if the whole value is a placeholder form (REV-0702: no substring matches).
+
+    Surrounding Markdown/code punctuation (backticks, trailing ``,;.``) is ignored, so documentation such as
+    ``NAME=<literal>`` (in backticks) is recognised; the core must still be a placeholder as a whole.
+    """
+    core = value.strip("`").rstrip(",;.").strip("`")
+    return _PLACEHOLDER_RE.fullmatch(core) is not None
 
 
 def scan_line(line: str) -> list[str]:

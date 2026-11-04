@@ -32,6 +32,9 @@ PHASE_00 scope: platform skeleton tables only. No business tables, no users/role
 | `platform_core.0002_db_triggers` | `RunSQL` | functions `platform_reject_mutation`, `platform_reject_truncate_nonempty`, `platform_touch_row`; triggers `trg_audit_event_append_only`, `trg_audit_event_no_truncate`, `trg_outbox_event_touch`, `trg_idempotency_record_touch` | drops the triggers and functions |
 | `platform_core.0003_seed_schema_meta` | `RunPython` (seed) | one non-sensitive row in `platform_schema_meta`: `id=1, schema_contract='PHASE_00.2', seeded_by_migration='platform_core.0003_seed_schema_meta'` | deletes that row only |
 
+Step 00.6 added `0004_integration`, `0005_integration_triggers` and `0006_seed_integration_sources`; the full
+list of migration IDs and the ERD of all PHASE_00 tables is in `docs/db/ERD.md` (step 00.8).
+
 The seed is the only data written by migrations. It is not audited: writing an audit row from a migration
 would make the migration irreversible (audit rows cannot be deleted).
 

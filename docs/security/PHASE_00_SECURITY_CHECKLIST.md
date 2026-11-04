@@ -26,7 +26,7 @@ orchestrator stores it under `reports/phase-00/step-7/logs/`) or the same stage 
 
 | # | Requirement | Status | Evidence |
 |---|---|---|---|
-| 2.1 | No secrets in Git / logs / reports | DONE | `tools/secret_scan.py` (tracked files + full git history, values never printed) + `tools/tests/test_secret_scan.py`; `control/tools/precommit_guard.py`; CI log `11_security.log`, `secret_scan.json` |
+| 2.1 | No secrets in Git / logs / reports (repository is PUBLIC by DEC-046, so every commit, log and artifact is world-readable) | DONE | `tools/secret_scan.py` (tracked + untracked files + full git history, values never printed; placeholders exempt only as a whole value, REV-0702 in 00.8) + `tools/tests/test_secret_scan.py`; `control/tools/precommit_guard.py`; CI log `11_security.log`, `secret_scan.json`; public-visibility threats T-75..T-78 in `THREAT_MODEL_DELTA_00.6_00.7.md` (REV-0703) |
 | 2.2 | Secrets from environment only | DONE | `aleekhan/settings.py` (no defaults for secrets in staging/prod); `test_settings_env.py` |
 | 2.3 | `.env.example` lists every variable (REV-0014) | OPEN | file not accessible to the implementing agent; `test_env_example_lists_every_settings_variable` is skipped with that reason until the orchestrator updates the file |
 | 2.4 | Secrets never in logs | DONE | `api/logging.py` (allowlisted fields, no exception messages); `tests/test_log_redaction.py` (query string, Authorization header, cookie, JSON body, exception messages with synthetic markers -> none in log lines) |
@@ -53,7 +53,7 @@ orchestrator stores it under `reports/phase-00/step-7/logs/`) or the same stage 
 | 3.10 | Signed build artifacts | OPEN | only SHA-256 of the frontend bundle (`frontend-dist.sha256`); signing needs the release pipeline (staging) |
 | 3.11 | Containers non-root, image scan | N/A-P00 | no container images yet (deployment phase) |
 | 3.12 | SAST | DONE (baseline) | ruff `S` rules (flake8-bandit) on backend + tools, eslint strict-type-checked on frontend; S101 (assert) ignored with justification in `ruff.toml` |
-| 3.13 | CI pipeline in contract order, no unexplained skips | DONE (local) / PENDING first GitHub run | `.github/workflows/ci.yml` (DEC-045 A, `permissions: contents: read`, no secrets); `tools/ci_local.sh` writes `summary.md` with skip reasons; actions pinned by major tag (SHA pin = follow-up) |
+| 3.13 | CI pipeline in contract order, no unexplained skips | DONE (local + GitHub Actions run 41790868012, see 00.7 REVIEW.md) | `.github/workflows/ci.yml` (DEC-045 A, `permissions: contents: read`, no secrets); `tools/ci_local.sh` writes `summary.md` with skip reasons; actions pinned to full commit SHAs with `# vX.Y.Z` comments (REV-0704, `reports/phase-00/step-8/logs/rev0704_action_shas.log`); fork PRs: `pull_request` only, read-only token, no secrets (T-77) |
 
 ## 4. Data integrity, reliability, operations
 
@@ -79,7 +79,8 @@ secret scan: 2.1 | data-flow / sensitive fields: 2.4, 2.5, threat-model delta se
 the structured-log test 2.4 | severity table: 00.7 REPORT + REVIEW.
 
 Known open items in PHASE_00 scope (no P0/P1 identified by the implementer; the reviewer decides): 2.3
-(REV-0014), 3.4 CSP, 3.10 artifact signing, action SHA pinning, first GitHub Actions run, staging drill.
+(REV-0014), 3.4 CSP, 3.10 artifact signing, staging drill. Closed in 00.8: action SHA pinning (REV-0704), public
+visibility threats (REV-0703), whole-value placeholder rule (REV-0702); first GitHub Actions run done (00.7 REVIEW.md).
 
 ## Sign-off (left blank on purpose - to be completed by the employer / independent auditor, not by an agent)
 

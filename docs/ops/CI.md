@@ -60,8 +60,14 @@ calling `tools/ci_local.sh` with `CI_APPEND=1`; the evidence folder is uploaded 
 `ci-evidence-<sha>` (30 days) even when a stage fails. `permissions: contents: read`, checkout without
 persisted credentials.
 
-Follow-ups: pin every action to a verified full commit SHA (currently major tags); the first run can only be
-triggered by a push from the employer's machine (the agent has no GitHub access).
+Action pins (REV-0704, step 00.8): every `uses:` is a full commit SHA with a `# vX.Y.Z` comment, resolved from
+the official repositories through the public GitHub API; each pinned SHA equalled the moving major tag that the
+green 00.7 run used (`reports/phase-00/step-8/logs/rev0704_action_shas.log`). Updating an action = resolve the
+new release tag to its commit SHA the same way and change SHA + comment together.
+
+Public repository (DEC-046): `pull_request` runs from forks receive a read-only `GITHUB_TOKEN` and no repository
+secrets; the workflow defines no secrets and never uses `pull_request_target`. Hosted evidence: GitHub Actions run
+41790868012 on b5397b6, all steps `success` (`reports/phase-00/step-7/REVIEW.md`).
 
 ## Dependency policy
 
