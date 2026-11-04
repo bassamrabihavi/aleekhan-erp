@@ -89,12 +89,12 @@
         },
         "00.8": {
           "name": "Report & Review",
-          "state": "TODO",
-          "commit": null,
-          "report": null,
+          "state": "IN_REVIEW",
+          "commit": "3c0ea1c03e0582d4a5e0d3e5e0fa76e151a659ed",
+          "report": "reports/phase-00/step-8/REPORT.md",
           "review": null,
           "rework_cycles": 0,
-          "started_at": null,
+          "started_at": "2026-11-04T11:00:30+00:00",
           "done_at": null
         }
       }
@@ -2514,7 +2514,25 @@
       "state": "PASS",
       "note": null,
       "commit": null
+    },
+    {
+      "at": "2026-11-04T11:00:30+00:00",
+      "kind": "step",
+      "phase": "PHASE_00",
+      "step": "00.8",
+      "state": "IN_PROGRESS",
+      "note": null,
+      "commit": null
+    },
+    {
+      "at": "2026-11-04T11:26:09+00:00",
+      "kind": "step",
+      "phase": "PHASE_00",
+      "step": "00.8",
+      "state": "IN_REVIEW",
+      "note": null,
+      "commit": "3c0ea1c03e0582d4a5e0d3e5e0fa76e151a659ed"
     }
   ],
-  "updated_at": "2026-11-04T09:26:55+00:00"
+  "updated_at": "2026-11-04T11:26:09+00:00"
 }
