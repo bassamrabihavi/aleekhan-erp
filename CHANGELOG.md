@@ -103,3 +103,26 @@ Review verdicts are in `reports/phase-00/step-N/REVIEW.md`. No version number is
   `test_api_contract_planned.py`.
 - No migration, no business code, no real data.
 - Implementation: 89e5f0d.
+
+### 01.2 Database
+- Added: migrations `0007_phase01_platform_schema` (33 platform tables + 5 audit columns),
+  `0008_phase01_db_guards` (btree_gist, 5 exclusion constraints, row-version / append-only / terminal-state /
+  invariant triggers, parameter lookup functions), `0009_phase01_constraint_names` (conventional FK/unique/index
+  names, exactly reversible), `0010_seed_phase01_catalogue` (permission matrix v1.0: 43 permissions, 11 roles,
+  111 grants; unit types; upload allow-list; protected job types; 32 DEC-provenanced parameters). Model modules
+  `platform_core/{identity,org,workflow,documents,params,jobs}`; `schema_common.py`.
+- Decisions reflected: DEC-003, DEC-032, DEC-048..DEC-054 (APPROVED 2026-11-04). Permission matrix promoted to
+  APPROVED v1.0 (`docs/security/PERMISSION_MATRIX_DRAFT.md`).
+- Changed: OpenAPI `0.5.0-draft` -> `0.5.1-draft` (`CONTRACT_VERSION`): `x-aleekhan-decided-by` for approved
+  decisions, enums aligned with the schema; `ops/db/grants.sql` + `roles_check.sh` (PHASE_01 privileges);
+  `backend/scripts/db_roundtrip.sh` (extension check, partial rollback to 0006); `docs/db/ERD.md` sections 4-6,
+  `DATA_TABLE.md`, `STATE_TRANSITIONS.md` (DECIDED markers, open questions Q-0101..Q-0106), `CONFLICTS.md`.
+- Fixed: REV-0101 (MFA step-up on `rejectDocumentRevision` + regression test), REV-0103 (host name redaction in
+  `tools/redact_paths.py`, junit xml redacted in place by `tools/ci_local.sh`, unit tests), REV-0104 (Notification
+  retention labelled TECHNICAL DEFAULT in `DATA_TABLE.md`).
+- Employer answers 2026-11-05 seeded as DEC-051 parameters: Q-0101 `session_limit_exceeded_action`,
+  Q-0102 `session_operator_absolute_hours`, Q-0105 `password_history_reuse_depth`.
+- Fixed (orchestrator verification): deadlock between concurrent role/position assignment inserts during the
+  GiST exclusion check - per-user advisory transaction lock in the guard triggers.
+- No API endpoint, engine rule or UI added; no user, org or network data seeded.
+- Implementation: PENDING.

@@ -47,7 +47,13 @@ Unspecified in the contract (must be asked of the owner in the phase's xx.1, not
 ## 3. Project control (phase/step) — governance, not product
 Enforced by `control/tools/status.py` `STEP_TRANSITIONS` (not part of the product): `TODO → IN_PROGRESS | BLOCKED`; `IN_PROGRESS → IN_REVIEW | BLOCKED`; `IN_REVIEW → PASS | REWORK | BLOCKED`; `REWORK → IN_PROGRESS | BLOCKED`; `BLOCKED → IN_PROGRESS | TODO`; `PASS → REWORK` (only via a recorded REV issue). 3 rework cycles → BLOCKED/escalate (CLAUDE.md). Phase states `NOT_STARTED, ACTIVE, GATE_PENDING, ACCEPTED, BLOCKED`; ACCEPTED only with employer signature (DEC-036). Open P0 decisions block phase start.
 
-## 4. PHASE_01 platform machines (01.1, PROPOSED — implemented in 01.3)
+## 4. PHASE_01 platform machines (01.1, PROPOSED — implemented in 01.3; decisions updated in 01.2)
+
+01.2 update (2026-11-04): the employer APPROVED DEC-032 and DEC-048..DEC-054. Guards that were **BLOCKED** by
+them are now marked **DECIDED (DEC-xxx)** with the approved value; the numbers live in versioned parameters
+(`platform_parameter_value`, migration 0010) and the DB guards of migration 0008 (docs/db/ERD.md section 6).
+Still open and therefore still blocked: force kill (DEC-024, PHASE_11), the items of section 4.11, and the
+01.2 open questions listed in section 4.12.
 
 Status: DRAFT/PROPOSED. Refines §1.3 (Job), §1.4 (ApprovalTask → split into §4.3 WorkTask and §4.4
 ApprovalRequest, CONFLICTS C-30; `OPEN` of §1.4 is `PENDING` here) and §1.5 (User → §4.1). The general rules at
@@ -61,29 +67,32 @@ request_id and session handle in the audit event.
 ### 4.1 User account
 | From | To | Trigger / actor | Guards |
 |---|---|---|---|
-| — | CREATED | `createUser` (holder of `platform.identity.user.create`, MFA step-up) or the console bootstrap command for the first owner (audited as system bootstrap) | username unique; reason; initial one-time credential **BLOCKED (DEC-051)** |
-| CREATED | ACTIVE | first successful login + password changed | password policy **BLOCKED (DEC-051)**; MFA enrolment if MFA is required for the user (role list DEC-049, outside access DEC-042) — factor **BLOCKED (DEC-050)** |
-| ACTIVE | LOCKED | system, after N failed logins / MFA codes in a window | thresholds **BLOCKED (DEC-051)**; until approved TECH default for tests only, never enabled in production config |
-| LOCKED | ACTIVE | `unlockUser` (reason, MFA step-up) or automatic expiry of `locked_until` | auto-expiry rule **BLOCKED (DEC-051)** |
+| — | CREATED | `createUser` (holder of `platform.identity.user.create`, MFA step-up) or the console bootstrap command for the first owner (audited as system bootstrap) | username unique; reason; initial one-time credential **DECIDED (DEC-051)**: set by the admin, valid 72 h (`password_initial_validity_hours`), forced change at first login |
+| CREATED | ACTIVE | first successful login + password changed | password policy **DECIDED (DEC-051)**: min 8, upper-case + digit + symbol, rotation 90 days (history of hashes in `platform_password_history`); MFA enrolment if MFA is required for the user (role list DEC-049, outside access DEC-042) — factor **DECIDED (DEC-050)**: TOTP + 10 recovery codes |
+| ACTIVE | LOCKED | system, after N failed logins / MFA codes in a window | thresholds **DECIDED (DEC-051)**: 5 failures in 15 min -> automatic lock 15 min + event on pages 36/46 (`lockout_*` parameters) |
+| LOCKED | ACTIVE | `unlockUser` (reason, MFA step-up) or automatic expiry of `locked_until` | auto-expiry **DECIDED (DEC-051)**: `locked_until` = lock + 15 min; `it_ops` may also unlock (DEC-049) |
 | CREATED, ACTIVE, LOCKED | DISABLED | `disableUser` (reason, MFA step-up) | revokes all sessions in the same transaction; refused if the target is the last ACTIVE holder of `platform.identity.user.disable` (lock-out protection, TECH) |
 | DISABLED | ACTIVE | `enableUser` (reason, MFA step-up) | sessions stay revoked; `must_change` set if the credential is older than policy (DEC-051) |
 
 No delete, no self-registration, no directory sync (DEC-003). `resetUserPassword` / `resetUserMfa` do not change
-the state; they revoke sessions and set `must_change` / remove the factor (BLOCKED DEC-051 / DEC-050).
+the state; they revoke sessions and set `must_change` / remove the factor (DECIDED DEC-051 / DEC-050: admin MFA reset needs reason + admin MFA + audit).
 
 ### 4.2 Session
 | From | To | Trigger | Guards / notes |
 |---|---|---|---|
-| — | ACTIVE | `login` when MFA does not apply | network policy: OPERATOR_TERMINAL / INTERNAL_ONLY accounts from EXTERNAL or UNKNOWN zone → 403 `NETWORK_POLICY_DENIED`, no session (DEC-042; zone definition **BLOCKED (DEC-052)** — until approved every zone is UNKNOWN and internal-only accounts cannot log in) |
+| — | ACTIVE | `login` when MFA does not apply | network policy: OPERATOR / INTERNAL_ONLY accounts from EXTERNAL or UNKNOWN zone → 403 `NETWORK_POLICY_DENIED`, no session (DEC-042; zone **DECIDED (DEC-052)**: explicit CIDR list in server config only, client IP from the trusted proxy, unknown = outside, VPN = outside; personal operator accounts only) |
 | — | MFA_PENDING | `login` when MFA applies (role list or outside login) | MFA_PENDING accepts only `verifyMfa` and `logout` |
-| MFA_PENDING | ACTIVE | `verifyMfa` | factor **BLOCKED (DEC-050)**; session id rotated |
+| MFA_PENDING | ACTIVE | `verifyMfa` | factor **DECIDED (DEC-050)**: TOTP (replay guard `last_used_step`); session id rotated |
 | MFA_PENDING | EXPIRED | timeout | TECH 5 min |
-| ACTIVE | EXPIRED | idle or absolute timeout | durations **BLOCKED (DEC-051)** |
+| ACTIVE | EXPIRED | idle or absolute timeout | durations **DECIDED (DEC-051)**: users idle 2 h / absolute 12 h; operators idle 8 h / absolute 12 h (employer answer Q-0102, 2026-11-05), internal network only |
 | ACTIVE, MFA_PENDING | LOGGED_OUT | `logout` | — |
 | ACTIVE, MFA_PENDING | REVOKED | `revokeMySession`, `revokeUserSessions`, user DISABLED, password change/reset, MFA reset | reason stored for admin revoke |
 
 Step-up (operations with `x-aleekhan-mfa-step-up`) does not change the state; it updates `mfa_verified_at`.
-Window **BLOCKED (DEC-051)**. Concurrent session limit: **BLOCKED (DEC-051)** (until then unlimited, all listed).
+Window **DECIDED (DEC-051)**: 15 minutes (also inside the factory network, DEC-049). Concurrent session limit
+**DECIDED (DEC-051)**: 3; on the 4th login the OLDEST live session is ended automatically (state REVOKED,
+audited; parameter `session_limit_exceeded_action = END_OLDEST_SESSION`, employer answer Q-0101, 2026-11-05;
+engine logic in 01.3).
 
 ### 4.3 WorkTask (operational task, page 39)
 | From | To | Trigger | Guards |
@@ -104,15 +113,15 @@ implemented in PHASE_01; `due_at` is informational only.
 ### 4.4 ApprovalRequest (maker-checker)
 | From | To | Trigger | Guards |
 |---|---|---|---|
-| — | PENDING | raised by the owning use case (document approval, parameter publish, role grant if DEC-032 requires) | one PENDING per (resource, revision, action); which actions require it **BLOCKED (DEC-032)**; approver route **BLOCKED (DEC-048)** |
+| — | PENDING | raised by the owning use case (document approval, parameter publish, role grant if DEC-032 requires) | one PENDING per (resource, revision, action); which actions require it **DECIDED (DEC-032)**: document revision approval, BUSINESS_RULE parameter publish, assignment of roles holding a business-approval permission; route **DECIDED (DEC-048)**: role + unit scope only in PHASE_01 (`route_kind = ROLE_UNIT_SCOPE`) |
 | PENDING | APPROVED | `approveRequest` | decider ≠ requester (403 `SELF_APPROVAL_FORBIDDEN`); decider in the resolved route and holds `platform.workflow.approval.decide` in scope; technical-admin roles never qualify (DEC-003); `resource_revision` equals the request revision; MFA step-up; one-time |
 | PENDING | REJECTED | `rejectRequest` | same decider rules; note mandatory |
 | PENDING | WITHDRAWN | `withdrawRequest` by the requester, or the owning workflow is cancelled | — |
 | PENDING | SUPERSEDED | system: the resource got a new revision | approval never carries over to a new revision |
-| PENDING | EXPIRED | system at `expires_at` | expiry period **BLOCKED (DEC-032)** (until approved: no expiry) |
+| PENDING | EXPIRED | system at `expires_at` | expiry period **DECIDED (DEC-032)**: 30 days (`approval_request_expiry_days`; `expires_at` NOT NULL) |
 
 Terminal: all except PENDING. Single-person deadlock (requester is the only eligible approver, e.g. the owner):
-the request stays PENDING; any bypass rule **BLOCKED (DEC-032 item 1-d)**. Never auto-approve.
+the request stays PENDING; **DECIDED (DEC-032, D1)**: never self-approved; an emergency approval needs a later decision. Never auto-approve.
 
 ### 4.5 WorkflowInstance and cancellation
 | From | To | Trigger | Guards / effects |
@@ -134,10 +143,10 @@ Scan status (file safety), independent of the approval status:
 
 | From | To | Trigger | Guards |
 |---|---|---|---|
-| — | QUARANTINED | `uploadDocumentRevision` | stored under a random key in private storage, sha256 computed server-side, never executed/rendered; type allowlist, size limit **BLOCKED (DEC-053)** |
-| QUARANTINED | SCANNING | scanner job picks it up | scanner **BLOCKED (DEC-053)**; scanner unavailable → stays QUARANTINED (never auto-CLEAN) |
+| — | QUARANTINED | `uploadDocumentRevision` | stored under a random key in private storage, sha256 computed server-side, never executed/rendered; **DECIDED (DEC-053)**: PDF, PNG, JPG, DXF, XLSX without macros (never XLSM/DOCM/EXE/scripts), max 25 MB (`document_upload_max_bytes`), encrypted server folder |
+| QUARANTINED | SCANNING | scanner job picks it up | scanner **DECIDED (DEC-053)**: ClamAV in an isolated container on the same server + magic bytes; scanner unavailable → stays QUARANTINED (never auto-CLEAN) |
 | SCANNING | CLEAN | scanner verdict clean + magic-bytes type matches the allowlist | — |
-| SCANNING | REJECTED | malware/type mismatch/parser bomb | finding stored (no file content in the finding); file bytes purged after the quarantine period (DEC-053) |
+| SCANNING | REJECTED | malware/type mismatch/parser bomb | finding stored (no file content in the finding); file bytes purged after 30 days of quarantine, metadata + hash kept (DEC-053) |
 
 Revision status (business approval):
 
@@ -145,7 +154,7 @@ Revision status (business approval):
 |---|---|---|---|
 | — | WORKING | upload accepted | — |
 | WORKING | IN_REVIEW | `submitDocumentRevision` | scan_status CLEAN |
-| IN_REVIEW | APPROVED | `approveDocumentRevision` (raises/uses §4.4) | approver ≠ uploader; MFA step-up; who approves which document type **BLOCKED (DEC-032)** |
+| IN_REVIEW | APPROVED | `approveDocumentRevision` (raises/uses §4.4) | approver ≠ uploader; MFA step-up; maker-checker **DECIDED (DEC-032)**; approvers = `document_approver` role in scope (DEC-049) |
 | IN_REVIEW | REJECTED | `rejectDocumentRevision` | reason |
 | WORKING | REJECTED | system when scan REJECTED | — |
 | APPROVED | SUPERSEDED | system when a newer revision of the same document is APPROVED | approved bytes and metadata immutable |
@@ -170,20 +179,36 @@ restore, backup) are seeded `protected=true`; the complete protected list is DEC
 ### 4.8 Role and RoleAssignment
 | Machine | Transitions | Guards |
 |---|---|---|
-| Role | DRAFT → ACTIVE → RETIRED | ACTIVE only if the permission set is in the approved matrix **BLOCKED (DEC-049)**; TECHNICAL roles never contain business-approval permissions (DEC-003); RETIRED requires no ACTIVE assignment |
-| RoleAssignment | — → ACTIVE, or — → PENDING_APPROVAL → ACTIVE / REVOKED; ACTIVE → EXPIRED (system at `valid_to`); ACTIVE → REVOKED (`revokeRoleAssignment`, reason) | role ACTIVE; reason; self-assignment allowed only explicitly and always flagged (DEC-003); second approver for business/MFA roles **BLOCKED (DEC-032 item 1-c)** |
+| Role | DRAFT → ACTIVE → RETIRED | ACTIVE only if the permission set is in the approved matrix **DECIDED (DEC-049, v1.0)**; TECHNICAL roles never contain business-approval permissions (DEC-003); RETIRED requires no ACTIVE assignment |
+| RoleAssignment | — → ACTIVE, or — → PENDING_APPROVAL → ACTIVE / REVOKED; ACTIVE → EXPIRED (system at `valid_to`); ACTIVE → REVOKED (`revokeRoleAssignment`, reason) | role ACTIVE; reason; self-assignment allowed only explicitly and always flagged (DEC-003); second approver **DECIDED (DEC-032)**: roles holding a business-approval permission wait PENDING_APPROVAL until a second eligible person approves (DB guard `ck_role_assignment_second_approval`) |
 
 ### 4.9 Parameter value revision (page 42)
 `DRAFT → PENDING_APPROVAL → PUBLISHED | REJECTED`; `PUBLISHED → SUPERSEDED` (a newer revision becomes
-effective). TECHNICAL parameters: whether publish needs a second person **BLOCKED (DEC-032)**. BUSINESS_RULE
+effective). TECHNICAL parameters: DEC-032 requires maker-checker only for BUSINESS_RULE publish, so TECHNICAL publish has no
+second person; OWNER_POLICY values (01.2: seeded DEC-048..054 values) change only with a new decision id
+(open question Q-0103 whether their publish also needs a second person). BUSINESS_RULE
 parameters: publish **BLOCKED** by their own `decision_id` (e.g. DEC-016 thresholds) until that decision is
 APPROVED. History is never rewritten; `effective_from` in the past is refused (TECH).
 
 ### 4.10 Org unit / position (effective-dated)
 `ACTIVE → INACTIVE` (deactivate with effective date; unit must have no ACTIVE position; position must have no
 current holder). `moveOrgUnit` closes the current parent link and opens a new one at `effective_from` (acyclic
-check). Unit types/levels, multiple or acting holders: **BLOCKED (DEC-048)**. No transition grants a permission.
+check). **DECIDED (DEC-048)**: unit types COMPANY/DEPARTMENT/SECTION/LINE (admin may add), max depth 6, one
+PRIMARY position per person + ACTING with an end date, reports-to between positions, edited by the owner/admin
+only in PHASE_01, history with effective dates. No transition grants a permission.
 
 ### 4.11 Unspecified (ask the owner, do not assume)
 Reopen of a DONE task; SLA clocks; delegation of approvals during absence (out of office); emergency access
-(break-glass) states — **DEC-054**; notification channels outside the app.
+(break-glass) **DECIDED (DEC-054)**: console recovery command now (audited), sealed emergency account before
+production (schema flag + usage record in 01.2, no API); notification channels outside the app.
+
+### 4.12 Open questions raised by 01.2 (not decided; the engine refuses, it does not guess)
+| ID | Question | Proposed safe behaviour for 01.3 until the employer answers (proposal only) |
+|---|---|---|
+| Q-0101 | DEC-051 "max 3 concurrent sessions": refuse the 4th login, or end the oldest session? | **ANSWERED 2026-11-05**: end the oldest session automatically, audited (`session_limit_exceeded_action`) |
+| Q-0102 | DEC-051 gives operators idle 8 h but no absolute session limit | **ANSWERED 2026-11-05**: 12 h (`session_operator_absolute_hours`) |
+| Q-0103 | Does publishing a changed OWNER_POLICY value (e.g. lockout threshold) need a second person? | changes need a new decision id; no API publishes OWNER_POLICY values in PHASE_01 |
+| Q-0104 | DEC-053 "25 مگابایت": 25 000 000 or 26 214 400 bytes? | seeded 25 000 000 (the stricter reading) |
+| Q-0105 | Password history depth for the 90-day rotation (how many previous passwords are refused) | **ANSWERED 2026-11-05**: the last 5 passwords are refused (`password_history_reuse_depth`) |
+| Q-0106 | May a position have several PRIMARY holders at once (e.g. many operators in one position)? | allowed by the schema (only one PRIMARY position per person is enforced) |
+

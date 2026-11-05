@@ -29,7 +29,7 @@ from .request_id import request_id_of
 from .throttling import HealthIpThrottle
 
 # Version of docs/api/openapi-draft.yaml (``info.version``); a contract test keeps them equal.
-CONTRACT_VERSION: Final = "0.5.0-draft"
+CONTRACT_VERSION: Final = "0.5.1-draft"
 API_VERSION: Final = "v1"
 _ENVIRONMENT_NAMES: Final = {"dev": "dev", "test": "test", "staging": "staging", "prod": "production"}
 NO_STORE: Final = {"Cache-Control": "no-store"}

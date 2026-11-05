@@ -1,0 +1,153 @@
+{
+  "phase": "PHASE_01",
+  "step": "01.2",
+  "commit_sha": "PENDING",
+  "status": "COMPLETE",
+  "scope": [
+    "migrations 0007-0010 (33 PHASE_01 platform tables + 5 audit columns)",
+    "named PK/FK/unique/check/index/exclusion constraints",
+    "row-version, append-only, terminal-state and invariant triggers",
+    "non-sensitive seed: permission matrix v1.0, unit types, upload allow-list, protected job types, DEC-provenanced parameters",
+    "DB roles/grants for the new tables",
+    "tests: constraints, triggers, state CHECKs vs contract, seed integrity vs matrix doc and contract, race tests",
+    "docs: ERD, DATA_TABLE, STATE_TRANSITIONS, CONFLICTS, OpenAPI 0.5.1-draft, matrix APPROVED v1.0",
+    "REV-0101, REV-0103, REV-0104"
+  ],
+  "changes": [
+    "backend/platform_core/schema_common.py",
+    "backend/platform_core/identity/models.py",
+    "backend/platform_core/org/models.py",
+    "backend/platform_core/workflow/models.py",
+    "backend/platform_core/documents/models.py",
+    "backend/platform_core/params/models.py",
+    "backend/platform_core/jobs/models.py",
+    "backend/platform_core/models.py",
+    "backend/platform_core/migrations/0007_phase01_platform_schema.py",
+    "backend/platform_core/migrations/0008_phase01_db_guards.py",
+    "backend/platform_core/migrations/0009_phase01_constraint_names.py",
+    "backend/platform_core/migrations/0010_seed_phase01_catalogue.py",
+    "backend/platform_core/api/views.py",
+    "backend/platform_core/tests/openapi_contract.py",
+    "backend/platform_core/tests/test_api_contract_planned.py",
+    "backend/platform_core/tests/test_schema.py",
+    "backend/platform_core/tests/phase01_factories.py",
+    "backend/platform_core/tests/test_phase01_identity.py",
+    "backend/platform_core/tests/test_phase01_roles.py",
+    "backend/platform_core/tests/test_phase01_org.py",
+    "backend/platform_core/tests/test_phase01_workflow_docs.py",
+    "backend/platform_core/tests/test_phase01_params_jobs.py",
+    "backend/platform_core/tests/test_phase01_schema.py",
+    "backend/platform_core/tests/test_phase01_concurrency.py",
+    "backend/scripts/db_roundtrip.sh",
+    "ops/db/grants.sql",
+    "ops/db/roles_check.sh",
+    "tools/redact_paths.py",
+    "tools/tests/test_redact_paths.py",
+    "tools/ci_local.sh",
+    "ruff.toml",
+    "docs/api/openapi-draft.yaml",
+    "docs/api/API_RUNTIME.md",
+    "docs/db/ERD.md",
+    "docs/ops/DB_ROLES.md",
+    "docs/discovery/DATA_TABLE.md",
+    "docs/discovery/STATE_TRANSITIONS.md",
+    "docs/discovery/CONFLICTS.md",
+    "docs/security/PERMISSION_MATRIX_DRAFT.md",
+    "CHANGELOG.md"
+  ],
+  "migrations": [
+    "platform_core.0007_phase01_platform_schema",
+    "platform_core.0008_phase01_db_guards",
+    "platform_core.0009_phase01_constraint_names",
+    "platform_core.0010_seed_phase01_catalogue"
+  ],
+  "test_evidence": [
+    {
+      "command": "ruff check . && ruff format --check .",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-2/logs/ruff.log"
+    },
+    {
+      "command": "cd backend && mypy . (strict)",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-2/logs/mypy.log"
+    },
+    {
+      "command": "cd backend && manage.py makemigrations --check --dry-run",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-2/logs/makemigrations_check.log"
+    },
+    {
+      "command": "python -m unittest discover -s tools/tests",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-2/logs/tools_unittest.log"
+    },
+    {
+      "command": "python tools/verify_handoff.py",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-2/logs/verify_handoff.log"
+    },
+    {
+      "command": "python tools/secret_scan.py",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-2/logs/secret_scan.log"
+    },
+    {
+      "command": "python tools/secret_scan.py --history",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-2/logs/secret_scan_history.log"
+    },
+    {
+      "command": "openapi_spec_validator.validate(docs/api/openapi-draft.yaml)",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-2/logs/openapi_validate.log"
+    },
+    {
+      "command": "cd backend && pytest -m \"not perf\" --junitxml (692 passed, 0 failed/errors/skipped)",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-2/logs/pytest.log"
+    },
+    {
+      "command": "pytest platform_core/tests/test_phase01_concurrency.py x12 (deadlock fix proof)",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-2/logs/concurrency_x12.log"
+    },
+    {
+      "command": "backend/scripts/db_roundtrip.sh reports/phase-01/step-2/logs/migration",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-2/logs/db_roundtrip.log"
+    },
+    {
+      "command": "ops/db/roles_check.sh reports/phase-01/step-2/logs/roles (49/49)",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-2/logs/roles_check.log"
+    }
+  ],
+  "security_evidence": [
+    "TECHNICAL role cannot hold business-approval permissions (DB triggers, DEC-003)",
+    "maker-checker CHECKs/triggers for approvals, documents, BUSINESS_RULE publish, BA-role assignment (DEC-032)",
+    "append-only evidence tables + app-role privilege revocations (ops/db/grants.sql)",
+    "secrets stored only as hashes/ciphertext; no CIDR, users or org data seeded",
+    "REV-0103: host name redacted from logs and junit xml"
+  ],
+  "decisions": [
+    "DEC-003",
+    "DEC-032",
+    "DEC-048",
+    "DEC-049",
+    "DEC-050",
+    "DEC-051",
+    "DEC-052",
+    "DEC-053",
+    "DEC-054",
+    "DEC-051 employer answers Q-0101/Q-0102/Q-0105 (2026-11-05)"
+  ],
+  "risks": [
+    "Open questions Q-0103, Q-0104, Q-0106 (docs/discovery/STATE_TRANSITIONS.md 4.12) still need employer answers"
+  ],
+  "evidence_paths": [
+    "reports/phase-01/step-2/logs/"
+  ],
+  "rollback": "manage.py migrate platform_core 0006 (reverses 0010 seed, 0009 renames, 0008 guards incl. btree_gist, 0007 tables); seed reverse is refused by PROTECT FKs once catalogue rows are referenced (compensation plan needed then).",
+  "review_request": "PASS"
+}

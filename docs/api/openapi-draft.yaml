@@ -2,8 +2,8 @@ openapi: 3.1.0
 jsonSchemaDialect: https://spec.openapis.org/oas/3.1/dialect/base
 info:
   title: Aleekhan Factory Platform API
-  version: 0.5.0-draft
-  summary: PHASE_00 contract (implemented) + PHASE_01 planned operations (01.1 draft). Platform only, NO business writes.
+  version: 0.5.1-draft
+  summary: PHASE_00 contract (implemented) + PHASE_01 planned operations (01.1 draft, 01.2 decision update). Platform only, NO business writes.
   description: |
     Status: DRAFT (PHASE_00 / 00.1 Discovery & Contract, implemented in 00.4). Not approved. This hand-written
     document is the contract (contract-first): the backend is tested against it (route parity, security
@@ -21,6 +21,14 @@ info:
     `x-aleekhan-blocked-by` and answer 409 RULE_NOT_APPROVED until the decision is approved. New error codes
     needed by PHASE_01 are listed in `x-aleekhan-conventions.planned_error_codes` and join `ErrorCode` only in
     the reviewed commit that implements them (docs/engine/ERROR_CODES.md rule 5).
+
+    0.5.1-draft (PHASE_01 / 01.2 Database): the employer APPROVED DEC-032 and DEC-048..DEC-054 on 2026-11-04.
+    Operations that were blocked by them now carry `x-aleekhan-decided-by` (traceability) instead of
+    `x-aleekhan-blocked-by`; no planned operation is blocked by an open decision any more (the only open PHASE_01
+    item, DEC-027, is UI scope). REV-0101: `rejectDocumentRevision` declares the MFA step-up of its permission.
+    Enums aligned with the 01.2 schema: `User.account_kind` = PERSON | OPERATOR (personal operator accounts only,
+    DEC-052), `PositionAssignment.kind` = PRIMARY | ACTING (DEC-048), `Parameter.classification` adds
+    OWNER_POLICY (owner-approved platform/security policy, e.g. DEC-051 values). Implemented paths unchanged.
 
     Stack: Django 5.2 LTS + DRF (DEC-001). Base path is versioned: every endpoint lives under `/api/v1`.
     A breaking change requires `/api/v2` (or an explicitly approved deprecation window); additive changes only
@@ -80,9 +88,9 @@ tags:
     description: 'PHASE_01 (planned): users, roles, permission catalogue, role assignments (owner/admin only, DEC-003; admin
       != business approval).'
   - name: org
-    description: 'PHASE_01 (planned): organisation tree - units, positions, holders, reports-to (DEC-043; details DEC-048).'
+    description: 'PHASE_01 (planned): organisation tree - units, positions, holders, reports-to (DEC-043; details DEC-048 APPROVED).'
   - name: workflow
-    description: 'PHASE_01 (planned): tasks, approvals (maker-checker DEC-032), workflow definitions/instances.'
+    description: 'PHASE_01 (planned): tasks, approvals (maker-checker DEC-032 APPROVED), workflow definitions/instances.'
   - name: audit
     description: 'PHASE_01 (planned): read-only audit query and integrity status.'
   - name: jobs
@@ -213,7 +221,7 @@ paths:
           (parameters are validated first: 400 VALIDATION_FAILED).
         The endpoint is read-only and NEVER grants access; it exists so 00.3/00.4 can test the
         deny-by-default contract. Real policy (roles, scopes, MFA step-up, maker-checker) is PHASE_01
-        (permission matrix still PROPOSED; DEC-032 PROPOSED).
+        (permission matrix APPROVED v1.0 by DEC-049, DEC-032 APPROVED, 2026-11-04; implemented in 01.3/01.4).
       security:
         - sessionCookie: []
       parameters:
@@ -476,7 +484,7 @@ paths:
       summary: Username/password login (local accounts only, DEC-003)
       description: |
         Exempt from Idempotency-Key (authentication ceremony; see x-aleekhan-conventions.idempotency_exempt).
-        Planned PUBLIC operation (C-26). Requires the CSRF header. Wrong username, wrong password, disabled or locked account all answer the SAME 401 INVALID_CREDENTIALS (no account enumeration). Operator/terminal accounts from outside the factory network -> 403 NETWORK_POLICY_DENIED (DEC-042; inside/outside definition DEC-052). If MFA applies (role list DEC-003/SECURITY_BASELINE, or outside login DEC-042) the new session is MFA_PENDING and only /auth/mfa/verify and /auth/logout accept it. Brute force: per-IP and per-username throttling + lockout thresholds (DEC-051). Session id is rotated on login.
+        Planned PUBLIC operation (C-26). Requires the CSRF header. Wrong username, wrong password, disabled or locked account all answer the SAME 401 INVALID_CREDENTIALS (no account enumeration). Operator/terminal accounts from outside the factory network -> 403 NETWORK_POLICY_DENIED (DEC-042; DEC-052 APPROVED: explicit CIDR list in server config, unknown and VPN = outside). If MFA applies (role list DEC-003/SECURITY_BASELINE, or outside login DEC-042) the new session is MFA_PENDING and only /auth/mfa/verify and /auth/logout accept it. Brute force: per-IP and per-username throttling + lockout thresholds (DEC-051). Session id is rotated on login.
       security: []
       parameters:
       - $ref: '#/components/parameters/RequestId'
@@ -515,10 +523,10 @@ paths:
       operationId: verifyMfa
       summary: Second factor for an MFA_PENDING session
       description: |
-        BLOCKED until DEC-050 is approved: the server answers 409 RULE_NOT_APPROVED with `decision_id` (safe blocked behaviour).
+        Decided: DEC-050 APPROVED 2026-11-04 (no longer blocked; schema in 01.2, rule implemented in 01.3/01.4).
         Exempt from Idempotency-Key (authentication ceremony; see x-aleekhan-conventions.idempotency_exempt).
-        Accepts only a session in state MFA_PENDING. Factor type and recovery codes: DEC-050. Failed attempts count towards the lockout (DEC-051). Session id rotated on success.
-      x-aleekhan-blocked-by:
+        Accepts only a session in state MFA_PENDING. Factor TOTP and 10 one-time recovery codes (DEC-050 APPROVED). Failed attempts count towards the lockout (DEC-051: 5 in 15 min -> 15 min lock). Session id rotated on success.
+      x-aleekhan-decided-by:
       - DEC-050
       parameters:
       - $ref: '#/components/parameters/RequestId'
@@ -693,10 +701,10 @@ paths:
       operationId: changeMyPassword
       summary: Change my password
       description: |
-        BLOCKED until DEC-051 is approved: the server answers 409 RULE_NOT_APPROVED with `decision_id` (safe blocked behaviour).
+        Decided: DEC-051 APPROVED 2026-11-04 (no longer blocked; schema in 01.2, rule implemented in 01.3/01.4).
         Exempt from Idempotency-Key (authentication ceremony; see x-aleekhan-conventions.idempotency_exempt).
         Not idempotency-recorded: the request carries secrets and its hash must not be stored. All other sessions of the user are revoked on success.
-      x-aleekhan-blocked-by:
+      x-aleekhan-decided-by:
       - DEC-051
       parameters:
       - $ref: '#/components/parameters/RequestId'
@@ -731,10 +739,10 @@ paths:
       operationId: startMfaEnrolment
       summary: Start MFA enrolment (own account)
       description: |
-        BLOCKED until DEC-050 is approved: the server answers 409 RULE_NOT_APPROVED with `decision_id` (safe blocked behaviour).
+        Decided: DEC-050 APPROVED 2026-11-04 (no longer blocked; schema in 01.2, rule implemented in 01.3/01.4).
         Exempt from Idempotency-Key (authentication ceremony; see x-aleekhan-conventions.idempotency_exempt).
         Returns the enrolment secret ONCE (never logged, never stored in idempotency records).
-      x-aleekhan-blocked-by:
+      x-aleekhan-decided-by:
       - DEC-050
       parameters:
       - $ref: '#/components/parameters/RequestId'
@@ -769,9 +777,9 @@ paths:
       operationId: confirmMfaEnrolment
       summary: Confirm MFA enrolment
       description: |
-        BLOCKED until DEC-050 is approved: the server answers 409 RULE_NOT_APPROVED with `decision_id` (safe blocked behaviour).
+        Decided: DEC-050 APPROVED 2026-11-04 (no longer blocked; schema in 01.2, rule implemented in 01.3/01.4).
         Exempt from Idempotency-Key (authentication ceremony; see x-aleekhan-conventions.idempotency_exempt).
-      x-aleekhan-blocked-by:
+      x-aleekhan-decided-by:
       - DEC-050
       parameters:
       - $ref: '#/components/parameters/RequestId'
@@ -905,12 +913,12 @@ paths:
       summary: Create a user (owner/admin only, DEC-003)
       description: |
         Requires permission `platform.identity.user.create` (deny by default; record scope enforced server-side).
-        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: DEC-051).
-        BLOCKED until DEC-051 is approved: the server answers 409 RULE_NOT_APPROVED with `decision_id` (safe blocked behaviour).
-        No self-registration, no directory sync (DEC-003). Initial credential handling (one-time password, forced change) depends on DEC-051. Audited with reason.
+        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: parameter `mfa_step_up_window_minutes` = 15 min, DEC-051; also inside the factory network, DEC-049).
+        Decided: DEC-051 APPROVED 2026-11-04 (no longer blocked; schema in 01.2, rule implemented in 01.3/01.4).
+        No self-registration, no directory sync (DEC-003). Initial credential (DEC-051 APPROVED): one-time password set by the admin, valid 72 h, forced change at first login. Audited with reason.
       x-aleekhan-permission: platform.identity.user.create
       x-aleekhan-mfa-step-up: true
-      x-aleekhan-blocked-by:
+      x-aleekhan-decided-by:
       - DEC-051
       parameters:
       - $ref: '#/components/parameters/RequestId'
@@ -989,7 +997,7 @@ paths:
       summary: Update profile fields (not roles)
       description: |
         Requires permission `platform.identity.user.update` (deny by default; record scope enforced server-side).
-        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: DEC-051).
+        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: parameter `mfa_step_up_window_minutes` = 15 min, DEC-051; also inside the factory network, DEC-049).
       x-aleekhan-permission: platform.identity.user.update
       x-aleekhan-mfa-step-up: true
       parameters:
@@ -1044,7 +1052,7 @@ paths:
       summary: Disable a user (revokes all sessions)
       description: |
         Requires permission `platform.identity.user.disable` (deny by default; record scope enforced server-side).
-        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: DEC-051).
+        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: parameter `mfa_step_up_window_minutes` = 15 min, DEC-051; also inside the factory network, DEC-049).
       x-aleekhan-permission: platform.identity.user.disable
       x-aleekhan-mfa-step-up: true
       parameters:
@@ -1099,7 +1107,7 @@ paths:
       summary: Re-enable a disabled user
       description: |
         Requires permission `platform.identity.user.disable` (deny by default; record scope enforced server-side).
-        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: DEC-051).
+        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: parameter `mfa_step_up_window_minutes` = 15 min, DEC-051; also inside the factory network, DEC-049).
       x-aleekhan-permission: platform.identity.user.disable
       x-aleekhan-mfa-step-up: true
       parameters:
@@ -1154,7 +1162,7 @@ paths:
       summary: Unlock a brute-force-locked user
       description: |
         Requires permission `platform.identity.user.unlock` (deny by default; record scope enforced server-side).
-        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: DEC-051).
+        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: parameter `mfa_step_up_window_minutes` = 15 min, DEC-051; also inside the factory network, DEC-049).
       x-aleekhan-permission: platform.identity.user.unlock
       x-aleekhan-mfa-step-up: true
       parameters:
@@ -1209,11 +1217,11 @@ paths:
       summary: Issue a new one-time password
       description: |
         Requires permission `platform.identity.user.reset_password` (deny by default; record scope enforced server-side).
-        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: DEC-051).
-        BLOCKED until DEC-051 is approved: the server answers 409 RULE_NOT_APPROVED with `decision_id` (safe blocked behaviour).
+        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: parameter `mfa_step_up_window_minutes` = 15 min, DEC-051; also inside the factory network, DEC-049).
+        Decided: DEC-051 APPROVED 2026-11-04 (no longer blocked; schema in 01.2, rule implemented in 01.3/01.4).
       x-aleekhan-permission: platform.identity.user.reset_password
       x-aleekhan-mfa-step-up: true
-      x-aleekhan-blocked-by:
+      x-aleekhan-decided-by:
       - DEC-051
       parameters:
       - $ref: '#/components/parameters/RequestId'
@@ -1267,11 +1275,11 @@ paths:
       summary: Remove the user's MFA factor (forces re-enrolment)
       description: |
         Requires permission `platform.identity.user.reset_mfa` (deny by default; record scope enforced server-side).
-        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: DEC-051).
-        BLOCKED until DEC-050 is approved: the server answers 409 RULE_NOT_APPROVED with `decision_id` (safe blocked behaviour).
+        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: parameter `mfa_step_up_window_minutes` = 15 min, DEC-051; also inside the factory network, DEC-049).
+        Decided: DEC-050 APPROVED 2026-11-04 (no longer blocked; schema in 01.2, rule implemented in 01.3/01.4).
       x-aleekhan-permission: platform.identity.user.reset_mfa
       x-aleekhan-mfa-step-up: true
-      x-aleekhan-blocked-by:
+      x-aleekhan-decided-by:
       - DEC-050
       parameters:
       - $ref: '#/components/parameters/RequestId'
@@ -1362,7 +1370,7 @@ paths:
       summary: Revoke every session of a user
       description: |
         Requires permission `platform.identity.session.revoke` (deny by default; record scope enforced server-side).
-        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: DEC-051).
+        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: parameter `mfa_step_up_window_minutes` = 15 min, DEC-051; also inside the factory network, DEC-049).
       x-aleekhan-permission: platform.identity.session.revoke
       x-aleekhan-mfa-step-up: true
       parameters:
@@ -1511,8 +1519,8 @@ paths:
       summary: Create a role in DRAFT
       description: |
         Requires permission `platform.identity.role.manage` (deny by default; record scope enforced server-side).
-        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: DEC-051).
-        A role is created DRAFT; activating a role whose permission set is not in the approved matrix (DEC-049) is refused.
+        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: parameter `mfa_step_up_window_minutes` = 15 min, DEC-051; also inside the factory network, DEC-049).
+        A role is created DRAFT; activating a role whose permission set is not in the approved matrix (DEC-049, v1.0) is refused; TECHNICAL roles never hold business-approval permissions (DB trigger, DEC-003).
       x-aleekhan-permission: platform.identity.role.manage
       x-aleekhan-mfa-step-up: true
       parameters:
@@ -1592,7 +1600,7 @@ paths:
       summary: Edit a DRAFT role
       description: |
         Requires permission `platform.identity.role.manage` (deny by default; record scope enforced server-side).
-        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: DEC-051).
+        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: parameter `mfa_step_up_window_minutes` = 15 min, DEC-051; also inside the factory network, DEC-049).
       x-aleekhan-permission: platform.identity.role.manage
       x-aleekhan-mfa-step-up: true
       parameters:
@@ -1647,11 +1655,11 @@ paths:
       summary: Activate a role
       description: |
         Requires permission `platform.identity.role.manage` (deny by default; record scope enforced server-side).
-        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: DEC-051).
-        BLOCKED until DEC-049 is approved: the server answers 409 RULE_NOT_APPROVED with `decision_id` (safe blocked behaviour).
+        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: parameter `mfa_step_up_window_minutes` = 15 min, DEC-051; also inside the factory network, DEC-049).
+        Decided: DEC-049 APPROVED 2026-11-04 (no longer blocked; schema in 01.2, rule implemented in 01.3/01.4).
       x-aleekhan-permission: platform.identity.role.manage
       x-aleekhan-mfa-step-up: true
-      x-aleekhan-blocked-by:
+      x-aleekhan-decided-by:
       - DEC-049
       parameters:
       - $ref: '#/components/parameters/RequestId'
@@ -1705,7 +1713,7 @@ paths:
       summary: Retire a role (no new assignments)
       description: |
         Requires permission `platform.identity.role.manage` (deny by default; record scope enforced server-side).
-        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: DEC-051).
+        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: parameter `mfa_step_up_window_minutes` = 15 min, DEC-051; also inside the factory network, DEC-049).
       x-aleekhan-permission: platform.identity.role.manage
       x-aleekhan-mfa-step-up: true
       parameters:
@@ -1790,12 +1798,12 @@ paths:
       summary: Grant a role to a user with a record scope and validity
       description: |
         Requires permission `platform.identity.assignment.grant` (deny by default; record scope enforced server-side).
-        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: DEC-051).
-        BLOCKED until DEC-049 is approved: the server answers 409 RULE_NOT_APPROVED with `decision_id` (safe blocked behaviour).
-        Reason mandatory. Self-assignment by the owner is allowed by DEC-003 only explicitly and is audited as `self_assignment=true`; whether a second approver is needed for business roles: DEC-032.
+        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: parameter `mfa_step_up_window_minutes` = 15 min, DEC-051; also inside the factory network, DEC-049).
+        Decided: DEC-049 APPROVED 2026-11-04 (no longer blocked; schema in 01.2, rule implemented in 01.3/01.4).
+        Reason mandatory. Self-assignment by the owner is allowed by DEC-003 only explicitly and is audited as `self_assignment=true`; roles holding a business-approval permission stay PENDING_APPROVAL until a second eligible person approves (DEC-032 APPROVED; never self-approved).
       x-aleekhan-permission: platform.identity.assignment.grant
       x-aleekhan-mfa-step-up: true
-      x-aleekhan-blocked-by:
+      x-aleekhan-decided-by:
       - DEC-049
       parameters:
       - $ref: '#/components/parameters/RequestId'
@@ -1879,7 +1887,7 @@ paths:
       summary: Revoke a role assignment
       description: |
         Requires permission `platform.identity.assignment.grant` (deny by default; record scope enforced server-side).
-        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: DEC-051).
+        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: parameter `mfa_step_up_window_minutes` = 15 min, DEC-051; also inside the factory network, DEC-049).
       x-aleekhan-permission: platform.identity.assignment.grant
       x-aleekhan-mfa-step-up: true
       parameters:
@@ -2000,12 +2008,12 @@ paths:
       summary: Create an org unit
       description: |
         Requires permission `platform.org.manage` (deny by default; record scope enforced server-side).
-        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: DEC-051).
-        BLOCKED until DEC-048 is approved: the server answers 409 RULE_NOT_APPROVED with `decision_id` (safe blocked behaviour).
-        Unit types / allowed levels: DEC-048.
+        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: parameter `mfa_step_up_window_minutes` = 15 min, DEC-051; also inside the factory network, DEC-049).
+        Decided: DEC-048 APPROVED 2026-11-04 (no longer blocked; schema in 01.2, rule implemented in 01.3/01.4).
+        Unit types: COMPANY, DEPARTMENT, SECTION, LINE (seeded; the admin may add types); max depth 6 = parameter `org_tree_max_depth` (DEC-048 APPROVED).
       x-aleekhan-permission: platform.org.manage
       x-aleekhan-mfa-step-up: true
-      x-aleekhan-blocked-by:
+      x-aleekhan-decided-by:
       - DEC-048
       parameters:
       - $ref: '#/components/parameters/RequestId'
@@ -2084,7 +2092,7 @@ paths:
       summary: Rename / edit an org unit
       description: |
         Requires permission `platform.org.manage` (deny by default; record scope enforced server-side).
-        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: DEC-051).
+        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: parameter `mfa_step_up_window_minutes` = 15 min, DEC-051; also inside the factory network, DEC-049).
       x-aleekhan-permission: platform.org.manage
       x-aleekhan-mfa-step-up: true
       parameters:
@@ -2139,7 +2147,7 @@ paths:
       summary: Move a unit under another parent (acyclic check)
       description: |
         Requires permission `platform.org.manage` (deny by default; record scope enforced server-side).
-        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: DEC-051).
+        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: parameter `mfa_step_up_window_minutes` = 15 min, DEC-051; also inside the factory network, DEC-049).
       x-aleekhan-permission: platform.org.manage
       x-aleekhan-mfa-step-up: true
       parameters:
@@ -2194,7 +2202,7 @@ paths:
       summary: Deactivate an empty unit (effective date)
       description: |
         Requires permission `platform.org.manage` (deny by default; record scope enforced server-side).
-        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: DEC-051).
+        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: parameter `mfa_step_up_window_minutes` = 15 min, DEC-051; also inside the factory network, DEC-049).
       x-aleekhan-permission: platform.org.manage
       x-aleekhan-mfa-step-up: true
       parameters:
@@ -2278,11 +2286,11 @@ paths:
       summary: Create a position in a unit
       description: |
         Requires permission `platform.org.manage` (deny by default; record scope enforced server-side).
-        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: DEC-051).
-        BLOCKED until DEC-048 is approved: the server answers 409 RULE_NOT_APPROVED with `decision_id` (safe blocked behaviour).
+        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: parameter `mfa_step_up_window_minutes` = 15 min, DEC-051; also inside the factory network, DEC-049).
+        Decided: DEC-048 APPROVED 2026-11-04 (no longer blocked; schema in 01.2, rule implemented in 01.3/01.4).
       x-aleekhan-permission: platform.org.manage
       x-aleekhan-mfa-step-up: true
-      x-aleekhan-blocked-by:
+      x-aleekhan-decided-by:
       - DEC-048
       parameters:
       - $ref: '#/components/parameters/RequestId'
@@ -2361,7 +2369,7 @@ paths:
       summary: Edit a position (title, reports-to position)
       description: |
         Requires permission `platform.org.manage` (deny by default; record scope enforced server-side).
-        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: DEC-051).
+        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: parameter `mfa_step_up_window_minutes` = 15 min, DEC-051; also inside the factory network, DEC-049).
       x-aleekhan-permission: platform.org.manage
       x-aleekhan-mfa-step-up: true
       parameters:
@@ -2446,12 +2454,12 @@ paths:
       summary: Put a user into a position
       description: |
         Requires permission `platform.org.manage` (deny by default; record scope enforced server-side).
-        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: DEC-051).
-        BLOCKED until DEC-048 is approved: the server answers 409 RULE_NOT_APPROVED with `decision_id` (safe blocked behaviour).
-        Holding a position grants NO permission by itself (roles are separate, DEC-049); multiple/acting holders: DEC-048.
+        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: parameter `mfa_step_up_window_minutes` = 15 min, DEC-051; also inside the factory network, DEC-049).
+        Decided: DEC-048 APPROVED 2026-11-04 (no longer blocked; schema in 01.2, rule implemented in 01.3/01.4).
+        Holding a position grants NO permission by itself (roles are separate, DEC-049); one PRIMARY position per person at any instant + ACTING with an end date; no ADDITIONAL kind in PHASE_01 (DEC-048 APPROVED).
       x-aleekhan-permission: platform.org.manage
       x-aleekhan-mfa-step-up: true
-      x-aleekhan-blocked-by:
+      x-aleekhan-decided-by:
       - DEC-048
       parameters:
       - $ref: '#/components/parameters/RequestId'
@@ -2500,7 +2508,7 @@ paths:
       summary: End a position assignment (effective date)
       description: |
         Requires permission `platform.org.manage` (deny by default; record scope enforced server-side).
-        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: DEC-051).
+        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: parameter `mfa_step_up_window_minutes` = 15 min, DEC-051; also inside the factory network, DEC-049).
       x-aleekhan-permission: platform.org.manage
       x-aleekhan-mfa-step-up: true
       parameters:
@@ -3109,12 +3117,12 @@ paths:
       summary: Approve (bound to the resource revision; one-time)
       description: |
         Requires permission `platform.workflow.approval.decide` (deny by default; record scope enforced server-side).
-        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: DEC-051).
-        BLOCKED until DEC-032 is approved: the server answers 409 RULE_NOT_APPROVED with `decision_id` (safe blocked behaviour).
-        maker == checker -> 403 SELF_APPROVAL_FORBIDDEN. The resource revision in the request must equal the revision the request was raised for (else 409). Technical admin rights never satisfy this permission (DEC-003). Which actions need maker-checker and who may decide: DEC-032 / DEC-048 / DEC-049.
+        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: parameter `mfa_step_up_window_minutes` = 15 min, DEC-051; also inside the factory network, DEC-049).
+        Decided: DEC-032 APPROVED 2026-11-04 (no longer blocked; schema in 01.2, rule implemented in 01.3/01.4).
+        maker == checker -> 403 SELF_APPROVAL_FORBIDDEN. The resource revision in the request must equal the revision the request was raised for (else 409). Technical admin rights never satisfy this permission (DEC-003). Maker-checker applies to document revision approval, BUSINESS_RULE parameter publish and assignment of roles holding business-approval permissions (DEC-032); requests expire after 30 days; routing in PHASE_01 = role + unit scope only (DEC-048); deciders per the approved matrix (DEC-049).
       x-aleekhan-permission: platform.workflow.approval.decide
       x-aleekhan-mfa-step-up: true
-      x-aleekhan-blocked-by:
+      x-aleekhan-decided-by:
       - DEC-032
       parameters:
       - $ref: '#/components/parameters/RequestId'
@@ -3168,11 +3176,11 @@ paths:
       summary: Reject (reason)
       description: |
         Requires permission `platform.workflow.approval.decide` (deny by default; record scope enforced server-side).
-        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: DEC-051).
-        BLOCKED until DEC-032 is approved: the server answers 409 RULE_NOT_APPROVED with `decision_id` (safe blocked behaviour).
+        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: parameter `mfa_step_up_window_minutes` = 15 min, DEC-051; also inside the factory network, DEC-049).
+        Decided: DEC-032 APPROVED 2026-11-04 (no longer blocked; schema in 01.2, rule implemented in 01.3/01.4).
       x-aleekhan-permission: platform.workflow.approval.decide
       x-aleekhan-mfa-step-up: true
-      x-aleekhan-blocked-by:
+      x-aleekhan-decided-by:
       - DEC-032
       parameters:
       - $ref: '#/components/parameters/RequestId'
@@ -3382,7 +3390,7 @@ paths:
       summary: Request cancellation of a running instance (compensation per definition)
       description: |
         Requires permission `platform.workflow.instance.cancel` (deny by default; record scope enforced server-side).
-        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: DEC-051).
+        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: parameter `mfa_step_up_window_minutes` = 15 min, DEC-051; also inside the factory network, DEC-049).
       x-aleekhan-permission: platform.workflow.instance.cancel
       x-aleekhan-mfa-step-up: true
       parameters:
@@ -3435,7 +3443,7 @@ paths:
       summary: Query audit events (read-only, redacted)
       description: |
         Requires permission `platform.audit.read` (deny by default; record scope enforced server-side).
-        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: DEC-051).
+        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: parameter `mfa_step_up_window_minutes` = 15 min, DEC-051; also inside the factory network, DEC-049).
         Append-only store: there is NO create/update/delete operation on audit events in the API. Sensitive before/after values are redacted for callers without the field permission. Max range per query: 31 days (TECHNICAL DEFAULT).
       x-aleekhan-permission: platform.audit.read
       x-aleekhan-mfa-step-up: true
@@ -3481,7 +3489,7 @@ paths:
       summary: One audit event
       description: |
         Requires permission `platform.audit.read` (deny by default; record scope enforced server-side).
-        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: DEC-051).
+        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: parameter `mfa_step_up_window_minutes` = 15 min, DEC-051; also inside the factory network, DEC-049).
       x-aleekhan-permission: platform.audit.read
       x-aleekhan-mfa-step-up: true
       parameters:
@@ -3689,7 +3697,7 @@ paths:
       summary: Request SAFE cancellation at the next checkpoint (reason mandatory)
       description: |
         Requires permission `platform.ops.job.cancel` (deny by default; record scope enforced server-side).
-        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: DEC-051).
+        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: parameter `mfa_step_up_window_minutes` = 15 min, DEC-051; also inside the factory network, DEC-049).
         RUNNING|QUEUED -> CANCEL_REQUESTED. Protected job types -> 409 JOB_PROTECTED. Force kill is NOT part of this contract (DEC-024, PHASE_11; CONFLICTS C-25/C-31).
       x-aleekhan-permission: platform.ops.job.cancel
       x-aleekhan-mfa-step-up: true
@@ -3939,10 +3947,10 @@ paths:
       summary: Upload a new revision (file goes to QUARANTINE, never executed)
       description: |
         Requires permission `platform.document.upload` (deny by default; record scope enforced server-side).
-        BLOCKED until DEC-053 is approved: the server answers 409 RULE_NOT_APPROVED with `decision_id` (safe blocked behaviour).
-        SEC-03: the file is streamed to private object storage under a random key, SHA-256 computed server-side, scan_status=QUARANTINED; it is not downloadable until a scan marks it CLEAN. Allowed types, size limit, scanner: DEC-053. Client file name is metadata only (basename, bidi/control stripped).
+        Decided: DEC-053 APPROVED 2026-11-04 (no longer blocked; schema in 01.2, rule implemented in 01.3/01.4).
+        SEC-03: the file is streamed to private object storage under a random key, SHA-256 computed server-side, scan_status=QUARANTINED; it is not downloadable until a scan marks it CLEAN. DEC-053 APPROVED: PDF, PNG, JPG, DXF, XLSX without macros only (never XLSM/DOCM/EXE/scripts), max 25 MB (parameter `document_upload_max_bytes`), ClamAV + magic bytes; rejected bytes purged after 30 days (metadata + hash kept); download only, never rendered inline. Client file name is metadata only (basename, bidi/control stripped).
       x-aleekhan-permission: platform.document.upload
-      x-aleekhan-blocked-by:
+      x-aleekhan-decided-by:
       - DEC-053
       parameters:
       - $ref: '#/components/parameters/RequestId'
@@ -4128,12 +4136,12 @@ paths:
       summary: Approve a revision (becomes immutable; previous approved -> SUPERSEDED)
       description: |
         Requires permission `platform.document.approve` (deny by default; record scope enforced server-side).
-        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: DEC-051).
-        BLOCKED until DEC-032 is approved: the server answers 409 RULE_NOT_APPROVED with `decision_id` (safe blocked behaviour).
+        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: parameter `mfa_step_up_window_minutes` = 15 min, DEC-051; also inside the factory network, DEC-049).
+        Decided: DEC-032 APPROVED 2026-11-04 (no longer blocked; schema in 01.2, rule implemented in 01.3/01.4).
         Uploader cannot approve their own revision (split-of-duty).
       x-aleekhan-permission: platform.document.approve
       x-aleekhan-mfa-step-up: true
-      x-aleekhan-blocked-by:
+      x-aleekhan-decided-by:
       - DEC-032
       parameters:
       - $ref: '#/components/parameters/RequestId'
@@ -4188,9 +4196,12 @@ paths:
       summary: Reject a revision (reason)
       description: |
         Requires permission `platform.document.approve` (deny by default; record scope enforced server-side).
-        BLOCKED until DEC-032 is approved: the server answers 409 RULE_NOT_APPROVED with `decision_id` (safe blocked behaviour).
+        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: parameter `mfa_step_up_window_minutes` = 15 min, DEC-051; also inside the factory network, DEC-049).
+        REV-0101 (01.2): same permission as approveDocumentRevision, therefore the same MFA step-up.
+        Decided: DEC-032 APPROVED 2026-11-04 (no longer blocked; schema in 01.2, rule implemented in 01.3/01.4).
       x-aleekhan-permission: platform.document.approve
-      x-aleekhan-blocked-by:
+      x-aleekhan-mfa-step-up: true
+      x-aleekhan-decided-by:
       - DEC-032
       parameters:
       - $ref: '#/components/parameters/RequestId'
@@ -4272,7 +4283,7 @@ paths:
       summary: Define a parameter (system_key immutable after creation)
       description: |
         Requires permission `platform.config.parameter.define` (deny by default; record scope enforced server-side).
-        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: DEC-051).
+        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: parameter `mfa_step_up_window_minutes` = 15 min, DEC-051; also inside the factory network, DEC-049).
       x-aleekhan-permission: platform.config.parameter.define
       x-aleekhan-mfa-step-up: true
       parameters:
@@ -4440,12 +4451,12 @@ paths:
       summary: Publish an approved value revision
       description: |
         Requires permission `platform.config.parameter.publish` (deny by default; record scope enforced server-side).
-        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: DEC-051).
-        BLOCKED until DEC-032 is approved: the server answers 409 RULE_NOT_APPROVED with `decision_id` (safe blocked behaviour).
+        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: parameter `mfa_step_up_window_minutes` = 15 min, DEC-051; also inside the factory network, DEC-049).
+        Decided: DEC-032 APPROVED 2026-11-04 (no longer blocked; schema in 01.2, rule implemented in 01.3/01.4).
         Business-rule parameters (owned by a module whose rule is OPEN) stay RULE_NOT_APPROVED with that module's decision id.
       x-aleekhan-permission: platform.config.parameter.publish
       x-aleekhan-mfa-step-up: true
-      x-aleekhan-blocked-by:
+      x-aleekhan-decided-by:
       - DEC-032
       parameters:
       - $ref: '#/components/parameters/RequestId'
@@ -4658,7 +4669,7 @@ components:
         local username/password (+ MFA per DEC-003/DEC-042). Unsafe methods additionally require the
         `X-CSRFToken` header. No AD/LDAP/SSO (DEC-003). Not usable in PHASE_00.
         0.5.0 (01.1): the session id is rotated at login and at MFA verification; a session in state
-        MFA_PENDING is accepted only by `verifyMfa` and `logout`. Idle/absolute timeout: DEC-051. Browser
+        MFA_PENDING is accepted only by `verifyMfa` and `logout`. Idle/absolute timeout (DEC-051): users 2 h / 12 h, operators idle 8 h internal only; max 3 concurrent sessions. Browser
         only (DEC-002): no bearer/API tokens in PHASE_01 (CONFLICTS C-35).
   parameters:
     RequestId:
@@ -5196,7 +5207,7 @@ components:
           schema:
             $ref: '#/components/schemas/Problem'
     UnsupportedMediaType:
-      description: FILE_TYPE_NOT_ALLOWED (planned code; allowlist DEC-053)
+      description: FILE_TYPE_NOT_ALLOWED (planned code; allowlist DEC-053 APPROVED)
       headers:
         X-Request-ID:
           $ref: '#/components/headers/X-Request-ID'
@@ -5601,7 +5612,7 @@ components:
           type: string
           enum:
           - TOTP
-          description: Proposal only (DEC-050).
+          description: TOTP only (DEC-050 APPROVED).
         provisioning_uri:
           type: string
           description: Shown once as QR; never logged.
@@ -5618,7 +5629,7 @@ components:
           maxItems: 16
           items:
             type: string
-          description: Shown once (DEC-050).
+          description: Shown once; 10 one-time codes, stored as hashes only (DEC-050).
     PasswordChangeRequest:
       type: object
       additionalProperties: false
@@ -5649,7 +5660,7 @@ components:
           format: uuid
         one_time_password:
           type: string
-          description: Shown once to the admin; must be changed at first login; never logged or stored in clear (DEC-051).
+          description: Shown once to the admin; valid 72 h; must be changed at first login; never logged or stored in clear (DEC-051).
         expires_at:
           $ref: '#/components/schemas/UtcTimestamp'
     SessionInfo:
@@ -5695,7 +5706,7 @@ components:
           - INTERNAL
           - EXTERNAL
           - UNKNOWN
-          description: From the trusted proxy's client address (DEC-052).
+          description: From the trusted proxy's client address; zone from the server-side CIDR list (DEC-052).
         is_current:
           type: boolean
     SessionPage:
@@ -5748,9 +5759,8 @@ components:
           type: string
           enum:
           - PERSON
-          - OPERATOR_TERMINAL
-          - SERVICE
-          description: 'Shared terminal accounts allowed or not: DEC-052.'
+          - OPERATOR
+          description: 'PERSON or OPERATOR (personal operator account, internal network only); no shared terminal or service accounts (DEC-052).'
         network_policy:
           type: string
           enum:
@@ -5808,8 +5818,7 @@ components:
           type: string
           enum:
           - PERSON
-          - OPERATOR_TERMINAL
-          - SERVICE
+          - OPERATOR
         network_policy:
           type: string
           enum:
@@ -5932,7 +5941,7 @@ components:
           type:
           - string
           - 'null'
-          description: Version of the approved permission matrix (DEC-049) the role matches.
+          description: Version of the approved permission matrix (DEC-049, currently 1.0) the role matches.
         row_version:
           type: integer
           minimum: 1
@@ -6186,7 +6195,7 @@ components:
         unit_type:
           type: string
           pattern: ^[A-Z][A-Z_]{1,31}$
-          description: 'Allowed types/levels: DEC-048 (e.g. COMPANY, DEPARTMENT, SECTION, LINE).'
+          description: 'Seeded COMPANY, DEPARTMENT, SECTION, LINE; extendable by the admin (DEC-048).'
         parent_unit_id:
           type:
           - string
@@ -6416,9 +6425,8 @@ components:
           type: string
           enum:
           - PRIMARY
-          - ADDITIONAL
           - ACTING
-          description: 'Whether ADDITIONAL/ACTING are allowed: DEC-048.'
+          description: 'PRIMARY (one per person at any instant) or ACTING (needs valid_to) - DEC-048.'
         valid_from:
           $ref: '#/components/schemas/UtcTimestamp'
         valid_to:
@@ -6462,7 +6470,6 @@ components:
           type: string
           enum:
           - PRIMARY
-          - ADDITIONAL
           - ACTING
         valid_from:
           $ref: '#/components/schemas/UtcTimestamp'
@@ -6519,7 +6526,6 @@ components:
                       type: string
                       enum:
                       - PRIMARY
-                      - ADDITIONAL
                       - ACTING
         children:
           type: array
@@ -6735,7 +6741,7 @@ components:
           maxItems: 20
           items:
             $ref: '#/components/schemas/Assignee'
-          description: 'Resolved approvers (rule: DEC-048 routing).'
+          description: 'Resolved approvers: role + unit scope only in PHASE_01 (DEC-048).'
         decided_by:
           type:
           - string
@@ -7492,6 +7498,7 @@ components:
           type: string
           enum:
           - TECHNICAL
+          - OWNER_POLICY
           - BUSINESS_RULE
           description: BUSINESS_RULE values need the owning decision (decision_id) approved.
         decision_id:
@@ -7554,6 +7561,7 @@ components:
           type: string
           enum:
           - TECHNICAL
+          - OWNER_POLICY
           - BUSINESS_RULE
         decision_id:
           type:
@@ -7815,6 +7823,6 @@ x-aleekhan-conventions:
     ACCESS_DENIED / VALIDATION_FAILED / STATE_TRANSITION_NOT_ALLOWED in drafts.
   mfa_step_up_rule: |
     Operations with `x-aleekhan-mfa-step-up: true` require an MFA verification younger than the step-up window
-    (DEC-051) for every caller, inside or outside the factory network; this is in addition to the login-time MFA
+    (DEC-051: 15 minutes) for every caller, inside or outside the factory network (DEC-049); this is in addition to the login-time MFA
     rules (DEC-003 role list, DEC-042 outside logins).
-  out_of_scope_phase_01: [customers, products, styles, serials, orders, engineering, warehouse, production, quality, dispatch, hr, ai, force-kill (DEC-024), layout publishing (PHASE_11), break-glass (DEC-054)]
+  out_of_scope_phase_01: [customers, products, styles, serials, orders, engineering, warehouse, production, quality, dispatch, hr, ai, force-kill (DEC-024), layout publishing (PHASE_11), break-glass account use (DEC-054: console command only, no API)]

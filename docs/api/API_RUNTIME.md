@@ -117,6 +117,13 @@ SameSite=Lax session cookie (`aleekhan_session`), secure CSRF cookie, HSTS (prod
 
 ## 8. PHASE_01 planned operations (contract 0.5.0-draft, step 01.1)
 
+01.2 update: contract `0.5.1-draft` - the employer APPROVED DEC-032 and DEC-048..054; the 18 formerly blocked
+planned operations now carry `x-aleekhan-decided-by` instead of `x-aleekhan-blocked-by` (test
+`test_blocked_operations_name_an_open_decision_and_declare_409`); REV-0101 `rejectDocumentRevision` declares the MFA
+step-up of `platform.document.approve` (test `test_operations_sharing_a_permission_share_the_mfa_step_up`); enums
+aligned with the 01.2 schema (account_kind, position assignment kind, parameter classification). Implemented
+paths are unchanged.
+
 `openapi-draft.yaml` 0.5.0-draft adds 97 PLANNED operations on 78 paths (auth, me, admin-identity, org, workflow,
 audit, jobs, documents, parameters). They are marked `x-aleekhan-status: planned` + `x-aleekhan-step: '01.4'`
 and are **not served**: `test_route_parity_with_openapi` compares the production URLconf with the implemented

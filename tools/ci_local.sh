@@ -7,8 +7,9 @@
 # backup drill) -> build/artifacts.
 #
 # Every stage writes <out>/NN_<stage>.log; all output passes tools/redact_paths.py (REV-0502: no home paths
-# or account names in evidence). A stage that cannot run prints "SKIPPED: <reason>" and is listed with
-# that reason in <out>/summary.md - never silently. Passwords are never printed (libpq env only).
+# or account names in evidence; REV-0103: junit xml files are redacted in place, incl. the host name). A stage
+# that cannot run prints "SKIPPED: <reason>" and is listed with that reason in <out>/summary.md - never silently.
+# Passwords are never printed (libpq env only).
 #
 # Usage: tools/ci_local.sh <out-dir> [stage ...]          (default: all stages, keep going after a failure)
 # Stages: lint type tools unit migration contract authz frontend e2e perf security ops artifacts
@@ -220,6 +221,8 @@ for s in "${STAGES[@]}"; do
     } 2>&1 | "$PYTHON" tools/redact_paths.py | tee "$log"
     rc="${PIPESTATUS[0]}"
   fi
+  # REV-0103: junit xml is written by pytest directly (not through the log filter): redact host/account names
+  "$PYTHON" tools/redact_paths.py --in-place "$OUT"/*.xml >/dev/null 2>&1 || true
   secs=$(( $(date +%s) - start ))
   case "$rc" in
     0) result=PASS ;;

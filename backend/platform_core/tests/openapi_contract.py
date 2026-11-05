@@ -16,7 +16,8 @@ from typing import Any
 import yaml
 from openapi_schema_validator import OAS31Validator, oas31_format_checker
 
-OPENAPI_PATH = Path(__file__).resolve().parents[3] / "docs" / "api" / "openapi-draft.yaml"
+REPO_ROOT = Path(__file__).resolve().parents[3]
+OPENAPI_PATH = REPO_ROOT / "docs" / "api" / "openapi-draft.yaml"
 BASE_PATH = "/api/v1"
 HTTP_METHODS = ("get", "put", "post", "patch", "delete", "head", "options")
 # Statuses any endpoint may produce via the framework (unknown method, payload, rate limit, crash).

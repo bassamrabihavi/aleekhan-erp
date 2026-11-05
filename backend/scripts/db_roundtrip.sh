@@ -65,6 +65,16 @@ echo "tables after rollback:"; tables
 echo "platform functions left: $("$PSQL" -d "$DB" -Atc "SELECT count(*) FROM pg_proc WHERE proname LIKE 'platform\_%'")"
 remaining="$(tables | grep -v -x 'django_migrations' || true)"
 if [ -n "$remaining" ]; then echo "FAIL: tables left after rollback: $remaining" >&2; exit 1; fi
+# PHASE_01 / 01.2: migration 0008 installs btree_gist (exclusion constraints); its reverse must remove it
+exts="$("$PSQL" -d "$DB" -Atc "SELECT string_agg(extname, ',' ORDER BY extname) FROM pg_extension WHERE extname <> 'plpgsql'")"
+echo "extensions left (besides plpgsql): ${exts:-none}"
+if [ -n "$exts" ]; then echo "FAIL: extensions left after rollback: $exts" >&2; exit 1; fi
+
+echo "== [3b] partial rollback to the PHASE_00 schema (0006) and forward again"
+manage migrate --noinput
+manage migrate platform_core 0006 --noinput
+echo "schema contract after partial rollback: $("$PSQL" -d "$DB" -Atc 'SELECT schema_contract FROM platform_schema_meta')"
+manage migrate platform_core zero --noinput >/dev/null
 
 echo "== [4] migrate up again"
 manage migrate --noinput

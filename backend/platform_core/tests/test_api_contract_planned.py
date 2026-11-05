@@ -10,12 +10,15 @@ implementing step cannot weaken them silently:
   ``auth``/``me`` resources, an explicit permission (``x-aleekhan-permission``);
 * every mutating planned operation requires ``Idempotency-Key`` unless it is an explicitly exempt
   authentication ceremony; every PATCH requires ``If-Match``;
-* blocked operations name a decision id and declare the 409 answer (``RULE_NOT_APPROVED``);
+* blocked operations name an OPEN decision id and declare the 409 answer (``RULE_NOT_APPROVED``); operations
+  whose decision was approved carry ``x-aleekhan-decided-by`` instead (01.2);
+* operations sharing one permission share its MFA step-up flag (REV-0101);
 * planned error codes are not yet in the implemented ``ErrorCode`` enum (they join it with the engine change).
 """
 
 from __future__ import annotations
 
+import csv
 import re
 from collections import Counter
 from typing import Any
@@ -93,16 +96,39 @@ def test_planned_mutations_require_idempotency_key_unless_exempt() -> None:
             assert "IfMatch" in refs and "412" in op["responses"], op["operationId"]
 
 
-def test_blocked_operations_name_a_decision_and_declare_409() -> None:
-    blocked = 0
+def _decision_status() -> dict[str, str]:
+    """decision_id -> status from the governance log (read-only; control/ is the source of truth)."""
+    log = oc.REPO_ROOT / "control" / "decisions" / "DECISION_LOG.csv"
+    with log.open(encoding="utf-8", newline="") as fh:
+        return {row["decision_id"]: row["status"] for row in csv.DictReader(fh)}
+
+
+def test_blocked_operations_name_an_open_decision_and_declare_409() -> None:
+    """Blocked-by stays honest (01.2): an APPROVED decision no longer blocks; decided-by keeps the trace."""
+    status = _decision_status()
     for _path, _method, op in oc.operations(planned=True):
-        decisions = op.get("x-aleekhan-blocked-by")
-        if decisions is None:
-            continue
-        blocked += 1
-        assert decisions and all(DEC.match(d) for d in decisions), op["operationId"]
-        assert "409" in op["responses"], op["operationId"]
-    assert blocked > 0
+        blocked = op.get("x-aleekhan-blocked-by")
+        if blocked is not None:
+            assert blocked and all(DEC.match(d) for d in blocked), op["operationId"]
+            assert all(status.get(d) != "APPROVED" for d in blocked), (op["operationId"], blocked)
+            assert "409" in op["responses"], op["operationId"]
+        decided = op.get("x-aleekhan-decided-by")
+        if decided is not None:
+            assert decided and all(status.get(d) == "APPROVED" for d in decided), (op["operationId"], decided)
+            assert blocked is None, op["operationId"]
+
+
+def test_operations_sharing_a_permission_share_the_mfa_step_up() -> None:
+    """REV-0101: the MFA step-up belongs to the permission (matrix row), not to a single operation."""
+    flags: dict[str, set[tuple[str, bool]]] = {}
+    for _path, _method, op in oc.operations():
+        perm = op.get("x-aleekhan-permission")
+        if perm:
+            flags.setdefault(perm, set()).add(
+                (op["operationId"], bool(op.get("x-aleekhan-mfa-step-up", False)))
+            )
+    mixed = {p: sorted(v) for p, v in flags.items() if len({f for _o, f in v}) > 1}
+    assert mixed == {}
 
 
 def test_planned_error_codes_are_not_yet_implemented_codes() -> None:

@@ -75,3 +75,17 @@ DEC-002/003/042/043/047 (`control/decisions/DECISION_LOG.csv`). Same rules as ab
 - Open, owned by decision packets: C-37 (DEC-048), C-38/C-39 and the second-approver part of C-28 (DEC-032), C-44 (DEC-053).
 - Noted documentation drift: C-40, C-41.
 - No P0 business rule was decided in this step; every one is a packet in `control/decisions/`.
+
+### 01.2 update (2026-11-04): decisions approved by the employer
+- C-28 (second person for role grants), C-38 (single-person deadlock) and C-39 (audit retention): **RESOLVED by
+  DEC-032** - maker-checker for document approval, BUSINESS_RULE publish and business-approval role assignments
+  (PENDING until a second eligible person exists, never self-approved, D1); approval requests expire after 30 days;
+  business/access audit never deleted (yearly archive); login events kept 2 years. Schema: docs/db/ERD.md
+  section 6.
+- C-37 (approval routing): **RESOLVED by DEC-048** - combined routing later per module; PHASE_01 = role + unit
+  scope only (`platform_approval_request.route_kind = ROLE_UNIT_SCOPE`).
+- C-44 (upload size/types/scanner): **RESOLVED by DEC-053** - PDF/PNG/JPG/DXF/XLSX without macros, max 25 MB
+  (parameter `document_upload_max_bytes`; the MB/MiB reading is open question Q-0104), ClamAV, encrypted folder,
+  30-day quarantine of rejected bytes. The separate streaming limit of the upload endpoint is an 01.4 item.
+- C-36 binding: MFA rows of the approved matrix v1.0 (DEC-049), factor TOTP (DEC-050).
+- C-33/C-34/C-46 (scope splits) remain proposals for the employer (not covered by DEC-049's answers).

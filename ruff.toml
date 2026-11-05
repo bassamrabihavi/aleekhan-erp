@@ -18,6 +18,8 @@ ignore = ["RUF012", "S101"]
 "backend/*/migrations/*.py" = ["E501"]
 # Persian user-facing texts (message_fa): Arabic-script letters are intended, not confusables.
 "backend/platform_core/engine/errors.py" = ["RUF001"]
+# Persian labels of the PHASE_01 seed catalogue (role/permission/parameter names).
+"backend/platform_core/migrations/0010_seed_phase01_catalogue.py" = ["RUF001"]
 # Persian sensitive-key deny-list and its tests (REV-0602): Persian letters are intended.
 "backend/platform_core/engine/redaction.py" = ["RUF001", "RUF002", "RUF003"]
 "backend/platform_core/tests/test_redaction_persian.py" = ["RUF001", "RUF002", "RUF003"]

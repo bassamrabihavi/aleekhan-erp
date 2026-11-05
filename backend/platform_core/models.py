@@ -9,7 +9,8 @@
 * Integration tables (00.6): ``platform_core/integration/models.py`` (source registry seeded in 0006 with
   metadata of three read-only sources, import batch, staging row, conflict item).
 
-No business tables and no users/roles here (PHASE_01). ``actor_id`` columns are plain UUIDs for now;
+No business tables here. PHASE_01 platform tables (identity, org, workflow, documents, params, jobs) live in
+sibling modules registered at the end of this file. ``actor_id`` columns are plain UUIDs for now;
 the FK to the user table is added in PHASE_01 when that table exists.
 Behaviour (dispatching, idempotency protocol, redaction) is the domain engine of step 00.3.
 """
@@ -69,6 +70,16 @@ class AuditEvent(models.Model):
     # before/after must be REDACTED by the writer (no salary, password, PII); enforced in 00.3/00.7.
     before = models.JSONField(null=True, blank=True)
     after = models.JSONField(null=True, blank=True)
+    # PHASE_01 / 01.2 additions (DATA_TABLE "AuditEvent extended"). Filled by the 01.3 engine; NULL / '' for
+    # PHASE_00 rows; DB defaults keep older/raw INSERTs valid (backward compatible). session_id is the public
+    # session handle (no FK: audit is evidence and must stay writable and readable independently of identity
+    # rows). Hash chain: chain_seq is the order, event_hash = sha256(prev_hash || canonical event);
+    # verification results go to platform_audit_integrity_run.
+    session_id = models.UUIDField(null=True, blank=True)
+    network_zone = models.CharField(max_length=8, blank=True, db_default="")
+    chain_seq = models.BigIntegerField(null=True, blank=True)
+    prev_hash = models.CharField(max_length=64, blank=True, db_default="")
+    event_hash = models.CharField(max_length=64, blank=True, db_default="")
 
     class Meta:
         db_table = "platform_audit_event"
@@ -83,9 +94,28 @@ class AuditEvent(models.Model):
                 condition=Q(resource_version__isnull=True) | Q(resource_version__gte=0),
                 name="ck_audit_event_resource_version_nonneg",
             ),
+            CheckConstraint(
+                condition=Q(network_zone__in=["", "INTERNAL", "EXTERNAL", "UNKNOWN"]),
+                name="ck_audit_event_network_zone",
+            ),
+            CheckConstraint(
+                condition=Q(prev_hash="") | Q(prev_hash__regex=r"^[0-9a-f]{64}$"),
+                name="ck_audit_event_prev_hash_fmt",
+            ),
+            CheckConstraint(
+                condition=Q(event_hash="") | Q(event_hash__regex=r"^[0-9a-f]{64}$"),
+                name="ck_audit_event_event_hash_fmt",
+            ),
+            CheckConstraint(
+                condition=Q(chain_seq__isnull=True, event_hash="")
+                | Q(chain_seq__gte=1, event_hash__regex=r"^[0-9a-f]{64}$"),
+                name="ck_audit_event_chain_consistent",
+            ),
+            UniqueConstraint(fields=["chain_seq"], name="uq_audit_event_chain_seq"),
         ]
         indexes = [
             models.Index(fields=["occurred_at"], name="ix_audit_event_occurred"),
+            models.Index(fields=["session_id"], name="ix_audit_event_session"),
             models.Index(
                 fields=["resource_type", "resource_id", "occurred_at"], name="ix_audit_event_resource"
             ),
@@ -375,6 +405,13 @@ class CompensationRecord(models.Model):
         return f"{self.consumer} {self.event_id} [{self.outcome}]"
 
 
-# Integration tables (sources, import batches, staging, conflict queue) live in their own module of this app
-# (platform_core.integration.models) and are registered here so Django's app loading sees them.
+# Integration tables (00.6, platform_core.integration.models) and the PHASE_01 / 01.2 platform tables (one
+# module per area: identity, org, workflow, documents, params, jobs; same app, same migration history) are
+# registered here so Django's app loading sees them.
+from platform_core.documents import models as _documents_models  # noqa: E402,F401
+from platform_core.identity import models as _identity_models  # noqa: E402,F401
 from platform_core.integration import models as _integration_models  # noqa: E402,F401
+from platform_core.jobs import models as _jobs_models  # noqa: E402,F401
+from platform_core.org import models as _org_models  # noqa: E402,F401
+from platform_core.params import models as _params_models  # noqa: E402,F401
+from platform_core.workflow import models as _workflow_models  # noqa: E402,F401

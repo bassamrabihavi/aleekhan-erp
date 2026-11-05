@@ -132,12 +132,12 @@
         },
         "01.2": {
           "name": "Database",
-          "state": "TODO",
+          "state": "IN_PROGRESS",
           "commit": null,
           "report": null,
           "review": null,
           "rework_cycles": 0,
-          "started_at": null,
+          "started_at": "2026-11-04T15:48:31+00:00",
           "done_at": null
         },
         "01.3": {
@@ -2819,7 +2819,16 @@
       "status": "APPROVED",
       "by": "بسام ربیهاوی",
       "note": "پاسخ کارفرما ۲۰۲۶-۱۱-۰۴: بخش ۱ = B (متوسط): maker≠checker برای approveDocumentRevision، publishParameterValue پارامترهای BUSINESS_RULE، و createRoleAssignment نقش‌های دارای حق تأیید کسب‌وکار؛ تا تعریف نفر دوم این موارد «در انتظار» می‌مانند. بن‌بست یک‌نفره = D1 (هرگز خودتأیید؛ تأیید اضطراری فقط با تصمیم بعدی). انقضای درخواست تأیید ۳۰ روز. بخش ۲ = R-A: Audit کسب‌وکار و دسترسی هرگز حذف نشود (بایگانی سالانه)؛ رخدادهای ورود ۲ سال؛ مدت الزام قانونی را مشاور حقوقی/مالی تأیید کند."
+    },
+    {
+      "at": "2026-11-04T15:48:31+00:00",
+      "kind": "step",
+      "phase": "PHASE_01",
+      "step": "01.2",
+      "state": "IN_PROGRESS",
+      "note": null,
+      "commit": null
     }
   ],
-  "updated_at": "2026-11-04T15:48:21+00:00"
+  "updated_at": "2026-11-04T15:48:31+00:00"
 }

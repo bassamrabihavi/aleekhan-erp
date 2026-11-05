@@ -4,7 +4,8 @@
 #   1. create a throw-away database + three throw-away roles (unique random suffix, NOLOGIN, no password)
 #   2. ops/db/roles.sql, then `manage.py migrate` AS THE OWNER ROLE (PGOPTIONS="-c role=..."), then
 #      ops/db/grants.sql
-#   3. as the APP role: the platform write path works (unit of work: audit + outbox), and every attempt to
+#   3. as the APP role: the platform write path works (unit of work: audit + outbox; PHASE_01: org insert with
+#      tree trigger + history), every attempt to
 #      bypass the append-only audit (DELETE/UPDATE/TRUNCATE, DISABLE TRIGGER, DROP TRIGGER,
 #      session_replication_role=replica) or to run DDL is refused
 #   4. as the READONLY role: SELECT works, writes are refused
@@ -135,14 +136,42 @@ expect_denied "app: CREATE FUNCTION" "$APP" "CREATE FUNCTION rc_probe() RETURNS 
 expect_denied "app: DROP TABLE" "$APP" "DROP TABLE platform_outbox_event"
 expect_denied "app: ALTER TABLE ADD COLUMN" "$APP" "ALTER TABLE platform_outbox_event ADD COLUMN rc_probe int"
 
+echo "== app role: PHASE_01 tables (01.2)"
+SYN_NAME="convert_from(decode('d988d8a7d8add8af20d8b3d8a7d8aed8aadaafdb8c2028d985d8addb8cd8b720d8a2d8b2d985d8a7db8cd8b4db8c20e2809420d8afd8a7d8afd98720d8b3d8a7d8aed8aadaafdb8c29', 'hex'), 'UTF8')"
+expect_ok "app: INSERT synthetic org unit (tree trigger reads parameter; history via SECURITY DEFINER)" "$APP"   "INSERT INTO platform_org_unit (id, code, name_fa, unit_type_code, provenance) VALUES (gen_random_uuid(), 'rc_unit', $SYN_NAME, 'COMPANY', 'SEED_SYNTHETIC')"
+expect_ok "app: SELECT permission catalogue" "$APP" "SELECT count(*) FROM platform_permission"
+expect_denied "app: INSERT permission (catalogue is migration-only)" "$APP" "INSERT INTO platform_permission (action, module, description_fa, mfa_step_up, business_approval, maker_checker, matrix_version, decision_id) VALUES ('platform.rc.probe', 'rc', 'x', false, false, false, '1.0', 'DEC-049')"
+expect_denied "app: UPDATE permission flags" "$APP" "UPDATE platform_permission SET business_approval = false"
+expect_denied "app: INSERT upload type" "$APP" "INSERT INTO platform_upload_type (extension, media_type, label_fa, content_check, decision_id) VALUES ('rcx', 'application/x-rc', 'x', 'PDF', 'DEC-053')"
+expect_denied "app: UPDATE protected job type" "$APP" "UPDATE platform_job_definition SET protected = false"
+expect_denied "app: DELETE user" "$APP" "DELETE FROM platform_user"
+expect_denied "app: DELETE role assignment" "$APP" "DELETE FROM platform_role_assignment"
+expect_denied "app: DELETE org unit" "$APP" "DELETE FROM platform_org_unit"
+expect_denied "app: DELETE document revision" "$APP" "DELETE FROM platform_document_revision"
+expect_denied "app: UPDATE password history" "$APP" "UPDATE platform_password_history SET password_hash = password_hash"
+expect_denied "app: DELETE password history" "$APP" "DELETE FROM platform_password_history"
+expect_denied "app: UPDATE login attempt" "$APP" "UPDATE platform_login_attempt SET outcome = 'OK'"
+expect_denied "app: INSERT org unit history directly" "$APP" "INSERT INTO platform_org_unit_history (unit_id, unit_row_version, valid_from, code, name_fa, unit_type_code, status) SELECT id, 99, now(), code, name_fa, unit_type_code, status FROM platform_org_unit"
+expect_denied "app: UPDATE org unit history" "$APP" "UPDATE platform_org_unit_history SET valid_to = now()"
+expect_denied "app: DISABLE TECHNICAL/BA guard trigger" "$APP" "ALTER TABLE platform_role_permission DISABLE TRIGGER trg_role_permission_guard"
+expect_denied "app: DISABLE org tree trigger" "$APP" "ALTER TABLE platform_org_unit DISABLE TRIGGER trg_org_unit_tree_guard"
+expect_denied "app: DROP exclusion constraint" "$APP" "ALTER TABLE platform_position_assignment DROP CONSTRAINT ex_position_assignment_one_primary"
+expect_denied "app: TRUNCATE login attempts" "$APP" "TRUNCATE platform_login_attempt"
+hist="$(admin -d "$DB" -c "SELECT count(*) FROM platform_org_unit_history h JOIN platform_org_unit u ON u.id = h.unit_id WHERE u.code = 'rc_unit'")"
+if [ "$hist" = "1" ]; then record "history row written by trigger for the app role's insert" PASS; else record "history row written by trigger for the app role's insert" FAIL "found $hist"; fi
+
 echo "== readonly role"
 expect_ok "ro: SELECT audit" "$RO" "SELECT count(*) FROM platform_audit_event"
 expect_ok "ro: SELECT outbox" "$RO" "SELECT count(*) FROM platform_outbox_event"
 expect_denied "ro: INSERT audit" "$RO" "$AUDIT_INSERT"
 expect_denied "ro: UPDATE integration source" "$RO" "UPDATE platform_integration_source SET name_fa = name_fa"
 expect_denied "ro: DELETE outbox" "$RO" "DELETE FROM platform_outbox_event"
+expect_ok "ro: SELECT role grants" "$RO" "SELECT count(*) FROM platform_role_permission"
+expect_denied "ro: UPDATE user" "$RO" "UPDATE platform_user SET display_name = display_name"
 
 echo "== audit trigger still enabled and rows intact"
+disabled="$(admin -d "$DB" -c "SELECT count(*) FROM pg_trigger g JOIN pg_class c ON c.oid = g.tgrelid WHERE NOT g.tgisinternal AND c.relname LIKE 'platform\_%' AND g.tgenabled <> 'O'")"
+if [ "$disabled" = "0" ]; then record "all platform triggers enabled" PASS; else record "all platform triggers enabled" FAIL "$disabled disabled"; fi
 state="$(admin -d "$DB" -c "SELECT string_agg(tgname || '=' || tgenabled::text, ',' ORDER BY tgname) FROM pg_trigger WHERE tgrelid = 'platform_audit_event'::regclass AND NOT tgisinternal")"
 if [ "$state" = "trg_audit_event_append_only=O,trg_audit_event_no_truncate=O" ]; then record "audit triggers enabled" PASS "$state"; else record "audit triggers enabled" FAIL "$state"; fi
 rows="$(admin -d "$DB" -c "SELECT count(*) FROM platform_audit_event WHERE action = 'platform.ops.roles_check'")"

@@ -1,5 +1,9 @@
 # Database roles - least privilege (PHASE_00 / 00.7)
 
+PHASE_01 / 01.2 extends `ops/db/grants.sql` for the identity/org/workflow/document/parameter/job tables (no hard
+delete, append-only history and evidence, migration-only catalogues, EXECUTE on the parameter functions) - table
+in `docs/db/ERD.md` section 6; `ops/db/roles_check.sh` proves each rule as the app role.
+
 SECURITY_BASELINE 4: "least privileged service accounts"; 2: "logs append-only under restricted roles".
 
 | Role | Used by | Privileges |
