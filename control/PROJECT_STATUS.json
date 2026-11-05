@@ -142,11 +142,11 @@
         },
         "01.3": {
           "name": "Domain Engine",
-          "state": "IN_REVIEW",
+          "state": "IN_PROGRESS",
           "commit": "6fc3eea",
           "report": "reports/phase-01/step-3/REPORT.md",
-          "review": null,
-          "rework_cycles": 0,
+          "review": "reports/phase-01/step-3/REVIEW.md",
+          "rework_cycles": 1,
           "started_at": "2026-11-05T08:15:00+00:00",
           "done_at": null
         },
@@ -2316,6 +2316,20 @@
       "resolution": "پاسخ کارفرما ۲۰۲۶-۱۱-۰۴: C از ابتدا (دستور بازیابی روی کنسول سرور با دسترسی فیزیکی/SSH، بازنشانی رمز/MFA مالک با Audit) + A پیش از Production (حساب اضطراری مهروموم در گاوصندوق، هشدار فوری و Audit ویژه، جلسه ۲ ساعته، تعویض رمز پس از هر استفاده). B (ادمین دوم) فعلاً نه.",
       "decided_by": "بسام ربیهاوی",
       "decided_at": "2026-11-04T15:44:43+00:00"
+    },
+    {
+      "id": "DEC-055",
+      "priority": "P1",
+      "gate": "Phase-1",
+      "domain": "Security",
+      "issue": "تأیید اولین دارنده نقش تأیید کسب‌وکار (کنسول سرور؛ خودتأییدی راه‌اندازی مالک؛ نفر دوم از روز اول)",
+      "status": "APPROVED",
+      "owner": "کارفرما",
+      "phase": "PHASE_01",
+      "source": "گام 01.3 2026-11-05 (REV-0116؛ DEC-032)",
+      "resolution": "B: خودتأییدی یک‌باره مالک فقط برای اولین دارنده هر نقش تأیید کسب‌وکار؛ تأیید دومرحله‌ای تازه + علامت ویژه در Audit",
+      "decided_by": "بسام ربیهاوی",
+      "decided_at": "2026-11-05T18:12:46+00:00"
     }
   ],
   "ready_for_test": [
@@ -2891,7 +2905,39 @@
       "state": "IN_REVIEW",
       "note": null,
       "commit": "6fc3eea"
+    },
+    {
+      "at": "2026-11-05T17:40:03+00:00",
+      "kind": "step",
+      "phase": "PHASE_01",
+      "step": "01.3",
+      "state": "REWORK",
+      "note": null,
+      "commit": null
+    },
+    {
+      "at": "2026-11-05T17:40:03+00:00",
+      "kind": "step",
+      "phase": "PHASE_01",
+      "step": "01.3",
+      "state": "IN_PROGRESS",
+      "note": null,
+      "commit": null
+    },
+    {
+      "at": "2026-11-05T17:40:48+00:00",
+      "kind": "decision_added",
+      "id": "DEC-055",
+      "status": "OPEN"
+    },
+    {
+      "at": "2026-11-05T18:12:46+00:00",
+      "kind": "decision",
+      "id": "DEC-055",
+      "status": "APPROVED",
+      "by": "بسام ربیهاوی",
+      "note": "B: خودتأییدی یک‌باره مالک فقط برای اولین دارنده هر نقش تأیید کسب‌وکار؛ تأیید دومرحله‌ای تازه + علامت ویژه در Audit"
     }
   ],
-  "updated_at": "2026-11-05T17:29:18+00:00"
+  "updated_at": "2026-11-05T18:12:46+00:00"
 }

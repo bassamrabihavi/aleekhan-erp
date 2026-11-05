@@ -54,3 +54,7 @@
 - **Back-dating (DEC-048):** org-tree changes take effect only from now on; no past effective dates.
 - **Decided by:** بسام ربیهاوی (کارفرما), in the Claude Code session.
 - **2026-11-05 (REV-0109 follow-up, DEC-048):** no back-dating applies to person-to-position assignments too (valid_from and valid_to only from now on). Unit-head positions always have exactly one PRIMARY holder; a stand-in is recorded as ACTING. Decided by بسام ربیهاوی (کارفرما).
+
+## 2026-11-05 — DEC-055 APPROVED: first holder of a business-approval role (REV-0116)
+- **Decision:** option B. The owner (owner_admin) may approve, inside the system, his own request for the **first** holder of each business-approval role, once per role: only while that role has no ACTIVE holder, with a fresh MFA step-up, a mandatory reason, and a special audit flag (`bootstrap_self_approval`). From the second holder on, DEC-032 maker-checker applies unchanged.
+- **Decided by:** بسام ربیهاوی (کارفرما), in the Claude Code session.

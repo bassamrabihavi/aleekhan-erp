@@ -270,6 +270,8 @@ class ApprovalRequest(models.Model):
     )
     decided_by = _user_fk()
     decision_note = models.CharField(max_length=500, blank=True, default="")
+    # DEC-055 (option B): the owner's one-time self-approval of the first holder of a business-approval role
+    bootstrap_self_approval = models.BooleanField(db_default=False)
     closed_at = models.DateTimeField(null=True, blank=True)
     workflow_instance = models.ForeignKey(
         WorkflowInstance, on_delete=models.PROTECT, null=True, blank=True, related_name="+", db_index=False
@@ -298,10 +300,22 @@ class ApprovalRequest(models.Model):
             CheckConstraint(
                 condition=in_values("route_kind", RouteKind.values), name="ck_approval_request_route_kind"
             ),
-            # DEC-032: maker != checker, never self-approval
+            # DEC-032: maker != checker, never self-approval - except the DEC-055 (option B) bootstrap
+            # self-approval of the first holder of a business-approval role (trigger, migration 0013)
             CheckConstraint(
-                condition=Q(decided_by__isnull=True) | ~Q(decided_by=F("requested_by")),
+                condition=Q(decided_by__isnull=True)
+                | ~Q(decided_by=F("requested_by"))
+                | Q(bootstrap_self_approval=True, status=ApprovalStatus.APPROVED),
                 name="ck_approval_request_maker_checker",
+            ),
+            CheckConstraint(
+                condition=Q(bootstrap_self_approval=False)
+                | Q(
+                    status=ApprovalStatus.APPROVED,
+                    action="platform.identity.assignment.grant",
+                    resource_type="role_assignment",
+                ),
+                name="ck_approval_request_bootstrap_scope",
             ),
             CheckConstraint(
                 condition=Q(expires_at__gt=F("requested_at")), name="ck_approval_request_expiry_after_request"

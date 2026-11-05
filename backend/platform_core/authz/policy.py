@@ -197,6 +197,11 @@ def grants_for(user_id: uuid.UUID, action: str | None = None, *, at: datetime | 
     return out
 
 
+def effective_grants(user_id: uuid.UUID, action: str) -> list[Grant]:
+    """Grants that count for ``action`` (TECHNICAL roles removed for business-approval permissions)."""
+    return _effective_grants(user_id, action)
+
+
 def _effective_grants(user_id: uuid.UUID, action: str) -> list[Grant]:
     perm = permission_flags(action)
     grants = grants_for(user_id, action)
@@ -335,34 +340,83 @@ def requires_login_mfa(user_id: uuid.UUID) -> bool:
 
 
 # --------------------------------------------------------------------------------- list scoping (01.4)
-def scope_q(caller: Caller, action: str, *, unit_field: str | None, owner_fields: Iterable[str]) -> Q:
-    """``Q`` restricting a queryset to the records the caller may see (deny: matches nothing)."""
+MATCH_ALL: Final = ~Q(pk__in=[])  # a non-empty "true" (an empty Q() is dropped by Q.__or__, REV-0112)
+MATCH_NONE: Final = Q(pk__in=[])
+
+
+def grant_q(
+    g: Grant,
+    facts: ScopeFacts,
+    caller_id: uuid.UUID,
+    *,
+    unit_field: str | None,
+    owner_fields: Iterable[str],
+    sensitivity_field: str | None = None,
+) -> Q:
+    """``Q`` of the records ONE grant covers - the queryset form of :func:`grant_allows` (REV-0112)."""
+    if g.scope_kind == ScopeKind.GLOBAL:
+        in_scope = MATCH_ALL
+    elif unit_field is None or g.scope_unit_id is None:
+        in_scope = MATCH_NONE
+    elif g.scope_kind == ScopeKind.ORG_UNIT:
+        in_scope = Q(**{unit_field: g.scope_unit_id})
+    else:
+        in_scope = Q(**{f"{unit_field}__in": list(facts.subtree.get(g.scope_unit_id, {g.scope_unit_id}))})
+    own = MATCH_NONE
+    for f in owner_fields:
+        own = own | Q(**{f: caller_id})
+    own_unit = (in_scope & Q(**{f"{unit_field}__in": list(facts.own_units)})) if unit_field else MATCH_NONE
+    if g.mode == GrantMode.SCOPE:
+        q = in_scope
+    elif g.mode == GrantMode.OWN:
+        q = own
+    elif g.mode == GrantMode.OWN_UNIT:
+        q = own_unit
+    elif g.mode == GrantMode.OWN_AND_OWN_UNIT:
+        q = own | own_unit
+    else:
+        return MATCH_NONE  # unknown mode: deny
+    return q & sensitivity_q(g, sensitivity_field)
+
+
+def sensitivity_q(g: Grant, sensitivity_field: str | None) -> Q:
+    """The grant's sensitivity cap as a filter. No cap: match all. A capped grant used on a query without a
+    sensitivity field matches nothing (fail closed: a cap is never silently ignored, REV-0112)."""
+    if not g.max_sensitivity:
+        return MATCH_ALL
+    if not sensitivity_field:
+        return MATCH_NONE
+    cap = SENSITIVITY_RANK[g.max_sensitivity]
+    allowed = [s for s, rank in SENSITIVITY_RANK.items() if rank <= cap]
+    return Q(**{f"{sensitivity_field}__in": allowed}) | Q(**{sensitivity_field: ""})
+
+
+def scope_q(
+    caller: Caller,
+    action: str,
+    *,
+    unit_field: str | None,
+    owner_fields: Iterable[str],
+    sensitivity_field: str | None = None,
+) -> Q:
+    """``Q`` restricting a queryset to the records the caller may see (deny: matches nothing).
+
+    Equal, record for record, to :func:`decide` with the record scope built from the same fields (one unit
+    field, owner fields, optional sensitivity field) - property-tested in ``test_phase01_authz_engine.py``.
+    """
     grants = _effective_grants(caller.user_id, action)
     facts = _facts(caller.user_id, grants)
-    nothing = Q(pk__in=[])
-    q = nothing
     fields = tuple(owner_fields)
-    own = nothing
-    for f in fields:
-        own |= Q(**{f: caller.user_id})
+    q = MATCH_NONE
     for g in grants:
-        if g.scope_kind == ScopeKind.GLOBAL:
-            in_scope = Q()
-        elif unit_field is None or g.scope_unit_id is None:
-            in_scope = nothing
-        elif g.scope_kind == ScopeKind.ORG_UNIT:
-            in_scope = Q(**{unit_field: g.scope_unit_id})
-        else:
-            in_scope = Q(**{f"{unit_field}__in": list(facts.subtree.get(g.scope_unit_id, {g.scope_unit_id}))})
-        own_unit = in_scope & Q(**{f"{unit_field}__in": list(facts.own_units)}) if unit_field else nothing
-        if g.mode == GrantMode.SCOPE:
-            q |= in_scope
-        elif g.mode == GrantMode.OWN:
-            q |= own
-        elif g.mode == GrantMode.OWN_UNIT:
-            q |= own_unit
-        elif g.mode == GrantMode.OWN_AND_OWN_UNIT:
-            q |= own | own_unit
+        q = q | grant_q(
+            g,
+            facts,
+            caller.user_id,
+            unit_field=unit_field,
+            owner_fields=fields,
+            sensitivity_field=sensitivity_field,
+        )
     return q
 
 

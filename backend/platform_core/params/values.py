@@ -7,7 +7,7 @@ is a configuration error (``EngineContractError`` -> 500), never a silent defaul
 
 from __future__ import annotations
 
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 from django.db import DatabaseError, connections, transaction
 
@@ -47,3 +47,15 @@ def effective_hours(key: str, *, using: str = "default") -> timedelta:
 
 def effective_days(key: str, *, using: str = "default") -> timedelta:
     return timedelta(days=effective_int(key, using=using))
+
+
+def effective_at(key: str, at: datetime, *, using: str = "default") -> str:
+    """Value effective at instant ``at`` (``platform_param_value_at``, migration 0012; REV-0113)."""
+    try:
+        with transaction.atomic(using=using), connections[using].cursor() as cur:
+            cur.execute("SELECT public.platform_param_value_at(%s, %s)", [key, at])
+            row = cur.fetchone()
+    except DatabaseError as exc:
+        raise EngineContractError(f"parameter {key!r} has no effective value") from exc
+    assert row is not None
+    return str(row[0])

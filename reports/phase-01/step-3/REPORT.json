@@ -11,7 +11,9 @@
     "documents: allow-list, magic bytes, macro-free XLSX, bomb guard, quarantine, ClamAV INSTREAM adapter + test double, AES-256-GCM storage, attachment-only download, 30-day purge",
     "parameters (effective reads, OWNER_POLICY Q-0103, BUSINESS_RULE blocked), jobs (safe cancel, JOB_PROTECTED, no force kill), login retention 24 months, audit never purged",
     "audit: session_id, network_zone, hash chain + verification + integrity run",
-    "error codes: 8 new codes, golden, OpenAPI 0.5.2-draft"
+    "error codes: 8 new codes, golden, OpenAPI 0.5.2-draft",
+    "rework 1: REV-0111 (operator: current approved revision of task-linked documents only), REV-0112 (scope_q GLOBAL + sensitivity caps, list == object check), REV-0113, REV-0114, REV-0115",
+    "DEC-055 B: owner bootstrap self-approval of the first holder of each business-approval role (service + DB guard)"
   ],
   "changes": [
     "CHANGELOG.md",
@@ -76,10 +78,18 @@
     "backend/platform_core/workflow/approvals.py",
     "backend/platform_core/workflow/instances.py",
     "backend/platform_core/workflow/tasks.py",
-    "docs/engine/PHASE01_ENGINE.md"
+    "docs/engine/PHASE01_ENGINE.md",
+    "backend/platform_core/migrations/0012_phase01_engine_rework.py",
+    "backend/platform_core/tests/test_phase01_rework1.py",
+    "ops/db/grants.sql",
+    "backend/platform_core/migrations/0013_dec055_bootstrap_self_approval.py",
+    "backend/platform_core/tests/test_phase01_dec055.py",
+    "backend/platform_core/workflow/models.py"
   ],
   "migrations": [
-    "platform_core.0011_phase01_engine (RunSQL trigger trg_position_assignment_a_not_backdated; ck_session_end_reason + CONCURRENT_LIMIT; housekeeping job types seed) - reversible"
+    "platform_core.0011_phase01_engine (RunSQL trigger trg_position_assignment_a_not_backdated; ck_session_end_reason + CONCURRENT_LIMIT; housekeeping job types seed) - reversible",
+    "platform_core.0012_phase01_engine_rework (rework 1: platform_param_value_at, superseded future values never apply (REV-0113); login outcome MFA_ENROLMENT_REQUIRED (REV-0114)) - reversible",
+    "platform_core.0013_dec055_bootstrap_self_approval (DEC-055 B: bootstrap_self_approval flag, CHECKs, per-role-locked trigger, role-assignment guard) - reversible"
   ],
   "test_evidence": [
     {
@@ -151,6 +161,46 @@
       "command": "pip-audit ... --vulnerability-service osv: no known vulnerabilities",
       "outcome": "PASS",
       "log_path": "reports/phase-01/step-3/logs/pip_audit_osv.log"
+    },
+    {
+      "command": "rework1: ruff check + format --check",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-3/logs/rework1/ruff.log"
+    },
+    {
+      "command": "rework1: mypy strict (155 files)",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-3/logs/rework1/mypy.log"
+    },
+    {
+      "command": "rework1: makemigrations --check",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-3/logs/rework1/makemigrations_check.log"
+    },
+    {
+      "command": "rework1: pytest -m \"not perf\" (868 passed, 1 skipped: real ClamAV)",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-3/logs/rework1/pytest.log"
+    },
+    {
+      "command": "rework1: race tests x3 (37 each, incl. DEC-055 bootstrap race)",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-3/logs/rework1/concurrency_x3.log"
+    },
+    {
+      "command": "rework1: db_roundtrip.sh (0012+0013, empty diff)",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-3/logs/rework1/db_roundtrip.log"
+    },
+    {
+      "command": "rework1: roles_check.sh 50/50",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-3/logs/rework1/roles_check.log"
+    },
+    {
+      "command": "rework1: secret_scan + --history",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-3/logs/rework1/secret_scan.log"
     }
   ],
   "security_evidence": [
@@ -173,10 +223,10 @@
     "DEC-053",
     "DEC-054",
     "Q-0101..Q-0106",
-    "REV-0109 employer answer 2026-11-05"
+    "REV-0109 employer answer 2026-11-05",
+    "DEC-055 (option B)"
   ],
   "risks": [
-    "first holder of a business-approval role cannot be confirmed (no decider exists, no self-approval) - needs employer decision",
     "engine interpretations E-1..E-10 in docs/engine/PHASE01_ENGINE.md need employer/reviewer confirmation",
     "all write transactions serialise on the audit-chain lock (perf check in 01.7)",
     "OpenAPI text of requestJobCancel says QUEUED -> CANCEL_REQUESTED; engine follows STATE_TRANSITIONS 4.7 (QUEUED -> CANCELLED)"

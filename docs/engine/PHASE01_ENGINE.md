@@ -60,12 +60,39 @@ between the start of their unit of work and the commit (short; acceptable at fac
 
 ## 4. Known gaps (not implemented on purpose)
 
-- First holder of a business-approval role (e.g. the first `workflow_approver`) cannot be confirmed: nobody
-  holds `platform.workflow.approval.decide` yet and DEC-032 forbids self-approval -> the request stays PENDING
-  and expires (DEC-032 D1). Needs an employer decision (e.g. a console confirmation like DEC-054).
 - An IN_REVIEW revision whose request expires / is withdrawn stays IN_REVIEW (4.6 has no IN_REVIEW -> WORKING);
   a new revision must be uploaded.
 - Workflow FAILED: the "manual resolution task" of 4.5 is not created (no approved assignee rule).
 - Yearly archive of business audit (DEC-032 R-A): no archive target decided; audit is kept, never deleted.
 - Break-glass account (DEC-054 A): before production, not in 01.3.
 - Force kill (DEC-024), SLA clocks, task reopen, approval delegation: not approved (4.11).
+
+## 5. Rework round 1 (review of 6fc3eea)
+
+- REV-0111: documents ○ (operator_terminal) = assignee of a live task linked to the document; only the
+  document's current APPROVED, CLEAN revision (a task with `related_revision` only while that revision is the
+  current approved one). `revision_scope` (object check, used by `download` and `get_revision`) and
+  `revision_list_q` / `document_list_q` (lists) implement the same rule. The creator is no longer an owner.
+- REV-0112: `scope_q` = per-grant `grant_q` (queryset form of `grant_allows`): GLOBAL uses a non-empty match-all
+  (`~Q(pk__in=[])`; an empty `Q()` vanishes in `|`), the sensitivity cap is applied per grant
+  (`sensitivity_field`), and a capped grant used without a sensitivity field matches nothing (fail closed).
+  Tested: list == object check for every scope kind x grant mode and for the document sensitivity cells.
+- REV-0113: migration 0012 `platform_param_value_at(key, at)`; a SUPERSEDED value counts only if
+  `superseded_at > effective_from` (it really was in force), so a future value superseded before its date never
+  applies. `platform_param_value(key)` = `platform_param_value_at(key, now)`; `params.values.effective_at`.
+- REV-0114: refused outside login without MFA factor is recorded as `MFA_ENROLMENT_REQUIRED` (audit DENIED) and
+  does not reset the lockout window.
+- REV-0115: purge deletes the bytes in `transaction.on_commit` (idempotent delete).
+
+## 6. DEC-055 (option B, APPROVED 2026-11-05): first holder of a business-approval role
+
+`workflow.approvals.bootstrap_self_approve(caller, request_id, reason=)`: the owner (ACTIVE `owner_admin`)
+approves his own `platform.identity.assignment.grant` request for the FIRST holder of a business-approval role
+- once per role, only while the role has no ACTIVE holder and no earlier bootstrap approval, with a fresh MFA
+step-up and a mandatory reason; the request carries `bootstrap_self_approval = true` and the audit event the
+scope flag `bootstrap_self_approval`. Anything else -> 403 `SELF_APPROVAL_FORBIDDEN`; from the second holder on
+DEC-032 is unchanged. DB (migration 0013): CHECK `ck_approval_request_maker_checker` allows decider = requester
+only for a flagged APPROVED row, `ck_approval_request_bootstrap_scope`, trigger
+`trg_approval_request_bootstrap_guard` (rule `ck_approval_request_bootstrap_self_approval`, per-role advisory
+lock: concurrent bootstrap approvals of one role -> exactly one wins) and the 0008 role-assignment guard accepting
+only such a flagged request. API exposure (an operation or an `approveRequest` variant) is a 01.4 contract item.

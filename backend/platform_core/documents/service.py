@@ -23,13 +23,15 @@ PHASE_01,
 
 from __future__ import annotations
 
+import functools
 import uuid
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Final
 from urllib.parse import quote
 
-from django.db.models import Q
+from django.db import transaction
+from django.db.models import F, Q
 
 from platform_core.authz.policy import (
     Caller,
@@ -50,6 +52,7 @@ from platform_core.engine.errors import (
 )
 from platform_core.engine.state import StateMachine
 from platform_core.engine.uow import NothingToDo, UnitOfWork, unit_of_work, unit_of_work_or_nothing
+from platform_core.identity.models import GrantMode
 from platform_core.params.values import effective_days, effective_int
 from platform_core.workflow import approvals
 from platform_core.workflow.models import ApprovalRequest, ApprovalStatus
@@ -112,16 +115,117 @@ def download_headers(filename: str, size: int) -> dict[str, str]:
 
 
 # --------------------------------------------------------------------------------------------- scopes
-def document_scope(doc: Document, *, approved_only_owner: bool = True) -> RecordScope:
+# Matrix v1.0, operator_terminal on platform.document.read/download: "○ approved, linked to own tasks"
+# (REV-0111). ○ for documents means: the caller is the assignee of a live (not CANCELLED) task linked
+# to the document (``related_type = "document"``), and only the CURRENT APPROVED, CLEAN revision is visible;
+# a task that pins ``related_revision`` gives access to that revision number only while it is the current
+# approved one. The document creator is not an "owner" in this sense (creators hold ● grants anyway).
+def _linked_tasks(document_id: uuid.UUID) -> list[tuple[uuid.UUID, int | None]]:
     from platform_core.workflow.models import TaskStatus, WorkTask
 
-    owners: set[uuid.UUID] = {doc.created_by_id}
-    linked = WorkTask.objects.filter(related_type="document", related_id=str(doc.pk)).exclude(
-        status=TaskStatus.CANCELLED
+    rows = (
+        WorkTask.objects.filter(
+            related_type="document", related_id=str(document_id), assignee_user__isnull=False
+        )
+        .exclude(status=TaskStatus.CANCELLED)
+        .values_list("assignee_user_id", "related_revision")
     )
-    if not approved_only_owner or doc.current_approved_revision_id is not None:
-        owners |= {u for u in linked.values_list("assignee_user_id", flat=True) if u is not None}
+    return [(u, r) for u, r in rows if u is not None]
+
+
+def document_scope(doc: Document) -> RecordScope:
+    """Document level (getDocument / upload / submit): ○ owners only while an approved revision exists."""
+    owners = {u for u, _r in _linked_tasks(doc.pk)} if doc.current_approved_revision_id is not None else set()
     return RecordScope(owners=frozenset(owners), sensitivity=doc.sensitivity)
+
+
+def is_released_for_task_holders(rev: DocumentRevision) -> bool:
+    return (
+        rev.status == R.APPROVED
+        and rev.scan_status == S.CLEAN
+        and rev.document.current_approved_revision_id == rev.pk
+    )
+
+
+def revision_scope(rev: DocumentRevision) -> RecordScope:
+    """Revision level (read / download): ○ only for the current approved, clean revision (REV-0111)."""
+    owners: set[uuid.UUID] = set()
+    if is_released_for_task_holders(rev):
+        owners = {
+            u for u, pinned in _linked_tasks(rev.document_id) if pinned is None or pinned == rev.revision_no
+        }
+    return RecordScope(owners=frozenset(owners), sensitivity=rev.document.sensitivity)
+
+
+def _own_task_links(user_id: uuid.UUID) -> list[tuple[uuid.UUID, int | None]]:
+    from platform_core.workflow.models import TaskStatus, WorkTask
+
+    out: list[tuple[uuid.UUID, int | None]] = []
+    rows = (
+        WorkTask.objects.filter(related_type="document", assignee_user_id=user_id)
+        .exclude(status=TaskStatus.CANCELLED)
+        .values_list("related_id", "related_revision")
+    )
+    for rid, rev_no in rows:
+        try:
+            out.append((uuid.UUID(rid), rev_no))
+        except ValueError:
+            continue
+    return out
+
+
+def revision_list_q(caller: Caller, action: str = "platform.document.read") -> Q:
+    """List scoping of revisions = the object check :func:`revision_scope` + ``decide`` (REV-0111/0112)."""
+    from platform_core.authz import policy as P
+
+    grants = P.effective_grants(caller.user_id, action)
+    facts = P.ScopeFacts(caller.user_id)
+    links = _own_task_links(caller.user_id)
+    own = P.MATCH_NONE
+    for doc_id, pinned in links:
+        own = own | (Q(document_id=doc_id) & (P.MATCH_ALL if pinned is None else Q(revision_no=pinned)))
+    own = own & Q(status=R.APPROVED, scan_status=S.CLEAN, document__current_approved_revision=F("pk"))
+    q = P.MATCH_NONE
+    for g in grants:
+        q = q | P.grant_q(
+            g,
+            facts,
+            caller.user_id,
+            unit_field=None,
+            owner_fields=(),
+            sensitivity_field="document__sensitivity",
+        )
+        if g.mode in (GrantMode.OWN, GrantMode.OWN_AND_OWN_UNIT):
+            q = q | (own & P.sensitivity_q(g, "document__sensitivity"))
+    return q
+
+
+def document_list_q(caller: Caller, action: str = "platform.document.read") -> Q:
+    """List scoping of documents, equal to :func:`document_scope` + ``decide``."""
+    from platform_core.authz import policy as P
+
+    grants = P.effective_grants(caller.user_id, action)
+    facts = P.ScopeFacts(caller.user_id)
+    own = Q(pk__in=[d for d, _r in _own_task_links(caller.user_id)], current_approved_revision__isnull=False)
+    q = P.MATCH_NONE
+    for g in grants:
+        q = q | P.grant_q(
+            g, facts, caller.user_id, unit_field=None, owner_fields=(), sensitivity_field="sensitivity"
+        )
+        if g.mode in (GrantMode.OWN, GrantMode.OWN_AND_OWN_UNIT):
+            q = q | (own & P.sensitivity_q(g, "sensitivity"))
+    return q
+
+
+def get_revision(caller: Caller, revision_id: uuid.UUID) -> DocumentRevision:
+    """Revision read (``platform.document.read``) with the same scope as download."""
+    action = "platform.document.read"
+    require_permission(caller, action)
+    rev = DocumentRevision.objects.select_related("document").filter(pk=revision_id).first()
+    if rev is None:
+        raise NotFound()
+    require_record(caller, action, revision_scope(rev))
+    return rev
 
 
 def _reason(text: str) -> str:
@@ -503,7 +607,7 @@ def download(caller: Caller, revision_id: uuid.UUID) -> DownloadFile:
     rev = DocumentRevision.objects.select_related("document", "stored_object").filter(pk=revision_id).first()
     if rev is None:
         raise NotFound()
-    require_record(caller, action, document_scope(rev.document))
+    require_record(caller, action, revision_scope(rev))
     if rev.scan_status != S.CLEAN or rev.stored_object.bytes_purged_at is not None:
         raise FileNotReleased()
     data = storage.read(rev.stored_object.storage_key, key_ref=rev.stored_object.key_ref)
@@ -553,6 +657,8 @@ def purge_rejected(
                 aggregate_version=1,
                 payload={"sha256": obj.sha256},
             )
-            storage.delete(key)  # after the row update: a crash leaves bytes behind, never a lying marker
+            # REV-0115: bytes are deleted only after the marker is committed (idempotent delete); a failed
+            # commit leaves bytes and no marker, and the next run purges again.
+            transaction.on_commit(functools.partial(storage.delete, key))
             n += 1
     return n

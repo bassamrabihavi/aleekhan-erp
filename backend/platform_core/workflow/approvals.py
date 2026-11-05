@@ -289,6 +289,78 @@ def reject(
     )
 
 
+BOOTSTRAP_ACTION: Final = "platform.identity.assignment.grant"
+
+
+def bootstrap_self_approve(
+    caller: Caller, request_id: uuid.UUID, *, reason: str, request_ctx_id: uuid.UUID | None = None
+) -> Outcome:
+    """DEC-055 (option B): the owner approves his own request for the FIRST holder of a business-approval
+    role.
+
+    Conditions (also enforced by the DB, migration 0013): the caller holds an ACTIVE ``owner_admin``
+    assignment and made the request; the request is PENDING, not expired, for
+    ``platform.identity.assignment.grant`` on a PENDING_APPROVAL assignment he granted; the role holds a
+    business-approval permission, has no ACTIVE holder and was never bootstrap-approved before
+    (once per role, serialised per role); fresh MFA step-up; reason
+    >= 3 characters. Anything else -> 403 ``SELF_APPROVAL_FORBIDDEN`` (DEC-032 applies unchanged).
+    """
+    from django.db import connection
+
+    from platform_core.authz.policy import holds_role
+    from platform_core.identity.models import RoleAssignment, RolePermission
+
+    text = reason.strip()
+    if len(text) < 3:
+        raise ValidationFailed("a reason is required (DEC-055)", errors=[FieldError("reason", "REQUIRED")])
+    if not holds_role(caller.user_id, "owner_admin"):
+        raise SelfApprovalForbidden("only the owner may approve the first holder of a role (DEC-055)")
+    require_step_up(caller, BOOTSTRAP_ACTION)
+    with unit_of_work(caller.context(request_ctx_id)) as uow:
+        r = _lock(request_id)
+        if r.requested_by_id != caller.user_id:
+            raise NotFound()
+        APPROVAL_MACHINE.assert_transition(r.status, ApprovalStatus.APPROVED)
+        if r.expires_at <= db_now():
+            raise StateTransitionNotAllowed("the approval request has expired")
+        if r.action_id != BOOTSTRAP_ACTION or r.resource_type != "role_assignment":
+            raise SelfApprovalForbidden("bootstrap self-approval exists only for role assignments (DEC-055)")
+        ra = RoleAssignment.objects.select_for_update().filter(pk=uuid.UUID(r.resource_id)).first()
+        if ra is None or ra.status != "PENDING_APPROVAL" or ra.granted_by_id != caller.user_id:
+            raise SelfApprovalForbidden("no pending assignment granted by you")
+        with connection.cursor() as cur:  # same per-role lock as the DB guard
+            cur.execute(
+                "SELECT pg_advisory_xact_lock(hashtextextended(%s, 0))",
+                [f"platform_bootstrap_self_approval:{ra.role_id}"],
+            )
+        if not RolePermission.objects.filter(role_id=ra.role_id, permission__business_approval=True).exists():
+            raise SelfApprovalForbidden("the role holds no business-approval permission")
+        earlier = ApprovalRequest.objects.filter(
+            bootstrap_self_approval=True, resource_type="role_assignment"
+        ).values_list("resource_id", flat=True)
+        if (
+            RoleAssignment.objects.filter(role_id=ra.role_id, status="ACTIVE").exists()
+            or RoleAssignment.objects.filter(
+                role_id=ra.role_id, pk__in=[uuid.UUID(x) for x in earlier]
+            ).exists()
+        ):
+            raise SelfApprovalForbidden("the role already has a holder: a second person decides (DEC-032)")
+        before = _snapshot(r)
+        ApprovalRequest.objects.filter(pk=r.pk).update(
+            status=ApprovalStatus.APPROVED,
+            decided_by_id=caller.user_id,
+            decision_note=text[:500],
+            closed_at=db_now(),
+            bootstrap_self_approval=True,
+        )
+        r.refresh_from_db()
+        _audit(uow, "approve", r, before=before, reason=text, scope={"bootstrap_self_approval": True})
+        handler = _handler(r.resource_type)
+        if handler is not None:
+            handler.on_approved(uow, r, caller.user_id)
+    return Outcome(r, False)
+
+
 def withdraw(
     caller: Caller, request_id: uuid.UUID, *, request_ctx_id: uuid.UUID | None = None
 ) -> ApprovalRequest:

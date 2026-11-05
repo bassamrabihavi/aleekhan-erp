@@ -211,7 +211,9 @@ def test_uploader_never_approves_and_s2_hidden_from_employees(store, no_exec) ->
 
 
 @pytest.mark.django_db
-def test_eicar_is_quarantined_rejected_and_purged_after_30_days(store, no_exec) -> None:
+def test_eicar_is_quarantined_rejected_and_purged_after_30_days(
+    store, no_exec, django_capture_on_commit_callbacks
+) -> None:
     ctl, _apr, _emp = _people()
     doc = service.create_document(
         ctl, document_type="syn_drawing", title_fa="سند آزمون ساختگی", sensitivity="S1"
@@ -225,7 +227,10 @@ def test_eicar_is_quarantined_rejected_and_purged_after_30_days(store, no_exec) 
     assert obj.purge_after is not None and rev.scanned_at is not None
     assert obj.purge_after - rev.scanned_at == timedelta(days=30)
     assert service.purge_rejected() == 0  # not before the quarantine period
-    assert service.purge_rejected(now=db_now() + timedelta(days=31)) == 1
+    with django_capture_on_commit_callbacks(execute=True) as callbacks:  # REV-0115: bytes go after commit
+        assert service.purge_rejected(now=db_now() + timedelta(days=31)) == 1
+        storage.read(obj.storage_key, key_ref=obj.key_ref)  # still there until the commit
+    assert len(callbacks) == 1
     obj.refresh_from_db()
     assert obj.bytes_purged_at is not None and obj.sha256 == rev.sha256  # metadata + hash kept
     with pytest.raises(DependencyUnavailable):

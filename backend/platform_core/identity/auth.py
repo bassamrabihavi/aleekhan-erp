@@ -319,7 +319,7 @@ def _open(
     needs_mfa = outside or requires_login_mfa(user.pk)
     factor = _active_factor(user)
     if needs_mfa and factor is None and outside:
-        _record_attempt(uow, att, user=user, outcome=LoginOutcome.OK)
+        _record_attempt(uow, att, user=user, outcome=LoginOutcome.MFA_ENROLMENT_REQUIRED)  # REV-0114: refusal
         return None, MfaRequired("MFA enrolment is required; enrol from inside the factory network first")
     pending = needs_mfa and factor is not None
     session, token = sessions.open_session(

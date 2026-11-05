@@ -416,6 +416,9 @@ class LoginOutcome(models.TextChoices):
     MFA_OK = "MFA_OK", "MFA code accepted"
     MFA_FAILED = "MFA_FAILED", "MFA code rejected"
     RECOVERY_CODE_USED = "RECOVERY_CODE_USED", "Recovery code used (DEC-050)"
+    # 01.3 rework (REV-0114, migration 0012): correct password, refused: MFA applies (outside login) and
+    # the user has no MFA factor yet - a refusal, never a success, and it does not reset the lockout window
+    MFA_ENROLMENT_REQUIRED = "MFA_ENROLMENT_REQUIRED", "Refused: MFA required but not enrolled"
 
 
 class LoginAttempt(models.Model):

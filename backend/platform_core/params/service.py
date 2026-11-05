@@ -213,6 +213,8 @@ def _lock_value(value_id: uuid.UUID) -> ParameterValue:
 
 
 def _supersede_previous(definition: ParameterDefinition, now: datetime) -> None:
+    # Every PUBLISHED revision is superseded, also future-dated ones: a value superseded before its
+    # effective_from never takes effect (platform_param_value_at, migration 0012; REV-0113).
     ParameterValue.objects.filter(definition=definition, status=ValueStatus.PUBLISHED).update(
         status=ValueStatus.SUPERSEDED, superseded_at=now
     )

@@ -170,3 +170,28 @@ Request PASS. Reviewer attention:
 
 ## 10. Next step
 01.4 API: endpoints over these services, the switch from DenyAll to `RbacPolicy`, and the SEC-01 API tests.
+
+## 11. Rework round 1 (review of 6fc3eea: REWORK)
+| Issue | Fix |
+|---|---|
+| REV-0111 [P1] operator document access | Applied strictly per the approved matrix cell "approved, linked to own tasks". The operator sees only the document's current APPROVED and CLEAN revision, and only through a non-cancelled task assigned to them; a pinned revision counts only while it is still the current approved one. The object check and the list functions apply the same rule. |
+| REV-0112 [P1] `scope_q` | Built per grant, as the queryset form of the single-object check. GLOBAL grants list everything again. The sensitivity cap applies per grant; a capped grant without a sensitivity field matches nothing (fail-closed). Tests check that list = object check. |
+| REV-0113 [P2] superseded future parameter value | Migration 0012 adds `platform_param_value_at`: a value superseded before its effective date never applies. |
+| REV-0114 [P3] refused outside login | Recorded with outcome `MFA_ENROLMENT_REQUIRED` (DENIED); it no longer resets the lockout window. |
+| REV-0115 [P3] purge order | The bytes are deleted in `transaction.on_commit`. |
+| REV-0116 [P2] first-approver gap | Packet DEC-055 written; the employer approved option B on 2026-11-05 (DECISION_LOG.md). Implemented in `approvals.bootstrap_self_approve` and enforced in the DB (migration 0013, per-role advisory lock). The flag `bootstrap_self_approval` is set once per role, needs MFA step-up and a reason, and is audited. From the second holder on, DEC-032 is unchanged. |
+
+New tests: `test_phase01_rework1.py` (11) and `test_phase01_dec055.py` (6, including a 4-way race). The API exposure of the bootstrap approval is a 01.4 contract item.
+
+Orchestrator re-run, logs in `logs/orch-rework1/`:
+
+| Check | Result |
+|---|---|
+| ruff | PASS |
+| mypy strict | 155 files, no issues |
+| full pytest | **868 passed, 1 skipped** (real ClamAV), 1 deselected |
+| race tests ×3 | 21 passed each run |
+| roundtrip (0012 + 0013) | OK |
+| roles check | 50/0 |
+
+Implementer logs are in `logs/rework1/`.

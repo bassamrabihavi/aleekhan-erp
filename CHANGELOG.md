@@ -150,3 +150,10 @@ Review verdicts are in `reports/phase-00/step-N/REVIEW.md`. No version number is
 - New runtime dependency: `cryptography==50.0.2` (+ `cffi==2.0.0`, `pycparser==2.23`).
 - Production API unchanged: `ACCESS_POLICY` stays deny-all until 01.4 wires authentication.
 - Implementation: PENDING.
+- Rework 1 (REV-0111..0115): operator document access limited to the current approved revision of documents
+  linked to own tasks (object + list scoping); `scope_q` fixed for GLOBAL grants and sensitivity caps (fail
+  closed); migration `0012_phase01_engine_rework` (`platform_param_value_at`, superseded future values never
+  apply; login outcome `MFA_ENROLMENT_REQUIRED`); purge deletes bytes after commit.
+- DEC-055 option B (employer 2026-11-05): owner bootstrap self-approval of the first holder of each
+  business-approval role (`approvals.bootstrap_self_approve`), migration `0013_dec055_bootstrap_self_approval`
+  (flag column, CHECKs, per-role-locked trigger, role-assignment guard).
