@@ -132,8 +132,8 @@
         },
         "01.2": {
           "name": "Database",
-          "state": "REWORK",
-          "commit": "84e5acd",
+          "state": "IN_REVIEW",
+          "commit": "153651f",
           "report": "reports/phase-01/step-2/REPORT.md",
           "review": "reports/phase-01/step-2/REVIEW.md",
           "rework_cycles": 1,
@@ -2846,7 +2846,25 @@
       "state": "REWORK",
       "note": null,
       "commit": null
+    },
+    {
+      "at": "2026-11-05T04:25:45+00:00",
+      "kind": "step",
+      "phase": "PHASE_01",
+      "step": "01.2",
+      "state": "IN_PROGRESS",
+      "note": null,
+      "commit": null
+    },
+    {
+      "at": "2026-11-05T04:25:46+00:00",
+      "kind": "step",
+      "phase": "PHASE_01",
+      "step": "01.2",
+      "state": "IN_REVIEW",
+      "note": null,
+      "commit": "153651f"
     }
   ],
-  "updated_at": "2026-11-05T04:03:19+00:00"
+  "updated_at": "2026-11-05T04:25:46+00:00"
 }
