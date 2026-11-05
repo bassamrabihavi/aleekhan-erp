@@ -4,3 +4,7 @@ Django==5.2.18
 djangorestframework==3.18.3
 psycopg[binary]==3.3.6
 dj-database-url==3.1.2
+# 01.3: AES-256-GCM for secrets at rest (TOTP seeds, stored documents); pyca/cryptography 50.0.2 released
+# 2026-09-30 (>= 14 days before the 2026-11-05 pin date). Transitive: cffi 2.0.0 (2025-09-08), pycparser 2.23
+# (2025-09-09) - exact versions in requirements.lock.
+cryptography==50.0.2

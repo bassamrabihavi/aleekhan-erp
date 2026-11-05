@@ -216,3 +216,12 @@ production (schema flag + usage record in 01.2, no API); notification channels o
 
 All 01.2 questions Q-0101..Q-0106 are answered (employer, 2026-11-05).
 
+
+### 4.13 Implemented by the 01.3 engine (2026-11-05)
+All machines of 4.1-4.10 are implemented as `engine.state.StateMachine` definitions in their service modules
+(`identity/auth.py` USER, `identity/sessions.py` SESSION, `workflow/tasks.py`, `workflow/approvals.py`,
+`workflow/instances.py`, `documents/service.py` revision + scan, `jobs/service.py`, `identity/roles.py`,
+`params/service.py`) and tested pair by pair. Engine-level additions and interpretations (CREATED -> LOCKED,
+SCANNING -> QUARANTINED when the scanner is unavailable, QUEUED -> CANCELLED, login MFA role list, "own unit")
+are listed in `docs/engine/PHASE01_ENGINE.md` section 3. REV-0109 (employer 2026-11-05): person-to-position
+assignments are never back-dated either (migration 0011).

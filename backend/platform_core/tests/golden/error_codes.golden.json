@@ -1,5 +1,5 @@
 {
-  "_note": "Golden snapshot of the stable error-code contract (PHASE_00 / 00.3; SOURCE_READ_ONLY and SOURCE_DISABLED added in 00.6). Changing a code, status or exception class is a breaking API change: update docs/api/openapi-draft.yaml, docs/engine/ERROR_CODES.md and this file in the same reviewed commit.",
+  "_note": "Golden snapshot of the stable error-code contract (PHASE_00 / 00.3; SOURCE_READ_ONLY and SOURCE_DISABLED added in 00.6; the PHASE_01 codes INVALID_CREDENTIALS..JOB_PROTECTED added by the 01.3 domain engine, OpenAPI 0.5.2-draft). Changing a code, status or exception class is a breaking API change: update docs/api/openapi-draft.yaml, docs/engine/ERROR_CODES.md and this file in the same reviewed commit.",
   "error_codes": [
     {"code": "VALIDATION_FAILED", "http_status": 400, "exception": "ValidationFailed"},
     {"code": "AUTHENTICATION_REQUIRED", "http_status": 401, "exception": "AuthenticationRequired"},
@@ -16,6 +16,14 @@
     {"code": "STATE_TRANSITION_NOT_ALLOWED", "http_status": 409, "exception": "StateTransitionNotAllowed"},
     {"code": "SOURCE_READ_ONLY", "http_status": 409, "exception": "SourceReadOnly"},
     {"code": "SOURCE_DISABLED", "http_status": 409, "exception": "SourceDisabled"},
+    {"code": "INVALID_CREDENTIALS", "http_status": 401, "exception": "InvalidCredentials"},
+    {"code": "NETWORK_POLICY_DENIED", "http_status": 403, "exception": "NetworkPolicyDenied"},
+    {"code": "PASSWORD_CHANGE_REQUIRED", "http_status": 403, "exception": "PasswordChangeRequired"},
+    {"code": "SELF_APPROVAL_FORBIDDEN", "http_status": 403, "exception": "SelfApprovalForbidden"},
+    {"code": "PASSWORD_POLICY_VIOLATION", "http_status": 422, "exception": "PasswordPolicyViolation"},
+    {"code": "FILE_TYPE_NOT_ALLOWED", "http_status": 415, "exception": "FileTypeNotAllowed"},
+    {"code": "FILE_NOT_RELEASED", "http_status": 409, "exception": "FileNotReleased"},
+    {"code": "JOB_PROTECTED", "http_status": 409, "exception": "JobProtected"},
     {"code": "RATE_LIMITED", "http_status": 429, "exception": "RateLimited"},
     {"code": "PAYLOAD_TOO_LARGE", "http_status": 413, "exception": "PayloadTooLarge"},
     {"code": "DEPENDENCY_UNAVAILABLE", "http_status": 503, "exception": "DependencyUnavailable"},

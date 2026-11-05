@@ -1,0 +1,191 @@
+{
+  "phase": "PHASE_01",
+  "step": "01.3",
+  "commit_sha": "PENDING",
+  "status": "COMPLETE",
+  "scope": [
+    "authorization engine (RBAC over role assignments, GLOBAL/ORG_UNIT/ORG_UNIT_SUBTREE, own/own-unit, sensitivity cap, TECHNICAL != business approval, MFA step-up, field redaction, RbacPolicy adapter; production stays deny-all)",
+    "identity: password policy DEC-051, PBKDF2, one-time 72 h, last-5 reuse, lockout 5/15/15, network zones DEC-052, login ceremony, sessions (idle/absolute, cap 3 END_OLDEST_SESSION), TOTP RFC 6238 + replay guard, recovery codes, admin MFA reset, user admin, console bootstrap/recovery DEC-054 C",
+    "org services DEC-048 + REV-0109 (no back-dating of position assignments, migration 0011)",
+    "roles lifecycle + assignments with DEC-032 second approval; maker-checker approvals; tasks; workflow cancellation/compensation",
+    "documents: allow-list, magic bytes, macro-free XLSX, bomb guard, quarantine, ClamAV INSTREAM adapter + test double, AES-256-GCM storage, attachment-only download, 30-day purge",
+    "parameters (effective reads, OWNER_POLICY Q-0103, BUSINESS_RULE blocked), jobs (safe cancel, JOB_PROTECTED, no force kill), login retention 24 months, audit never purged",
+    "audit: session_id, network_zone, hash chain + verification + integrity run",
+    "error codes: 8 new codes, golden, OpenAPI 0.5.2-draft"
+  ],
+  "changes": [
+    "CHANGELOG.md",
+    "backend/.env.example",
+    "backend/aleekhan/settings.py",
+    "backend/aleekhan/settings_test.py",
+    "backend/platform_core/api/views.py",
+    "backend/platform_core/engine/context.py",
+    "backend/platform_core/engine/errors.py",
+    "backend/platform_core/engine/idempotency.py",
+    "backend/platform_core/engine/uow.py",
+    "backend/platform_core/identity/models.py",
+    "backend/platform_core/tests/golden/error_codes.golden.json",
+    "backend/platform_core/tests/test_engine_idempotency.py",
+    "backend/platform_core/tests/test_settings_env.py",
+    "backend/requirements.lock",
+    "backend/requirements.txt",
+    "docs/api/openapi-draft.yaml",
+    "docs/db/ERD.md",
+    "docs/discovery/STATE_TRANSITIONS.md",
+    "docs/engine/ERROR_CODES.md",
+    "docs/engine/README.md",
+    "ops/db/roles_check.sh",
+    "ruff.toml",
+    "backend/platform_core/authz/",
+    "backend/platform_core/documents/filetypes.py",
+    "backend/platform_core/documents/scanner.py",
+    "backend/platform_core/documents/service.py",
+    "backend/platform_core/documents/storage.py",
+    "backend/platform_core/engine/audit_chain.py",
+    "backend/platform_core/engine/commands.py",
+    "backend/platform_core/engine/dbrules.py",
+    "backend/platform_core/identity/auth.py",
+    "backend/platform_core/identity/crypto.py",
+    "backend/platform_core/identity/mfa.py",
+    "backend/platform_core/identity/network.py",
+    "backend/platform_core/identity/passwords.py",
+    "backend/platform_core/identity/roles.py",
+    "backend/platform_core/identity/sessions.py",
+    "backend/platform_core/identity/totp.py",
+    "backend/platform_core/identity/users.py",
+    "backend/platform_core/jobs/retention.py",
+    "backend/platform_core/jobs/service.py",
+    "backend/platform_core/management/commands/bootstrap_owner.py",
+    "backend/platform_core/migrations/0011_phase01_engine.py",
+    "backend/platform_core/org/service.py",
+    "backend/platform_core/params/service.py",
+    "backend/platform_core/params/values.py",
+    "backend/platform_core/tests/engine_fixtures.py",
+    "backend/platform_core/tests/golden/permission_decisions.golden.json",
+    "backend/platform_core/tests/golden/totp_rfc6238.golden.json",
+    "backend/platform_core/tests/hashers.py",
+    "backend/platform_core/tests/test_phase01_audit_chain.py",
+    "backend/platform_core/tests/test_phase01_auth_engine.py",
+    "backend/platform_core/tests/test_phase01_authz_engine.py",
+    "backend/platform_core/tests/test_phase01_documents_engine.py",
+    "backend/platform_core/tests/test_phase01_org_engine.py",
+    "backend/platform_core/tests/test_phase01_params_jobs_engine.py",
+    "backend/platform_core/tests/test_phase01_roles_approvals_engine.py",
+    "backend/platform_core/tests/test_phase01_totp_passwords.py",
+    "backend/platform_core/tests/test_phase01_workflow_engine.py",
+    "backend/platform_core/workflow/approvals.py",
+    "backend/platform_core/workflow/instances.py",
+    "backend/platform_core/workflow/tasks.py",
+    "docs/engine/PHASE01_ENGINE.md"
+  ],
+  "migrations": [
+    "platform_core.0011_phase01_engine (RunSQL trigger trg_position_assignment_a_not_backdated; ck_session_end_reason + CONCURRENT_LIMIT; housekeeping job types seed) - reversible"
+  ],
+  "test_evidence": [
+    {
+      "command": "ruff check backend tools && ruff format --check backend tools",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-3/logs/ruff.log"
+    },
+    {
+      "command": "cd backend && mypy . (strict, 151 files)",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-3/logs/mypy.log"
+    },
+    {
+      "command": "manage.py makemigrations --check --dry-run",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-3/logs/makemigrations_check.log"
+    },
+    {
+      "command": "pytest -m \"not perf\" --junitxml (851 passed, 1 skipped: real-ClamAV contract test, clamd not reachable)",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-3/logs/pytest.log"
+    },
+    {
+      "command": "race/concurrency tests x5 (36 tests per run)",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-3/logs/concurrency_x5.log"
+    },
+    {
+      "command": "backend/scripts/db_roundtrip.sh (up/zero/up, empty schema diff)",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-3/logs/db_roundtrip.log"
+    },
+    {
+      "command": "ops/db/roles_check.sh (50/50)",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-3/logs/roles_check.log"
+    },
+    {
+      "command": "python -m unittest discover -s tools/tests",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-3/logs/tools_unittest.log"
+    },
+    {
+      "command": "python tools/verify_handoff.py",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-3/logs/verify_handoff.log"
+    },
+    {
+      "command": "python tools/secret_scan.py",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-3/logs/secret_scan.log"
+    },
+    {
+      "command": "python tools/secret_scan.py --history",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-3/logs/secret_scan_history.log"
+    },
+    {
+      "command": "openapi_spec_validator.validate(docs/api/openapi-draft.yaml) 0.5.2-draft",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-3/logs/openapi_validate.log"
+    },
+    {
+      "command": "pip-audit -r backend/requirements.lock --no-deps --strict (PyPI service: network timeout)",
+      "outcome": "FAIL",
+      "log_path": "reports/phase-01/step-3/logs/pip_audit.log"
+    },
+    {
+      "command": "pip-audit ... --vulnerability-service osv: no known vulnerabilities",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-3/logs/pip_audit_osv.log"
+    }
+  ],
+  "security_evidence": [
+    "SEC-01 out-of-scope record -> NOT_FOUND (authz, tasks, approvals, sessions, documents tests)",
+    "SEC-03 EICAR -> quarantined/REJECTED, macro xlsx refused, magic mismatch refused, nothing executed (subprocess/os.system patched to fail)",
+    "golden permission decisions = approved matrix v1.0 (473 cells)",
+    "TOTP RFC 6238 vectors SHA1/256/512",
+    "audit hash chain tamper/gap/bypass detection",
+    "new dependency cryptography==50.0.2 (+cffi 2.0.0, pycparser 2.23), wheel hashes verified vs PyPI; offline SBOM reports/phase-01/step-3/logs/sbom-python-runtime.offline.cdx.json"
+  ],
+  "decisions": [
+    "DEC-003",
+    "DEC-032",
+    "DEC-042",
+    "DEC-048",
+    "DEC-049",
+    "DEC-050",
+    "DEC-051",
+    "DEC-052",
+    "DEC-053",
+    "DEC-054",
+    "Q-0101..Q-0106",
+    "REV-0109 employer answer 2026-11-05"
+  ],
+  "risks": [
+    "first holder of a business-approval role cannot be confirmed (no decider exists, no self-approval) - needs employer decision",
+    "engine interpretations E-1..E-10 in docs/engine/PHASE01_ENGINE.md need employer/reviewer confirmation",
+    "all write transactions serialise on the audit-chain lock (perf check in 01.7)",
+    "OpenAPI text of requestJobCancel says QUEUED -> CANCEL_REQUESTED; engine follows STATE_TRANSITIONS 4.7 (QUEUED -> CANCELLED)"
+  ],
+  "evidence_paths": [
+    "reports/phase-01/step-3/logs/",
+    "docs/engine/PHASE01_ENGINE.md",
+    "docs/engine/ERROR_CODES.md"
+  ],
+  "rollback": "manage.py migrate platform_core 0010 (reverses 0011; refused while sessions use CONCURRENT_LIMIT or job runs reference housekeeping types); revert the commit; remove cryptography from requirements",
+  "review_request": "PASS"
+}

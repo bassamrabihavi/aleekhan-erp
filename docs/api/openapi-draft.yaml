@@ -2,7 +2,7 @@ openapi: 3.1.0
 jsonSchemaDialect: https://spec.openapis.org/oas/3.1/dialect/base
 info:
   title: Aleekhan Factory Platform API
-  version: 0.5.1-draft
+  version: 0.5.2-draft
   summary: PHASE_00 contract (implemented) + PHASE_01 planned operations (01.1 draft, 01.2 decision update). Platform only, NO business writes.
   description: |
     Status: DRAFT (PHASE_00 / 00.1 Discovery & Contract, implemented in 00.4). Not approved. This hand-written
@@ -29,6 +29,12 @@ info:
     Enums aligned with the 01.2 schema: `User.account_kind` = PERSON | OPERATOR (personal operator accounts only,
     DEC-052), `PositionAssignment.kind` = PRIMARY | ACTING (DEC-048), `Parameter.classification` adds
     OWNER_POLICY (owner-approved platform/security policy, e.g. DEC-051 values). Implemented paths unchanged.
+
+    0.5.2-draft (PHASE_01 / 01.3 Domain Engine): the planned error codes join `ErrorCode` together with the engine
+    (errors.py, golden catalogue, docs/engine/ERROR_CODES.md): INVALID_CREDENTIALS 401, NETWORK_POLICY_DENIED 403,
+    SELF_APPROVAL_FORBIDDEN 403, PASSWORD_POLICY_VIOLATION 422, FILE_TYPE_NOT_ALLOWED 415, FILE_NOT_RELEASED 409,
+    JOB_PROTECTED 409, plus PASSWORD_CHANGE_REQUIRED 403 (a session whose one-time or expired password must be
+    changed first, DEC-051). Additive change; no path, operation or existing code changed.
 
     Stack: Django 5.2 LTS + DRF (DEC-001). Base path is versioned: every endpoint lives under `/api/v1`.
     A breaking change requires `/api/v2` (or an explicitly approved deprecation window); additive changes only
@@ -5188,8 +5194,8 @@ components:
           schema:
             $ref: '#/components/schemas/Problem'
     LoginFailed:
-      description: 'INVALID_CREDENTIALS (planned code, x-aleekhan-conventions.planned_error_codes): same answer for unknown
-        user, wrong password, disabled or locked account'
+      description: 'INVALID_CREDENTIALS: same answer for unknown user, wrong password, disabled or locked account,
+        expired one-time password and a wrong MFA code'
       headers:
         X-Request-ID:
           $ref: '#/components/headers/X-Request-ID'
@@ -5207,7 +5213,7 @@ components:
           schema:
             $ref: '#/components/schemas/Problem'
     UnsupportedMediaType:
-      description: FILE_TYPE_NOT_ALLOWED (planned code; allowlist DEC-053 APPROVED)
+      description: FILE_TYPE_NOT_ALLOWED (allowlist + magic bytes + no macros, DEC-053 APPROVED)
       headers:
         X-Request-ID:
           $ref: '#/components/headers/X-Request-ID'
@@ -5349,6 +5355,14 @@ components:
         - STATE_TRANSITION_NOT_ALLOWED
         - SOURCE_READ_ONLY
         - SOURCE_DISABLED
+        - INVALID_CREDENTIALS
+        - NETWORK_POLICY_DENIED
+        - PASSWORD_CHANGE_REQUIRED
+        - SELF_APPROVAL_FORBIDDEN
+        - PASSWORD_POLICY_VIOLATION
+        - FILE_TYPE_NOT_ALLOWED
+        - FILE_NOT_RELEASED
+        - JOB_PROTECTED
         - RATE_LIMITED
         - PAYLOAD_TOO_LARGE
         - DEPENDENCY_UNAVAILABLE
@@ -7800,6 +7814,14 @@ x-aleekhan-conventions:
     STATE_TRANSITION_NOT_ALLOWED: 409
     SOURCE_READ_ONLY: 409
     SOURCE_DISABLED: 409
+    INVALID_CREDENTIALS: 401
+    NETWORK_POLICY_DENIED: 403
+    PASSWORD_CHANGE_REQUIRED: 403
+    SELF_APPROVAL_FORBIDDEN: 403
+    PASSWORD_POLICY_VIOLATION: 422
+    FILE_TYPE_NOT_ALLOWED: 415
+    FILE_NOT_RELEASED: 409
+    JOB_PROTECTED: 409
     RATE_LIMITED: 429
     INTERNAL_ERROR: 500
     DEPENDENCY_UNAVAILABLE: 503
@@ -7821,18 +7843,11 @@ x-aleekhan-conventions:
       credentials whose hash must not be persisted. Duplicate submission is harmless (a second login simply
       rotates the session again). Protection instead: CSRF, rate limits, lockout (DEC-051), audit of every attempt.
       (CONFLICTS C-27.)
-  planned_error_codes:
-    INVALID_CREDENTIALS: 401
-    NETWORK_POLICY_DENIED: 403
-    SELF_APPROVAL_FORBIDDEN: 403
-    PASSWORD_POLICY_VIOLATION: 422
-    FILE_TYPE_NOT_ALLOWED: 415
-    FILE_NOT_RELEASED: 409
-    JOB_PROTECTED: 409
+  planned_error_codes: {}
   planned_error_codes_note: |
-    Not yet in `ErrorCode` (the engine catalogue, golden file and this enum must change together in one reviewed
-    commit, docs/engine/ERROR_CODES.md rule 5). Proposed for 01.3/01.4. Until then planned operations reuse
-    ACCESS_DENIED / VALIDATION_FAILED / STATE_TRANSITION_NOT_ALLOWED in drafts.
+    Codes proposed by a step but not yet in `ErrorCode` (the engine catalogue, golden file and this enum change
+    together in one reviewed commit, docs/engine/ERROR_CODES.md rule 5). Empty since 0.5.2-draft: the PHASE_01
+    codes were implemented by the 01.3 domain engine.
   mfa_step_up_rule: |
     Operations with `x-aleekhan-mfa-step-up: true` require an MFA verification younger than the step-up window
     (DEC-051: 15 minutes) for every caller, inside or outside the factory network (DEC-049); this is in addition to the login-time MFA

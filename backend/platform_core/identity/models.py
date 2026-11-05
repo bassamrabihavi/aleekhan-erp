@@ -330,6 +330,8 @@ class SessionEndReason(models.TextChoices):
     USER_DISABLED = "USER_DISABLED", "User disabled"
     PASSWORD_CHANGED = "PASSWORD_CHANGED", "Password changed or reset"
     MFA_RESET = "MFA_RESET", "MFA reset"
+    # 01.3 (migration 0011): the oldest live session ended on a new login (DEC-051, Q-0101 END_OLDEST_SESSION)
+    CONCURRENT_LIMIT = "CONCURRENT_LIMIT", "Ended by the concurrent-session limit (oldest session)"
 
 
 class Session(models.Model):

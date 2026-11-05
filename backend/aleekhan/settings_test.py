@@ -17,3 +17,13 @@ if _shell_env not in {"", "test"}:
 os.environ["ALEEKHAN_ENV"] = "test"
 
 from .settings import *  # noqa: E402,F403
+
+# ------------------------------------------------------------------------------------- PHASE_01 / 01.3
+# TEST ONLY: a fast PBKDF2 work factor (the production hasher is unchanged, see settings.PASSWORD_HASHERS).
+PASSWORD_HASHERS = ["platform_core.tests.hashers.FastPBKDF2ForTests"]
+# TEST ONLY synthetic data key, derived at start-up from a public label (not a secret, never used outside
+# tests).
+import hashlib as _hashlib  # noqa: E402
+
+ALEEKHAN_DATA_KEYS = {"test-key-1": _hashlib.sha256(b"aleekhan synthetic test data key 1").digest()}
+ALEEKHAN_DATA_KEY_CURRENT = "test-key-1"

@@ -31,11 +31,25 @@ class Actor:
         return cls(ActorType.USER, actor_id)
 
 
+# Values allowed in ``platform_audit_event.network_zone`` (CHECK ``ck_audit_event_network_zone``); '' =
+# unknown
+# to the writer (system jobs, PHASE_00 callers).
+AUDIT_NETWORK_ZONES = frozenset({"", "INTERNAL", "EXTERNAL", "UNKNOWN"})
+
+
 @dataclass(frozen=True)
 class RequestContext:
     actor: Actor
     request_id: uuid.UUID | None = None
     correlation_id: uuid.UUID | None = None
+    # PHASE_01 / 01.3: public session handle and network zone of the caller, copied into every audit row
+    # (STATE_TRANSITIONS 4: "every transition records actor, reason, request_id and session handle").
+    session_id: uuid.UUID | None = None
+    network_zone: str = ""
+
+    def __post_init__(self) -> None:
+        if self.network_zone not in AUDIT_NETWORK_ZONES:
+            raise EngineContractError(f"unknown network zone {self.network_zone!r}")
 
     @property
     def effective_correlation_id(self) -> uuid.UUID | None:

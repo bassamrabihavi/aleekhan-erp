@@ -121,6 +121,15 @@ else
   record "app: manage.py outbox_status" FAIL
 fi
 
+# PHASE_01 / 01.3: the app role can verify the audit hash chain and record the integrity run
+if (
+  cd "$ROOT/backend" && PGDATABASE="$DB" PGOPTIONS="-c role=$APP" ALEEKHAN_ENV=test "$PYTHON" manage.py shell -c "
+import sys
+from platform_core.engine.audit_chain import verify_chain
+sys.exit(0 if verify_chain().status == 'OK' else 1)
+" >/dev/null 2>&1
+); then record "app: audit hash chain verified + integrity run recorded (01.3)" PASS; else record "app: audit hash chain verified + integrity run recorded (01.3)" FAIL; fi
+
 echo "== app role: audit bypass and DDL must be refused"
 expect_denied "app: DELETE audit rows" "$APP" "DELETE FROM platform_audit_event"
 expect_denied "app: UPDATE audit rows" "$APP" "UPDATE platform_audit_event SET reason = 'x'"

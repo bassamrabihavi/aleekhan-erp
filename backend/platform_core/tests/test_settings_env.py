@@ -178,3 +178,23 @@ def test_connected_test_db_passes_the_guard() -> None:
     from django.db import connection
 
     assert_throwaway_test_db(connection.settings_dict, settings.ALEEKHAN_ENV)
+
+
+# ------------------------------------------------------------------------------------- PHASE_01 / 01.3
+@pytest.mark.parametrize(
+    ("env", "message"),
+    [
+        (
+            {"ALEEKHAN_INTERNAL_CIDRS": "10.0.0.0/8,not-a-range"},
+            "ALEEKHAN_INTERNAL_CIDRS contains an invalid",
+        ),
+        ({"ALEEKHAN_VPN_CIDRS": "300.1.1.0/24"}, "ALEEKHAN_VPN_CIDRS contains an invalid"),
+        ({"ALEEKHAN_DATA_KEYS": "k1:too-short"}, "ALEEKHAN_DATA_KEYS must be"),
+        ({"ALEEKHAN_DATA_KEY_CURRENT": "missing"}, "ALEEKHAN_DATA_KEY_CURRENT must name"),
+    ],
+)
+def test_identity_and_storage_settings_are_validated_at_start(env: dict[str, str], message: str) -> None:
+    """DEC-052 CIDR list and the data keys are checked when the process starts (values never printed)."""
+    result = _settings({"ALEEKHAN_ENV": "dev", **env})
+    assert message in result["error"]
+    assert "too-short" not in result["error"]

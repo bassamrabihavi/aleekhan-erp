@@ -39,6 +39,15 @@ class ErrorCode(StrEnum):
     STATE_TRANSITION_NOT_ALLOWED = "STATE_TRANSITION_NOT_ALLOWED"
     SOURCE_READ_ONLY = "SOURCE_READ_ONLY"
     SOURCE_DISABLED = "SOURCE_DISABLED"
+    # PHASE_01 / 01.3 (OpenAPI 0.5.2-draft; were x-aleekhan-conventions.planned_error_codes in 0.5.1)
+    INVALID_CREDENTIALS = "INVALID_CREDENTIALS"
+    NETWORK_POLICY_DENIED = "NETWORK_POLICY_DENIED"
+    PASSWORD_CHANGE_REQUIRED = "PASSWORD_CHANGE_REQUIRED"  # noqa: S105 - an error code, not a secret
+    SELF_APPROVAL_FORBIDDEN = "SELF_APPROVAL_FORBIDDEN"
+    PASSWORD_POLICY_VIOLATION = "PASSWORD_POLICY_VIOLATION"  # noqa: S105 - an error code, not a secret
+    FILE_TYPE_NOT_ALLOWED = "FILE_TYPE_NOT_ALLOWED"
+    FILE_NOT_RELEASED = "FILE_NOT_RELEASED"
+    JOB_PROTECTED = "JOB_PROTECTED"
     RATE_LIMITED = "RATE_LIMITED"
     PAYLOAD_TOO_LARGE = "PAYLOAD_TOO_LARGE"
     DEPENDENCY_UNAVAILABLE = "DEPENDENCY_UNAVAILABLE"
@@ -120,6 +129,54 @@ _SPECS: tuple[ErrorSpec, ...] = (
         409,
         "Source disabled",
         "دریافت داده از این منبع فعلاً غیرفعال است.",
+    ),
+    ErrorSpec(
+        ErrorCode.INVALID_CREDENTIALS,
+        401,
+        "Invalid credentials",
+        "نام کاربری یا رمز عبور نادرست است یا این حساب در دسترس نیست.",
+    ),
+    ErrorSpec(
+        ErrorCode.NETWORK_POLICY_DENIED,
+        403,
+        "Network policy denied",
+        "ورود با این حساب فقط از شبکه داخلی کارخانه مجاز است.",
+    ),
+    ErrorSpec(
+        ErrorCode.PASSWORD_CHANGE_REQUIRED,
+        403,
+        "Password change required",
+        "ابتدا باید رمز عبور خود را تغییر دهید.",
+    ),
+    ErrorSpec(
+        ErrorCode.SELF_APPROVAL_FORBIDDEN,
+        403,
+        "Self approval forbidden",
+        "تصمیم درباره درخواستی که خودتان ثبت کرده‌اید یا به خودتان مربوط است مجاز نیست.",
+    ),
+    ErrorSpec(
+        ErrorCode.PASSWORD_POLICY_VIOLATION,
+        422,
+        "Password policy violation",
+        "رمز عبور با سیاست رمز سازمان سازگار نیست.",
+    ),
+    ErrorSpec(
+        ErrorCode.FILE_TYPE_NOT_ALLOWED,
+        415,
+        "File type not allowed",
+        "نوع این فایل مجاز نیست یا محتوای آن با نوع اعلام‌شده نمی‌خواند.",
+    ),
+    ErrorSpec(
+        ErrorCode.FILE_NOT_RELEASED,
+        409,
+        "File not released",
+        "این فایل هنوز از بررسی امنیتی عبور نکرده یا رد شده است و قابل دانلود نیست.",
+    ),
+    ErrorSpec(
+        ErrorCode.JOB_PROTECTED,
+        409,
+        "Job protected",
+        "این کار پس‌زمینه محافظت‌شده است و لغو آن مجاز نیست.",
     ),
     ErrorSpec(
         ErrorCode.RATE_LIMITED, 429, "Too many requests", "تعداد درخواست‌ها زیاد است؛ کمی بعد تلاش کنید."
@@ -289,6 +346,55 @@ class SourceReadOnly(ConflictError):
 
 class SourceDisabled(ConflictError):
     code = ErrorCode.SOURCE_DISABLED
+
+
+class InvalidCredentials(ClientError):
+    """Same answer for unknown user, wrong password, disabled/locked account, expired one-time password and a
+    wrong MFA code (no account enumeration, openapi ``LoginFailed``)."""
+
+    code = ErrorCode.INVALID_CREDENTIALS
+
+
+class NetworkPolicyDenied(ClientError):
+    """INTERNAL_ONLY / operator account used from outside the factory network (DEC-042, DEC-052)."""
+
+    code = ErrorCode.NETWORK_POLICY_DENIED
+
+
+class PasswordChangeRequired(ClientError):
+    """The session belongs to a user whose password must be changed first (DEC-051 one-time / rotation)."""
+
+    code = ErrorCode.PASSWORD_CHANGE_REQUIRED
+
+
+class SelfApprovalForbidden(ClientError):
+    """Maker-checker (DEC-032): the decider is the maker (requester/uploader/proposer/completer/grantee)."""
+
+    code = ErrorCode.SELF_APPROVAL_FORBIDDEN
+
+
+class PasswordPolicyViolation(ClientError):
+    """DEC-051 password policy; ``errors[]`` names the failed rules (never echoes the password)."""
+
+    code = ErrorCode.PASSWORD_POLICY_VIOLATION
+
+
+class FileTypeNotAllowed(ClientError):
+    """DEC-053 allow-list / magic bytes / macro container check (SEC-03)."""
+
+    code = ErrorCode.FILE_TYPE_NOT_ALLOWED
+
+
+class FileNotReleased(ConflictError):
+    """Download of a revision whose scan status is not CLEAN (STATE_TRANSITIONS 4.6)."""
+
+    code = ErrorCode.FILE_NOT_RELEASED
+
+
+class JobProtected(ConflictError):
+    """Cancel of a protected or non-cancellable job type (STATE_TRANSITIONS 4.7; force kill: DEC-024)."""
+
+    code = ErrorCode.JOB_PROTECTED
 
 
 class RateLimited(ClientError):

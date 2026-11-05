@@ -131,3 +131,22 @@ Review verdicts are in `reports/phase-00/step-N/REVIEW.md`. No version number is
   (Q-0106). Employer answers 2026-11-05.
 - No API endpoint, engine rule or UI added; no user, org or network data seeded.
 - Implementation: PENDING.
+
+### 01.3 Domain Engine
+- Added (services only, no HTTP views): `platform_core/authz/policy.py` (RBAC over role assignments: GLOBAL /
+  ORG_UNIT / ORG_UNIT_SUBTREE, own / own-unit, sensitivity caps, TECHNICAL != business approval, MFA step-up,
+  field redaction, `RbacPolicy` adapter for 01.4), identity (`passwords`, `totp` RFC 6238, `crypto` AES-256-GCM,
+  `network` zones, `sessions`, `auth` login/MFA/step-up/lockout/password change, `mfa` enrolment/recovery
+  codes/admin reset, `users`, `roles`), `org/service.py`, workflow (`approvals` maker-checker, `tasks`,
+  `instances` cancellation), documents (`filetypes` allow-list/magic/macro check, `scanner` ClamAV adapter + test
+  double, `storage` encrypted, `service` quarantine/review/download/purge), `params` (`values`, `service`), jobs
+  (`service`, `retention`), engine (`audit_chain`, `dbrules`, `commands`), `manage.py bootstrap_owner`.
+- Changed: unit of work takes the audit chain lock first and fills `session_id`, `network_zone` and the hash
+  chain; error catalogue + golden + OpenAPI `0.5.2-draft` (`INVALID_CREDENTIALS`, `NETWORK_POLICY_DENIED`,
+  `PASSWORD_CHANGE_REQUIRED`, `SELF_APPROVAL_FORBIDDEN`, `PASSWORD_POLICY_VIOLATION`, `FILE_TYPE_NOT_ALLOWED`,
+  `FILE_NOT_RELEASED`, `JOB_PROTECTED`); settings for CIDR lists, data keys, document storage, clamd.
+- Migration `0011_phase01_engine`: REV-0109 (no back-dating of person-to-position assignments), session end
+  reason `CONCURRENT_LIMIT` (Q-0101), housekeeping job types.
+- New runtime dependency: `cryptography==50.0.2` (+ `cffi==2.0.0`, `pycparser==2.23`).
+- Production API unchanged: `ACCESS_POLICY` stays deny-all until 01.4 wires authentication.
+- Implementation: PENDING.

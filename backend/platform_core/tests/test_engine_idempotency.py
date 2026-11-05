@@ -381,6 +381,8 @@ def test_replayable_classification_covers_every_client_error() -> None:
 
     transient = {E.ErrorCode.IDEMPOTENCY_IN_PROGRESS, E.ErrorCode.RATE_LIMITED}
     transient |= {E.ErrorCode.AUTHENTICATION_REQUIRED, E.ErrorCode.MFA_REQUIRED}
+    # 01.3: depend on the caller's network zone / credential state, not on the request
+    transient |= {E.ErrorCode.NETWORK_POLICY_DENIED, E.ErrorCode.PASSWORD_CHANGE_REQUIRED}
     for code, cls in E.EXCEPTION_FOR_CODE.items():
         if not issubclass(cls, E.ClientError):
             continue

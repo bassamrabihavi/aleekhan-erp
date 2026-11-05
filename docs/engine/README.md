@@ -119,3 +119,18 @@ decision. Only the platform outbox machine is defined in PHASE_00.
 `backend/platform_core/tests/test_engine_*.py`: unit, property-based (hypothesis, derandomized profile in
 `backend/conftest.py`), golden snapshots (`tests/golden/*.json`) and race tests on PostgreSQL (threads with
 separate connections: idempotency same-key ×8, different-body ×6, compare-and-set ×8, 4 dispatchers × 60 events).
+
+## 7. PHASE_01 / 01.3 additions
+
+See [PHASE01_ENGINE.md](PHASE01_ENGINE.md) for the identity / authorization / org / workflow / documents /
+parameters / jobs services. Engine-level changes:
+
+- `RequestContext` carries `session_id` and `network_zone`; the unit of work copies them into every audit row.
+- The outermost `unit_of_work` takes the audit-chain advisory lock first and every audit row is hash-chained
+  (`audit_chain.py`; verification `verify_chain` -> `platform_audit_integrity_run`). Rule: open the unit of work
+  before any `select_for_update` in the same transaction. A nested unit of work counts towards the enclosing
+  one's "at least one audit / outbox" check.
+- `unit_of_work_or_nothing` + `NothingToDo`: roll back silently when the locked rows show nothing to change.
+- `dbrules.db_rules()`: DB guard refusal -> 409 / 400 with the rule name in `errors[].code`.
+- `commands.execute()`: the idempotency protocol for service commands (never for authentication ceremonies).
+- The approved-rule registry stays empty (no business rule is unlocked in PHASE_01).

@@ -18,10 +18,18 @@ event"; openapi-draft ``write_requirements``)::
   callers must never put personal data or secrets there (reason = short operator justification, resource_id
   = surrogate id / 14-digit code only). This is a code-review rule (docs/engine/README.md section 1).
 * Nested use joins the outer transaction as a savepoint (the outer commit decides durability).
+* PHASE_01 / 01.3: audit rows carry the caller's ``session_id`` and ``network_zone`` and are hash-chained
+  (``audit_chain``). The **outermost** unit of work takes the chain lock when it starts - before any business
+  row lock of the transaction - so every writer acquires locks in the same order (chain first) and the chain
+  lock can never be part of a lock cycle. Audit rows are inserted immediately (a savepoint rollback removes
+  them with the rest of the nested write). Rule for callers: open the unit of work before taking business row
+  locks (``select_for_update``) in the same transaction; services in this repository do.
 """
 
 from __future__ import annotations
 
+import re
+import threading
 import uuid
 from collections.abc import Iterator, Mapping
 from contextlib import contextmanager
@@ -31,9 +39,21 @@ from django.db import transaction
 
 from platform_core.models import AuditEvent, AuditOutcome, OutboxEvent
 
+from .audit_chain import acquire_chain_lock, append_chained
 from .context import RequestContext
 from .errors import EngineContractError
 from .redaction import redact, sensitive_paths
+
+_ACTION_RE = re.compile(r"^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_-]*)+$")  # = models.DOTTED_NAME_PATTERN
+_local = threading.local()  # per thread (= per Django DB connection): the open units of work
+
+
+def _open_units() -> list[UnitOfWork]:
+    units: list[UnitOfWork] | None = getattr(_local, "units", None)
+    if units is None:
+        units = []
+        _local.units = units
+    return units
 
 
 class UnitOfWork:
@@ -56,11 +76,17 @@ class UnitOfWork:
         reason: str = "",
         scope: Mapping[str, Any] | None = None,
     ) -> AuditEvent:
+        if not _ACTION_RE.fullmatch(action):
+            raise EngineContractError(f"audit action {action!r} is not a dotted lower-case name")
+        if not resource_type:
+            raise EngineContractError("audit resource_type is required")
         event = AuditEvent(
             actor_type=self.ctx.actor.actor_type,
             actor_id=self.ctx.actor.actor_id,
             request_id=self.ctx.request_id,
             correlation_id=self.ctx.effective_correlation_id,
+            session_id=self.ctx.session_id,
+            network_zone=self.ctx.network_zone,
             action=action,
             outcome=outcome,
             resource_type=resource_type,
@@ -71,7 +97,7 @@ class UnitOfWork:
             before=redact(dict(before)) if before is not None else None,
             after=redact(dict(after)) if after is not None else None,
         )
-        event.save(using=self.using)
+        append_chained([event], using=self.using)
         self.audit_events.append(event)
         return event
 
@@ -112,10 +138,40 @@ class UnitOfWork:
 def unit_of_work(
     ctx: RequestContext, *, require_event: bool = True, using: str = "default"
 ) -> Iterator[UnitOfWork]:
+    units = _open_units()
+    outer = next((u for u in reversed(units) if u.using == using), None)
     with transaction.atomic(using=using):
+        acquire_chain_lock(using)  # re-entrant: a no-op wait for nested units of work of this transaction
         uow = UnitOfWork(ctx, using)
-        yield uow
+        units.append(uow)
+        try:
+            yield uow
+        finally:
+            units.pop()
         if not uow.audit_events:
             raise EngineContractError("a write must append at least one audit event")
         if require_event and not uow.outbox_events:
             raise EngineContractError("a write must append at least one outbox event")
+    if outer is not None:  # the enclosing unit of work counts the writes of the nested ones (contract check)
+        outer.audit_events.extend(uow.audit_events)
+        outer.outbox_events.extend(uow.outbox_events)
+
+
+class NothingToDo(Exception):
+    """Raise inside :func:`unit_of_work_or_nothing` when the locked rows show there is nothing to change."""
+
+
+@contextmanager
+def unit_of_work_or_nothing(
+    ctx: RequestContext, *, require_event: bool = True, using: str = "default"
+) -> Iterator[UnitOfWork]:
+    """A unit of work that may end without a write: raising :class:`NothingToDo` rolls it back silently.
+
+    Used by sweeps and checks that must lock rows inside the unit of work (lock order: chain lock first) but
+    often find nothing to do - instead of writing a meaningless audit row.
+    """
+    try:
+        with unit_of_work(ctx, require_event=require_event, using=using) as uow:
+            yield uow
+    except NothingToDo:
+        return

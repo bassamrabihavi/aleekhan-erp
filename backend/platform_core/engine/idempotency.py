@@ -61,6 +61,8 @@ from .errors import (
     IdempotencyKeyRequired,
     IdempotencyKeyReused,
     MfaRequired,
+    NetworkPolicyDenied,
+    PasswordChangeRequired,
     RateLimited,
     ValidationFailed,
 )
@@ -311,6 +313,9 @@ TRANSIENT_CLIENT_ERRORS: tuple[type[ClientError], ...] = (
     RateLimited,
     AuthenticationRequired,
     MfaRequired,
+    # 01.3: depend on the caller's network zone / credential state, not on the request body
+    NetworkPolicyDenied,
+    PasswordChangeRequired,
 )
 PROBLEM_CONTENT_TYPE = "application/problem+json"
 

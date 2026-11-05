@@ -1,0 +1,12 @@
+== run 1
+....................                                                     [100%]
+20 passed, 833 deselected in 33.26s
+rc=0
+== run 2
+....................                                                     [100%]
+20 passed, 833 deselected in 36.72s
+rc=0
+== run 3
+....................                                                     [100%]
+20 passed, 833 deselected in 37.88s
+rc=0

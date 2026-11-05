@@ -229,6 +229,74 @@ if DEPLOYED and _TRUST_PROXY_TLS_HEADER and _NUM_PROXIES == 0:
         "ALEEKHAN_TRUST_PROXY_TLS_HEADER=1 requires ALEEKHAN_NUM_PROXIES >= 1 in staging/prod"
     )
 
+# ---------------------------------------------------------------------------------- identity (PHASE_01)
+# Password hashing: Django's PBKDF2-SHA256 hasher (built in, no new dependency; Django 5.2 default work
+# factor).
+PASSWORD_HASHERS = ["django.contrib.auth.hashers.PBKDF2PasswordHasher"]
+
+
+def _env_cidrs(name: str) -> tuple[str, ...]:
+    """DEC-052: explicit CIDR list in server config only (never in Git or the DB). Validated at start-up."""
+    import ipaddress
+
+    out: list[str] = []
+    for part in os.environ.get(name, "").split(","):
+        item = part.strip()
+        if not item:
+            continue
+        try:
+            out.append(str(ipaddress.ip_network(item, strict=False)))
+        except ValueError:
+            raise ImproperlyConfigured(f"{name} contains an invalid CIDR range") from None
+    return tuple(out)
+
+
+# Factory network ranges (INTERNAL) and VPN ranges (always EXTERNAL, DEC-052). Empty = nothing is internal:
+# every login then needs MFA and operator accounts cannot log in (safe default until IT supplies the list).
+ALEEKHAN_INTERNAL_CIDRS = _env_cidrs("ALEEKHAN_INTERNAL_CIDRS")
+ALEEKHAN_VPN_CIDRS = _env_cidrs("ALEEKHAN_VPN_CIDRS")
+
+# Data keys for secrets at rest (TOTP seeds, stored files): "<key_ref>:<base64url 32 bytes>[,...]" from the
+# secret store; ALEEKHAN_DATA_KEY_CURRENT names the key used for new ciphertexts. Never logged or stored.
+_KEY_REF_RE = re.compile(r"[A-Za-z0-9_-]{1,64}")
+
+
+def _env_data_keys() -> dict[str, bytes]:
+    import base64
+
+    keys: dict[str, bytes] = {}
+    for part in os.environ.get("ALEEKHAN_DATA_KEYS", "").split(","):
+        item = part.strip()
+        if not item:
+            continue
+        ref, sep, encoded = item.partition(":")
+        try:
+            raw = base64.urlsafe_b64decode(encoded + "=" * (-len(encoded) % 4)) if sep else b""
+        except ValueError:
+            raw = b""
+        if not _KEY_REF_RE.fullmatch(ref) or len(raw) != 32:
+            raise ImproperlyConfigured("ALEEKHAN_DATA_KEYS must be '<key_ref>:<base64url 32-byte key>' items")
+        keys[ref] = raw
+    return keys
+
+
+ALEEKHAN_DATA_KEYS = _env_data_keys()
+ALEEKHAN_DATA_KEY_CURRENT = os.environ.get("ALEEKHAN_DATA_KEY_CURRENT", "").strip()
+if ALEEKHAN_DATA_KEY_CURRENT and ALEEKHAN_DATA_KEY_CURRENT not in ALEEKHAN_DATA_KEYS:
+    raise ImproperlyConfigured("ALEEKHAN_DATA_KEY_CURRENT must name a key of ALEEKHAN_DATA_KEYS")
+
+# ---------------------------------------------------------------------------------- documents (DEC-053)
+# Root folder of stored files: must be on the encrypted server volume (ST-A); files are additionally encrypted
+# per object (AES-256-GCM, key ALEEKHAN_DATA_KEY_CURRENT). Empty = uploads refused (DEPENDENCY_UNAVAILABLE).
+ALEEKHAN_DOCUMENT_STORAGE_ROOT = os.environ.get("ALEEKHAN_DOCUMENT_STORAGE_ROOT", "").strip()
+ALEEKHAN_DOCUMENT_VOLUME = os.environ.get("ALEEKHAN_DOCUMENT_VOLUME", "").strip() or "documents"
+# ClamAV daemon in the isolated container (DEC-053 AV-A): TCP host/port or a unix socket path. Empty = no
+# scanner configured: revisions stay QUARANTINED (never auto-CLEAN).
+ALEEKHAN_CLAMD_HOST = os.environ.get("ALEEKHAN_CLAMD_HOST", "").strip()
+ALEEKHAN_CLAMD_PORT = _env_int("ALEEKHAN_CLAMD_PORT", 3310, minimum=1)
+ALEEKHAN_CLAMD_SOCKET = os.environ.get("ALEEKHAN_CLAMD_SOCKET", "").strip()
+ALEEKHAN_CLAMD_TIMEOUT_SECONDS = _env_int("ALEEKHAN_CLAMD_TIMEOUT_SECONDS", 30, minimum=1)
+
 REST_FRAMEWORK: dict[str, Any] = {
     # No authentication backend exists in PHASE_00 (login is PHASE_01; DEC-003: local users only).
     "DEFAULT_AUTHENTICATION_CLASSES": [],
