@@ -58,3 +58,4 @@
 ## 2026-11-05 — DEC-055 APPROVED: first holder of a business-approval role (REV-0116)
 - **Decision:** option B. The owner (owner_admin) may approve, inside the system, his own request for the **first** holder of each business-approval role, once per role: only while that role has no ACTIVE holder, with a fresh MFA step-up, a mandatory reason, and a special audit flag (`bootstrap_self_approval`). From the second holder on, DEC-032 maker-checker applies unchanged.
 - **Decided by:** بسام ربیهاوی (کارفرما), in the Claude Code session.
+- **2026-11-05 (REV-0111 follow-up, DEC-049 operator cell):** an operator sees only the current APPROVED revision of a document linked to one of their open tasks. If a task is pinned to a revision and a newer revision is approved, the operator sees no revision until the task is re-linked (prevents building from a stale drawing). Decided by بسام ربیهاوی (کارفرما).
