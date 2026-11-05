@@ -53,3 +53,4 @@
 - **Q-0106 (DEC-048):** a position may have several PRIMARY holders up to a per-position capacity (default 1).
 - **Back-dating (DEC-048):** org-tree changes take effect only from now on; no past effective dates.
 - **Decided by:** بسام ربیهاوی (کارفرما), in the Claude Code session.
+- **2026-11-05 (REV-0109 follow-up, DEC-048):** no back-dating applies to person-to-position assignments too (valid_from and valid_to only from now on). Unit-head positions always have exactly one PRIMARY holder; a stand-in is recorded as ACTING. Decided by بسام ربیهاوی (کارفرما).
