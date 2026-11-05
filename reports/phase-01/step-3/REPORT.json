@@ -1,7 +1,7 @@
 {
   "phase": "PHASE_01",
   "step": "01.3",
-  "commit_sha": "PENDING",
+  "commit_sha": "6fc3eea",
   "status": "COMPLETE",
   "scope": [
     "authorization engine (RBAC over role assignments, GLOBAL/ORG_UNIT/ORG_UNIT_SUBTREE, own/own-unit, sensitivity cap, TECHNICAL != business approval, MFA step-up, field redaction, RbacPolicy adapter; production stays deny-all)",

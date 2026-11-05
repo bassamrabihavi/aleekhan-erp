@@ -4,7 +4,7 @@
 PROJECT: Aleekhan
 PHASE: PHASE_01
 STEP: 01.3
-COMMIT SHA: see git log ("[PHASE_01][01.3] domain engine"); REPORT.json commit_sha set at IN_REVIEW
+COMMIT SHA: 6fc3eea
 BRANCH/PR: main
 STATUS: COMPLETE
 TIME OF REPORT (UTC): 2026-11-05
@@ -124,6 +124,8 @@ Orchestrator re-runs on work-windows (PG 17.9); logs in `logs/orch/`.
 | race tests (`-k "concurrent or race or parallel"`) ×3 | 20 passed each run | `logs/orch/concurrency_x3.log` |
 | `db_roundtrip.sh` | ROUNDTRIP OK | `logs/orch/db_roundtrip.log`, `migration/` |
 | `roles_check.sh` | passed=50, failed=0 | `logs/orch/roles_check.log`, `roles/` |
+
+Orchestrator fix before commit: the pre-commit guard flagged 6 inline synthetic test passwords; they were moved to named `SYN_PW_*` constants in `engine_fixtures.py` (no guard bypass); full suite re-run 851 passed.
 
 Implementer runs, in `logs/`:
 - race/concurrency suite ×5: 36/36 each run;
