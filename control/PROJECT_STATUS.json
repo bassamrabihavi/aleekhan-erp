@@ -142,8 +142,8 @@
         },
         "01.3": {
           "name": "Domain Engine",
-          "state": "IN_PROGRESS",
-          "commit": "6fc3eea",
+          "state": "IN_REVIEW",
+          "commit": "3f1f3ab",
           "report": "reports/phase-01/step-3/REPORT.md",
           "review": "reports/phase-01/step-3/REVIEW.md",
           "rework_cycles": 1,
@@ -2937,7 +2937,16 @@
       "status": "APPROVED",
       "by": "بسام ربیهاوی",
       "note": "B: خودتأییدی یک‌باره مالک فقط برای اولین دارنده هر نقش تأیید کسب‌وکار؛ تأیید دومرحله‌ای تازه + علامت ویژه در Audit"
+    },
+    {
+      "at": "2026-11-05T18:31:27+00:00",
+      "kind": "step",
+      "phase": "PHASE_01",
+      "step": "01.3",
+      "state": "IN_REVIEW",
+      "note": null,
+      "commit": "3f1f3ab"
     }
   ],
-  "updated_at": "2026-11-05T18:12:46+00:00"
+  "updated_at": "2026-11-05T18:31:27+00:00"
 }
