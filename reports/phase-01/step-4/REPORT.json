@@ -1,7 +1,7 @@
 {
   "phase": "PHASE_01",
   "step": "01.4",
-  "commit_sha": "PENDING",
+  "commit_sha": "f6a60a5",
   "status": "COMPLETE",
   "scope": [
     "HTTP endpoints for all 97 planned PHASE_01 operations + 2 new (stepUpMfa, bootstrapSelfApproveRequest) over the 01.3 services: auth/MFA/sessions, me, users, roles/assignments, org tree/units/positions/holders, tasks, approvals, workflow definitions/instances, audit query/integrity, health detail, jobs + safe cancel, documents (quarantined upload, attachment-only download), parameters, dynamic-field drafts",
@@ -57,18 +57,66 @@
   ],
   "migrations": [],
   "test_evidence": [
-    {"command": "ruff check backend tools && ruff format --check backend tools", "outcome": "PASS", "log_path": "reports/phase-01/step-4/logs/ruff.log"},
-    {"command": "cd backend && mypy . (strict, 173 files)", "outcome": "PASS", "log_path": "reports/phase-01/step-4/logs/mypy.log"},
-    {"command": "manage.py makemigrations --check --dry-run", "outcome": "PASS", "log_path": "reports/phase-01/step-4/logs/makemigrations_check.log"},
-    {"command": "pytest -m \"not perf\" --junitxml (1846 passed, 1 skipped: real-ClamAV contract test, clamd not reachable)", "outcome": "PASS", "log_path": "reports/phase-01/step-4/logs/pytest.log"},
-    {"command": "race tests -k \"concurrent or race or parallel\" x3 (25 passed each run, incl. 4 new HTTP race tests)", "outcome": "PASS", "log_path": "reports/phase-01/step-4/logs/concurrency_x3.log"},
-    {"command": "backend/scripts/db_roundtrip.sh (up/zero/up, schema diff empty)", "outcome": "PASS", "log_path": "reports/phase-01/step-4/logs/db_roundtrip.log"},
-    {"command": "ops/db/roles_check.sh (50/50)", "outcome": "PASS", "log_path": "reports/phase-01/step-4/logs/roles_check.log"},
-    {"command": "openapi_spec_validator.validate(docs/api/openapi-draft.yaml): 0.6.0-draft, 88 paths, 107 operations, 0 planned", "outcome": "PASS", "log_path": "reports/phase-01/step-4/logs/openapi_validate.log"},
-    {"command": "python tools/secret_scan.py", "outcome": "PASS", "log_path": "reports/phase-01/step-4/logs/secret_scan.log"},
-    {"command": "python tools/secret_scan.py --history", "outcome": "PASS", "log_path": "reports/phase-01/step-4/logs/secret_scan_history.log"},
-    {"command": "python -m unittest discover -s tools/tests (42 tests)", "outcome": "PASS", "log_path": "reports/phase-01/step-4/logs/tools_unittest.log"},
-    {"command": "python tools/verify_handoff.py (OK=300, KNOWN_DEFECT=1 DEC-044, failures=0)", "outcome": "PASS", "log_path": "reports/phase-01/step-4/logs/verify_handoff.log"}
+    {
+      "command": "ruff check backend tools && ruff format --check backend tools",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-4/logs/ruff.log"
+    },
+    {
+      "command": "cd backend && mypy . (strict, 173 files)",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-4/logs/mypy.log"
+    },
+    {
+      "command": "manage.py makemigrations --check --dry-run",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-4/logs/makemigrations_check.log"
+    },
+    {
+      "command": "pytest -m \"not perf\" --junitxml (1846 passed, 1 skipped: real-ClamAV contract test, clamd not reachable)",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-4/logs/pytest.log"
+    },
+    {
+      "command": "race tests -k \"concurrent or race or parallel\" x3 (25 passed each run, incl. 4 new HTTP race tests)",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-4/logs/concurrency_x3.log"
+    },
+    {
+      "command": "backend/scripts/db_roundtrip.sh (up/zero/up, schema diff empty)",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-4/logs/db_roundtrip.log"
+    },
+    {
+      "command": "ops/db/roles_check.sh (50/50)",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-4/logs/roles_check.log"
+    },
+    {
+      "command": "openapi_spec_validator.validate(docs/api/openapi-draft.yaml): 0.6.0-draft, 88 paths, 107 operations, 0 planned",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-4/logs/openapi_validate.log"
+    },
+    {
+      "command": "python tools/secret_scan.py",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-4/logs/secret_scan.log"
+    },
+    {
+      "command": "python tools/secret_scan.py --history",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-4/logs/secret_scan_history.log"
+    },
+    {
+      "command": "python -m unittest discover -s tools/tests (42 tests)",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-4/logs/tools_unittest.log"
+    },
+    {
+      "command": "python tools/verify_handoff.py (OK=300, KNOWN_DEFECT=1 DEC-044, failures=0)",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-4/logs/verify_handoff.log"
+    }
   ],
   "security_evidence": [
     "SEC-01: test_api_bola.py - probe with ALL permissions scoped ORG_UNIT=A gets 404 NOT_FOUND on every {id} operation of the contract (50 path families, reads and writes with valid body, Idempotency-Key and current If-Match); GLOBAL holder reads the same ids (200); lists == object checks; subtree scope; revision under another document's path -> 404",
