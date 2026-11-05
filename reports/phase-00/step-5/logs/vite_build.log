@@ -23,8 +23,8 @@ http://www.w3.org/XML/1998/namespace
 https://react.dev/errors/
 $ ls dist/assets
 total 392
-drwxr-xr-x 1 A.Ameri 1049089      0 Nov  3 23:29 .
-drwxr-xr-x 1 A.Ameri 1049089      0 Nov  3 23:29 ..
--rw-r--r-- 1 A.Ameri 1049089 111152 Nov  3 23:29 Vazirmatn_wght_-BeciDpKm.woff2
--rw-r--r-- 1 A.Ameri 1049089   9365 Nov  3 23:29 index-CUAWgkTz.css
--rw-r--r-- 1 A.Ameri 1049089 272554 Nov  3 23:29 index-cIzii9Q8.js
+drwxr-xr-x 1 <user> 1049089      0 Nov  3 23:29 .
+drwxr-xr-x 1 <user> 1049089      0 Nov  3 23:29 ..
+-rw-r--r-- 1 <user> 1049089 111152 Nov  3 23:29 Vazirmatn_wght_-BeciDpKm.woff2
+-rw-r--r-- 1 <user> 1049089   9365 Nov  3 23:29 index-CUAWgkTz.css
+-rw-r--r-- 1 <user> 1049089 272554 Nov  3 23:29 index-cIzii9Q8.js

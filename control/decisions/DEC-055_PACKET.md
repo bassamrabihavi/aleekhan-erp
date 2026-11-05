@@ -3,7 +3,7 @@
 - اولویت: P1 (برای Gate-1 لازم است؛ مانع گام‌های ۰۱.۳ تا ۰۱.۵ نیست)
 - Gate: Phase-1 · حوزه: Security / Workflow · مالک: کارفرما
 - منبع: REV-0116 (`reports/phase-01/step-3/REVIEW.md`)، DEC-032، DEC-049، DEC-054، `docs/engine/PHASE01_ENGINE.md` §4
-- وضعیت: OPEN — بسته تصمیم
+- وضعیت: APPROVED — گزینه B (بسام ربیهاوی، 2026-11-05؛ DECISION_LOG.md)
 - تهیه: PHASE_01 / 01.3، تاریخ 2026-11-05
 
 ## مسئله
