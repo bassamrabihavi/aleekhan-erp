@@ -17,6 +17,7 @@ position (or of positions in an assignee unit). ``platform.workflow.task.cancel`
 from __future__ import annotations
 
 import uuid
+from datetime import datetime
 from typing import Final
 
 from django.db.models import Q
@@ -201,6 +202,8 @@ def create_task(
     related_type: str = "",
     related_id: str = "",
     related_revision: int | None = None,
+    due_at: datetime | None = None,
+    note: str = "",
     request_id: uuid.UUID | None = None,
 ) -> WorkTask:
     action = "platform.workflow.task.create"
@@ -218,13 +221,14 @@ def create_task(
             related_type=related_type,
             related_id=related_id,
             related_revision=related_revision,
+            due_at=due_at,  # informational only (no approved SLA rule, STATE_TRANSITIONS 4.11)
             status=TaskStatus.ASSIGNED if assignee_kind == AssigneeKind.USER else TaskStatus.OPEN,
             created_by_id=caller.user_id,
             updated_by_id=caller.user_id,
             **fields,
         )
         t.refresh_from_db()
-        _audit(uow, "create", t, before=None)
+        _audit(uow, "create", t, before=None, reason=note.strip()[:500])
     return t
 
 
@@ -286,7 +290,9 @@ def reassign(
     )
 
 
-def start(caller: Caller, task_id: uuid.UUID, *, request_id: uuid.UUID | None = None) -> WorkTask:
+def start(
+    caller: Caller, task_id: uuid.UUID, *, note: str = "", request_id: uuid.UUID | None = None
+) -> WorkTask:
     return _transition(
         caller,
         task_id,
@@ -294,6 +300,7 @@ def start(caller: Caller, task_id: uuid.UUID, *, request_id: uuid.UUID | None = 
         TaskStatus.IN_PROGRESS,
         "start",
         request_id=request_id,
+        reason=note.strip()[:500],
         from_states=frozenset({TaskStatus.OPEN, TaskStatus.ASSIGNED}),
     )
 
@@ -320,7 +327,9 @@ def block(
     )
 
 
-def unblock(caller: Caller, task_id: uuid.UUID, *, request_id: uuid.UUID | None = None) -> WorkTask:
+def unblock(
+    caller: Caller, task_id: uuid.UUID, *, note: str = "", request_id: uuid.UUID | None = None
+) -> WorkTask:
     return _transition(
         caller,
         task_id,
@@ -328,13 +337,16 @@ def unblock(caller: Caller, task_id: uuid.UUID, *, request_id: uuid.UUID | None 
         TaskStatus.IN_PROGRESS,
         "unblock",
         request_id=request_id,
+        reason=note.strip()[:500],
         from_states=frozenset({TaskStatus.BLOCKED}),
         blocked_reason="",
         blocked_by_ref="",
     )
 
 
-def complete(caller: Caller, task_id: uuid.UUID, *, request_id: uuid.UUID | None = None) -> WorkTask:
+def complete(
+    caller: Caller, task_id: uuid.UUID, *, note: str = "", request_id: uuid.UUID | None = None
+) -> WorkTask:
     return _transition(
         caller,
         task_id,
@@ -342,12 +354,15 @@ def complete(caller: Caller, task_id: uuid.UUID, *, request_id: uuid.UUID | None
         TaskStatus.DONE,
         "complete",
         request_id=request_id,
+        reason=note.strip()[:500],
         completed_by_id=caller.user_id,
         completed_at=db_now(),
     )
 
 
-def verify_close(caller: Caller, task_id: uuid.UUID, *, request_id: uuid.UUID | None = None) -> WorkTask:
+def verify_close(
+    caller: Caller, task_id: uuid.UUID, *, note: str = "", request_id: uuid.UUID | None = None
+) -> WorkTask:
     action = "platform.workflow.task.verify"
     require_permission(caller, action)
     with unit_of_work(caller.context(request_id)) as uow:
@@ -364,7 +379,7 @@ def verify_close(caller: Caller, task_id: uuid.UUID, *, request_id: uuid.UUID | 
             updated_by_id=caller.user_id,
         )
         t.refresh_from_db()
-        _audit(uow, "verify_close", t, before=before)
+        _audit(uow, "verify_close", t, before=before, reason=note.strip()[:500])
     return t
 
 

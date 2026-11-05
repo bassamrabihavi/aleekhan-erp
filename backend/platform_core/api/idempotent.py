@@ -16,10 +16,12 @@ the ``request_id`` of the original request (it points to the original audit trai
 from __future__ import annotations
 
 from collections.abc import Callable
+from typing import Any
 
 from rest_framework.request import Request
 from rest_framework.response import Response
 
+from platform_core.authz.policy import Caller
 from platform_core.engine.context import Actor, RequestContext
 from platform_core.engine.idempotency import StoredResponse, parse_idempotency_key, run_idempotent
 from platform_core.engine.uow import UnitOfWork
@@ -30,16 +32,36 @@ from .request_id import request_id_of
 REPLAY_HEADER = "Idempotent-Replayed"
 
 
+_UNSET: Any = object()
+
+
 def idempotent_response(
-    request: Request, *, endpoint: str, handler: Callable[[UnitOfWork], StoredResponse]
+    request: Request,
+    *,
+    endpoint: str,
+    handler: Callable[[UnitOfWork], StoredResponse],
+    body: Any = _UNSET,
+    require_event: bool = True,
 ) -> Response:
+    """``body`` overrides the hashed request body (e.g. multipart uploads hash the file digest, never the
+    bytes); ``require_event=False`` for writes whose effect is audited by the service without own event."""
     principal = require_principal(request)
     if request.method is None:  # pragma: no cover - DRF always sets the method
         raise ValueError("request without method")
     key = parse_idempotency_key(request.headers.get("Idempotency-Key"))
-    ctx = RequestContext(Actor.user(principal.actor_id), request_id=request_id_of(request))
+    caller = getattr(principal, "caller", None)
+    if isinstance(caller, Caller) and caller.user_id == principal.actor_id:
+        ctx = caller.context(request_id_of(request))  # session handle + network zone in audit rows
+    else:
+        ctx = RequestContext(Actor.user(principal.actor_id), request_id=request_id_of(request))
     result = run_idempotent(
-        ctx, key=key, method=request.method.upper(), endpoint=endpoint, body=request.data, handler=handler
+        ctx,
+        key=key,
+        method=request.method.upper(),
+        endpoint=endpoint,
+        body=request.data if body is _UNSET else body,
+        handler=handler,
+        require_event=require_event,
     )
     stored = result.response
     headers = {k: v for k, v in stored.headers.items() if k.lower() != "content-type"}

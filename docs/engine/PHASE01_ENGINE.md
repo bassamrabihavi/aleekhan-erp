@@ -3,8 +3,8 @@
 Services only (no HTTP view, no URL): the API of 01.4 calls these functions. Every write runs in
 `engine.uow.unit_of_work` (write + audit + outbox in one transaction); every number comes from a versioned
 parameter (`params.values.effective*`), never from code. Error codes: [ERROR_CODES.md](ERROR_CODES.md).
-Production authorization stays deny-all (`api.permissions.ACCESS_POLICY = DenyAllPolicy`, no authentication
-class) until 01.4 installs `authz.policy.RbacPolicy` together with session authentication.
+01.4 installed `authz.policy.RbacPolicy` as `api.permissions.ACCESS_POLICY` together with session
+authentication (docs/api/API_RUNTIME.md section 9).
 
 ## 1. Module map
 
@@ -53,7 +53,7 @@ between the start of their unit of work and the commit (short; acceptable at fac
 | E-4 | Decider of a request | the request's action if it is a business-approval permission (document approve, parameter publish), else `platform.workflow.approval.decide` (role grants) | STATE_TRANSITIONS 4.4 + matrix |
 | E-5 | Lockout of a CREATED account | CREATED -> LOCKED is allowed; unlock returns to CREATED while the one-time password is unchanged | 4.1 lists only ACTIVE -> LOCKED |
 | E-6 | "Last 5 passwords" | current password + 4 previous ones | Q-0105 |
-| E-7 | Job cancel while QUEUED | QUEUED -> CANCELLED at once (STATE_TRANSITIONS 4.7); the OpenAPI text of `requestJobCancel` says QUEUED -> CANCEL_REQUESTED | conflict noted, 4.7 followed |
+| E-7 | Job cancel while QUEUED | QUEUED -> CANCELLED at once (STATE_TRANSITIONS 4.7); 01.4 aligned the OpenAPI text of `requestJobCancel` (0.6.0-draft) | resolved in 01.4 |
 | E-8 | Scanner unavailable | SCANNING -> QUARANTINED (back to the queue), never CLEAN | 4.6 "stays QUARANTINED" |
 | E-9 | Activation of a runtime-created role | refused: RULE_NOT_APPROVED (DEC-049) - only matrix v1.0 sets are approved | PERMISSION_MATRIX section 6 |
 | E-10 | Login failures | audit + login event only (no outbox event); the lock emits `platform.identity.user.status_changed` | page 36/46 counters read audit/login events |
@@ -95,4 +95,19 @@ DEC-032 is unchanged. DB (migration 0013): CHECK `ck_approval_request_maker_chec
 only for a flagged APPROVED row, `ck_approval_request_bootstrap_scope`, trigger
 `trg_approval_request_bootstrap_guard` (rule `ck_approval_request_bootstrap_self_approval`, per-role advisory
 lock: concurrent bootstrap approvals of one role -> exactly one wins) and the 0008 role-assignment guard accepting
-only such a flagged request. API exposure (an operation or an `approveRequest` variant) is a 01.4 contract item.
+only such a flagged request. API exposure (01.4): the separate operation `bootstrapSelfApproveRequest`
+(`POST /workflow/approvals/{approval_id}/bootstrap-approve`, permission `platform.identity.assignment.grant`,
+MFA step-up, If-Match + Idempotency-Key, `ReasonRequest`); `approveRequest` is unchanged.
+
+
+## 7. Step 01.4 additions to the engine
+
+Services for contract operations that had none in 01.3 (same rules: unit of work, audit + outbox, DB guards
+through `db_rules`): `users.update_user` (profile only, operators stay INTERNAL_ONLY, the audit row names the
+changed fields only), `roles.update_role` (DRAFT only, a TECHNICAL role never gets a business-approval
+permission), `org.update_unit`, `org.update_position` (+ title, unit head), `documents.update_document`,
+`documents.record_download` (audit of every download), `params.define_parameter` (no value; ENUM refused until
+the contract carries allowed values), `params.create_dynamic_field` / `update_dynamic_field` (DRAFT only),
+optional task notes (audit reason) and `due_at` (informational), `approvals.makers_of` / `can_decide` (inbox).
+Fix: `mfa.reset_factors` now always emits `platform.identity.user.mfa_reset` (a reset of a user without
+factors or sessions violated the unit-of-work contract -> 500).

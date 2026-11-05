@@ -1,8 +1,10 @@
-"""Rules for PLANNED operations in docs/api/openapi-draft.yaml (0.5.0-draft, PHASE_01 / 01.1).
+"""Rules for the PHASE_01 operations in docs/api/openapi-draft.yaml (planned in 0.5.0-draft / 01.1,
+IMPLEMENTED in 0.6.0-draft / 01.4).
 
-Planned path items (``x-aleekhan-status: planned``) are contract drafts that a later step implements. They are
-not routed (``test_route_parity_with_openapi``), but they must already respect the conventions so that the
-implementing step cannot weaken them silently:
+Since 01.4 no path item is planned any more (``x-aleekhan-status`` removed, route parity covers every path);
+the rules pinned in 01.1 keep applying to the PHASE_01 operations (tags ``auth``, ``me``, ``admin-identity``,
+``org``, ``workflow``, ``audit``, ``jobs``, ``documents``, ``parameters``), so the implementation cannot
+weaken them silently:
 
 * every planned path names the implementing step;
 * operation ids are unique across the whole document;
@@ -44,12 +46,21 @@ def _param_refs(path: str, op: dict[str, Any]) -> set[str]:
     return {r.rsplit("/", 1)[-1] for r in refs}
 
 
-def test_there_are_planned_paths_and_each_names_its_step() -> None:
-    planned = oc.planned_paths()
-    assert planned, "0.5.0-draft must contain the PHASE_01 planned operations"
-    for path in planned:
+PHASE01_TAGS = {"auth", "me", "admin-identity", "org", "workflow", "audit", "jobs", "documents", "parameters"}
+
+
+def phase01_operations() -> list[tuple[str, str, dict[str, Any]]]:
+    return [(p, m, op) for p, m, op in oc.operations() if set(op["tags"]) & PHASE01_TAGS]
+
+
+def test_no_planned_path_remains_and_phase01_operations_exist() -> None:
+    """01.4 implemented every planned operation: no planned marker is left; any future planned path must name
+    its step."""
+    assert len(phase01_operations()) >= 99  # 97 planned in 01.1 + stepUpMfa + bootstrapSelfApproveRequest
+    for path in oc.planned_paths():
         step = oc.spec()["paths"][path].get("x-aleekhan-step")
         assert isinstance(step, str) and STEP.match(step), path
+    assert oc.planned_paths() == set()
 
 
 def test_operation_ids_are_unique() -> None:
@@ -59,7 +70,7 @@ def test_operation_ids_are_unique() -> None:
 
 def test_planned_operations_require_session_and_permission() -> None:
     schemes = set(oc.spec()["components"]["securitySchemes"])
-    for path, method, op in oc.operations(planned=True):
+    for path, method, op in phase01_operations():
         op_id = op["operationId"]
         sec = op.get("security", oc.spec()["security"])
         if op_id in PLANNED_PUBLIC_OPERATIONS:
@@ -81,9 +92,9 @@ def test_planned_public_operations_match_conventions() -> None:
 
 def test_planned_mutations_require_idempotency_key_unless_exempt() -> None:
     exempt = set(_conventions()["idempotency_exempt"]["operations"])
-    planned_ids = {op["operationId"] for _p, _m, op in oc.operations(planned=True)}
+    planned_ids = {op["operationId"] for _p, _m, op in phase01_operations()}
     assert exempt <= planned_ids
-    for path, method, op in oc.operations(planned=True):
+    for path, method, op in phase01_operations():
         if method not in MUTATING:
             continue
         refs = _param_refs(path, op)
@@ -106,7 +117,7 @@ def _decision_status() -> dict[str, str]:
 def test_blocked_operations_name_an_open_decision_and_declare_409() -> None:
     """Blocked-by stays honest (01.2): an APPROVED decision no longer blocks; decided-by keeps the trace."""
     status = _decision_status()
-    for _path, _method, op in oc.operations(planned=True):
+    for _path, _method, op in phase01_operations():
         blocked = op.get("x-aleekhan-blocked-by")
         if blocked is not None:
             assert blocked and all(DEC.match(d) for d in blocked), op["operationId"]

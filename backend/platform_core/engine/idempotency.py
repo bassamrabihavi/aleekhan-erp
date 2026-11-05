@@ -99,9 +99,21 @@ def request_hash(method: str, endpoint: str, body: Any) -> str:
 
 @dataclass(frozen=True)
 class StoredResponse:
+    """A response to return and to store for replay.
+
+    01.4: a response that reveals a one-time secret (``createUser`` / ``resetUserPassword``: the one-time
+    password is shown ONCE, DEC-051) sets ``secret_free_body``; that body - never the secret - is what the
+    idempotency record stores, so a replay can never show the secret again.
+    """
+
     status: int
     body: Any = None
     headers: Mapping[str, str] = field(default_factory=dict)
+    secret_free_body: Any = None
+    contains_secret: bool = False
+
+    def body_to_store(self) -> Any:
+        return self.secret_free_body if self.contains_secret else self.body
 
 
 @dataclass(frozen=True)
@@ -209,7 +221,7 @@ def complete(claim: IdempotencyClaim, response: StoredResponse, *, using: str = 
             state=IdempotencyState.COMPLETED,
             response_status=response.status,
             response_headers=dict(response.headers),
-            response_body=response.body,
+            response_body=response.body_to_store(),
         )
     )
     if updated != 1:

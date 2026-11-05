@@ -1,17 +1,22 @@
-"""Authorization skeleton: deny by default, explicit public allowlist, scoped (action + record) permission.
-
-PHASE_00 has no users, roles or login (PHASE_01; DEC-003: users are created only inside the system by the
-owner/admin, never AD/LDAP/SSO). Therefore:
+"""Authorization: deny by default, explicit public allowlist, scoped (action + record) permission.
 
 * :class:`DenyByDefault` is the DRF default: a view that does not choose a permission is closed
   (401 without a principal, 403 ``ACCESS_DENIED`` with one).
-* :class:`PublicEndpoint` is allowed only on the allowlisted platform probes (health/version); a test walks
-  the production URLconf and fails if any other view uses it.
-* :class:`ScopedPermission` checks the view's ``required_action`` against the :data:`ACCESS_POLICY` and, per
-  record, the record scope. A record outside the caller's scope is reported as 404 ``NOT_FOUND`` (not 403)
-  to prevent enumeration (BOLA/IDOR, SEC-01). The PHASE_00 policy :class:`DenyAllPolicy` denies everything;
-  PHASE_01 replaces it (reviewed commit) with the role/scope policy from the approved permission matrix.
-  There is intentionally no setting or environment variable that can swap the policy.
+* :class:`PublicEndpoint` is allowed only on the allowlisted operations of ``PUBLIC_OPERATIONS`` (platform
+  probes + the two pre-login operations of ``/auth/login``, CONFLICTS C-26); a contract test walks the
+  production URLconf and fails if any other view uses it.
+* :class:`ScopedPermission` checks the view's ``required_action`` against the :data:`ACCESS_POLICY` (403
+  without a grant), then the MFA step-up of the permission (401 ``MFA_REQUIRED``), and per record the record
+  scope. A record outside the caller's scope is reported as 404 ``NOT_FOUND`` (not 403) to prevent
+  enumeration (BOLA/IDOR, SEC-01).
+* :class:`SessionOperation` - operations on the caller's own session/profile (``auth``/``me``): any real,
+  authenticated session (no permission row in the matrix).
+* PHASE_01 / 01.4: the production policy is :class:`platform_core.authz.policy.RbacPolicy` over the APPROVED
+  permission matrix v1.0 (DEC-049), replacing the PHASE_00 :class:`DenyAllPolicy` in a reviewed commit. An
+  action that is not in the permission catalogue is denied. There is intentionally no setting or environment
+  variable that can swap the policy.
+* A failed session authentication (expired session, MFA pending, password change required, CSRF) is recorded
+  on the request by the authentication class and raised here, AFTER the throttles ran (``api/base.py``).
 """
 
 from __future__ import annotations
@@ -23,7 +28,14 @@ from django.db import models
 from rest_framework.permissions import BasePermission
 from rest_framework.request import Request
 
-from platform_core.engine.errors import AccessDenied, AuthenticationRequired, EngineContractError, NotFound
+from platform_core.authz.policy import RbacPolicy, RecordScope
+from platform_core.engine.errors import (
+    AccessDenied,
+    AleekhanError,
+    AuthenticationRequired,
+    EngineContractError,
+    NotFound,
+)
 
 if TYPE_CHECKING:  # DRF imports these modules from its settings; avoid an import cycle
     from rest_framework.views import APIView
@@ -50,10 +62,19 @@ def principal_of(request: Request) -> Principal | None:
     return user
 
 
+AUTH_ERROR_ATTR: Final = "aleekhan_auth_error"
+
+
+def auth_error_of(request: object) -> AleekhanError | None:
+    raw: Any = getattr(request, "_request", request)
+    err = getattr(raw, AUTH_ERROR_ATTR, None)
+    return err if isinstance(err, AleekhanError) else None
+
+
 def require_principal(request: Request) -> Principal:
     principal = principal_of(request)
     if principal is None:
-        raise AuthenticationRequired()
+        raise auth_error_of(request) or AuthenticationRequired()
     return principal
 
 
@@ -82,7 +103,14 @@ class DenyAllPolicy:
         return queryset.none()
 
 
-ACCESS_POLICY: Final[AccessPolicy] = DenyAllPolicy()
+def _no_record_scope(obj: Any) -> RecordScope:
+    """Generic record scope: no unit, no owner -> only GLOBAL grants cover it. Module views that need unit or
+    owner scope check their records with their module's record-scope function (``api/phase01``)."""
+    return RecordScope()
+
+
+# PHASE_01 / 01.4 (reviewed commit): role/scope policy over the APPROVED permission matrix v1.0 (DEC-049).
+ACCESS_POLICY: Final[AccessPolicy] = RbacPolicy(_no_record_scope)
 
 
 def policy_for(view: APIView) -> AccessPolicy:
@@ -110,8 +138,11 @@ class PublicEndpoint(BasePermission):
         return True
 
 
-# openapi-draft operations with ``security: []`` (contract test keeps code and spec in sync).
-PUBLIC_OPERATIONS: Final[frozenset[str]] = frozenset({"getLiveness", "getReadiness", "getVersion"})
+# openapi-draft operations with ``security: []`` (contract test keeps code and spec in sync). 01.4: the two
+# pre-login operations of /auth/login (CONFLICTS C-26) join the platform probes.
+PUBLIC_OPERATIONS: Final[frozenset[str]] = frozenset(
+    {"getLiveness", "getReadiness", "getVersion", "getLoginContext", "login"}
+)
 
 
 class AuthenticatedPrincipal(BasePermission):
@@ -122,13 +153,28 @@ class AuthenticatedPrincipal(BasePermission):
         return True
 
 
-class ScopedPermission(BasePermission):
-    """Action permission + record scope. Views set ``required_action`` (e.g. ``module.entity.read``)."""
+class SessionOperation(BasePermission):
+    """The caller's own session/profile operations: a real session principal is required (401 otherwise)."""
 
     def has_permission(self, request: Request, view: APIView) -> bool:
         principal = require_principal(request)
-        if not policy_for(view).allows_action(principal, required_action(view)):
+        if getattr(principal, "session_id", None) is None:
+            raise AuthenticationRequired()
+        return True
+
+
+class ScopedPermission(BasePermission):
+    """Action permission + MFA step-up + record scope. Views set ``required_action``."""
+
+    def has_permission(self, request: Request, view: APIView) -> bool:
+        principal = require_principal(request)
+        policy = policy_for(view)
+        action = required_action(view)
+        if not policy.allows_action(principal, action):
             raise AccessDenied()
+        step_up = getattr(policy, "check_step_up", None)
+        if step_up is not None:
+            step_up(principal, action)  # 401 MFA_REQUIRED for permissions flagged mfa_step_up
         return True
 
     def has_object_permission(self, request: Request, view: APIView, obj: Any) -> bool:

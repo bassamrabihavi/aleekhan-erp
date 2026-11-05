@@ -4,10 +4,13 @@ For each production route and each HTTP method (GET/POST/PUT/PATCH/DELETE):
 
 * anonymous caller -> 401 ``AUTHENTICATION_REQUIRED`` (problem+json), for every non-public route;
 * authenticated SYNTHETIC principal that even *claims* the view's action (``X-Test-Actions``) and a record
-  scope -> 403 ``ACCESS_DENIED``: the production policy (``DenyAllPolicy``) grants nothing in PHASE_00;
+  scope -> 403 ``ACCESS_DENIED``: the production policy (01.4: ``RbacPolicy`` over the approved matrix) grants
+  only through real role assignments of real users, never through claims;
+* session-only operations (``SessionOperation``, 01.4) refuse a principal without a real session -> 401;
 * the only exception is the access-gate *decision* endpoint (``AuthenticatedPrincipal``): an authenticated
   GET returns ``decision = DENY`` (never ``ALLOW``), other methods are refused;
-* public probes (``PublicEndpoint``, allowlisted in ``PUBLIC_OPERATIONS``) refuse every write method (405).
+* public operations (``PublicEndpoint``, allowlisted in ``PUBLIC_OPERATIONS``) refuse every method they do not
+  implement (405); the public login answers 400 to an empty body (no credential, no session).
 
 A new route is covered without editing this file; a new permission class makes
 ``test_every_route_has_a_known_permission_profile`` fail until its expected outcome is defined here.
@@ -32,11 +35,13 @@ METHODS = ("get", "post", "put", "patch", "delete")
 PUBLIC = "public"
 DECISION_ONLY = "decision_only"
 CLOSED = "closed"
+SESSION_ONLY = "session_only"
 PROFILES = {
     frozenset({permissions.PublicEndpoint}): PUBLIC,
     frozenset({permissions.AuthenticatedPrincipal}): DECISION_ONLY,
     frozenset({permissions.ScopedPermission}): CLOSED,
     frozenset({permissions.DenyByDefault}): CLOSED,
+    frozenset({permissions.SessionOperation}): SESSION_ONLY,
 }
 SAMPLE_UUID = "00000000-0000-4000-8000-00000000a0a0"  # synthetic
 
@@ -73,7 +78,7 @@ def _code(resp: Any) -> str | None:
 
 
 def test_routes_were_discovered() -> None:
-    assert len(ROUTES) >= 8  # PHASE_00 has 8 routes; the list grows automatically
+    assert len(ROUTES) >= 88  # PHASE_00 8 routes + PHASE_01 80 (01.4); the list grows automatically
     assert all(route.startswith("api/v1/") for route, _ in ROUTES)
 
 
@@ -89,7 +94,8 @@ def test_anonymous_is_denied_on_every_non_public_route(
     resp = _call(client, method, _url(route))
     if _profile(view_cls) == PUBLIC:
         allowed = {m for m in METHODS if hasattr(view_cls, m)}
-        assert resp.status_code in ({200, 503} if method in allowed else {405}), (route, method)
+        ok = {200, 503} if method == "get" else {400}  # 400: public login without credentials
+        assert resp.status_code in (ok if method in allowed else {405}), (route, method, resp.status_code)
         return
     assert resp.status_code == 401, (route, method, resp.status_code)
     assert _code(resp) == "AUTHENTICATION_REQUIRED"
@@ -110,6 +116,11 @@ def test_authenticated_without_permission_is_denied_on_every_route(
         "HTTP_X_TEST_SCOPE": "synthetic_scope",
     }
     resp = _call(client, method, _url(route), **headers)
+    if profile == SESSION_ONLY:
+        assert resp.status_code in ({401} if hasattr(view_cls, method) else {401, 405}), (route, method)
+        if resp.status_code == 401:
+            assert _code(resp) == "AUTHENTICATION_REQUIRED"
+        return
     if profile == DECISION_ONLY:
         if method == "get":
             assert resp.status_code == 200, resp.content
@@ -121,5 +132,10 @@ def test_authenticated_without_permission_is_denied_on_every_route(
     assert _code(resp) == "ACCESS_DENIED"
 
 
-def test_production_policy_is_deny_all() -> None:
-    assert isinstance(permissions.ACCESS_POLICY, permissions.DenyAllPolicy)
+def test_production_policy_is_the_rbac_policy_and_denies_unknown_actions() -> None:
+    from platform_core.authz.policy import RbacPolicy
+
+    assert isinstance(permissions.ACCESS_POLICY, RbacPolicy)
+    principal = type("P", (), {"actor_id": uuid.uuid4(), "is_authenticated": True})()
+    assert permissions.ACCESS_POLICY.allows_action(principal, "platform.synthetic.read") is False
+    assert permissions.ACCESS_POLICY.allows_action(principal, "platform.identity.user.read") is False

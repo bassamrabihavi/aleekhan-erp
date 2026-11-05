@@ -256,12 +256,19 @@ def test_sensitivity_cap_property(rank, cap) -> None:
 
 
 # ---------------------------------------------------------------------------------- production wiring
-def test_production_policy_is_still_deny_all_until_01_4() -> None:
-    """01.3 adds no authentication: the API keeps the PHASE_00 deny-all policy (no endpoint reachable)."""
-    assert isinstance(api_permissions.ACCESS_POLICY, api_permissions.DenyAllPolicy)
+def test_production_policy_is_the_rbac_policy_since_01_4() -> None:
+    """01.4 installs the role/scope policy; authentication is explicit per view (session cookie) - the DRF
+    default stays without authentication class and with DenyByDefault, so a view that declares nothing is
+    closed."""
+    from platform_core.authz.policy import RbacPolicy
+
+    assert isinstance(api_permissions.ACCESS_POLICY, RbacPolicy)
     from django.conf import settings
 
     assert settings.REST_FRAMEWORK["DEFAULT_AUTHENTICATION_CLASSES"] == []
+    assert settings.REST_FRAMEWORK["DEFAULT_PERMISSION_CLASSES"] == [
+        "platform_core.api.permissions.DenyByDefault"
+    ]
 
 
 @pytest.mark.django_db

@@ -1,4 +1,4 @@
-# API runtime — PHASE_00 / 00.4
+# API runtime — PHASE_00 / 00.4, PHASE_01 / 01.4
 
 Contract: [openapi-draft.yaml](openapi-draft.yaml) (contract-first, hand-written; the backend is tested
 against it). Code: `backend/platform_core/api/`. Error codes: [../engine/ERROR_CODES.md](../engine/ERROR_CODES.md).
@@ -31,8 +31,9 @@ inside the system by the owner/admin, never AD/LDAP/SSO).
   `EngineContractError` → 500 `INTERNAL_ERROR` with a generic body. DRF validation errors list field paths and
   machine codes only (submitted values are never echoed).
 - **Permissions** (`api/permissions.py`): DRF default is `DenyByDefault` (401 without principal, 403 with).
-  `PublicEndpoint` is allowed only for the three probes (contract test). `ScopedPermission` = view
-  `required_action` + record scope through the `ACCESS_POLICY`; PHASE_00 policy `DenyAllPolicy` denies all.
+  `PublicEndpoint` is allowed only for the three probes and the two pre-login operations (contract test).
+  `ScopedPermission` = view `required_action` + MFA step-up + record scope through the `ACCESS_POLICY`;
+  PHASE_00 policy `DenyAllPolicy` denied all, 01.4 installs `RbacPolicy` (section 9).
   A record outside the caller's scope is **404 `NOT_FOUND`**, indistinguishable from a missing record. There is
   no setting/env toggle that changes the policy; PHASE_01 replaces it in a reviewed commit.
 - **Rate limits** (`api/throttling.py`): per client IP for anonymous callers (`anon`), per principal for
@@ -75,6 +76,7 @@ bodies, headers or query strings. Rule for all code: no secrets or personal data
 | `ALEEKHAN_BUILD_COMMIT` | staging/prod | `0000000` (= unknown build, dev/test only) | hex git sha, 7–40 chars; shown truncated to 12 |
 | `DJANGO_DEBUG` | no | `0` | honoured only in dev/test |
 | `ALEEKHAN_RATE_ANON` / `_PRINCIPAL` / `_HEALTH` | no | `60/min` / `600/min` / `120/min` | `<n>/<s\|m\|h\|d>` |
+| `ALEEKHAN_RATE_LOGIN_IP` / `_LOGIN_USER` | no | `20/min` / `10/min` | 01.4: `POST /auth/login` per client IP / per attempted username (technical defaults; lockout = DEC-051) |
 | `ALEEKHAN_NUM_PROXIES` | staging/prod behind the proxy: `1` | `0` | trusted reverse proxies for `X-Forwarded-For`; `0` = use `REMOTE_ADDR` only (XFF ignored). REV-0015 (00.7): staging/prod refuse to start with `ALEEKHAN_TRUST_PROXY_TLS_HEADER=1` and `NUM_PROXIES=0` (all clients would share the proxy's rate-limit bucket) |
 | `ALEEKHAN_REDIS_URL` | recommended staging/prod | unset → local memory | shared rate-limit counters (see §5) |
 | `ALEEKHAN_TRUST_PROXY_TLS_HEADER` | no | `0` | trust `X-Forwarded-Proto: https` from the proxy |
@@ -134,3 +136,39 @@ public operations are `getLoginContext` and `login` (CONFLICTS C-26). `CONTRACT_
 `platform_core/api/views.py` is `0.5.0-draft`, so `/version` reports the document version; the behaviour of the
 eight implemented endpoints is unchanged. New error codes needed later are listed in
 `x-aleekhan-conventions.planned_error_codes` and are not part of `ErrorCode` until the engine implements them.
+
+## 9. PHASE_01 implemented (contract 0.6.0-draft, step 01.4)
+
+All 99 PHASE_01 operations are served (`backend/platform_core/api/phase01/`, routes in `phase01/urls.py`); the
+`x-aleekhan-status: planned` markers are gone and route parity covers all 88 paths.
+
+- **Authentication**: cookie `aleekhan_session` (random 256-bit token, only its SHA-256 stored; HttpOnly,
+  Secure outside dev/test, SameSite=Lax, path `/`), validated per request by `identity.sessions.authenticate`
+  (timeouts, network policy, MFA pending, forced password change). A failed authentication is raised by the
+  permission check, i.e. after the throttles. No bearer tokens (C-35).
+- **CSRF**: `getLoginContext` sets `csrftoken`; `login` and every unsafe method of a session need
+  `X-CSRFToken` (Django `CsrfViewMiddleware` logic) -> 403 `ACCESS_DENIED`.
+- **Policy**: `ACCESS_POLICY = RbacPolicy` over the APPROVED matrix v1.0 (DEC-049). Action level 403; MFA
+  step-up of the permission (DB flag `mfa_step_up`, window 15 min) 401 `MFA_REQUIRED` -> `stepUpMfa`; record
+  level 404 (SEC-01) for every `{id}` family, lists filtered with the same rule (`scope_q`, or the per-record
+  check of `paginate_filtered` for task / approval inboxes). Session-only operations (`auth`, `me`) use
+  `SessionOperation`.
+- **Writes**: `Idempotency-Key` checked right after the permission (428/400), If-Match parsed next
+  (428/400/412); the row is locked inside the idempotent transaction and the scope is checked BEFORE the
+  version (an out-of-scope id never answers 412). Service write + audit + outbox + idempotency record commit
+  together. Authentication ceremonies (`login`, `verifyMfa`, `stepUpMfa`, `logout`, `changeMyPassword`, MFA
+  enrolment) are exempt (C-27). One-time passwords (`createUser`, `resetUserPassword`) are shown once; the
+  idempotency record stores `[REDACTED]` instead (`StoredResponse.secret_free_body`).
+- **Rate limits**: `anon` per IP, `principal` per user, plus `login_ip` (20/min) and `login_user` (10/min, key
+  = SHA-256 of the normalised username) on `POST /auth/login` - technical defaults; the business rule is the
+  DEC-051 lockout. A user has at most 3 live sessions (Q-0101 END_OLDEST_SESSION).
+- **Documents (SEC-03)**: multipart upload -> size (413), allow-list + magic + macro check (415), encrypted,
+  `WORKING/QUARANTINED` (202); download only CLEAN (409 `FILE_NOT_RELEASED`), always attachment,
+  `application/octet-stream`, `nosniff`, sandbox CSP; every download audited. The idempotency hash of an upload
+  covers the file digest and metadata, never the bytes.
+- **DEC-055**: `POST /workflow/approvals/{approval_id}/bootstrap-approve` (`bootstrapSelfApproveRequest`) - a
+  separate operation, so `approveRequest` never accepts maker == checker.
+- **Not supported yet (400 `NOT_SUPPORTED`, never silently ignored)**: `RoleAssignmentCreateRequest.valid_from`
+  (assignments start now), `OrgUnitCreateRequest.valid_from` / `OrgUnitMoveRequest.effective_from` / tree
+  `as_of` other than now (+-5 min, never back-dated), task reassignment to a unit/position, ENUM parameter
+  definitions (no allowed-value list in the contract).

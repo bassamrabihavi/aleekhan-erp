@@ -24,9 +24,9 @@ Rules (docs/security/PERMISSION_MATRIX_DRAFT.md section 1):
 * Self-assignment (DEC-003) is allowed only explicitly and is reported in :class:`Decision` so callers audit
   it.
 
-Production wiring: ``platform_core.api.permissions.ACCESS_POLICY`` stays :class:`DenyAllPolicy` until step
-01.4
-adds authentication (no endpoint becomes reachable in 01.3). :class:`RbacPolicy` is the adapter 01.4 installs.
+Production wiring (01.4): ``platform_core.api.permissions.ACCESS_POLICY`` is :class:`RbacPolicy`; the session
+authentication (``api/session_auth.py``) gives every request a principal that carries its :class:`Caller`
+(session handle, network zone, last MFA verification).
 """
 
 from __future__ import annotations
@@ -463,17 +463,30 @@ RecordScopeOf = Callable[[Any], RecordScope]
 
 
 class RbacPolicy:
-    """``platform_core.api.permissions.AccessPolicy`` implementation for step 01.4 (not installed in 01.3)."""
+    """``platform_core.api.permissions.AccessPolicy`` implementation (installed in 01.4).
+
+    A principal from the session authentication carries its :class:`Caller`; any other principal (e.g. a
+    synthetic test principal) is judged as a caller without session and without MFA verification.
+    """
 
     def __init__(self, record_scope_of: RecordScopeOf) -> None:
         self._record_scope_of = record_scope_of
 
     @staticmethod
     def _caller(principal: Any) -> Caller:
+        caller = getattr(principal, "caller", None)
+        if isinstance(caller, Caller) and caller.user_id == principal.actor_id:
+            return caller
         return Caller(user_id=principal.actor_id)
 
     def allows_action(self, principal: Any, action: str) -> bool:
-        return can(self._caller(principal), action)
+        try:
+            return can(self._caller(principal), action)
+        except AccessDenied:  # action not in the permission catalogue: deny (403)
+            return False
+
+    def check_step_up(self, principal: Any, action: str) -> None:
+        require_step_up(self._caller(principal), action)
 
     def allows_record(self, principal: Any, action: str, obj: Any) -> bool:
         return can(self._caller(principal), action, self._record_scope_of(obj))

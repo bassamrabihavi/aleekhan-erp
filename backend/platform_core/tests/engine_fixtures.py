@@ -33,6 +33,7 @@ SYN_PW_NEW = "New-Pass-12!"
 SYN_PW_WEAK = "weak"
 SYN_PW_OWNER = "Syn-Owner-Pass-2!"
 SYN_PW_ZERO = "Syn-Pass-0!"
+SYN_PW_WRONG = "Wrong-Pass-123!"  # 01.4 API tests: a policy-shaped but wrong password
 PASSWORD = SYN_PW_MAIN
 INTERNAL_CIDRS = ("10.20.0.0/16",)
 VPN_CIDRS = ("10.20.99.0/24",)

@@ -1,0 +1,61 @@
+== server: 17.9
+== throw-away database aleekhan_roles_check, roles owner/app/ro with suffix e3e6e50f (NOLOGIN, no password)
+NOTICE:  database "aleekhan_roles_check" does not exist, skipping
+== migrate as the owner role
+PASS all tables owned by the owner role
+== app role: allowed runtime path
+PASS app: INSERT audit row
+PASS app: SELECT audit
+PASS app: UPDATE integration source (DML)
+PASS app: unit of work (audit + outbox) via Django
+PASS app: manage.py outbox_status
+PASS app: audit hash chain verified + integrity run recorded (01.3)
+== app role: audit bypass and DDL must be refused
+PASS app: DELETE audit rows  (ERROR:  permission denied for table platform_audit_event)
+PASS app: UPDATE audit rows  (ERROR:  permission denied for table platform_audit_event)
+PASS app: TRUNCATE audit  (ERROR:  permission denied for table platform_audit_event)
+PASS app: DISABLE audit trigger  (ERROR:  must be owner of table platform_audit_event)
+PASS app: DISABLE TRIGGER ALL  (ERROR:  must be owner of table platform_audit_event)
+PASS app: DROP audit trigger  (ERROR:  must be owner of relation platform_audit_event)
+PASS app: session_replication_role=replica (skips triggers)  (ERROR:  permission denied to set parameter "session_replication_role")
+PASS app: DELETE compensation rows  (ERROR:  permission denied for table platform_compensation_record)
+PASS app: write django_migrations  (ERROR:  permission denied for table django_migrations)
+PASS app: CREATE TABLE  (ERROR:  permission denied for schema public)
+PASS app: CREATE FUNCTION  (ERROR:  permission denied for schema public)
+PASS app: DROP TABLE  (ERROR:  must be owner of table platform_outbox_event)
+PASS app: ALTER TABLE ADD COLUMN  (ERROR:  must be owner of table platform_outbox_event)
+== app role: PHASE_01 tables (01.2)
+PASS app: INSERT synthetic org unit (tree trigger reads parameter; history via SECURITY DEFINER)
+PASS app: SELECT permission catalogue
+PASS app: INSERT permission (catalogue is migration-only)  (ERROR:  permission denied for table platform_permission)
+PASS app: UPDATE permission flags  (ERROR:  permission denied for table platform_permission)
+PASS app: INSERT upload type  (ERROR:  permission denied for table platform_upload_type)
+PASS app: UPDATE protected job type  (ERROR:  permission denied for table platform_job_definition)
+PASS app: DELETE user  (ERROR:  permission denied for table platform_user)
+PASS app: DELETE role assignment  (ERROR:  permission denied for table platform_role_assignment)
+PASS app: DELETE org unit  (ERROR:  permission denied for table platform_org_unit)
+PASS app: DELETE document revision  (ERROR:  permission denied for table platform_document_revision)
+PASS app: UPDATE password history  (ERROR:  permission denied for table platform_password_history)
+PASS app: DELETE password history  (ERROR:  permission denied for table platform_password_history)
+PASS app: UPDATE login attempt  (ERROR:  permission denied for table platform_login_attempt)
+PASS app: INSERT org unit history directly  (ERROR:  permission denied for table platform_org_unit_history)
+PASS app: UPDATE org unit history  (ERROR:  permission denied for table platform_org_unit_history)
+PASS app: DISABLE TECHNICAL/BA guard trigger  (ERROR:  must be owner of table platform_role_permission)
+PASS app: DISABLE org tree trigger  (ERROR:  must be owner of table platform_org_unit)
+PASS app: DROP exclusion constraint  (ERROR:  must be owner of table platform_position_assignment)
+PASS app: TRUNCATE login attempts  (ERROR:  permission denied for table platform_login_attempt)
+PASS history row written by trigger for the app role's insert
+== readonly role
+PASS ro: SELECT audit
+PASS ro: SELECT outbox
+PASS ro: INSERT audit  (ERROR:  permission denied for table platform_audit_event)
+PASS ro: UPDATE integration source  (ERROR:  permission denied for table platform_integration_source)
+PASS ro: DELETE outbox  (ERROR:  permission denied for table platform_outbox_event)
+PASS ro: SELECT role grants
+PASS ro: UPDATE user  (ERROR:  permission denied for table platform_user)
+== audit trigger still enabled and rows intact
+PASS all platform triggers enabled
+PASS audit triggers enabled  (trg_audit_event_append_only=O,trg_audit_event_no_truncate=O)
+PASS audit rows written by app are intact (2)
+== roles check: passed=50 failed=0
+== cleanup: drop aleekhan_roles_check and roles *_e3e6e50f

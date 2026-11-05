@@ -1,13 +1,14 @@
 """Routes under ``/api/v1`` (openapi-draft ``servers``). PHASE_00: platform probes, access gate,
-integration."""
+integration. PHASE_01 / 01.4: ``api/phase01/urls.py`` (auth, me, admin identity, org, workflow, audit, jobs,
+documents, parameters)."""
 
 from __future__ import annotations
 
-from django.urls import URLPattern, path
+from django.urls import URLPattern, URLResolver, include, path
 
 from . import integration_views, views
 
-urlpatterns: list[URLPattern] = [
+urlpatterns: list[URLPattern | URLResolver] = [
     path("health/live", views.LivenessView.as_view(), name="health-live"),
     path("health/ready", views.ReadinessView.as_view(), name="health-ready"),
     path("version", views.VersionView.as_view(), name="version"),
@@ -28,4 +29,5 @@ urlpatterns: list[URLPattern] = [
         integration_views.ConflictResolveView.as_view(),
         name="integration-conflict-resolve",
     ),
+    path("", include("platform_core.api.phase01.urls")),
 ]

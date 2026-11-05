@@ -157,3 +157,24 @@ Review verdicts are in `reports/phase-00/step-N/REVIEW.md`. No version number is
 - DEC-055 option B (employer 2026-11-05): owner bootstrap self-approval of the first holder of each
   business-approval role (`approvals.bootstrap_self_approve`), migration `0013_dec055_bootstrap_self_approval`
   (flag column, CHECKs, per-role-locked trigger, role-assignment guard).
+
+### 01.4 Backend/API
+- Added: HTTP endpoints for every PHASE_01 operation (`backend/platform_core/api/phase01/`: auth, me,
+  admin-identity, org, workflow, audit, jobs, documents, parameters) over the 01.3 services; session-cookie
+  authentication with CSRF (`api/session_auth.py`); login throttles per IP / per username
+  (`ALEEKHAN_RATE_LOGIN_IP`, `ALEEKHAN_RATE_LOGIN_USER`, technical defaults); request-body validation mirrored
+  from the OpenAPI schemas; keyset pagination with per-record scope check for task / approval inboxes.
+- Changed: production `ACCESS_POLICY` = `RbacPolicy` (approved matrix v1.0) instead of `DenyAllPolicy`
+  (deny by default kept: unknown action -> 403, out of scope -> 404); `ScopedPermission` enforces the MFA
+  step-up of the permission; public operations = probes + `getLoginContext` / `login` (C-26).
+- Contract `0.6.0-draft` (= `CONTRACT_VERSION`): planned markers removed (route parity covers all 88 paths);
+  new `stepUpMfa` and `bootstrapSelfApproveRequest` (DEC-055); `UserCreated` (one-time password shown once,
+  never stored for idempotent replay); `requestJobCancel` text aligned with STATE_TRANSITIONS 4.7 (QUEUED ->
+  CANCELLED); nullable actor references for system/console rows; see `info.description` 0.6.0.
+- Engine additions for contract operations without a 01.3 service: `users.update_user`, `roles.update_role`,
+  `org.update_unit`, `update_position` (title / unit head), `documents.update_document` / `record_download`
+  (audited download), `params.define_parameter` / `create_dynamic_field` / `update_dynamic_field`, task notes and
+  `due_at`, `approvals.can_decide` / `makers_of`; `StoredResponse.secret_free_body`.
+- Fixed: `mfa.reset_factors` wrote no outbox event for a user without factors/sessions (500); REV-0118 (test
+  assertion that was always true for the download branch).
+- No migration.

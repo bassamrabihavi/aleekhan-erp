@@ -175,14 +175,16 @@ def test_revision_list_equals_object_check_for_every_document_role(store) -> Non
         _link(docs[0], u)
         c = caller(u)
         for action in ("platform.document.read", "platform.document.download"):
-            if not P.can(c, action):
-                assert _visible_revisions(c) == set() or action == "platform.document.download"
-                continue
             got = set(
                 DocumentRevision.objects.filter(service.revision_list_q(c, action)).values_list(
                     "pk", flat=True
                 )
             )
+            if not P.can(c, action):
+                # REV-0118: no grant of THIS action -> the list of THIS action is empty and no object passes
+                assert got == set(), (role, action)
+                assert _object_allowed(c, action) == set(), (role, action)
+                continue
             assert got == _object_allowed(c, action), (role, action)
 
 

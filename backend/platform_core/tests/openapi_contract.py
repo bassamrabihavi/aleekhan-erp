@@ -87,8 +87,15 @@ def validate_response(path: str, method: str, response: Any) -> None:
     """``response`` is a Django test-client response for ``BASE_PATH + path``."""
     op = operation(path, method)
     status = str(response.status_code)
+    if response.status_code == 204:  # 01.4: no content (logout, password change)
+        assert status in op["responses"], f"{method} {path}: undeclared 204"
+        assert "content" not in _resolve(op["responses"][status])
+        assert not response.content
+        validator({"type": "string", "format": "uuid"}).validate(response.get("X-Request-ID"))
+        return
     content_type = response["Content-Type"].split(";")[0].strip()
-    body = json.loads(response.content.decode("utf-8")) if response.content else None
+    is_json = "json" in response.get("Content-Type", "")
+    body = json.loads(response.content.decode("utf-8")) if response.content and is_json else None
 
     # conventions: every response carries a UUID X-Request-ID
     validator({"type": "string", "format": "uuid"}).validate(response.get("X-Request-ID"))
@@ -103,6 +110,8 @@ def validate_response(path: str, method: str, response: Any) -> None:
     declared = _resolve(declared)
     content = declared.get("content", {})
     assert content_type in content, f"{method} {path} {status}: {content_type} not in {list(content)}"
+    if content_type == "application/octet-stream":  # 01.4 download: bytes, not JSON
+        return
     validator(content[content_type]["schema"]).validate(body)
     for name, header in declared.get("headers", {}).items():
         value = response.get(name)

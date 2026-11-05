@@ -436,3 +436,21 @@ def expire_due(*, limit: int = 500, request_id: uuid.UUID | None = None) -> int:
             )
             n += 1
     return n
+
+
+def makers_of(r: ApprovalRequest) -> set[uuid.UUID]:
+    """Everyone who may NOT decide ``r`` (requester + the resource's makers, DEC-032)."""
+    makers = {r.requested_by_id}
+    handler = _handler(r.resource_type)
+    if handler is not None:
+        makers |= handler.makers_of(r)
+    return makers
+
+
+def can_decide(caller: Caller, r: ApprovalRequest) -> bool:
+    """Inbox ``to_decide`` (01.4): the decider check of :func:`_check_decider` without the MFA step-up (the
+    step-up is asked when deciding, not when listing)."""
+    if r.status != ApprovalStatus.PENDING:
+        return False
+    perm = decider_permission(r.action_id)
+    return decide(caller, perm, record_scope(r)).allowed and caller.user_id not in makers_of(r)

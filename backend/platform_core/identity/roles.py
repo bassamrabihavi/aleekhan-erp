@@ -417,3 +417,58 @@ def expire_due_assignments(*, limit: int = 500, request_id: uuid.UUID | None = N
             _audit_assignment(uow, "expire", ra, before=before, reason="valid_to reached")
             n += 1
     return n
+
+
+def update_role(
+    caller: Caller,
+    role_id: uuid.UUID,
+    *,
+    reason: str,
+    name_fa: str | None = None,
+    permissions: list[str] | None = None,
+    request_id: uuid.UUID | None = None,
+) -> Role:
+    """``updateRole`` (01.4): name and permission set of a DRAFT role only (grants never change after
+    activation, DEC-049; the DB refuses it too). New grants use mode SCOPE; a TECHNICAL role never receives a
+    business-approval permission (DEC-003). Activation still needs an approved matrix version."""
+    require_permission(caller, MANAGE)
+    require_step_up(caller, MANAGE)
+    text = _reason(reason)
+    with unit_of_work(caller.context(request_id)) as uow:
+        role = Role.objects.select_for_update().filter(pk=role_id).first()
+        if role is None:
+            raise NotFound()
+        if role.status != RoleStatus.DRAFT:
+            raise StateTransitionNotAllowed("a role changes only while it is DRAFT")
+        before: dict[str, object] = {
+            "permissions": sorted(
+                RolePermission.objects.filter(role=role).values_list("permission_id", flat=True)
+            )
+        }
+        if name_fa is not None:
+            if not name_fa.strip():
+                raise ValidationFailed(errors=[FieldError("name_fa", "REQUIRED")])
+            Role.objects.filter(pk=role.pk).update(
+                name_fa=name_fa.strip()[:200], updated_by_id=caller.user_id
+            )
+        if permissions is not None:
+            wanted = set(permissions)
+            known = dict(
+                Permission.objects.filter(action__in=wanted).values_list("action", "business_approval")
+            )
+            unknown = sorted(wanted - set(known))
+            if unknown:
+                raise ValidationFailed(errors=[FieldError("permissions", "UNKNOWN_PERMISSION")])
+            if role.kind == RoleKind.TECHNICAL and any(known.values()):
+                raise StateTransitionNotAllowed(
+                    "a TECHNICAL role never holds a business-approval permission (DEC-003)"
+                )
+            current = set(RolePermission.objects.filter(role=role).values_list("permission_id", flat=True))
+            with db_rules():
+                RolePermission.objects.filter(role=role, permission_id__in=current - wanted).delete()
+                for action in sorted(wanted - current):
+                    RolePermission.objects.create(role=role, permission_id=action, grant_mode="SCOPE")
+            Role.objects.filter(pk=role.pk).update(updated_by_id=caller.user_id)
+        role.refresh_from_db()
+        _audit_role(uow, "update", role, before=before, reason=text)
+    return role

@@ -23,6 +23,7 @@ from typing import Final
 
 from platform_core.authz.policy import Caller, require_owner_admin, require_permission, require_step_up
 from platform_core.engine.context import db_now
+from platform_core.engine.dbrules import db_rules
 from platform_core.engine.errors import (
     FieldError,
     NotFound,
@@ -34,7 +35,7 @@ from platform_core.engine.rules import require_approved_rule
 from platform_core.engine.state import StateMachine
 from platform_core.engine.uow import UnitOfWork, unit_of_work
 
-from .models import Classification, ParameterDefinition, ParameterValue, ValueStatus
+from .models import Classification, DynamicFieldDefinition, ParameterDefinition, ParameterValue, ValueStatus
 
 CLOCK_TOLERANCE: Final = timedelta(seconds=60)  # TECHNICAL (app/DB clock skew), not a business rule
 
@@ -255,3 +256,155 @@ def _audit(
         aggregate_version=pv.row_version,
         payload={"id": str(pv.pk), "parameter_key": pv.definition_id, "status": pv.status},
     )
+
+
+# ------------------------------------------------------------------------- definitions + fields (01.4)
+DEFINE: Final = "platform.config.parameter.define"
+FIELD_DEFINE: Final = "platform.config.field.define"
+
+
+def define_parameter(
+    caller: Caller,
+    *,
+    key: str,
+    label_fa: str,
+    datatype: str,
+    owner_module: str,
+    classification: str,
+    decision_id: str = "",
+    reason: str,
+    request_id: uuid.UUID | None = None,
+) -> ParameterDefinition:
+    """``createParameterDefinition`` (01.4): a definition WITHOUT a value (values are proposed/published
+    separately). OWNER_POLICY / BUSINESS_RULE need the deciding ``decision_id`` (DB CHECK); ENUM needs an
+    allowed-value list the 0.6.0 contract does not carry yet, so it is refused (400 NOT_SUPPORTED)."""
+    require_permission(caller, DEFINE)
+    require_step_up(caller, DEFINE)
+    text = _reason(reason)
+    if datatype == "ENUM":
+        raise ValidationFailed(
+            "ENUM definitions need allowed values (not in the contract yet)",
+            errors=[FieldError("datatype", "NOT_SUPPORTED")],
+        )
+    if classification != Classification.TECHNICAL and not decision_id:
+        raise ValidationFailed(errors=[FieldError("decision_id", "REQUIRED")])
+    with unit_of_work(caller.context(request_id)) as uow:
+        if ParameterDefinition.objects.filter(key=key).exists():
+            raise ValidationFailed(errors=[FieldError("parameter_key", "ALREADY_EXISTS")])
+        with db_rules():
+            d = ParameterDefinition.objects.create(
+                key=key,
+                label_fa=label_fa.strip()[:200],
+                datatype=datatype,
+                owner_module=owner_module,
+                classification=classification,
+                decision_id=decision_id,
+                created_by_id=caller.user_id,
+            )
+        d.refresh_from_db()
+        uow.audit(
+            action="platform.config.parameter.define",
+            resource_type="platform.parameter_definition",
+            resource_id=d.key,
+            resource_version=d.row_version,
+            after={"datatype": datatype, "classification": classification, "decision_id": decision_id},
+            reason=text,
+        )
+        uow.emit(
+            event_type="platform.config.parameter.defined",
+            aggregate_type="platform.parameter_definition",
+            aggregate_id=d.key,
+            aggregate_version=d.row_version,
+            payload={"key": d.key},
+        )
+    return d
+
+
+def _field_audit(
+    uow: UnitOfWork, verb: str, f: DynamicFieldDefinition, *, before: dict[str, object] | None
+) -> None:
+    uow.audit(
+        action=f"platform.config.field.{verb}",
+        resource_type="platform.dynamic_field",
+        resource_id=f.field_key,
+        resource_version=f.row_version,
+        before=before,
+        after={"entity_scope": f.entity_scope, "datatype": f.datatype, "security_class": f.security_class},
+    )
+    uow.emit(
+        event_type="platform.config.field.changed",
+        aggregate_type="platform.dynamic_field",
+        aggregate_id=f.field_key,
+        aggregate_version=f.row_version,
+        payload={"key": f.field_key, "status": f.status},
+    )
+
+
+def create_dynamic_field(
+    caller: Caller,
+    *,
+    field_key: str,
+    entity_scope: str,
+    label_fa: str,
+    datatype: str,
+    security_class: str,
+    help_fa: str = "",
+    request_id: uuid.UUID | None = None,
+) -> DynamicFieldDefinition:
+    """``createDynamicField`` (01.4): DRAFT only (publishing into forms is PHASE_11, C-33)."""
+    require_permission(caller, FIELD_DEFINE)
+    require_step_up(caller, FIELD_DEFINE)
+    with unit_of_work(caller.context(request_id)) as uow:
+        if DynamicFieldDefinition.objects.filter(field_key=field_key).exists():
+            raise ValidationFailed(errors=[FieldError("field_key", "ALREADY_EXISTS")])
+        with db_rules():
+            f = DynamicFieldDefinition.objects.create(
+                field_key=field_key,
+                entity_scope=entity_scope,
+                label_fa=label_fa.strip()[:200],
+                datatype=datatype,
+                security_class=security_class,
+                help_fa=help_fa.strip()[:500],
+                created_by_id=caller.user_id,
+                updated_by_id=caller.user_id,
+            )
+        f.refresh_from_db()
+        _field_audit(uow, "create", f, before=None)
+    return f
+
+
+def update_dynamic_field(
+    caller: Caller,
+    field_key: str,
+    *,
+    expected_version: int,
+    label_fa: str | None = None,
+    help_fa: str | None = None,
+    request_id: uuid.UUID | None = None,
+) -> DynamicFieldDefinition:
+    """``updateDynamicField`` (01.4): label/help of a DRAFT field; key, scope and type are immutable."""
+    from platform_core.engine.errors import VersionConflict
+
+    require_permission(caller, FIELD_DEFINE)
+    require_step_up(caller, FIELD_DEFINE)
+    with unit_of_work(caller.context(request_id)) as uow:
+        f = DynamicFieldDefinition.objects.select_for_update().filter(field_key=field_key).first()
+        if f is None:
+            raise NotFound()
+        if f.row_version != expected_version:
+            raise VersionConflict()
+        values: dict[str, object] = {}
+        if label_fa is not None:
+            if not label_fa.strip():
+                raise ValidationFailed(errors=[FieldError("label_fa", "REQUIRED")])
+            values["label_fa"] = label_fa.strip()[:200]
+        if help_fa is not None:
+            values["help_fa"] = help_fa.strip()[:500]
+        if not values:
+            raise ValidationFailed("nothing to change", errors=[FieldError("body", "NO_CHANGE")])
+        before: dict[str, object] = {"changed": sorted(values)}
+        with db_rules():
+            DynamicFieldDefinition.objects.filter(pk=f.pk).update(updated_by_id=caller.user_id, **values)
+        f.refresh_from_db()
+        _field_audit(uow, "update", f, before=before)
+    return f

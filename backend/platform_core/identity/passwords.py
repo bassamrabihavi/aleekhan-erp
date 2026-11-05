@@ -178,3 +178,26 @@ def one_time_expired(cred: Credential | None, now: datetime) -> bool:
         and cred.one_time_expires_at is not None
         and cred.one_time_expires_at <= now
     )
+
+
+_OTP_ALPHABET: Final = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789"
+_OTP_SYMBOLS: Final = "!#%*+-=?@"
+
+
+def generate_one_time_password() -> str:
+    """01.4: server-generated one-time password for ``createUser`` / ``resetUserPassword`` (DEC-051: set by
+    the admin action, shown once, valid ``password_initial_validity_hours``, changed at first login). Random
+    from ``secrets``; always satisfies the current policy (checked again by :func:`validate_new_password`)."""
+    import secrets
+
+    policy = PasswordPolicy.current()
+    length = max(policy.min_length, 16)
+    chars = [secrets.choice(_OTP_ALPHABET) for _ in range(length - 3)]
+    chars += [
+        secrets.choice("ABCDEFGHJKLMNPQRSTUVWXYZ"),
+        secrets.choice("23456789"),
+        secrets.choice(_OTP_SYMBOLS),
+    ]
+    rng = secrets.SystemRandom()
+    rng.shuffle(chars)
+    return "".join(chars)

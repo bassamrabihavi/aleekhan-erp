@@ -152,12 +152,12 @@
         },
         "01.4": {
           "name": "Backend/API",
-          "state": "TODO",
+          "state": "IN_PROGRESS",
           "commit": null,
           "report": null,
           "review": null,
           "rework_cycles": 0,
-          "started_at": null,
+          "started_at": "2026-11-05T18:39:39+00:00",
           "done_at": null
         },
         "01.5": {
@@ -2955,7 +2955,16 @@
       "state": "PASS",
       "note": null,
       "commit": null
+    },
+    {
+      "at": "2026-11-05T18:39:39+00:00",
+      "kind": "step",
+      "phase": "PHASE_01",
+      "step": "01.4",
+      "state": "IN_PROGRESS",
+      "note": null,
+      "commit": null
     }
   ],
-  "updated_at": "2026-11-05T18:39:26+00:00"
+  "updated_at": "2026-11-05T18:39:39+00:00"
 }

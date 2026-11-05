@@ -23,6 +23,8 @@ from openapi_spec_validator import validate
 
 from platform_core.api import permissions, views
 from platform_core.api.base import AleekhanAPIView
+from platform_core.api.session_auth import SessionCookieAuthentication
+from platform_core.authz.policy import RbacPolicy
 
 from . import openapi_contract as oc
 
@@ -38,9 +40,11 @@ def test_contract_version_matches_code() -> None:
     assert oc.spec()["info"]["version"] == views.CONTRACT_VERSION
 
 
-# Planned pre-login operations (not routed yet); any new public operation must be added here AND to
-# ``x-aleekhan-conventions.planned_public_operations`` in a reviewed commit (CONFLICTS C-26).
+# Pre-login operations (CONFLICTS C-26), implemented in 01.4; any new public operation must be added here,
+# to ``x-aleekhan-conventions.planned_public_operations`` AND to ``permissions.PUBLIC_OPERATIONS`` in a
+# reviewed commit.
 PLANNED_PUBLIC_OPERATIONS = {"getLoginContext", "login"}
+PROBE_OPERATIONS = {"getLiveness", "getReadiness", "getVersion"}
 
 
 def _effective_security(op: dict[str, Any]) -> list[Any]:
@@ -63,8 +67,9 @@ def test_every_non_public_operation_declares_security() -> None:
             assert requirement, f"{method} {path}: empty security requirement object"
             assert set(requirement) <= schemes, f"{method} {path}: unknown scheme"
     assert public == set(permissions.PUBLIC_OPERATIONS)
-    # planned (not yet served) public operations are pinned separately (0.5.0-draft, CONFLICTS C-26)
-    assert planned_public == PLANNED_PUBLIC_OPERATIONS
+    # 01.4: the public set is exactly the probes + the two pre-login operations (CONFLICTS C-26)
+    assert public == PROBE_OPERATIONS | PLANNED_PUBLIC_OPERATIONS
+    assert planned_public == set()
     gate = oc.operation("/access-gate/check", "get")
     assert gate["security"] == [{"sessionCookie": []}]
 
@@ -108,6 +113,7 @@ ALLOWED_PERMISSIONS = {
     permissions.PublicEndpoint,
     permissions.AuthenticatedPrincipal,
     permissions.ScopedPermission,
+    permissions.SessionOperation,
     permissions.DenyByDefault,
 }
 
@@ -122,9 +128,15 @@ def test_production_views_use_allowlisted_permissions_and_default_policy() -> No
         if permissions.PublicEndpoint in perms:
             assert op_ids[path] in permissions.PUBLIC_OPERATIONS, path
         assert getattr(view_cls, "access_policy", None) is None, path
-        assert view_cls.authentication_classes == [], path  # no auth backend in PHASE_00
+        # 01.4: the only authentication is the session cookie; PHASE_00 views and the public login have none
+        assert view_cls.authentication_classes in ([], [SessionCookieAuthentication]), path
+        if permissions.ScopedPermission in perms or permissions.SessionOperation in perms:
+            if not path.startswith("api/v1/integration/"):
+                assert view_cls.authentication_classes == [SessionCookieAuthentication], path
+        if permissions.ScopedPermission in perms:
+            assert isinstance(view_cls.required_action, str) and view_cls.required_action, path
         assert issubclass(view_cls, AleekhanAPIView), path  # throttles before permissions
-    assert isinstance(permissions.ACCESS_POLICY, permissions.DenyAllPolicy)
+    assert isinstance(permissions.ACCESS_POLICY, RbacPolicy)
 
 
 # ------------------------------------------------------------------------------------------- real responses

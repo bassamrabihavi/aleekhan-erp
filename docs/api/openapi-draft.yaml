@@ -2,8 +2,8 @@ openapi: 3.1.0
 jsonSchemaDialect: https://spec.openapis.org/oas/3.1/dialect/base
 info:
   title: Aleekhan Factory Platform API
-  version: 0.5.2-draft
-  summary: PHASE_00 contract (implemented) + PHASE_01 planned operations (01.1 draft, 01.2 decision update). Platform only, NO business writes.
+  version: 0.6.0-draft
+  summary: PHASE_00 + PHASE_01 platform contract (implemented in 00.4 / 01.4). Platform only, NO business writes.
   description: |
     Status: DRAFT (PHASE_00 / 00.1 Discovery & Contract, implemented in 00.4). Not approved. This hand-written
     document is the contract (contract-first): the backend is tested against it (route parity, security
@@ -35,6 +35,23 @@ info:
     SELF_APPROVAL_FORBIDDEN 403, PASSWORD_POLICY_VIOLATION 422, FILE_TYPE_NOT_ALLOWED 415, FILE_NOT_RELEASED 409,
     JOB_PROTECTED 409, plus PASSWORD_CHANGE_REQUIRED 403 (a session whose one-time or expired password must be
     changed first, DEC-051). Additive change; no path, operation or existing code changed.
+
+    0.6.0-draft (PHASE_01 / 01.4 Backend/API): every PHASE_01 operation is IMPLEMENTED (the planned markers
+    are removed; route parity now covers all paths). Production authorization = role/scope policy over the
+    APPROVED permission matrix v1.0 (DEC-049) with session-cookie authentication; deny by default stays (an
+    action outside the catalogue is denied). Additions (backward compatible within v1): `stepUpMfa`
+    (POST /auth/mfa/step-up, fresh MFA for x-aleekhan-mfa-step-up operations; authentication ceremony, exempt
+    from Idempotency-Key); `bootstrapSelfApproveRequest` (POST /workflow/approvals/{approval_id}/bootstrap-approve,
+    DEC-055 option B: the owner approves the FIRST holder of a business-approval role; a separate operation so
+    approveRequest keeps DEC-032 unchanged); `createUser` answers `UserCreated` (user + one-time credential
+    shown once, never stored in idempotency records - a replay shows `[REDACTED]`); optional
+    `RoleAssignmentCreateRequest.confirm_self_assignment` (explicit self-assignment, DEC-003); optional
+    `SessionInfo.password_change_required` / `mfa_enrolment_required`, `Approval.bootstrap_self_approval`;
+    nullable `User.created_by`, `Task.created_by`, `RoleAssignment.granted_by`,
+    `ParameterValueRevision.proposed_by` (NULL = system/console); `Permission.sensitivity` optional/nullable
+    (the v1.0 catalogue carries none); `AuditIntegrity.status` adds ERROR (a check that could not complete);
+    the audit `resource_type` filter accepts dotted names (`platform.user`). requestJobCancel text aligned with
+    STATE_TRANSITIONS 4.7 (QUEUED -> CANCELLED at once).
 
     Stack: Django 5.2 LTS + DRF (DEC-001). Base path is versioned: every endpoint lives under `/api/v1`.
     A breaking change requires `/api/v2` (or an explicitly approved deprecation window); additive changes only
@@ -87,24 +104,24 @@ tags:
       Read-only source integration framework (00.6): source freshness and conflict queue. Sources are
       READ_ONLY (Rahkaran = Excel import only, ADR-001). Deny by default (explicit permission per action).
   - name: auth
-    description: 'PHASE_01 (planned): local login/MFA/session/logout. No AD/LDAP/SSO (DEC-003).'
+    description: 'PHASE_01: local login/MFA/session/logout. No AD/LDAP/SSO (DEC-003).'
   - name: me
-    description: 'PHASE_01 (planned): the caller''s own profile and effective permissions.'
+    description: 'PHASE_01: the caller''s own profile and effective permissions.'
   - name: admin-identity
-    description: 'PHASE_01 (planned): users, roles, permission catalogue, role assignments (owner/admin only, DEC-003; admin
+    description: 'PHASE_01: users, roles, permission catalogue, role assignments (owner/admin only, DEC-003; admin
       != business approval).'
   - name: org
-    description: 'PHASE_01 (planned): organisation tree - units, positions, holders, reports-to (DEC-043; details DEC-048 APPROVED).'
+    description: 'PHASE_01: organisation tree - units, positions, holders, reports-to (DEC-043; details DEC-048 APPROVED).'
   - name: workflow
-    description: 'PHASE_01 (planned): tasks, approvals (maker-checker DEC-032 APPROVED), workflow definitions/instances.'
+    description: 'PHASE_01: tasks, approvals (maker-checker DEC-032 APPROVED), workflow definitions/instances.'
   - name: audit
-    description: 'PHASE_01 (planned): read-only audit query and integrity status.'
+    description: 'PHASE_01: read-only audit query and integrity status.'
   - name: jobs
-    description: 'PHASE_01 (planned): detailed health, job runs, safe cancel (page 36).'
+    description: 'PHASE_01: detailed health, job runs, safe cancel (page 36).'
   - name: documents
-    description: 'PHASE_01 (planned): document registry, revisions, quarantined upload (SEC-03), download of CLEAN files only.'
+    description: 'PHASE_01: document registry, revisions, quarantined upload (SEC-03), download of CLEAN files only.'
   - name: parameters
-    description: 'PHASE_01 (planned): typed versioned parameters, dynamic field drafts (page 42; layout publishing PHASE_11).'
+    description: 'PHASE_01: typed versioned parameters, dynamic field drafts (page 42; layout publishing PHASE_11).'
 paths:
   /health/live:
     get:
@@ -457,8 +474,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /auth/login:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     get:
       tags:
       - auth
@@ -521,8 +536,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /auth/mfa/verify:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     post:
       tags:
       - auth
@@ -564,9 +577,48 @@ paths:
           $ref: '#/components/responses/Conflict'
         '429':
           $ref: '#/components/responses/RateLimited'
+  /auth/mfa/step-up:
+    post:
+      tags:
+      - auth
+      operationId: stepUpMfa
+      summary: Fresh MFA verification of an ACTIVE session (step-up)
+      description: |
+        01.4: required before operations marked `x-aleekhan-mfa-step-up` when the last MFA verification is older than the step-up window (parameter `mfa_step_up_window_minutes` = 15 min, DEC-051; also inside the factory network, DEC-049). TOTP or a one-time recovery code (DEC-050). Failed attempts count towards the lockout (DEC-051).
+        Exempt from Idempotency-Key (authentication ceremony; see x-aleekhan-conventions.idempotency_exempt).
+      x-aleekhan-decided-by:
+      - DEC-050
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MfaVerifyRequest'
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+            Cache-Control:
+              $ref: '#/components/headers/Cache-Control-NoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionInfo'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/RateLimited'
   /auth/logout:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     post:
       tags:
       - auth
@@ -594,8 +646,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /auth/session:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     get:
       tags:
       - auth
@@ -622,8 +672,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /auth/sessions:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     get:
       tags:
       - auth
@@ -654,8 +702,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /auth/sessions/{session_id}/revoke:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     parameters:
     - $ref: '#/components/parameters/SessionId'
     post:
@@ -699,8 +745,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /auth/password/change:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     post:
       tags:
       - auth
@@ -737,8 +781,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /auth/mfa/enrolment:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     post:
       tags:
       - auth
@@ -775,8 +817,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /auth/mfa/enrolment/confirm:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     post:
       tags:
       - auth
@@ -818,8 +858,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /me:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     get:
       tags:
       - me
@@ -848,8 +886,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /me/permissions:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     get:
       tags:
       - me
@@ -878,8 +914,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /admin/users:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     get:
       tags:
       - admin-identity
@@ -946,7 +980,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/UserCreated'
         '400':
           $ref: '#/components/responses/ValidationFailed'
         '401':
@@ -962,8 +996,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /admin/users/{user_id}:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     parameters:
     - $ref: '#/components/parameters/UserId'
     get:
@@ -1047,8 +1079,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /admin/users/{user_id}/disable:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     parameters:
     - $ref: '#/components/parameters/UserId'
     post:
@@ -1102,8 +1132,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /admin/users/{user_id}/enable:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     parameters:
     - $ref: '#/components/parameters/UserId'
     post:
@@ -1157,8 +1185,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /admin/users/{user_id}/unlock:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     parameters:
     - $ref: '#/components/parameters/UserId'
     post:
@@ -1212,8 +1238,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /admin/users/{user_id}/reset-password:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     parameters:
     - $ref: '#/components/parameters/UserId'
     post:
@@ -1270,8 +1294,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /admin/users/{user_id}/reset-mfa:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     parameters:
     - $ref: '#/components/parameters/UserId'
     post:
@@ -1328,8 +1350,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /admin/users/{user_id}/sessions:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     parameters:
     - $ref: '#/components/parameters/UserId'
     get:
@@ -1365,8 +1385,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /admin/users/{user_id}/sessions/revoke-all:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     parameters:
     - $ref: '#/components/parameters/UserId'
     post:
@@ -1420,8 +1438,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /admin/users/{user_id}/effective-permissions:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     parameters:
     - $ref: '#/components/parameters/UserId'
     get:
@@ -1453,8 +1469,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /admin/permissions:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     get:
       tags:
       - admin-identity
@@ -1486,8 +1500,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /admin/roles:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     get:
       tags:
       - admin-identity
@@ -1565,8 +1577,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /admin/roles/{role_id}:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     parameters:
     - $ref: '#/components/parameters/RoleId'
     get:
@@ -1650,8 +1660,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /admin/roles/{role_id}/activate:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     parameters:
     - $ref: '#/components/parameters/RoleId'
     post:
@@ -1708,8 +1716,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /admin/roles/{role_id}/retire:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     parameters:
     - $ref: '#/components/parameters/RoleId'
     post:
@@ -1763,8 +1769,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /admin/role-assignments:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     get:
       tags:
       - admin-identity
@@ -1847,8 +1851,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /admin/role-assignments/{assignment_id}:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     parameters:
     - $ref: '#/components/parameters/AssignmentId'
     get:
@@ -1882,8 +1884,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /admin/role-assignments/{assignment_id}/revoke:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     parameters:
     - $ref: '#/components/parameters/AssignmentId'
     post:
@@ -1937,8 +1937,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /org/tree:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     get:
       tags:
       - org
@@ -1974,8 +1972,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /org/units:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     get:
       tags:
       - org
@@ -2057,8 +2053,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /org/units/{unit_id}:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     parameters:
     - $ref: '#/components/parameters/UnitId'
     get:
@@ -2142,8 +2136,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /org/units/{unit_id}/move:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     parameters:
     - $ref: '#/components/parameters/UnitId'
     post:
@@ -2197,8 +2189,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /org/units/{unit_id}/deactivate:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     parameters:
     - $ref: '#/components/parameters/UnitId'
     post:
@@ -2252,8 +2242,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /org/positions:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     get:
       tags:
       - org
@@ -2334,8 +2322,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /org/positions/{position_id}:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     parameters:
     - $ref: '#/components/parameters/PositionId'
     get:
@@ -2419,8 +2405,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /org/position-assignments:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     get:
       tags:
       - org
@@ -2503,8 +2487,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /org/position-assignments/{position_assignment_id}/end:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     parameters:
     - $ref: '#/components/parameters/PositionAssignmentId'
     post:
@@ -2558,8 +2540,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /workflow/tasks:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     get:
       tags:
       - workflow
@@ -2636,8 +2616,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /workflow/tasks/{task_id}:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     parameters:
     - $ref: '#/components/parameters/TaskId'
     get:
@@ -2671,8 +2649,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /workflow/tasks/{task_id}/start:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     parameters:
     - $ref: '#/components/parameters/TaskId'
     post:
@@ -2724,8 +2700,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /workflow/tasks/{task_id}/complete:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     parameters:
     - $ref: '#/components/parameters/TaskId'
     post:
@@ -2777,8 +2751,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /workflow/tasks/{task_id}/block:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     parameters:
     - $ref: '#/components/parameters/TaskId'
     post:
@@ -2830,8 +2802,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /workflow/tasks/{task_id}/unblock:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     parameters:
     - $ref: '#/components/parameters/TaskId'
     post:
@@ -2883,8 +2853,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /workflow/tasks/{task_id}/reassign:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     parameters:
     - $ref: '#/components/parameters/TaskId'
     post:
@@ -2936,8 +2904,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /workflow/tasks/{task_id}/verify-close:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     parameters:
     - $ref: '#/components/parameters/TaskId'
     post:
@@ -2989,8 +2955,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /workflow/tasks/{task_id}/cancel:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     parameters:
     - $ref: '#/components/parameters/TaskId'
     post:
@@ -3042,8 +3006,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /workflow/approvals:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     get:
       tags:
       - workflow
@@ -3077,8 +3039,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /workflow/approvals/{approval_id}:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     parameters:
     - $ref: '#/components/parameters/ApprovalId'
     get:
@@ -3112,8 +3072,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /workflow/approvals/{approval_id}/approve:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     parameters:
     - $ref: '#/components/parameters/ApprovalId'
     post:
@@ -3171,8 +3129,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /workflow/approvals/{approval_id}/reject:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     parameters:
     - $ref: '#/components/parameters/ApprovalId'
     post:
@@ -3229,8 +3185,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /workflow/approvals/{approval_id}/withdraw:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     parameters:
     - $ref: '#/components/parameters/ApprovalId'
     post:
@@ -3281,9 +3235,63 @@ paths:
           $ref: '#/components/responses/PreconditionRequired'
         '429':
           $ref: '#/components/responses/RateLimited'
+  /workflow/approvals/{approval_id}/bootstrap-approve:
+    parameters:
+    - $ref: '#/components/parameters/ApprovalId'
+    post:
+      tags:
+      - workflow
+      operationId: bootstrapSelfApproveRequest
+      summary: Owner approves the FIRST holder of a business-approval role (DEC-055)
+      description: |
+        Requires permission `platform.identity.assignment.grant` (deny by default; record scope enforced server-side).
+        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: parameter `mfa_step_up_window_minutes` = 15 min, DEC-051; also inside the factory network, DEC-049).
+        Decided: DEC-055 option B APPROVED 2026-11-05. Only an ACTIVE `owner_admin` holder, only his OWN pending `platform.identity.assignment.grant` request for a role holding a business-approval permission, only while that role has no ACTIVE holder and was never bootstrap-approved before (once per role), with a mandatory reason; flagged `bootstrap_self_approval` and audited. Any other case -> 403 SELF_APPROVAL_FORBIDDEN; a request of another requester -> 404. From the second holder on, approveRequest (DEC-032, second person) applies unchanged. A separate operation on purpose: approveRequest never accepts maker == checker.
+      x-aleekhan-permission: platform.identity.assignment.grant
+      x-aleekhan-mfa-step-up: true
+      x-aleekhan-decided-by:
+      - DEC-055
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReasonRequest'
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Approval'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '412':
+          $ref: '#/components/responses/VersionConflict'
+        '422':
+          $ref: '#/components/responses/IdempotencyKeyReused'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+        '429':
+          $ref: '#/components/responses/RateLimited'
   /workflow/definitions:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     get:
       tags:
       - workflow
@@ -3315,8 +3323,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /workflow/definitions/{definition_id}:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     parameters:
     - $ref: '#/components/parameters/DefinitionId'
     get:
@@ -3350,8 +3356,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /workflow/instances/{instance_id}:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     parameters:
     - $ref: '#/components/parameters/InstanceId'
     get:
@@ -3385,8 +3389,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /workflow/instances/{instance_id}/cancel:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     parameters:
     - $ref: '#/components/parameters/InstanceId'
     post:
@@ -3440,8 +3442,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /audits:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     get:
       tags:
       - audit
@@ -3484,8 +3484,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /audits/{audit_event_id}:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     parameters:
     - $ref: '#/components/parameters/AuditEventId'
     get:
@@ -3523,8 +3521,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /audits/integrity:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     get:
       tags:
       - audit
@@ -3554,8 +3550,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /admin/health:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     get:
       tags:
       - jobs
@@ -3585,8 +3579,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /admin/job-definitions:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     get:
       tags:
       - jobs
@@ -3618,8 +3610,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /admin/jobs:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     get:
       tags:
       - jobs
@@ -3655,8 +3645,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /admin/jobs/{job_id}:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     parameters:
     - $ref: '#/components/parameters/JobId'
     get:
@@ -3692,8 +3680,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /admin/jobs/{job_id}/request-cancel:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     parameters:
     - $ref: '#/components/parameters/JobId'
     post:
@@ -3704,7 +3690,7 @@ paths:
       description: |
         Requires permission `platform.ops.job.cancel` (deny by default; record scope enforced server-side).
         MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (window: parameter `mfa_step_up_window_minutes` = 15 min, DEC-051; also inside the factory network, DEC-049).
-        RUNNING|QUEUED -> CANCEL_REQUESTED. Protected job types -> 409 JOB_PROTECTED. Force kill is NOT part of this contract (DEC-024, PHASE_11; CONFLICTS C-25/C-31).
+        QUEUED -> CANCELLED at once; RUNNING -> CANCEL_REQUESTED (the job stops at its next safe checkpoint) - STATE_TRANSITIONS 4.7. Protected job types -> 409 JOB_PROTECTED. Force kill is NOT part of this contract (DEC-024, PHASE_11; CONFLICTS C-25/C-31).
       x-aleekhan-permission: platform.ops.job.cancel
       x-aleekhan-mfa-step-up: true
       parameters:
@@ -3748,8 +3734,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /documents:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     get:
       tags:
       - documents
@@ -3827,8 +3811,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /documents/{document_id}:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     parameters:
     - $ref: '#/components/parameters/DocumentId'
     get:
@@ -3910,8 +3892,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /documents/{document_id}/revisions:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     parameters:
     - $ref: '#/components/parameters/DocumentId'
     get:
@@ -4000,8 +3980,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /documents/{document_id}/revisions/{revision_id}:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     parameters:
     - $ref: '#/components/parameters/DocumentId'
     - $ref: '#/components/parameters/RevisionId'
@@ -4036,8 +4014,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /documents/{document_id}/revisions/{revision_id}/content:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     parameters:
     - $ref: '#/components/parameters/DocumentId'
     - $ref: '#/components/parameters/RevisionId'
@@ -4076,8 +4052,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /documents/{document_id}/revisions/{revision_id}/submit-review:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     parameters:
     - $ref: '#/components/parameters/DocumentId'
     - $ref: '#/components/parameters/RevisionId'
@@ -4130,8 +4104,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /documents/{document_id}/revisions/{revision_id}/approve:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     parameters:
     - $ref: '#/components/parameters/DocumentId'
     - $ref: '#/components/parameters/RevisionId'
@@ -4190,8 +4162,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /documents/{document_id}/revisions/{revision_id}/reject:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     parameters:
     - $ref: '#/components/parameters/DocumentId'
     - $ref: '#/components/parameters/RevisionId'
@@ -4250,8 +4220,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /admin/parameters:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     get:
       tags:
       - parameters
@@ -4328,8 +4296,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /admin/parameters/{parameter_key}:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     parameters:
     - $ref: '#/components/parameters/ParameterKey'
     get:
@@ -4363,8 +4329,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /admin/parameters/{parameter_key}/values:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     parameters:
     - $ref: '#/components/parameters/ParameterKey'
     get:
@@ -4445,8 +4409,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /admin/parameters/{parameter_key}/values/{value_revision_id}/publish:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     parameters:
     - $ref: '#/components/parameters/ParameterKey'
     - $ref: '#/components/parameters/ValueRevisionId'
@@ -4505,8 +4467,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /admin/dynamic-fields:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     get:
       tags:
       - parameters
@@ -4582,8 +4542,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /admin/dynamic-fields/{field_key}:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '01.4'
     parameters:
     - $ref: '#/components/parameters/FieldKey'
     get:
@@ -4671,9 +4629,9 @@ components:
       in: cookie
       name: aleekhan_session
       description: |
-        PLANNED for PHASE_01: server-side Django session (HttpOnly, Secure, SameSite=Lax) issued after
+        PHASE_01 (implemented in 01.4): server-side session (HttpOnly, Secure outside dev/test, SameSite=Lax) issued after
         local username/password (+ MFA per DEC-003/DEC-042). Unsafe methods additionally require the
-        `X-CSRFToken` header. No AD/LDAP/SSO (DEC-003). Not usable in PHASE_00.
+        `X-CSRFToken` header (cookie `csrftoken` from getLoginContext). No AD/LDAP/SSO (DEC-003).
         0.5.0 (01.1): the session id is rotated at login and at MFA verification; a session in state
         MFA_PENDING is accepted only by `verifyMfa` and `logout`. Idle/absolute timeout (DEC-051): users 2 h / 12 h, operators idle 8 h internal only; max 3 concurrent sessions. Browser
         only (DEC-002): no bearer/API tokens in PHASE_01 (CONFLICTS C-35).
@@ -4986,7 +4944,7 @@ components:
       required: false
       schema:
         type: string
-        pattern: ^[a-z][a-z0-9_]{0,63}$
+        pattern: ^[a-z][a-z0-9_.]{0,63}$
     AuditResourceIdFilter:
       name: resource_id
       in: query
@@ -5674,7 +5632,7 @@ components:
           format: uuid
         one_time_password:
           type: string
-          description: Shown once to the admin; valid 72 h; must be changed at first login; never logged or stored in clear (DEC-051).
+          description: Shown once to the admin; valid 72 h; must be changed at first login; never logged or stored in clear (DEC-051). Server-generated (policy-compliant random). An idempotent replay answers `[REDACTED]` (the secret is never stored in the idempotency record).
         expires_at:
           $ref: '#/components/schemas/UtcTimestamp'
     SessionInfo:
@@ -5723,6 +5681,12 @@ components:
           description: From the trusted proxy's client address; zone from the server-side CIDR list (DEC-052).
         is_current:
           type: boolean
+        password_change_required:
+          type: boolean
+          description: Login/verify only - the one-time or expired password must be changed first (DEC-051).
+        mfa_enrolment_required:
+          type: boolean
+          description: Login only - MFA applies but no factor is enrolled yet (inside the factory network, E-2).
     SessionPage:
       type: object
       additionalProperties: false
@@ -5792,7 +5756,9 @@ components:
         created_at:
           $ref: '#/components/schemas/UtcTimestamp'
         created_by:
-          type: string
+          type:
+          - string
+          - 'null'
           format: uuid
         row_version:
           type: integer
@@ -5811,6 +5777,17 @@ components:
             $ref: '#/components/schemas/User'
         page:
           $ref: '#/components/schemas/PageMeta'
+    UserCreated:
+      type: object
+      additionalProperties: false
+      required:
+      - user
+      - one_time_credential
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        one_time_credential:
+          $ref: '#/components/schemas/OneTimeCredential'
     UserCreateRequest:
       type: object
       additionalProperties: false
@@ -5870,7 +5847,6 @@ components:
       - action
       - module
       - description_fa
-      - sensitivity
       - mfa_step_up
       - business_approval
       properties:
@@ -5886,12 +5862,16 @@ components:
           minLength: 1
           maxLength: 200
         sensitivity:
-          type: string
+          type:
+          - string
+          - 'null'
           enum:
           - S0
           - S1
           - S2
           - S3
+          - null
+          description: Data sensitivity of the action; null = not classified (matrix v1.0 classifies none).
         mfa_step_up:
           type: boolean
         business_approval:
@@ -6069,7 +6049,9 @@ components:
           - EXPIRED
           - REVOKED
         granted_by:
-          type: string
+          type:
+          - string
+          - 'null'
           format: uuid
         self_assignment:
           type: boolean
@@ -6124,6 +6106,9 @@ components:
           oneOf:
           - $ref: '#/components/schemas/UtcTimestamp'
           - type: 'null'
+        confirm_self_assignment:
+          type: boolean
+          description: Must be true when user_id is the caller (explicit, audited self-assignment, DEC-003).
         reason:
           type: string
           minLength: 3
@@ -6628,7 +6613,9 @@ components:
         assignee:
           $ref: '#/components/schemas/Assignee'
         created_by:
-          type: string
+          type:
+          - string
+          - 'null'
           format: uuid
         created_at:
           $ref: '#/components/schemas/UtcTimestamp'
@@ -6786,6 +6773,9 @@ components:
           oneOf:
           - $ref: '#/components/schemas/UtcTimestamp'
           - type: 'null'
+        bootstrap_self_approval:
+          type: boolean
+          description: DEC-055 - approved by the owner as the first holder of a business-approval role.
         workflow_instance_id:
           type:
           - string
@@ -7041,6 +7031,7 @@ components:
           - OK
           - BROKEN
           - NEVER_RUN
+          - ERROR
         events_checked:
           type: integer
           minimum: 0
@@ -7626,7 +7617,9 @@ components:
         effective_from:
           $ref: '#/components/schemas/UtcTimestamp'
         proposed_by:
-          type: string
+          type:
+          - string
+          - 'null'
           format: uuid
         proposed_at:
           $ref: '#/components/schemas/UtcTimestamp'
@@ -7836,7 +7829,7 @@ x-aleekhan-conventions:
     `idempotency_exempt`), If-Match on updates, audit + outbox in the same transaction.
   planned_public_operations: [getLoginContext, login]
   idempotency_exempt:
-    operations: [login, verifyMfa, logout, changeMyPassword, startMfaEnrolment, confirmMfaEnrolment]
+    operations: [login, verifyMfa, stepUpMfa, logout, changeMyPassword, startMfaEnrolment, confirmMfaEnrolment]
     reason: |
       Authentication ceremonies are not replayable business writes: their responses create/rotate session state
       or reveal one-time secrets that must never be stored in an idempotency record, and their bodies carry

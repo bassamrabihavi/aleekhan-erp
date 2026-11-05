@@ -40,6 +40,7 @@ from platform_core.authz.policy import (
     require_record,
 )
 from platform_core.engine.context import Actor, RequestContext, db_now
+from platform_core.engine.dbrules import db_rules
 from platform_core.engine.errors import (
     DependencyUnavailable,
     FieldError,
@@ -662,3 +663,68 @@ def purge_rejected(
             transaction.on_commit(functools.partial(storage.delete, key))
             n += 1
     return n
+
+
+def update_document(
+    caller: Caller,
+    document_id: uuid.UUID,
+    *,
+    expected_version: int,
+    title_fa: str | None = None,
+    legacy_location_ref: str | None = None,
+    clear_legacy_location_ref: bool = False,
+    request_id: uuid.UUID | None = None,
+) -> Document:
+    """``updateDocument`` (01.4): metadata only (title, legacy location text, C-29); type, sensitivity and
+    revisions never change here. Same record scope as ``getDocument`` (404 outside it)."""
+    from platform_core.engine.errors import VersionConflict
+
+    action = "platform.document.update"
+    require_permission(caller, action)
+    with unit_of_work(caller.context(request_id)) as uow:
+        doc = _lock_doc(document_id)
+        require_record(caller, action, document_scope(doc))
+        if doc.row_version != expected_version:
+            raise VersionConflict()
+        values: dict[str, object] = {}
+        if title_fa is not None:
+            if not title_fa.strip():
+                raise ValidationFailed(errors=[FieldError("title_fa", "REQUIRED")])
+            values["title_fa"] = title_fa.strip()[:200]
+        if clear_legacy_location_ref:
+            values["legacy_location_ref"] = ""
+        elif legacy_location_ref is not None:
+            values["legacy_location_ref"] = legacy_location_ref.strip()[:500]
+        if not values:
+            raise ValidationFailed("nothing to change", errors=[FieldError("body", "NO_CHANGE")])
+        with db_rules():
+            Document.objects.filter(pk=doc.pk).update(updated_by_id=caller.user_id, **values)
+        doc.refresh_from_db()
+        uow.audit(
+            action="platform.document.update",
+            resource_type="platform.document",
+            resource_id=str(doc.pk),
+            resource_version=doc.row_version,
+            after={"changed": sorted(values)},
+        )
+        uow.emit(
+            event_type="platform.document.updated",
+            aggregate_type="platform.document",
+            aggregate_id=str(doc.pk),
+            aggregate_version=doc.row_version,
+            payload={"id": str(doc.pk)},
+        )
+    return doc
+
+
+def record_download(caller: Caller, rev: DocumentRevision, *, request_id: uuid.UUID | None = None) -> None:
+    """Every download is audited (openapi ``downloadDocumentRevision``); no outbox event (a read)."""
+    with unit_of_work(caller.context(request_id), require_event=False) as uow:
+        uow.audit(
+            action="platform.document.download",
+            resource_type="platform.document_revision",
+            resource_id=str(rev.pk),
+            resource_version=rev.row_version,
+            scope={"document_id": str(rev.document_id)},
+            after={"sha256": rev.sha256, "size_bytes": rev.size_bytes},
+        )

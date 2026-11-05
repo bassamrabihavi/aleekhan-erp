@@ -218,6 +218,10 @@ ALEEKHAN_THROTTLE_RATES: dict[str, str] = {
     "anon": _env_rate("ALEEKHAN_RATE_ANON", "60/min"),
     "principal": _env_rate("ALEEKHAN_RATE_PRINCIPAL", "600/min"),
     "health": _env_rate("ALEEKHAN_RATE_HEALTH", "120/min"),
+    # 01.4 login-specific limits (TECHNICAL DEFAULTS against brute force / credential stuffing; the business
+    # rule is the DEC-051 lockout 5 failures / 15 min). Per client IP and per attempted username (hashed key).
+    "login_ip": _env_rate("ALEEKHAN_RATE_LOGIN_IP", "20/min"),
+    "login_user": _env_rate("ALEEKHAN_RATE_LOGIN_USER", "10/min"),
 }
 
 # REV-0015: behind the DEC-042 reverse proxy every client would share the proxy's IP bucket if NUM_PROXIES

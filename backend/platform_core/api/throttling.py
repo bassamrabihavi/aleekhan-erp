@@ -8,6 +8,7 @@ Counters live in the default cache: local memory per process in dev/test, Redis 
 
 from __future__ import annotations
 
+import hashlib
 from typing import TYPE_CHECKING
 
 from django.conf import settings
@@ -42,7 +43,7 @@ class AnonIpThrottle(_ConfiguredRateThrottle):
 
 
 class PrincipalThrottle(_ConfiguredRateThrottle):
-    """Authenticated callers, per principal (no-op in PHASE_00: there is no authentication yet)."""
+    """Authenticated callers, per principal (active since 01.4: session authentication)."""
 
     scope = "principal"
 
@@ -60,3 +61,32 @@ class HealthIpThrottle(_ConfiguredRateThrottle):
 
     def get_cache_key(self, request: Request, view: APIView) -> str | None:
         return self.cache_format % {"scope": self.scope, "ident": self.get_ident(request)}
+
+
+class LoginIpThrottle(_ConfiguredRateThrottle):
+    """01.4: login attempts per client IP (independent of authentication state)."""
+
+    scope = "login_ip"
+
+    def get_cache_key(self, request: Request, view: APIView) -> str | None:
+        if request.method != "POST":
+            return None
+        return self.cache_format % {"scope": self.scope, "ident": self.get_ident(request)}
+
+
+class LoginUsernameThrottle(_ConfiguredRateThrottle):
+    """01.4: login attempts per attempted username (normalised, SHA-256 in the cache key: no raw username in
+    cache keys). Credential stuffing from many IPs against one account is limited here; the DEC-051 lockout
+    is the business rule on top."""
+
+    scope = "login_user"
+
+    def get_cache_key(self, request: Request, view: APIView) -> str | None:
+        if request.method != "POST":
+            return None
+        data = request.data if isinstance(request.data, dict) else {}
+        raw = data.get("username")
+        if not isinstance(raw, str) or not raw.strip():
+            return None
+        digest = hashlib.sha256(raw.strip().lower()[:150].encode("utf-8")).hexdigest()
+        return self.cache_format % {"scope": self.scope, "ident": digest}

@@ -21,6 +21,7 @@ from django.db.models import Q
 
 from platform_core.authz.policy import OWNER_ROLE, Caller, require_permission, require_step_up
 from platform_core.engine.context import Actor, RequestContext, db_now
+from platform_core.engine.dbrules import db_rules
 from platform_core.engine.errors import (
     AccessDenied,
     FieldError,
@@ -327,5 +328,57 @@ def recover_owner(*, username: str, password: str, reason: str) -> User:
         target.refresh_from_db()
         _audit_user(
             uow, "platform.identity.owner.recover", "platform.identity.owner.recovered", target, reason=text
+        )
+    return target
+
+
+# ------------------------------------------------------------------------------------- profile (01.4)
+UPDATE_ACTION: Final = "platform.identity.user.update"
+
+
+def update_user(
+    caller: Caller,
+    user_id: uuid.UUID,
+    *,
+    reason: str,
+    display_name: str | None = None,
+    network_policy: str | None = None,
+    request_id: uuid.UUID | None = None,
+) -> User:
+    """``updateUser`` (01.4): profile fields only (never roles, status or credentials). Operators stay
+    INTERNAL_ONLY (DEC-052). The audit row names the changed fields, never their values (personal data)."""
+    require_permission(caller, UPDATE_ACTION)
+    require_step_up(caller, UPDATE_ACTION)
+    text = _reason(reason)
+    with unit_of_work(caller.context(request_id)) as uow:
+        target = _lock_target(user_id)
+        values: dict[str, object] = {}
+        if display_name is not None:
+            shown = display_name.strip()
+            if not shown or len(shown) > 200:
+                raise ValidationFailed(errors=[FieldError("display_name", "INVALID")])
+            if shown != target.display_name:
+                values["display_name"] = shown
+        if network_policy is not None and network_policy != target.network_policy:
+            if network_policy not in NetworkPolicy.values:
+                raise ValidationFailed(errors=[FieldError("network_policy", "INVALID")])
+            if target.account_kind == AccountKind.OPERATOR:
+                raise ValidationFailed(
+                    "operator accounts are always INTERNAL_ONLY (DEC-052)",
+                    errors=[FieldError("network_policy", "OPERATOR_INTERNAL_ONLY")],
+                )
+            values["network_policy"] = network_policy
+        if not values:
+            raise ValidationFailed("nothing to change", errors=[FieldError("body", "NO_CHANGE")])
+        with db_rules():  # DB guards (e.g. synthetic label, formats) -> 409/400 with the rule name
+            User.objects.filter(pk=target.pk).update(updated_by_id=caller.user_id, **values)
+        target.refresh_from_db()
+        _audit_user(
+            uow,
+            "platform.identity.user.update",
+            "platform.identity.user.updated",
+            target,
+            reason=text,
+            before={"changed": sorted(values)},
         )
     return target

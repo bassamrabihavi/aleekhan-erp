@@ -267,6 +267,8 @@ def update_position(
     reports_to_id: uuid.UUID | object | None = ...,
     primary_capacity: int | None = None,
     deactivate: bool = False,
+    title_fa: str | None = None,
+    is_unit_head: bool | None = None,
     request_id: uuid.UUID | None = None,
 ) -> Position:
     _guard(caller)
@@ -277,9 +279,21 @@ def update_position(
         before = _position_view(pos)
         values: dict[str, Any] = {"updated_by_id": caller.user_id}
         if reports_to_id is not ...:
+            target = reports_to_id if isinstance(reports_to_id, uuid.UUID) else None
+            if target is not None and not Position.objects.filter(pk=target).exists():
+                raise NotFound()
             values["reports_to_id"] = reports_to_id
         if primary_capacity is not None:
             values["primary_capacity"] = primary_capacity
+        if title_fa is not None:
+            if not title_fa.strip():
+                raise ValidationFailed(errors=[FieldError("title_fa", "REQUIRED")])
+            values["title_fa"] = title_fa.strip()[:200]
+        if is_unit_head is not None:
+            values["is_unit_head"] = is_unit_head
+        head = values.get("is_unit_head", pos.is_unit_head)
+        if head and values.get("primary_capacity", pos.primary_capacity) != 1:
+            raise ValidationFailed(errors=[FieldError("primary_capacity", "HEAD_CAPACITY_ONE")])
         if deactivate:
             if pos.status != OrgStatus.ACTIVE:
                 raise StateTransitionNotAllowed("the position is not ACTIVE")
@@ -390,3 +404,40 @@ def end_position_assignment(
             reason=text,
         )
     return pa
+
+
+def update_unit(
+    caller: Caller,
+    unit_id: uuid.UUID,
+    *,
+    expected_version: int,
+    reason: str,
+    name_fa: str | None = None,
+    request_id: uuid.UUID | None = None,
+) -> OrgUnit:
+    """``updateOrgUnit`` (01.4): the label only (the code is immutable; moves and deactivation have their own
+    operations). History is written by the 0008 trigger."""
+    _guard(caller)
+    text = _reason(reason)
+    with unit_of_work(caller.context(request_id)) as uow:
+        unit = _lock(OrgUnit, unit_id)
+        _check_version(unit, expected_version)
+        if name_fa is None or not name_fa.strip():
+            raise ValidationFailed("nothing to change", errors=[FieldError("name_fa", "REQUIRED")])
+        before = _unit_view(unit)
+        with db_rules():
+            OrgUnit.objects.filter(pk=unit.pk).update(
+                name_fa=name_fa.strip()[:200], updated_by_id=caller.user_id
+            )
+        unit.refresh_from_db()
+        _audit(
+            uow,
+            "platform.org.unit.update",
+            "platform.org.unit.updated",
+            "platform.org_unit",
+            unit,
+            _unit_view(unit),
+            before=before,
+            reason=text,
+        )
+    return unit

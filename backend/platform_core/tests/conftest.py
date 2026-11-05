@@ -55,3 +55,29 @@ def clear_cache() -> Iterator[None]:
     yield
     cache.clear()
     reset_migrations_check_cache()
+
+
+@pytest.fixture
+def api_db(audit_cleanup: None) -> Iterator[None]:
+    """01.4 HTTP tests: writes go through ``run_idempotent``, which refuses an outer transaction, so the API
+    tests run on a transactional test database (committed rows, cleaned up afterwards). The seeded catalogue
+    (permissions, roles, parameters, job types) is re-created after the previous test's flush."""
+    from importlib import import_module
+
+    from platform_core.documents.models import UploadType
+
+    from .engine_fixtures import ensure_catalogue
+
+    ensure_catalogue()
+    seed = import_module("platform_core.migrations.0010_seed_phase01_catalogue")
+    for ext, media, label, check in seed.UPLOAD_TYPES:  # DEC-053 allow-list, same values as migration 0010
+        UploadType.objects.get_or_create(
+            extension=ext,
+            defaults={
+                "media_type": media,
+                "label_fa": label,
+                "content_check": check,
+                "decision_id": "DEC-053",
+            },
+        )
+    yield

@@ -203,4 +203,14 @@ def reset_factors(uow: UnitOfWork, target: User, *, by: uuid.UUID | None, reason
         reason=reason,
         after={"revoked_factors": len(factors)},
     )
+    # 01.4 fix: a reset of a user WITHOUT factors or sessions wrote no outbox event (unit of work contract ->
+    # 500); the reset itself is now always an event.
+    target.refresh_from_db()
+    uow.emit(
+        event_type="platform.identity.user.mfa_reset",
+        aggregate_type="platform.user",
+        aggregate_id=str(target.pk),
+        aggregate_version=target.row_version,
+        payload={"id": str(target.pk), "revoked_factors": len(factors)},
+    )
     return len(factors)
