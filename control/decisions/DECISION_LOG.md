@@ -43,3 +43,13 @@
 ## 2026-11-04 — DEC-032 APPROVED
 - **Decision:** الگوی maker-checker و نگهداری Audit. پاسخ کارفرما ۲۰۲۶-۱۱-۰۴: بخش ۱ = B (متوسط): maker≠checker برای approveDocumentRevision، publishParameterValue پارامترهای BUSINESS_RULE، و createRoleAssignment نقش‌های دارای حق تأیید کسب‌وکار؛ تا تعریف نفر دوم این موارد «در انتظار» می‌مانند. بن‌بست یک‌نفره = D1 (هرگز خودتأیید؛ تأیید اضطراری فقط با تصمیم بعدی). انقضای درخواست تأیید ۳۰ روز. بخش ۲ = R-A: Audit کسب‌وکار و دسترسی هرگز حذف نشود (بایگانی سالانه)؛ رخدادهای ورود ۲ سال؛ مدت الزام قانونی را مشاور حقوقی/مالی تأیید کند.
 - **Decided by:** بسام ربیهاوی (کارفرما)
+
+## 2026-11-05 — Employer answers to 01.2 open questions (detail of DEC-051/053/048/032; REV-0110)
+- **Q-0101 (DEC-051):** on the 4th concurrent login the oldest session is ended automatically (audited).
+- **Q-0102 (DEC-051):** operator absolute session limit 12 h.
+- **Q-0103 (DEC-032):** OWNER_POLICY parameters are changed by the owner alone (owner_admin), no second person; MFA step-up + reason + audit.
+- **Q-0104 (DEC-053):** 25 MB = 26,214,400 bytes.
+- **Q-0105 (DEC-051):** password reuse check refuses the last 5 passwords.
+- **Q-0106 (DEC-048):** a position may have several PRIMARY holders up to a per-position capacity (default 1).
+- **Back-dating (DEC-048):** org-tree changes take effect only from now on; no past effective dates.
+- **Decided by:** بسام ربیهاوی (کارفرما), in the Claude Code session.

@@ -1,73 +1,100 @@
-VERDICT: REWORK
-PHASE/STEP: PHASE_01 / 01.2 Database    COMMIT: 84e5acd
+VERDICT: PASS
+PHASE/STEP: PHASE_01 / 01.2 Database (rework round 1)    COMMIT: 153651f (report sha fix 1f21be8; status 7a0e3df)
 REVIEWER: aleekhan-reviewer (independent, read-only), 2026-11-05, machine work-windows
 
-## Reviewer re-runs (this review)
+History: round 0 reviewed 84e5acd and gave **REWORK** (REV-0105 P1, REV-0106 P2, REV-0107 P2, REV-0108 P3). All four are resolved in this round, as shown below.
+
+## Reviewer re-runs (this review, reproduced by the reviewer)
+This time the DB-backed evidence was reproduced by the reviewer. I used a throw-away PostgreSQL 17.9 cluster that I initialised myself in the session scratchpad:
+- binaries from the local PG install;
+- trust auth on 127.0.0.1 only, no password;
+- the project's test credential file was not read;
+- the cluster was stopped afterwards.
+
+HEAD was 7a0e3df. `git diff --stat 153651f 7a0e3df` shows only REPORT.md/REPORT.json/PROJECT_STATUS.json, so the code is identical to 153651f.
+
 | Command | Result |
 |---|---|
-| `ruff check .` and `ruff format --check .` | All checks passed; 191 files already formatted |
-| `cd backend && mypy .` | Success: no issues in 112 source files |
+| `pytest -m "not perf"` (full backend) | **699 passed**, 1 deselected, 88.7 s (matches `logs/orch/pytest.log`) |
+| `pytest platform_core/tests/test_phase01_concurrency.py` x5 | 6 passed in each of the 5 runs (incl. new capacity race) |
+| `backend/scripts/db_roundtrip.sh` | 0001..0010 up, zero, up; `schema diff: EMPTY (5926 lines compared)`; `ROUNDTRIP OK`, rc=0 |
+| `ops/db/roles_check.sh` | `passed=49 failed=0`, rc=0 |
+| `manage.py makemigrations --check --dry-run` | No changes detected |
+| `mypy .` (backend) | Success: no issues in 112 source files |
+| `ruff check .` / `ruff format --check .` | All checks passed / 192 files already formatted |
+| `tools/secret_scan.py --history` | findings=0, PASS (1 allow-listed test literal) |
 | `python -m unittest discover -s tools/tests` | Ran 42, OK |
-| `tools/secret_scan.py --history` | findings=0, PASS (1 allow-listed history test literal) |
 | `tools/verify_handoff.py` | OK=300, KNOWN_DEFECT=1 (DEC-044), failures=0 |
-| `manage.py makemigrations --check --dry-run` | No changes detected (no DB connection; history-consistency check was skipped with a warning) |
-| pytest (692), `db_roundtrip.sh`, `roles_check.sh`, concurrency x5 | **NOT reproduced by the reviewer.** This sandbox has no PostgreSQL libpq env, and loading the test DB credential file was refused by the permission system. The orchestrator logs in `logs/orch/` are internally consistent: junit shows tests=692, failures=0, errors=0; the roundtrip log shows all 10 migrations up, down to zero, partial rollback to 0006, up again; `schema_diff.txt` is 0 bytes; roles check passed=49, failed=0. They count as orchestrator evidence, not reviewer-reproduced evidence. |
+| Privacy grep of `reports/phase-01/step-2/` (account name, mail domain, user path, `/home/`, hostname) | 0 hits |
+| Ad-hoc SQL probes (reviewer, in a rolled-back transaction) | see REV-0109 |
+
+## Resolution of round-0 issues
+- **REV-0105 [P1] resolved.**
+  - Code (0008_phase01_db_guards.py:344-384):
+    - `platform_role_kind_guard` allows only DRAFT→ACTIVE and ACTIVE→RETIRED.
+    - `kind` and `matrix_version` are frozen once a role is not DRAFT.
+    - RETIRED is refused while PENDING_APPROVAL/ACTIVE assignments exist.
+    - RETIRED is terminal (TERMINAL["role"], 0008:69).
+  - Remaining bypass paths checked, none open:
+    - assignment insert needs an ACTIVE role (0008:416);
+    - grants change only while DRAFT (0008:325);
+    - the app role cannot UPDATE `platform_permission.business_approval` (grants.sql:39).
+  - `unseed` (0010:707-713) disables the trigger only inside the owner-run migration. Roundtrip OK; roles check confirms the app role cannot DISABLE TRIGGER.
+  - Regression tests: test_phase01_roles.py:211-251, including the exact repro failing at step 3.
+- **REV-0106 [P2] resolved by employer answer Q-0103** (recorded in docs/discovery/STATE_TRANSITIONS.md:212).
+  - An OWNER_POLICY value needs an ACTIVE `owner_admin` holder for both propose and publish, plus a reason of at least 3 characters. Seed rows are exempt (0008:279-296).
+  - `platform_holds_owner_admin` is SECURITY INVOKER with a pinned search_path. EXECUTE is granted to the app role (grants.sql:42).
+  - Test: test_phase01_params_jobs.py:234-256.
+- **REV-0107 [P2] resolved** for org units and positions.
+  - `ck_effective_from_not_backdated` requires effective_from ≥ now − 60 s on INSERT and whenever it changes (0008:529-536).
+  - Content changes without a new date are auto-stamped `now` (0008:516-520).
+  - Test: test_phase01_org.py:90-102. Assignments: see REV-0109.
+- **REV-0108 [P3] resolved.** REPORT.md:7 and REPORT.json:4 carry `153651f`; both are committed in 1f21be8.
+- **Q-0104 applied.** 26214400 bytes (0010_seed:512-523). Tests at test_phase01_schema.py:286 and :335; workflow_docs:168-173.
+- **Q-0106 applied.**
+  - Schema: `primary_capacity` ≥ 1, and 1 for unit heads (0007 constraints, org/models.py:199-227).
+  - Enforcement: exact peak count under a per-position advisory lock (0008:637-652, 753-762). The lock order is person, then position, so there is no cycle.
+  - A capacity decrease is checked (0008:683-690), and history carries the column.
+  - Tests: test_phase01_org.py:174-201; concurrency test with capacity 2 → exactly 2 win (stable over 5 reviewer runs).
 
 ## CHECKS
-- R01 ✔ Scope matches 01.2: migrations, constraints, guards, a non-sensitive seed and up/down tests (`git show --stat 84e5acd`: models, migrations 0007–0010, tests, ops, docs). There is no engine, API behaviour or UI. `api/views.py` only changes CONTRACT_VERSION.
-- R02 ✘ Seed values match DECISION_LOG DEC-032/048–054 (0010_seed:242-560: 8/90/72h/5/15/15, 120min/12h, 480min, 3 sessions, 15min, 10 codes, 30 days, 24 months, depth 6). However, the new `OWNER_POLICY` classification (0010_seed:660) is an undecided contract change. It moves every policy parameter outside DEC-032's maker-checker while Q-0103 is still open (REV-0106). The rule "history is never back-dated" is stated but only partly enforced (REV-0107).
-- R03 ✘ Named PK/FK/unique/check/index and exclusion constraints are present and tested (test_phase01_schema.py:49). Roundtrip is evidenced by the orch log. The role lifecycle has no DB guard, which breaks the DEC-032/DEC-049 invariants claimed in REPORT §3 (REV-0105).
-- R04 ✔ Approval: maker≠checker CHECK, decided⇒decider, one PENDING per (resource, revision, action) (workflow/models.py:283-325). Terminal-state triggers (0008:52-62). Audit chain columns are backward-compatible (models.py AuditEvent). Per-user advisory locks come before the GiST exclusions (0008:361, 658). Concurrency tests exist (test_phase01_concurrency.py:30-102); the stability claim relies only on orch logs.
-- R05 n/a Engine is 01.3.
-- R06 ✔ OpenAPI 0.5.1-draft: decided-by tags added and REV-0101 MFA on rejectDocumentRevision (openapi diff). Grants seed is checked against the matrix document and the contract (test_phase01_schema.py:183, 223). Per-action enforcement belongs to 01.4.
+- R01 ✔ Rework only touches the REV items and employer answers (migrations 0007/0008/0010, org model, tests, docs, grants). There is no engine/API behaviour/UI (`git show --stat 153651f`).
+- R02 ✔ Every new rule cites an employer answer: Q-0103 (STATE_TRANSITIONS.md:212), Q-0104 (:213), Q-0106 (:215) and no back-dating (:194). The 60 s value is labelled a technical clock tolerance (0008:529-531). The "unit heads always 1" detail is an implementer refinement; see EMPLOYER ATTENTION.
+- R03 ✔ Named constraints and exclusions are in place; roundtrip up/down/up gives an empty schema diff (reviewer run); `makemigrations --check` is clean.
+- R04 ✔ Approval/role invariants hold in the DB (REV-0105 above). Capacity and one-PRIMARY rules are race-safe (concurrency x5 reviewer runs). Audit chain columns are unchanged from round 0.
+- R05 n/a The engine is 01.3.
+- R06 ✔ OpenAPI adds `primary_capacity` (openapi-draft.yaml:6331/6383/6409). Grants seed and matrix tests are still green (699 passed).
 - R07 n/a No UI in this step.
-- R08 ✔ Secrets are stored only as hashes or ciphertext (identity/models.py:156, 198, 233, 293). App role: append-only and history tables revoked, catalogues read-only (ops/db/grants.sql diff). SECURITY DEFINER functions pin `search_path = pg_catalog, pg_temp` (0008:624-626). Secret scan has 0 findings. Grep of step logs and migrations for account, home-path, domain and host names: 0 hits.
-- R09 ✔ Models are split by sub-module inside `platform_core`. Nothing writes to tables owned by another module.
+- R08 ✔ The app role cannot bypass triggers (roles 49/0). New functions pin `search_path`. Secret scan finds 0. There is no PII in logs (grep 0 hits).
+- R09 ✔ All changes are inside `platform_core` sub-modules.
 - R10 n/a No integration work.
-- R11 ✔ Protected job types (migrate/backup/restore) cannot be cancelled (0008 platform_job_run_guard; test_phase01_params_jobs.py:168).
-- R12 ✘ Not fully reproducible by the reviewer: the DB-backed suite could not be run here (see above). This is not counted as a defect of the step, but the PASS depends on the orchestrator logs.
-- R13 ✔ ERD §4–6, DATA_TABLE, STATE_TRANSITIONS §4.12, CONFLICTS, DB_ROLES, API_RUNTIME and CHANGELOG are all updated in the commit. Minor gap in REPORT.md (REV-0108).
+- R11 ✔ Protected job types are unchanged (test_phase01_params_jobs.py still passes).
+- R12 ✔ The DB-backed suite, roundtrip, roles check and concurrency were all reproduced by the reviewer (table above).
+- R13 ✔ ERD.md:240/306/307/316, DATA_TABLE.md:187-189, STATE_TRANSITIONS.md:189-217 and CHANGELOG.md:129-131 are updated.
 - R14 n/a Left to the employer at Gate time.
 
 ## ISSUES
-- REV-0105 [P1] backend/platform_core/migrations/0008_phase01_db_guards.py:316 (platform_role_kind_guard), with :356-384 and 0010_seed:706.
-  - Problem: the role lifecycle DRAFT → ACTIVE → RETIRED (STATE_TRANSITIONS §4.8) is not enforced at all in the DB. `platform_role` is not in TERMINAL, and no trigger blocks ACTIVE→DRAFT or RETIRED→ACTIVE. Retiring a role with live assignments is also allowed. The app role keeps UPDATE on `platform_role` and full DML on `platform_role_permission`.
-  - Consequence: the claimed invariants "grants change only while DRAFT" and DEC-032 "BA-role assignment needs a second person" can both be bypassed with plain DML. `requires_second_approval` is computed only when the assignment row is written.
-  - Repro, as the app role:
-    1. Create a BUSINESS role R, then set it ACTIVE.
-    2. Insert an ACTIVE role_assignment of R for user U. It is accepted without approval, because R has no BA permission yet.
-    3. `UPDATE platform_role SET status='DRAFT' WHERE id=R`.
-    4. `INSERT platform_role_permission (R, 'platform.document.approve')`.
-    5. `UPDATE platform_role SET status='ACTIVE'`.
-    6. Result: U now holds a business-approval permission and no second person ever approved it.
+- REV-0109 [P2] backend/platform_core/migrations/0008_phase01_db_guards.py:736-764 (platform_position_assignment_guard).
+  - Problem: the "never back-dated" rule (REV-0107 / employer answer) covers unit and position rows only. Person-to-position assignments, which are part of the org tree history ("who held which position when"), can still be back-dated or ended retroactively:
+    - `valid_from` on INSERT is not checked against now;
+    - `valid_to` can be UPDATEd to any past time.
+    - The row is updated in place, so the DB keeps no history of the old `valid_to`.
+  - Repro (reviewer, psql as owner, rolled back):
+    1. Create a unit, a position and a user.
+    2. `INSERT platform_position_assignment(kind='PRIMARY', valid_from=now()-'30 days', ...)`. It is accepted.
+    3. `UPDATE ... SET valid_to = now()-'10 days'`. It is accepted.
   - Expected fix:
-    - Add a role status-transition guard: only DRAFT→ACTIVE and ACTIVE→RETIRED; RETIRED is terminal; RETIRED is allowed only with no PENDING_APPROVAL or ACTIVE assignment. Optionally refuse ACTIVE→ACTIVE with a changed matrix_version.
-    - Adjust `unseed` so it still reverses. For example, delete the grants while the guard trigger is disabled inside the migration (migration owner only), or drop the guard in 0008 reverse before 0010 reverse runs. The order already allows this: 0010 reverses first, so 0010's reverse needs its own owner-only bypass.
-  - Regression tests required:
-    - ACTIVE→DRAFT is refused; RETIRED→ACTIVE is refused; RETIRED with a live assignment is refused.
-    - The repro above fails at step 3.
-    - `db_roundtrip.sh` is still OK.
-- REV-0106 [P2] backend/platform_core/migrations/0010_seed_phase01_catalogue.py:660 and 0008:270.
-  - Problem: the new enum value `OWNER_POLICY` is not in the handoff contract and has no approved decision. All 32 seeded DEC-048..054 policy values use it. The DB maker-checker applies only to BUSINESS_RULE, so one person can propose and publish a new lockout threshold or password length. Q-0103 is still open. For Q-0104 the implementer chose the stricter reading, but here the more permissive one.
-  - Repro: insert a DRAFT value for `lockout_max_failures` with decision_id set, then update it to PUBLISHED with published_by_id = proposed_by_id. It is accepted.
-  - Expected fix: until the employer answers Q-0103, apply the maker-checker to OWNER_POLICY as well (exempt only provenance=MIGRATION_SEED rows), or get the classification confirmed through a DEC.
-  - Regression test: OWNER_POLICY self-publish is refused; the seed rows still load.
-- REV-0107 [P2] 0008_phase01_db_guards.py:470-485 (platform_effective_from_guard).
-  - Problem: the claim "never back-dated" is only checked against OLD.effective_from, not against now. An update can set effective_from to any past time after the last change. That closes the previous history row retroactively, so the shown tree for past dates changes.
-  - Repro: create a unit with effective_from = now-7d (allowed: past and not future). Then update name_fa with effective_from = now-3d. It is accepted.
-  - Expected fix:
-    - Either enforce `NEW.effective_from >= statement_timestamp() - tolerance` on UPDATE, and on INSERT unless provenance is MIGRATION/IMPORT,
-    - or document that retroactive dating is intended and get the employer to confirm it (DEC-048 item 7 only says «تاریخچه با تاریخ اثر»).
-  - Regression test for the chosen rule.
-- REV-0108 [P3] reports/phase-01/step-2/REPORT.md:7.
-  - Problem: "COMMIT SHA: see status file / REPORT.json (filled after commit)". The sha fill in REPORT.json is an uncommitted working-tree change (`git status`: M REPORT.json).
-  - Expected fix: put `84e5acd` in REPORT.md and commit both files.
+    - On INSERT, require `valid_from >= statement_timestamp() - 60 s`. This uses the same tolerance; future-dated starts stay allowed, since tests use them.
+    - On UPDATE, allow `valid_to` changes only to a value ≥ now − 60 s (a past end is never written retroactively).
+    - Alternative: the employer explicitly confirms that assignments may be back-dated (see EMPLOYER ATTENTION).
+    - Can be done in 01.3 or as a small follow-up before Gate. Not blocking: no approval routing reads assignments yet.
+  - Regression test: back-dated insert refused; retroactive end refused; ending "now" accepted.
+- REV-0110 [P3] control/decisions/ (DECISION_LOG.md/.csv).
+  - Problem: the employer answers Q-0101..Q-0106 and the no-back-dating rule are recorded only in docs/discovery/STATE_TRANSITIONS.md:210-217 and the code comments. The decision log has no entry, so a later reader cannot trace them from the decision record.
+  - Expected fix: the orchestrator adds the answers to the decision log (or as DEC-048..054 resolution notes) via the normal decision channel.
   - Regression test: none (documentation).
-- Note (not a defect): DB-backed evidence (692 tests, roundtrip, roles 49/0, concurrency) must be re-run after the REV-0105 fix. The rework report should state the run that the reviewer can reproduce (or the employer's machine with DB env).
 
 ## EMPLOYER ATTENTION
-- Q-0103: آیا تغییر پارامترهای سیاستی (مثل تعداد تلاش ناموفق یا طول رمز) هم باید با تأیید نفر دوم منتشر شود؟ پیشنهاد ممیز: تا پاسخ شما، بله (سخت‌گیرانه).
-- Q-0104: «۲۵ مگابایت» یعنی ۲۵٬۰۰۰٬۰۰۰ بایت (فعلاً ثبت‌شده) یا ۲۶٬۲۱۴٬۴۰۰ بایت؟
-- Q-0106: آیا یک سمت می‌تواند هم‌زمان چند دارنده اصلی داشته باشد (مثلاً چند اپراتور در یک سمت)؟ فعلاً سامانه اجازه می‌دهد.
-- تاریخ اثر: آیا ثبت تغییر درخت سازمانی با تاریخ گذشته (اثر عطف به ماسبق) مجاز است یا نه؟
+- انتساب افراد به سمت (چه کسی از چه تاریخی در کدام سمت است) هنوز با تاریخ گذشته قابل ثبت یا پایان‌دادن است. آیا قاعده «بدون تاریخ گذشته» شامل این انتساب‌ها هم می‌شود؟ پیشنهاد ممیز: بله.
+- در پاسخ Q-0106، «سمت مدیر واحد همیشه فقط یک دارنده اصلی دارد» را پیاده‌کننده افزوده است. لطفاً تأیید کنید.
 - R14 (پذیرش مالک) در زمان Gate با شماست.
