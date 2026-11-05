@@ -230,14 +230,14 @@ to 0006, empty schema diff, no extension left): `reports/phase-01/step-2/logs/mi
 | identity | `platform_session` | uuid (public handle) | user, revoked_by | `uq_session_key_hash` (SHA-256 of the cookie) | state MFA_PENDING/ACTIVE/EXPIRED/REVOKED/LOGGED_OUT; zone INTERNAL/EXTERNAL/UNKNOWN |
 | identity | `platform_login_attempt` | bigint | user, session (nullable) | - | outcome list; append-only, delete only after 24 months |
 | identity | `platform_permission` | action (varchar) | - | - | BA => maker_checker + MFA |
-| identity | `platform_role` | uuid | created_by/updated_by | `uq_role_code` | status DRAFT/ACTIVE/RETIRED; kind TECHNICAL/BUSINESS |
+| identity | `platform_role` | uuid | created_by/updated_by | `uq_role_code` | status DRAFT/ACTIVE/RETIRED (only DRAFT->ACTIVE->RETIRED, REV-0105); kind TECHNICAL/BUSINESS |
 | identity | `platform_role_permission` | bigint | role, permission_action | `uq_role_permission_pair` | grant_mode SCOPE/OWN/OWN_UNIT/OWN_AND_OWN_UNIT |
 | identity | `platform_role_assignment` | uuid | user, role, scope_unit, approval_request, granted_by/revoked_by | `ex_role_assignment_no_overlap` (user, role, scope, period) for PENDING/ACTIVE | status PENDING_APPROVAL/ACTIVE/EXPIRED/REVOKED |
 | identity | `platform_break_glass_usage` | uuid | user (break-glass only), session | - | closing columns once only |
 | org | `platform_org_unit_type` | code | created_by | - | seeded COMPANY/DEPARTMENT/SECTION/LINE |
 | org | `platform_org_unit` | uuid | unit_type_code, parent (self) | `uq_org_unit_code` | status ACTIVE/INACTIVE |
 | org | `platform_org_unit_history` | bigint | unit, parent | `uq_org_unit_history_version`; `ex_org_unit_history_no_overlap` | written by trigger only |
-| org | `platform_position` | uuid | unit, reports_to (self) | `uq_position_code`; partial `uq_position_one_active_head` | status ACTIVE/INACTIVE |
+| org | `platform_position` | uuid | unit, reports_to (self) | `uq_position_code`; partial `uq_position_one_active_head` | status ACTIVE/INACTIVE; `primary_capacity` >= 1, unit head = 1 (Q-0106) |
 | org | `platform_position_history` | bigint | position, unit, reports_to | `uq_position_history_version`; `ex_position_history_no_overlap` | written by trigger only |
 | org | `platform_position_assignment` | uuid | position, user | `ex_position_assignment_one_primary` (user, period, PRIMARY); `ex_position_assignment_no_duplicate` | kind PRIMARY/ACTING (ACTING needs valid_to) |
 | workflow | `platform_workflow_definition` | uuid | - | `uq_workflow_definition_key_version`; partial `uq_workflow_definition_active` | DRAFT/ACTIVE/RETIRED; steps JSON array |
@@ -302,6 +302,9 @@ erDiagram
 |---|---|---|
 | TECHNICAL role never holds a business-approval permission | DEC-003 | `trg_role_permission_guard`, `trg_role_kind_guard`, `trg_permission_ba_guard` (`ck_role_technical_no_business_approval`) |
 | grants change only while the role is DRAFT | matrix versioning (DEC-049) | `trg_role_permission_guard` (`ck_role_permission_draft_only`) |
+| role lifecycle DRAFT->ACTIVE->RETIRED only; RETIRED terminal and only without live assignments; kind/matrix_version frozen after DRAFT (closes the ACTIVE->DRAFT->add BA->ACTIVE bypass) | REV-0105, DEC-032 | `trg_role_kind_guard` (`ck_role_lifecycle`, `ck_role_retire_unassigned`), `trg_role_a_terminal`; the 0010 reverse disables the grant guard as schema owner only |
+| OWNER_POLICY values proposed/published only by an ACTIVE `owner_admin` holder, with reason (no second person) | Q-0103 employer answer 2026-11-05 | `trg_parameter_value_guard` (`ck_parameter_value_owner_policy`), `platform_holds_owner_admin()` |
+| at most `primary_capacity` PRIMARY holders per position at any instant (exact peak count, per-position advisory lock) | Q-0106 employer answer 2026-11-05 | `trg_position_assignment_guard`, `platform_position_peak_primary()` (`ck_position_primary_capacity`) |
 | BA-role assignment needs an APPROVED request decided by a person other than grantor and assignee; the flag cannot be forced off | DEC-032 | `trg_role_assignment_guard` + `ck_role_assignment_second_approval` |
 | console bootstrap only for TECHNICAL roles | DEC-049 item 4 | `ck_role_assignment_bootstrap_technical` |
 | approval decided_by <> requested_by; one PENDING per (resource, revision, action); terminal immutable | DEC-032 | `ck_approval_request_maker_checker`, `uq_approval_request_one_pending`, `trg_approval_request_a_terminal` |
@@ -310,7 +313,7 @@ erDiagram
 | org tree acyclic, depth <= `org_tree_max_depth` (6), ACTIVE child needs ACTIVE parent, deactivate only empty units; serialised by an advisory lock | DEC-048 | `trg_org_unit_tree_guard` |
 | reports-to between positions acyclic; one ACTIVE head per unit; deactivate only without holder | DEC-048 | `trg_position_guard`, `uq_position_one_active_head` |
 | one PRIMARY position per person at any instant; ACTING needs an end date; no ADDITIONAL | DEC-048 | `ex_position_assignment_one_primary`, `ck_position_assignment_acting_has_end`, `ck_position_assignment_kind` |
-| effective-dated history, never back-dated or future-dated | DEC-048 item 7 | `trg_org_unit_effective` / `trg_position_effective`, history writers (SECURITY DEFINER) |
+| effective-dated history, never back-dated (`effective_from >= now - 60 s` technical clock tolerance) or future-dated | DEC-048 item 7, REV-0107 employer answer 2026-11-05 | `trg_org_unit_effective` / `trg_position_effective`, history writers (SECURITY DEFINER) |
 | operator accounts internal-only; no shared/service/directory accounts | DEC-052, DEC-003 | `ck_user_operator_internal_only`, `ck_user_account_kind` |
 | TOTP only, replay guard, revoked factor has no secret | DEC-050 | `ck_mfa_factor_*`, `trg_mfa_factor_guard` |
 | one break-glass account; usage only for it; usage record append-only | DEC-054 | `uq_user_single_break_glass`, `trg_break_glass_usage_*` |
@@ -322,5 +325,6 @@ Privileges for the runtime (app) role, on top of the triggers: no UPDATE/DELETE 
 step events, integrity runs; no UPDATE on login attempts; no INSERT/UPDATE/DELETE on the two history tables
 (written by SECURITY DEFINER triggers); no DELETE on identity/role/assignment/org/workflow/document/job/parameter
 rows; no INSERT/UPDATE/DELETE on the reviewed catalogues (permissions, upload types, job types, workflow
-definitions); EXECUTE on the two parameter functions. As before, the app role owns nothing, so it cannot
+definitions); EXECUTE on the parameter functions, `platform_holds_owner_admin()` and
+`platform_position_peak_primary()`. As before, the app role owns nothing, so it cannot
 disable/drop triggers or constraints. Evidence: `reports/phase-01/step-2/logs/roles/roles_check.json`.

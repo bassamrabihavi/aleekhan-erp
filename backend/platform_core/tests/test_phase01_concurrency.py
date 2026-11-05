@@ -119,3 +119,19 @@ def test_concurrent_duplicate_role_grants_only_one() -> None:
     ok, errors = _outcomes(run_concurrently(grant, N))
     assert ok == 1
     assert all("ex_role_assignment_no_overlap" in str(e) for e in errors)
+
+
+def test_concurrent_holders_never_exceed_position_capacity() -> None:
+    """Q-0106: N people assigned to one position (capacity 2) at once -> exactly 2 succeed."""
+    ensure_parameters()
+    pos = position(org_unit(), primary_capacity=2)
+    people = [user() for _ in range(N)]
+
+    def assign(i: int) -> None:
+        with transaction.atomic():
+            position_assignment(pos, people[i])
+
+    ok, errors = _outcomes(run_concurrently(assign, N))
+    assert ok == 2
+    assert all(isinstance(e, IntegrityError) and "ck_position_primary_capacity" in str(e) for e in errors)
+    assert PositionAssignment.objects.filter(position=pos, kind="PRIMARY").count() == 2

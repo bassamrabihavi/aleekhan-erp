@@ -1,7 +1,7 @@
 {
   "phase": "PHASE_01",
   "step": "01.2",
-  "commit_sha": "84e5acd",
+  "commit_sha": "PENDING",
   "status": "COMPLETE",
   "scope": [
     "migrations 0007-0010 (33 PHASE_01 platform tables + 5 audit columns)",
@@ -11,7 +11,8 @@
     "DB roles/grants for the new tables",
     "tests: constraints, triggers, state CHECKs vs contract, seed integrity vs matrix doc and contract, race tests",
     "docs: ERD, DATA_TABLE, STATE_TRANSITIONS, CONFLICTS, OpenAPI 0.5.1-draft, matrix APPROVED v1.0",
-    "REV-0101, REV-0103, REV-0104"
+    "REV-0101, REV-0103, REV-0104",
+    "rework REV-0105..0107 + employer answers Q-0101..Q-0106 (2026-11-05)"
   ],
   "changes": [
     "backend/platform_core/schema_common.py",
@@ -103,14 +104,14 @@
       "log_path": "reports/phase-01/step-2/logs/openapi_validate.log"
     },
     {
-      "command": "cd backend && pytest -m \"not perf\" --junitxml (692 passed, 0 failed/errors/skipped)",
+      "command": "cd backend && pytest -m \"not perf\" --junitxml (699 passed, 0 failed/errors/skipped)",
       "outcome": "PASS",
       "log_path": "reports/phase-01/step-2/logs/pytest.log"
     },
     {
-      "command": "pytest platform_core/tests/test_phase01_concurrency.py x12 (deadlock fix proof)",
+      "command": "pytest platform_core/tests/test_phase01_concurrency.py x10 (6/6 each run, no deadlock)",
       "outcome": "PASS",
-      "log_path": "reports/phase-01/step-2/logs/concurrency_x12.log"
+      "log_path": "reports/phase-01/step-2/logs/concurrency_x10.log"
     },
     {
       "command": "backend/scripts/db_roundtrip.sh reports/phase-01/step-2/logs/migration",
@@ -140,10 +141,10 @@
     "DEC-052",
     "DEC-053",
     "DEC-054",
-    "DEC-051 employer answers Q-0101/Q-0102/Q-0105 (2026-11-05)"
+    "Employer answers Q-0101..Q-0106 and no-back-dating rule (2026-11-05)"
   ],
   "risks": [
-    "Open questions Q-0103, Q-0104, Q-0106 (docs/discovery/STATE_TRANSITIONS.md 4.12) still need employer answers"
+    "None open from 01.2; MFA step-up and audit for OWNER_POLICY publish are enforced in 01.3/01.4 (DB enforces owner_admin + reason)"
   ],
   "evidence_paths": [
     "reports/phase-01/step-2/logs/"

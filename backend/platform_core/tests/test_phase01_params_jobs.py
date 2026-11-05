@@ -220,3 +220,37 @@ def test_audit_integrity_runs_are_append_only() -> None:
     r = AuditIntegrityRun.objects.create(started_at=now, finished_at=now, status="OK", events_checked=0)
     with db_refuses("append-only"):
         AuditIntegrityRun.objects.filter(pk=r.pk).update(status="BROKEN")
+
+
+# ---------------------------------------------------------------------------------------- Q-0103
+def _owner_admin() -> object:
+    from .phase01_factories import assignment
+
+    owner = user()
+    assignment(owner, "owner_admin", None)  # console bootstrap of the owner (TECHNICAL role)
+    return owner
+
+
+def test_owner_policy_published_by_owner_admin_alone_with_reason() -> None:
+    """Q-0103 (employer answer 2026-11-05): OWNER_POLICY values need no second person, only an owner_admin."""
+    d = ParameterDefinition.objects.get(key="lockout_max_failures")
+    owner = _owner_admin()
+    other = user()
+    with db_refuses("ck_parameter_value_owner_policy"):
+        _value(d, "6", proposed_by=other, decision_id="DEC-051", reason="synthetic test")
+    with db_refuses("ck_parameter_value_owner_policy"):
+        _value(d, "6", proposed_by=owner, decision_id="DEC-051", reason="")
+    v = _value(
+        d,
+        "6",
+        proposed_by=owner,
+        decision_id="DEC-051",
+        reason="synthetic test",
+        effective_from=timezone.now() + timedelta(days=1),
+    )
+    with db_refuses("ck_parameter_value_owner_policy"):
+        ParameterValue.objects.filter(pk=v.pk).update(
+            status="PUBLISHED", published_by=other, published_at=Now()
+        )
+    ParameterValue.objects.filter(pk=v.pk).update(status="PUBLISHED", published_by=owner, published_at=Now())
+    assert ParameterValue.objects.get(pk=v.pk).status == "PUBLISHED"

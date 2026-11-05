@@ -1,6 +1,6 @@
 ..........................................
 ----------------------------------------------------------------------
-Ran 42 tests in 2.103s
+Ran 42 tests in 2.142s
 
 OK
 lock_runtime: requirements.lock matches the venv (9 packages for this platform)

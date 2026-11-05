@@ -192,6 +192,14 @@ BEGIN
         RAISE EXCEPTION 'ck_effective_from_not_future: % changes take effect now or in the past', TG_TABLE_NAME
             USING ERRCODE = 'check_violation';
     END IF;
+    -- REV-0107 / employer answer 2026-11-05: org changes are never back-dated. effective_from given by the
+    -- application must be >= now - 60 s (TECHNICAL clock tolerance between app server and DB, not a business
+    -- rule). A late change keeps the real date only in the audit reason/note.
+    IF (TG_OP = 'INSERT' OR NEW.effective_from IS DISTINCT FROM OLD.effective_from)
+       AND NEW.effective_from < statement_timestamp() - interval '60 seconds' THEN
+        RAISE EXCEPTION 'ck_effective_from_not_backdated: % changes cannot be back-dated (record the real date in the reason)', TG_TABLE_NAME
+            USING ERRCODE = 'check_violation';
+    END IF;
     IF TG_OP = 'UPDATE' AND NEW.effective_from < OLD.effective_from THEN
         RAISE EXCEPTION 'ck_effective_from_monotonic: % history is never back-dated', TG_TABLE_NAME
             USING ERRCODE = 'check_violation';
@@ -201,6 +209,22 @@ BEGIN
     END IF;
     RETURN NEW;
 END;
+$$;
+
+
+--
+-- Name: platform_holds_owner_admin(uuid); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.platform_holds_owner_admin(p_user uuid) RETURNS boolean
+    LANGUAGE sql STABLE
+    SET search_path TO 'pg_catalog', 'pg_temp'
+    AS $$
+    SELECT p_user IS NOT NULL AND EXISTS (
+        SELECT 1 FROM public.platform_role_assignment ra
+          JOIN public.platform_role r ON r.id = ra.role_id
+         WHERE ra.user_id = p_user AND r.code = 'owner_admin' AND r.status = 'ACTIVE' AND ra.status = 'ACTIVE'
+           AND tstzrange(ra.valid_from, ra.valid_to, '[)') @> statement_timestamp());
 $$;
 
 
@@ -519,6 +543,24 @@ BEGIN
         RAISE EXCEPTION 'ck_parameter_value_decision: % value needs a decision id', NEW.parameter_key
             USING ERRCODE = 'check_violation';
     END IF;
+    -- Q-0103 (employer answer 2026-11-05, closes REV-0106): an OWNER_POLICY value is proposed and published by
+    -- the owner alone (no second person), but only by a user holding an ACTIVE owner_admin assignment now, with
+    -- a reason. MFA step-up and the audit event are enforced by the 01.3/01.4 engine. Migration seeds are exempt.
+    IF d.classification = 'OWNER_POLICY' AND NEW.provenance <> 'MIGRATION_SEED' THEN
+        IF length(btrim(NEW.reason)) < 3 THEN
+            RAISE EXCEPTION 'ck_parameter_value_owner_policy: % needs a reason (Q-0103)', NEW.parameter_key
+                USING ERRCODE = 'check_violation';
+        END IF;
+        IF TG_OP = 'INSERT' AND NOT public.platform_holds_owner_admin(NEW.proposed_by_id) THEN
+            RAISE EXCEPTION 'ck_parameter_value_owner_policy: only an owner_admin holder may propose % (Q-0103)',
+                NEW.parameter_key USING ERRCODE = 'check_violation';
+        END IF;
+        IF NEW.status = 'PUBLISHED' AND (TG_OP = 'INSERT' OR OLD.status <> 'PUBLISHED')
+           AND NOT public.platform_holds_owner_admin(NEW.published_by_id) THEN
+            RAISE EXCEPTION 'ck_parameter_value_owner_policy: only an owner_admin holder may publish % (Q-0103)',
+                NEW.parameter_key USING ERRCODE = 'check_violation';
+        END IF;
+    END IF;
     -- DEC-032: BUSINESS_RULE publish is maker-checker (never self-published)
     IF d.classification = 'BUSINESS_RULE' AND NEW.status IN ('PUBLISHED', 'SUPERSEDED')
        AND (NEW.published_by_id IS NULL OR NEW.published_by_id = NEW.proposed_by_id) THEN
@@ -562,6 +604,8 @@ CREATE FUNCTION public.platform_position_assignment_guard() RETURNS trigger
     LANGUAGE plpgsql
     SET search_path TO 'pg_catalog', 'pg_temp'
     AS $$
+DECLARE
+    cap smallint;
 BEGIN
     -- Serialise writes per person: concurrent GiST exclusion checks can deadlock each other; with the lock
     -- the losers deterministically get exclusion_violation (23P01 -> 409), never deadlock_detected (500).
@@ -574,6 +618,16 @@ BEGIN
         END IF;
     ELSIF NOT EXISTS (SELECT 1 FROM public.platform_position WHERE id = NEW.position_id AND status = 'ACTIVE') THEN
         RAISE EXCEPTION 'ck_position_assignment_position_active: position is not ACTIVE' USING ERRCODE = 'check_violation';
+    END IF;
+    -- Q-0106 (employer answer 2026-11-05): at most primary_capacity PRIMARY holders at any instant; serialised
+    -- per position (lock order: person, then position - never the reverse, so no lock cycle)
+    IF NEW.kind = 'PRIMARY' THEN
+        PERFORM pg_advisory_xact_lock(hashtextextended('platform_position_capacity:' || NEW.position_id::text, 0));
+        SELECT primary_capacity INTO cap FROM public.platform_position WHERE id = NEW.position_id;
+        IF public.platform_position_peak_primary(NEW.position_id, NEW.id, NEW.valid_from, NEW.valid_to) + 1 > cap THEN
+            RAISE EXCEPTION 'ck_position_primary_capacity: position already has % PRIMARY holder(s) in that period', cap
+                USING ERRCODE = 'check_violation';
+        END IF;
     END IF;
     RETURN NEW;
 END;
@@ -615,6 +669,14 @@ BEGIN
                 USING ERRCODE = 'check_violation';
         END IF;
     END IF;
+    IF TG_OP = 'UPDATE' AND NEW.primary_capacity < OLD.primary_capacity THEN
+        -- same per-position lock as the assignment guard: a capacity decrease never races a new holder
+        PERFORM pg_advisory_xact_lock(hashtextextended('platform_position_capacity:' || NEW.id::text, 0));
+        IF public.platform_position_peak_primary(NEW.id, NULL, statement_timestamp(), NULL) > NEW.primary_capacity THEN
+            RAISE EXCEPTION 'ck_position_primary_capacity: % has more current/future PRIMARY holders than %',
+                NEW.code, NEW.primary_capacity USING ERRCODE = 'check_violation';
+        END IF;
+    END IF;
     IF TG_OP = 'UPDATE' AND NEW.status = 'INACTIVE' AND OLD.status = 'ACTIVE' THEN
         IF EXISTS (SELECT 1 FROM public.platform_position_assignment pa
                     WHERE pa.position_id = NEW.id
@@ -640,19 +702,41 @@ CREATE FUNCTION public.platform_position_history_writer() RETURNS trigger
 BEGIN
     IF TG_OP = 'UPDATE' AND NEW.code = OLD.code AND NEW.title_fa = OLD.title_fa AND NEW.unit_id = OLD.unit_id
        AND NEW.reports_to_id IS NOT DISTINCT FROM OLD.reports_to_id AND NEW.is_unit_head = OLD.is_unit_head
-       AND NEW.status = OLD.status THEN
+       AND NEW.primary_capacity = OLD.primary_capacity AND NEW.status = OLD.status THEN
         RETURN NULL;
     END IF;
     UPDATE public.platform_position_history SET valid_to = NEW.effective_from
      WHERE position_id = NEW.id AND valid_to IS NULL;
     INSERT INTO public.platform_position_history
         (position_id, position_row_version, valid_from, valid_to, unit_id, code, title_fa, reports_to_id,
-         is_unit_head, status, changed_by_id, recorded_at)
+         is_unit_head, primary_capacity, status, changed_by_id, recorded_at)
     VALUES (NEW.id, NEW.row_version, NEW.effective_from, NULL, NEW.unit_id, NEW.code, NEW.title_fa,
-            NEW.reports_to_id, NEW.is_unit_head, NEW.status, COALESCE(NEW.updated_by_id, NEW.created_by_id),
+            NEW.reports_to_id, NEW.is_unit_head, NEW.primary_capacity, NEW.status, COALESCE(NEW.updated_by_id, NEW.created_by_id),
             statement_timestamp());
     RETURN NULL;
 END;
+$$;
+
+
+--
+-- Name: platform_position_peak_primary(uuid, uuid, timestamp with time zone, timestamp with time zone); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.platform_position_peak_primary(p_position uuid, p_exclude uuid, p_from timestamp with time zone, p_to timestamp with time zone) RETURNS bigint
+    LANGUAGE sql STABLE
+    SET search_path TO 'pg_catalog', 'pg_temp'
+    AS $$
+    WITH r AS (
+        SELECT tstzrange(pa.valid_from, pa.valid_to, '[)') AS rng, pa.valid_from
+          FROM public.platform_position_assignment pa
+         WHERE pa.position_id = p_position AND pa.kind = 'PRIMARY'
+           AND pa.id IS DISTINCT FROM p_exclude
+           AND tstzrange(pa.valid_from, pa.valid_to, '[)') && tstzrange(p_from, p_to, '[)')
+    ), pts AS (
+        SELECT p_from AS p
+        UNION SELECT valid_from FROM r WHERE valid_from > p_from
+    )
+    SELECT coalesce(max((SELECT count(*) FROM r WHERE r.rng @> pts.p)), 0) FROM pts;
 $$;
 
 
@@ -771,6 +855,22 @@ CREATE FUNCTION public.platform_role_kind_guard() RETURNS trigger
     SET search_path TO 'pg_catalog', 'pg_temp'
     AS $$
 BEGIN
+    IF NEW.status IS DISTINCT FROM OLD.status
+       AND NOT ((OLD.status = 'DRAFT' AND NEW.status = 'ACTIVE') OR (OLD.status = 'ACTIVE' AND NEW.status = 'RETIRED')) THEN
+        RAISE EXCEPTION 'ck_role_lifecycle: role % cannot go from % to %', OLD.code, OLD.status, NEW.status
+            USING ERRCODE = 'check_violation', HINT = 'A changed permission set is a new role / new matrix version.';
+    END IF;
+    IF OLD.status <> 'DRAFT' AND (NEW.kind IS DISTINCT FROM OLD.kind
+       OR NEW.matrix_version IS DISTINCT FROM OLD.matrix_version) THEN
+        RAISE EXCEPTION 'ck_role_lifecycle: kind/matrix_version of a % role are frozen', OLD.status
+            USING ERRCODE = 'check_violation';
+    END IF;
+    IF NEW.status = 'RETIRED' AND EXISTS (
+        SELECT 1 FROM public.platform_role_assignment ra
+         WHERE ra.role_id = NEW.id AND ra.status IN ('PENDING_APPROVAL', 'ACTIVE')) THEN
+        RAISE EXCEPTION 'ck_role_retire_unassigned: role % still has live assignments', OLD.code
+            USING ERRCODE = 'check_violation';
+    END IF;
     IF NEW.kind = 'TECHNICAL' AND EXISTS (
         SELECT 1 FROM public.platform_role_permission rp
           JOIN public.platform_permission p ON p.action = rp.permission_action
@@ -1824,6 +1924,7 @@ CREATE TABLE public.platform_position (
     code character varying(64) NOT NULL,
     title_fa character varying(200) NOT NULL,
     is_unit_head boolean DEFAULT false NOT NULL,
+    primary_capacity smallint DEFAULT 1 NOT NULL,
     status character varying(8) DEFAULT 'ACTIVE'::character varying NOT NULL,
     effective_from timestamp with time zone DEFAULT statement_timestamp() NOT NULL,
     provenance character varying(16) DEFAULT 'SYS'::character varying NOT NULL,
@@ -1834,7 +1935,9 @@ CREATE TABLE public.platform_position (
     reports_to_id uuid,
     unit_id uuid NOT NULL,
     updated_by_id uuid,
+    CONSTRAINT ck_position_capacity_pos CHECK ((primary_capacity >= 1)),
     CONSTRAINT ck_position_code_fmt CHECK (((code)::text ~ '^[a-z][a-z0-9_]{2,63}$'::text)),
+    CONSTRAINT ck_position_head_capacity_one CHECK (((NOT is_unit_head) OR (primary_capacity = 1))),
     CONSTRAINT ck_position_not_own_manager CHECK ((NOT ((reports_to_id = id) AND (reports_to_id IS NOT NULL)))),
     CONSTRAINT ck_position_provenance CHECK (((provenance)::text = ANY ((ARRAY['SYS'::character varying, 'SEED_SYNTHETIC'::character varying])::text[]))),
     CONSTRAINT ck_position_row_version_pos CHECK ((row_version >= 1)),
@@ -1881,6 +1984,7 @@ CREATE TABLE public.platform_position_history (
     code character varying(64) NOT NULL,
     title_fa character varying(200) NOT NULL,
     is_unit_head boolean NOT NULL,
+    primary_capacity smallint NOT NULL,
     status character varying(8) NOT NULL,
     recorded_at timestamp with time zone DEFAULT statement_timestamp() NOT NULL,
     changed_by_id uuid,
@@ -4315,6 +4419,13 @@ CREATE TRIGGER trg_position_touch BEFORE UPDATE ON public.platform_position FOR 
 --
 
 CREATE TRIGGER trg_recovery_code_use_once BEFORE UPDATE ON public.platform_recovery_code FOR EACH ROW EXECUTE FUNCTION public.platform_close_once_only('used_at');
+
+
+--
+-- Name: platform_role trg_role_a_terminal; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER trg_role_a_terminal BEFORE UPDATE ON public.platform_role FOR EACH ROW EXECUTE FUNCTION public.platform_reject_terminal_update('status', 'RETIRED');
 
 
 --

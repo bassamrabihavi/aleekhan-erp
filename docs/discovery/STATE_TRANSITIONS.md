@@ -179,19 +179,21 @@ restore, backup) are seeded `protected=true`; the complete protected list is DEC
 ### 4.8 Role and RoleAssignment
 | Machine | Transitions | Guards |
 |---|---|---|
-| Role | DRAFT → ACTIVE → RETIRED | ACTIVE only if the permission set is in the approved matrix **DECIDED (DEC-049, v1.0)**; TECHNICAL roles never contain business-approval permissions (DEC-003); RETIRED requires no ACTIVE assignment |
+| Role | DRAFT → ACTIVE → RETIRED (DB-enforced since 01.2 rework, REV-0105: no other move; RETIRED terminal; kind/matrix_version frozen after DRAFT) | ACTIVE only if the permission set is in the approved matrix **DECIDED (DEC-049, v1.0)**; TECHNICAL roles never contain business-approval permissions (DEC-003); RETIRED requires no ACTIVE assignment |
 | RoleAssignment | — → ACTIVE, or — → PENDING_APPROVAL → ACTIVE / REVOKED; ACTIVE → EXPIRED (system at `valid_to`); ACTIVE → REVOKED (`revokeRoleAssignment`, reason) | role ACTIVE; reason; self-assignment allowed only explicitly and always flagged (DEC-003); second approver **DECIDED (DEC-032)**: roles holding a business-approval permission wait PENDING_APPROVAL until a second eligible person approves (DB guard `ck_role_assignment_second_approval`) |
 
 ### 4.9 Parameter value revision (page 42)
 `DRAFT → PENDING_APPROVAL → PUBLISHED | REJECTED`; `PUBLISHED → SUPERSEDED` (a newer revision becomes
 effective). TECHNICAL parameters: DEC-032 requires maker-checker only for BUSINESS_RULE publish, so TECHNICAL publish has no
-second person; OWNER_POLICY values (01.2: seeded DEC-048..054 values) change only with a new decision id
-(open question Q-0103 whether their publish also needs a second person). BUSINESS_RULE
+second person. OWNER_POLICY values (seeded DEC-048..054 values): proposed and published by the owner alone,
+only by a holder of `owner_admin`, with reason, MFA step-up and audit (Q-0103, employer answer 2026-11-05). BUSINESS_RULE
 parameters: publish **BLOCKED** by their own `decision_id` (e.g. DEC-016 thresholds) until that decision is
 APPROVED. History is never rewritten; `effective_from` in the past is refused (TECH).
 
 ### 4.10 Org unit / position (effective-dated)
-`ACTIVE → INACTIVE` (deactivate with effective date; unit must have no ACTIVE position; position must have no
+`ACTIVE → INACTIVE` (deactivate with effective date - never back-dated: `effective_from >= now - 60 s`, the
+60 s being a TECHNICAL clock tolerance; a late change records the real date only in the audit reason
+(employer answer 2026-11-05, REV-0107); unit must have no ACTIVE position; position must have no
 current holder). `moveOrgUnit` closes the current parent link and opens a new one at `effective_from` (acyclic
 check). **DECIDED (DEC-048)**: unit types COMPANY/DEPARTMENT/SECTION/LINE (admin may add), max depth 6, one
 PRIMARY position per person + ACTING with an end date, reports-to between positions, edited by the owner/admin
@@ -207,8 +209,10 @@ production (schema flag + usage record in 01.2, no API); notification channels o
 |---|---|---|
 | Q-0101 | DEC-051 "max 3 concurrent sessions": refuse the 4th login, or end the oldest session? | **ANSWERED 2026-11-05**: end the oldest session automatically, audited (`session_limit_exceeded_action`) |
 | Q-0102 | DEC-051 gives operators idle 8 h but no absolute session limit | **ANSWERED 2026-11-05**: 12 h (`session_operator_absolute_hours`) |
-| Q-0103 | Does publishing a changed OWNER_POLICY value (e.g. lockout threshold) need a second person? | changes need a new decision id; no API publishes OWNER_POLICY values in PHASE_01 |
-| Q-0104 | DEC-053 "25 مگابایت": 25 000 000 or 26 214 400 bytes? | seeded 25 000 000 (the stricter reading) |
+| Q-0103 | Does publishing a changed OWNER_POLICY value (e.g. lockout threshold) need a second person? | **ANSWERED 2026-11-05**: no second person; only a holder of `owner_admin` proposes/publishes, with reason, MFA step-up and audit (DB: `ck_parameter_value_owner_policy`; MFA/audit in 01.3/01.4) |
+| Q-0104 | DEC-053 "25 مگابایت": 25 000 000 or 26 214 400 bytes? | **ANSWERED 2026-11-05**: 26 214 400 bytes (binary, as Windows shows it) |
 | Q-0105 | Password history depth for the 90-day rotation (how many previous passwords are refused) | **ANSWERED 2026-11-05**: the last 5 passwords are refused (`password_history_reuse_depth`) |
-| Q-0106 | May a position have several PRIMARY holders at once (e.g. many operators in one position)? | allowed by the schema (only one PRIMARY position per person is enforced) |
+| Q-0106 | May a position have several PRIMARY holders at once (e.g. many operators in one position)? | **ANSWERED 2026-11-05**: yes, up to `platform_position.primary_capacity` (default 1; unit-head positions always 1); one PRIMARY position per person stays |
+
+All 01.2 questions Q-0101..Q-0106 are answered (employer, 2026-11-05).
 

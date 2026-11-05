@@ -165,12 +165,12 @@ def test_revision_starts_quarantined_with_matching_object_and_size_limit() -> No
     obj = stored_object()
     with db_refuses("ck_document_revision_object_match"):
         revision(doc, uploader, obj=obj, sha256="0" * 64)
-    big = stored_object(size=25_000_001)
+    big = stored_object(size=26_214_401)  # Q-0104: 25 MB = 26 214 400 bytes
     with db_refuses("ck_document_revision_max_size"):
         revision(doc, uploader, obj=big)
     with db_refuses("ck_document_revision_name_basename"):
         revision(doc, uploader, original_name="..\\..\\windows\\evil.pdf")
-    revision(doc, uploader, obj=stored_object(size=25_000_000))
+    revision(doc, uploader, obj=stored_object(size=26_214_400))
 
 
 def test_review_needs_clean_scan_and_approver_differs_from_uploader() -> None:

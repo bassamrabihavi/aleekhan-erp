@@ -93,9 +93,9 @@ Orchestrator re-runs on work-windows, PG 17.9; logs in `logs/orch/`.
 |---|---|---|
 | ruff check + format --check | PASS | `logs/orch/ruff.log` |
 | mypy strict | PASS, 112 files | `logs/orch/mypy.log` |
-| `pytest -m "not perf"` full | **692 passed**, 1 deselected (perf) | `logs/orch/pytest.log`, `pytest.xml` |
-| concurrency tests ×5 | 5 passed each run | `logs/orch/concurrency_x5.log` |
-| `db_roundtrip.sh` (up → zero → up, partial rollback to 0006) | ROUNDTRIP OK, schema diff EMPTY (5815 lines) | `logs/orch/db_roundtrip.log`, `migration/` |
+| `pytest -m "not perf"` full | **699 passed**, 1 deselected (perf) | `logs/orch/pytest.log`, `pytest.xml` |
+| concurrency tests ×3 | 6 passed each run | `logs/orch/concurrency_x3.log` |
+| `db_roundtrip.sh` (up → zero → up, partial rollback to 0006) | ROUNDTRIP OK, schema diff EMPTY (5926 lines) | `logs/orch/db_roundtrip.log`, `migration/` |
 | `roles_check.sh` | passed=49, failed=0 | `logs/orch/roles_check.log`, `roles/` |
 
 The implementer's own runs are in `logs/`: 692 passed, concurrency ×12, makemigrations --check clean, tools unittest 42 OK, verify_handoff OK=300 / KNOWN_DEFECT=1, secret scan 0, OpenAPI valid.
@@ -105,14 +105,20 @@ The implementer's own runs are in `logs/`: 692 passed, concurrency ×12, makemig
 - Fix: a per-user `pg_advisory_xact_lock` in the assignment guards. The same fix was applied to role assignment.
 - Re-run after the fix: 692/692, and concurrency stable over 12 + 5 runs.
 
+**Rework round 1** (REVIEW.md of 84e5acd: REWORK):
+- REV-0105 [P1]: role lifecycle enforced in the DB. Only DRAFT→ACTIVE→RETIRED is allowed; RETIRED is terminal and is refused while live assignments exist; kind and matrix_version are frozen. The bypass scenario has a regression test.
+- REV-0106 / Q-0103: OWNER_POLICY values may be proposed and published only by an ACTIVE owner_admin, with a reason; no second person is needed (employer answer, 2026-11-05). MFA step-up and the audit event are enforced in 01.3/01.4.
+- REV-0107: no back-dating. effective_from must be ≥ now − 60 s (a technical clock tolerance).
+- Q-0104: upload limit = 26,214,400 bytes.
+- Q-0106: `primary_capacity` per position (default 1; unit heads 1). Enforced under a per-position advisory lock; 6-person race on capacity 2 → exactly 2 win.
+- Migrations 0007/0008/0010 were amended in place. Nothing has been deployed yet.
+- Orchestrator re-run: 699 passed; concurrency ×3 stable; roundtrip OK (5926 lines); roles 49/0. The implementer also ran concurrency ×10 (`logs/concurrency_x10.log`).
+
 ## 6. Demo (employer)
 Nothing to click yet (DB only). Pages come in 01.5.
 
 ## 7. Issues / decisions
-- **Still open, employer questions:**
-  - Q-0103: does publishing an OWNER_POLICY parameter need a second person?
-  - Q-0104: does 25 MB mean 25,000,000 or 26,214,400 bytes? 25,000,000 is seeded, the stricter reading.
-  - Q-0106: can one position have several PRIMARY holders?
+- **Employer questions Q-0101 to Q-0106 and back-dating:** all answered on 2026-11-05 and applied.
 - **Permission sensitivity:** left blank, because the matrix gives no per-action class.
 - **OWNER_POLICY classification:** added, which is a contract change. Reviewer to confirm.
 - **Actor ids:** PHASE_00 audit/outbox actor_id has no FK to user, on purpose.

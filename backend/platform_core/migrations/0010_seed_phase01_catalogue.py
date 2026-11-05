@@ -509,7 +509,7 @@ PARAMETERS: dict[str, tuple[str, str, str, str, str, int | None, int | None, lis
         None,
         "2",
     ),
-    # DEC-053 uploads (25 MB read as 25 000 000 bytes - the stricter reading; see 01.2 report open question)
+    # DEC-053 uploads; 25 MB = 26 214 400 bytes (binary, as Windows shows it - employer answer Q-0104, 2026-11-05)
     "document_upload_max_bytes": (
         "حداکثر حجم فایل بارگذاری",
         "INTEGER",
@@ -519,7 +519,7 @@ PARAMETERS: dict[str, tuple[str, str, str, str, str, int | None, int | None, lis
         1,
         None,
         None,
-        "25000000",
+        "26214400",
     ),
     "document_rejected_quarantine_days": (
         "نگهداری فایل ردشده در قرنطینه",
@@ -587,6 +587,7 @@ EMPLOYER_ANSWERS = {
     "session_limit_exceeded_action": _ANS,  # Q-0101
     "session_operator_absolute_hours": _ANS,  # Q-0102
     "password_history_reuse_depth": _ANS,  # Q-0105
+    "document_upload_max_bytes": "DEC-053 (employer answer Q-0104, 2026-11-05)",
 }
 
 SCHEMA_CONTRACT = "PHASE_01.2"
@@ -703,8 +704,12 @@ def unseed(apps: Any, schema_editor: Any) -> None:
     ).delete()
     role = get("platform_core", "Role")
     seeded = role.objects.using(db).filter(provenance=SEED, code__in=list(ROLES))
-    seeded.update(status="DRAFT")  # grants change only while DRAFT (trg_role_permission_guard)
+    # Owner-only bypass (REV-0105): grants of ACTIVE roles are frozen and a role can never go back to DRAFT.
+    # The reverse migration runs as the schema owner, so it may disable the guard for this one statement inside
+    # the migration transaction; the runtime role cannot (not owner, roles_check.sh).
+    schema_editor.execute("ALTER TABLE platform_role_permission DISABLE TRIGGER trg_role_permission_guard")
     get("platform_core", "RolePermission").objects.using(db).filter(role__in=seeded).delete()
+    schema_editor.execute("ALTER TABLE platform_role_permission ENABLE TRIGGER trg_role_permission_guard")
     seeded.delete()
     get("platform_core", "Permission").objects.using(db).filter(action__in=list(PERMISSIONS)).delete()
 

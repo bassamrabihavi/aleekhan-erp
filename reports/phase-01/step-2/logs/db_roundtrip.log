@@ -143,6 +143,6 @@ Running migrations:
   Applying platform_core.0009_phase01_constraint_names... OK
   Applying platform_core.0010_seed_phase01_catalogue... OK
 == [5] schema diff (up #1 vs up #2)
-schema diff: EMPTY (5815 lines compared)
+schema diff: EMPTY (5926 lines compared)
 == dropped aleekhan_roundtrip
 ROUNDTRIP OK

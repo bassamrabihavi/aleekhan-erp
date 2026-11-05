@@ -89,10 +89,17 @@ def test_history_written_by_trigger_effective_dated_and_append_only() -> None:
 
 def test_effective_from_never_back_dated_or_future_and_code_immutable() -> None:
     unit = org_unit()
-    with db_refuses("ck_effective_from_monotonic"):
+    with db_refuses("ck_effective_from_not_backdated"):
         OrgUnit.objects.filter(pk=unit.pk).update(
             name_fa=unit.name_fa + " ۲", effective_from=timezone.now() - timedelta(days=1)
         )
+    # REV-0107 repro: a change dated after the previous change but before now is refused as well
+    with db_refuses("ck_effective_from_not_backdated"):
+        org_unit(effective_from=timezone.now() - timedelta(days=7))
+    with db_refuses("ck_effective_from_not_backdated"):
+        position(unit, effective_from=timezone.now() - timedelta(hours=1))
+    # the documented 60 s clock tolerance accepts a slightly older application timestamp (new unit)
+    org_unit(effective_from=timezone.now() - timedelta(seconds=5))
     with db_refuses("ck_effective_from_not_future"):
         OrgUnit.objects.filter(pk=unit.pk).update(effective_from=timezone.now() + timedelta(days=1))
     with db_refuses("immutable_column"):
@@ -162,3 +169,33 @@ def test_holding_a_position_grants_no_permission() -> None:
             f.related_model.__name__ for f in model._meta.get_fields() if f.is_relation and f.related_model
         }
         assert not related & {"Role", "Permission", "RolePermission", "RoleAssignment"}
+
+
+def test_position_primary_capacity() -> None:
+    """Q-0106 (employer answer 2026-11-05): PRIMARY holders up to the position capacity; heads stay 1."""
+    unit = org_unit()
+    with db_refuses("ck_position_head_capacity_one"):
+        position(unit, is_unit_head=True, primary_capacity=2)
+    with db_refuses("ck_position_capacity_pos"):
+        position(unit, primary_capacity=0)
+    single = position(unit)
+    position_assignment(single, user())
+    with db_refuses("ck_position_primary_capacity"):
+        position_assignment(single, user())
+    shared = position(unit, primary_capacity=2)
+    a, b = user(), user()
+    first = position_assignment(shared, a)
+    position_assignment(shared, b)
+    with db_refuses("ck_position_primary_capacity"):
+        position_assignment(shared, user())
+    # ACTING does not count against the PRIMARY capacity
+    position_assignment(shared, user(), kind="ACTING", valid_to=timezone.now() + timedelta(days=3))
+    # a later period after one holder leaves is free again
+    end = timezone.now() + timedelta(days=10)
+    PositionAssignment.objects.filter(pk=first.pk).update(valid_to=end)
+    position_assignment(shared, user(), valid_from=end)
+    with db_refuses("ck_position_primary_capacity"):
+        Position.objects.filter(pk=shared.pk).update(primary_capacity=1)
+    assert (
+        PositionHistory.objects.filter(position=shared).latest("position_row_version").primary_capacity == 2
+    )

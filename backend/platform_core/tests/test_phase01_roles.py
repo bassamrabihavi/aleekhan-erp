@@ -198,3 +198,54 @@ def test_role_code_immutable() -> None:
     with connection.cursor() as cur:
         cur.execute("SELECT count(*) FROM platform_role WHERE code = 'employee'")
         assert cur.fetchone()[0] == 1
+
+
+# ---------------------------------------------------------------------------------------- REV-0105 lifecycle
+def _active_role(code: str = "syn_life") -> Role:
+    r = _draft_role("BUSINESS", code=code)
+    Role.objects.filter(pk=r.pk).update(status="ACTIVE", matrix_version="1.0")
+    return Role.objects.get(pk=r.pk)
+
+
+def test_role_lifecycle_only_draft_active_retired() -> None:
+    r = _draft_role("BUSINESS")
+    with db_refuses("ck_role_lifecycle"):
+        Role.objects.filter(pk=r.pk).update(status="RETIRED")  # DRAFT -> RETIRED
+    active = _active_role("syn_life2")
+    with db_refuses("ck_role_lifecycle"):
+        Role.objects.filter(pk=active.pk).update(status="DRAFT")  # ACTIVE -> DRAFT
+    with db_refuses("ck_role_lifecycle"):
+        Role.objects.filter(pk=active.pk).update(kind="TECHNICAL")
+    with db_refuses("ck_role_lifecycle"):
+        Role.objects.filter(pk=active.pk).update(matrix_version="1.1")
+    Role.objects.filter(pk=active.pk).update(name_fa="نام تازه")  # labels may change
+    Role.objects.filter(pk=active.pk).update(status="RETIRED")
+    with db_refuses("terminal_immutable"):
+        Role.objects.filter(pk=active.pk).update(status="ACTIVE")  # RETIRED is terminal
+
+
+def test_role_with_live_assignments_cannot_retire() -> None:
+    owner = user()
+    r = _active_role()
+    a = RoleAssignment.objects.create(
+        user=user(), role=r, scope_kind="GLOBAL", status="ACTIVE", granted_by=owner, reason="synthetic"
+    )
+    with db_refuses("ck_role_retire_unassigned"):
+        Role.objects.filter(pk=r.pk).update(status="RETIRED")
+    RoleAssignment.objects.filter(pk=a.pk).update(
+        status="REVOKED", revoked_at=timezone.now(), revoked_by=owner, revoke_reason="synthetic revoke"
+    )
+    Role.objects.filter(pk=r.pk).update(status="RETIRED")
+
+
+def test_reviewer_bypass_scenario_is_refused_at_step_3() -> None:
+    """REV-0105 repro: ACTIVE role -> assignment -> back to DRAFT -> add BA permission -> re-activate."""
+    r = _active_role()
+    RoleAssignment.objects.create(
+        user=user(), role=r, scope_kind="GLOBAL", status="ACTIVE", granted_by=user(), reason="synthetic"
+    )
+    with db_refuses("ck_role_lifecycle"):
+        Role.objects.filter(pk=r.pk).update(status="DRAFT")  # step 3
+    with db_refuses("ck_role_permission_draft_only"):
+        RolePermission.objects.create(role=r, permission_id="platform.document.approve", grant_mode="SCOPE")
+    assert not RolePermission.objects.filter(role=r).exists()

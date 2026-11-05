@@ -6325,6 +6325,10 @@ components:
           format: uuid
         is_unit_head:
           type: boolean
+        primary_capacity:
+          type: integer
+          minimum: 1
+          description: Max PRIMARY holders at any instant (Q-0106, employer answer 2026-11-05; default 1, unit heads always 1).
         status:
           type: string
           enum:
@@ -6373,6 +6377,10 @@ components:
         is_unit_head:
           type: boolean
           default: false
+        primary_capacity:
+          type: integer
+          minimum: 1
+          description: Max PRIMARY holders at any instant (Q-0106, employer answer 2026-11-05; default 1, unit heads always 1).
         reason:
           type: string
           minLength: 3
@@ -6395,6 +6403,10 @@ components:
           format: uuid
         is_unit_head:
           type: boolean
+        primary_capacity:
+          type: integer
+          minimum: 1
+          description: Max PRIMARY holders at any instant (Q-0106, employer answer 2026-11-05; default 1, unit heads always 1).
         reason:
           type: string
           minLength: 3

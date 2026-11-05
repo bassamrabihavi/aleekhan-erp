@@ -124,5 +124,10 @@ Review verdicts are in `reports/phase-00/step-N/REVIEW.md`. No version number is
   Q-0102 `session_operator_absolute_hours`, Q-0105 `password_history_reuse_depth`.
 - Fixed (orchestrator verification): deadlock between concurrent role/position assignment inserts during the
   GiST exclusion check - per-user advisory transaction lock in the guard triggers.
+- Rework after review REWORK (REV-0105..0107; migrations 0007/0008/0010 amended in place, nothing deployed):
+  role lifecycle DRAFT->ACTIVE->RETIRED enforced in the DB (closes the re-DRAFT bypass); OWNER_POLICY values
+  only by an owner_admin holder with reason (Q-0103); org changes never back-dated (60 s tolerance);
+  upload limit 26 214 400 bytes (Q-0104); `platform_position.primary_capacity` with per-position locking
+  (Q-0106). Employer answers 2026-11-05.
 - No API endpoint, engine rule or UI added; no user, org or network data seeded.
 - Implementation: PENDING.

@@ -1,5 +1,5 @@
 == server: 17.9
-== throw-away database aleekhan_roles_check, roles owner/app/ro with suffix 6415a86e (NOLOGIN, no password)
+== throw-away database aleekhan_roles_check, roles owner/app/ro with suffix 0aa7da97 (NOLOGIN, no password)
 NOTICE:  database "aleekhan_roles_check" does not exist, skipping
 == migrate as the owner role
 PASS all tables owned by the owner role
@@ -57,4 +57,4 @@ PASS all platform triggers enabled
 PASS audit triggers enabled  (trg_audit_event_append_only=O,trg_audit_event_no_truncate=O)
 PASS audit rows written by app are intact (2)
 == roles check: passed=49 failed=0
-== cleanup: drop aleekhan_roles_check and roles *_6415a86e
+== cleanup: drop aleekhan_roles_check and roles *_0aa7da97

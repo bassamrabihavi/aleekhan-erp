@@ -283,7 +283,7 @@ EXPECTED_PARAMETERS = {
     "network_vpn_is_external": ("true", "DEC-052"),
     "break_glass_session_hours": ("2", "DEC-054"),
     # DEC-053
-    "document_upload_max_bytes": ("25000000", "DEC-053"),
+    "document_upload_max_bytes": ("26214400", "DEC-053"),
     "document_rejected_quarantine_days": ("30", "DEC-053"),
     "document_scanner": ("CLAMAV", "DEC-053"),
     # DEC-032 / DEC-048
@@ -330,3 +330,8 @@ def test_seed_is_non_sensitive() -> None:
     values = [str(v) for (v,) in _rows("SELECT value FROM platform_parameter_value")]
     cidr = re.compile(r"\b\d{1,3}(\.\d{1,3}){3}(/\d{1,2})?\b")
     assert not [v for v in values if cidr.search(v)]
+
+
+def test_upload_limit_carries_the_q0104_answer() -> None:
+    v = ParameterValue.objects.get(definition_id="document_upload_max_bytes", provenance="MIGRATION_SEED")
+    assert v.reason == "DEC-053 (employer answer Q-0104, 2026-11-05) (seeded by migration 0010)"

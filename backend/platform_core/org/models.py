@@ -10,7 +10,9 @@
   head.
   History in ``PositionHistory``.
 * ``PositionAssignment``  one PRIMARY position per person at any instant + ACTING with an end date (DEC-048
-  item 2); no ADDITIONAL kind in PHASE_01. Exclusion constraints (migration 0008) are race-safe.
+  item 2); a position may have up to ``Position.primary_capacity`` PRIMARY holders at once (Q-0106, employer
+  answer 2026-11-05; default 1, unit heads 1); no ADDITIONAL kind in PHASE_01. Exclusion constraints and
+  per-position locks (migration 0008) are race-safe.
   Holding a position grants NO permission (roles are separate, DEC-049).
 
 The tree holds names only - no contact data (DEC-048 item 6). Real units/people are never seeded (C-45).
@@ -194,6 +196,9 @@ class Position(models.Model):
         "self", on_delete=models.PROTECT, null=True, blank=True, related_name="reports", db_index=False
     )
     is_unit_head = models.BooleanField(db_default=False)
+    # Q-0106 (employer answer 2026-11-05): how many PRIMARY holders the position may have at any instant;
+    # default 1, a unit-head (managerial) position always 1. Enforced under a per-position lock (0008).
+    primary_capacity = models.SmallIntegerField(db_default=1)
     status = models.CharField(max_length=8, choices=OrgStatus.choices, db_default=OrgStatus.ACTIVE)
     effective_from = models.DateTimeField(db_default=Now())
     provenance = models.CharField(max_length=16, choices=Provenance.choices, db_default=Provenance.SYS)
@@ -216,6 +221,10 @@ class Position(models.Model):
             CheckConstraint(condition=~Q(title_fa=""), name="ck_position_title_nonempty"),
             CheckConstraint(condition=in_values("status", OrgStatus.values), name="ck_position_status"),
             CheckConstraint(condition=~Q(reports_to=F("id")), name="ck_position_not_own_manager"),
+            CheckConstraint(condition=Q(primary_capacity__gte=1), name="ck_position_capacity_pos"),
+            CheckConstraint(
+                condition=~Q(is_unit_head=True) | Q(primary_capacity=1), name="ck_position_head_capacity_one"
+            ),
             _provenance_check("position"),
             _synthetic_label_check("position", "title_fa"),
             CheckConstraint(condition=Q(row_version__gte=1), name="ck_position_row_version_pos"),
@@ -246,6 +255,7 @@ class PositionHistory(models.Model):
         Position, on_delete=models.PROTECT, null=True, blank=True, related_name="+", db_index=False
     )
     is_unit_head = models.BooleanField()
+    primary_capacity = models.SmallIntegerField()
     status = models.CharField(max_length=8, choices=OrgStatus.choices)
     changed_by = _user_fk()
     recorded_at = models.DateTimeField(db_default=Now())

@@ -39,7 +39,8 @@ REVOKE DELETE ON platform_user, platform_credential, platform_mfa_factor, platfo
 REVOKE INSERT, UPDATE, DELETE ON platform_permission, platform_upload_type, platform_job_definition,
     platform_workflow_definition FROM :"app";
 -- the runtime role calls the parameter lookup from SECURITY INVOKER triggers (default privileges revoke EXECUTE)
-GRANT EXECUTE ON FUNCTION platform_param_value(text), platform_param_int(text) TO :"app";
+GRANT EXECUTE ON FUNCTION platform_param_value(text), platform_param_int(text), platform_holds_owner_admin(uuid),
+    platform_position_peak_primary(uuid, uuid, timestamptz, timestamptz) TO :"app";
 
 -- migration bookkeeping and the schema contract are owned by the deploy step, never written at runtime
 REVOKE INSERT, UPDATE, DELETE ON django_migrations FROM :"app";
