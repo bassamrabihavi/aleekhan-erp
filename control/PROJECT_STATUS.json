@@ -2330,6 +2330,20 @@
       "resolution": "B: خودتأییدی یک‌باره مالک فقط برای اولین دارنده هر نقش تأیید کسب‌وکار؛ تأیید دومرحله‌ای تازه + علامت ویژه در Audit",
       "decided_by": "بسام ربیهاوی",
       "decided_at": "2026-11-05T18:12:46+00:00"
+    },
+    {
+      "id": "DEC-056",
+      "priority": "P0",
+      "gate": "Phase-1",
+      "domain": "Security",
+      "issue": "ماتریس دسترسی v1.1: مالک (owner_admin) همه درخواست‌های تأیید را می‌بیند و حق تأیید مستقیم دارد (اصلاح DEC-003 برای مالک؛ خودتأییدی همچنان ممنوع جز DEC-055)",
+      "status": "APPROVED",
+      "owner": "کارفرما",
+      "phase": "PHASE_01",
+      "source": "گام 01.4 2026-11-06 (پرسش REVIEW 01.4)",
+      "resolution": "owner_admin: approval.read همه + approval.decide مستقیم؛ maker≠checker (DEC-032) بدون تغییر؛ ماتریس v1.1",
+      "decided_by": "بسام ربیهاوی",
+      "decided_at": "2026-11-06T01:15:34+00:00"
     }
   ],
   "ready_for_test": [
@@ -2982,7 +2996,21 @@
       "state": "PASS",
       "note": null,
       "commit": null
+    },
+    {
+      "at": "2026-11-06T01:15:34+00:00",
+      "kind": "decision_added",
+      "id": "DEC-056",
+      "status": "OPEN"
+    },
+    {
+      "at": "2026-11-06T01:15:34+00:00",
+      "kind": "decision",
+      "id": "DEC-056",
+      "status": "APPROVED",
+      "by": "بسام ربیهاوی",
+      "note": "owner_admin: approval.read همه + approval.decide مستقیم؛ maker≠checker (DEC-032) بدون تغییر؛ ماتریس v1.1"
     }
   ],
-  "updated_at": "2026-11-06T01:12:44+00:00"
+  "updated_at": "2026-11-06T01:15:34+00:00"
 }

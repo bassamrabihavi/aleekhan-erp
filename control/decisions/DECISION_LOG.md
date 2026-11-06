@@ -59,3 +59,9 @@
 - **Decision:** option B. The owner (owner_admin) may approve, inside the system, his own request for the **first** holder of each business-approval role, once per role: only while that role has no ACTIVE holder, with a fresh MFA step-up, a mandatory reason, and a special audit flag (`bootstrap_self_approval`). From the second holder on, DEC-032 maker-checker applies unchanged.
 - **Decided by:** بسام ربیهاوی (کارفرما), in the Claude Code session.
 - **2026-11-05 (REV-0111 follow-up, DEC-049 operator cell):** an operator sees only the current APPROVED revision of a document linked to one of their open tasks. If a task is pinned to a revision and a newer revision is approved, the operator sees no revision until the task is re-linked (prevents building from a stale drawing). Decided by بسام ربیهاوی (کارفرما).
+
+## 2026-11-06 — DEC-056 APPROVED: owner approval rights (permission matrix v1.1; amends DEC-003 for the owner)
+- **Decision:** the owner role (`owner_admin`) reads **all** approval requests and holds the business **decide** right directly, without assigning himself a separate approver role. Every decision by the owner is audited with his role.
+- **Unchanged:** nobody decides their own request (DEC-032 maker ≠ checker), except the one-time bootstrap approval of DEC-055. Other technical roles (IT, auditor) still hold no business approval.
+- **Implementation:** permission matrix v1.1, a seed migration, and the DB guard "TECHNICAL role holds no business-approval permission" gets an explicit owner_admin exception. Scheduled with step 01.5.
+- **Decided by:** بسام ربیهاوی (کارفرما), in the Claude Code session, as the answer to the 01.4 review question.
