@@ -162,9 +162,9 @@
         },
         "01.5": {
           "name": "UI",
-          "state": "IN_PROGRESS",
-          "commit": null,
-          "report": null,
+          "state": "IN_REVIEW",
+          "commit": "ef4902a",
+          "report": "reports/phase-01/step-5/REPORT.md",
           "review": null,
           "rework_cycles": 0,
           "started_at": "2026-11-06T01:15:53+00:00",
@@ -3019,7 +3019,16 @@
       "state": "IN_PROGRESS",
       "note": null,
       "commit": null
+    },
+    {
+      "at": "2026-11-09T18:28:57+00:00",
+      "kind": "step",
+      "phase": "PHASE_01",
+      "step": "01.5",
+      "state": "IN_REVIEW",
+      "note": null,
+      "commit": "ef4902a"
     }
   ],
-  "updated_at": "2026-11-06T01:15:53+00:00"
+  "updated_at": "2026-11-09T18:28:57+00:00"
 }

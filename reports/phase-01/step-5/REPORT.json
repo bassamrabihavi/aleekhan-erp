@@ -1,7 +1,7 @@
 {
   "phase": "PHASE_01",
   "step": "01.5",
-  "commit_sha": "PENDING",
+  "commit_sha": "ef4902a",
   "status": "COMPLETE",
   "scope": [
     "Shared shell bound to the real API: login (password -> MFA code -> forced password change -> TOTP enrolment with 10 recovery codes shown once), session-ended handling (401 -> login with notice), logout, role-aware navigation from GET /me/permissions (cosmetic; server re-checks), MFA step-up dialog on 401 MFA_REQUIRED with one retry (new Idempotency-Key), environment banner with the synthetic-data label",
