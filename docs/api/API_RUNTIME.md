@@ -172,3 +172,18 @@ All 99 PHASE_01 operations are served (`backend/platform_core/api/phase01/`, rou
   (assignments start now), `OrgUnitCreateRequest.valid_from` / `OrgUnitMoveRequest.effective_from` / tree
   `as_of` other than now (+-5 min, never back-dated), task reassignment to a unit/position, ENUM parameter
   definitions (no allowed-value list in the contract).
+
+## 10. PHASE_01 / 01.5 changes (contract 0.6.1-draft)
+
+- **Policy** runs over the APPROVED matrix **v1.1** (DEC-056, migration `0014`): `owner_admin` reads every approval
+  request and holds `platform.workflow.approval.decide`. It is the only TECHNICAL + business-approval pair the
+  engine (`policy.counts_for_business_approval`) and the DB guards accept. Maker != checker is unchanged: the
+  owner gets 403 `SELF_APPROVAL_FORBIDDEN` on his own requests (DEC-055 bootstrap stays a separate operation).
+  Every decision's audit row names the deciding role (`scope.via_role`).
+- **CSRF** token rotated after a successful `login` and `verifyMfa` (REV-0123); clients read `csrftoken` before
+  every unsafe call.
+- `uploadDocumentRevision`: `parent_revision_id` is checked under the document row lock (REV-0120): of two
+  concurrent uploads on the same parent exactly one gets 202, the other 409 `STATE_TRANSITION_NOT_ALLOWED`.
+- `withdrawRequest` stores its reason (closing note + audit reason, REV-0121); `publishParameterValue` stores the
+  optional note as the audit reason (REV-0122).
+- `ParameterValueRevision.row_version` (optional, additive): the If-Match of `publishParameterValue`.

@@ -162,12 +162,12 @@
         },
         "01.5": {
           "name": "UI",
-          "state": "TODO",
+          "state": "IN_PROGRESS",
           "commit": null,
           "report": null,
           "review": null,
           "rework_cycles": 0,
-          "started_at": null,
+          "started_at": "2026-11-06T01:15:53+00:00",
           "done_at": null
         },
         "01.6": {
@@ -3010,7 +3010,16 @@
       "status": "APPROVED",
       "by": "بسام ربیهاوی",
       "note": "owner_admin: approval.read همه + approval.decide مستقیم؛ maker≠checker (DEC-032) بدون تغییر؛ ماتریس v1.1"
+    },
+    {
+      "at": "2026-11-06T01:15:53+00:00",
+      "kind": "step",
+      "phase": "PHASE_01",
+      "step": "01.5",
+      "state": "IN_PROGRESS",
+      "note": null,
+      "commit": null
     }
   ],
-  "updated_at": "2026-11-06T01:15:34+00:00"
+  "updated_at": "2026-11-06T01:15:53+00:00"
 }

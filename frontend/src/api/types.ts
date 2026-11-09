@@ -48,4 +48,5 @@ export interface Problem {
   detail?: string;
   request_id: string;
   decision_id?: string;
+  errors?: unknown[];
 }

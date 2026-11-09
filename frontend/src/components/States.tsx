@@ -11,7 +11,7 @@ export function LoadingState({ label }: { label: string }) {
   );
 }
 
-export function EmptyState({ title, hint }: { title: string; hint?: string }) {
+export function EmptyState({ title, hint }: { title: string; hint?: string | undefined }) {
   return (
     <div className="state state--empty" data-testid="state-empty">
       <p className="state__title">{title}</p>

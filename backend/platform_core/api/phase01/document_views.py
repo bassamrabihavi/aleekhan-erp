@@ -26,7 +26,6 @@ from platform_core.engine.errors import (
     FieldError,
     NotFound,
     PayloadTooLarge,
-    StateTransitionNotAllowed,
     ValidationFailed,
 )
 from platform_core.engine.idempotency import StoredResponse
@@ -184,15 +183,18 @@ class RevisionsView(Phase01View):
         filename = str(upload.name or "upload")
         digest = hashlib.sha256(data).hexdigest()
 
+        expected_parent = uuid.UUID(parent_raw) if parent_raw is not None else None
+
         def run(c: Caller, rid: uuid.UUID) -> StoredResponse:
-            if parent_raw is not None:
-                last = (
-                    DocumentRevision.objects.filter(document_id=document_id).order_by("-revision_no").first()
-                )
-                if last is None or str(last.pk) != parent_raw.lower():
-                    raise StateTransitionNotAllowed("parent_revision_id is not the latest revision")
+            # REV-0120: the "parent is the latest revision" check runs under the document row lock (service)
             rev = docs.upload_revision(
-                c, document_id, filename=filename, data=data, change_note=note, request_id=rid
+                c,
+                document_id,
+                filename=filename,
+                data=data,
+                change_note=note,
+                expected_parent_id=expected_parent,
+                request_id=rid,
             )
             return stored(202, S.revision(rev), etag_version=rev.row_version)
 

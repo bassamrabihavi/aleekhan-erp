@@ -1,0 +1,244 @@
+{
+  "phase": "PHASE_01",
+  "step": "01.5",
+  "commit_sha": "PENDING",
+  "status": "COMPLETE",
+  "scope": [
+    "Shared shell bound to the real API: login (password -> MFA code -> forced password change -> TOTP enrolment with 10 recovery codes shown once), session-ended handling (401 -> login with notice), logout, role-aware navigation from GET /me/permissions (cosmetic; server re-checks), MFA step-up dialog on 401 MFA_REQUIRED with one retry (new Idempotency-Key), environment banner with the synthetic-data label",
+    "Page 46: users (list/filter/search, create with server one-time password shown once, disable/enable, unlock, reset password, reset MFA, revoke sessions, user sessions, effective permissions), roles + permission flags, role assignments (grant with scope/valid_to, explicit self-assignment confirmation, DEC-032 pending notice, revoke)",
+    "Org tree (DEC-043/048): WAI-ARIA tree with keyboard (RTL arrows), units / unit-head position (capacity fixed 1) / holder from now on only, rename / deactivate unit",
+    "Page 39: approval inboxes (to_decide / requested_by_me / all), approve/reject with note, withdraw with reason, DEC-055 bootstrap approval; task inbox start/complete/block/unblock",
+    "Page 40: documents list/create, revisions with scan status, quarantine upload with parent_revision_id, download only CLEAN (attachment link), submit/approve/reject",
+    "Page 42: parameters by classification; OWNER_POLICY one-step publish by the owner; PENDING values published with If-Match; RULE_NOT_APPROVED shown with its DEC id",
+    "Page 36: health detail (components, outbox/jobs/security counters), audit integrity, job definitions (protected/cancellable), job runs with safe cancel (reason + MFA); protected jobs shown as not cancellable",
+    "Every query: loading / error (Persian message, code, HTTP status, request id, retry) / forbidden / empty / stale; RTL; responsive 1440/1180/768/390; focus ring, skip link, focus to main on route change",
+    "DEC-056: matrix v1.1 (owner_admin approval.read + approval.decide), engine + DB-guard exception for exactly that pair, deciding role in the audit scope, migration 0014",
+    "REV-0120, REV-0121, REV-0122, REV-0123 fixed with tests",
+    "Contract 0.6.1-draft: optional ParameterValueRevision.row_version (additive; needed for the If-Match of publishParameterValue)"
+  ],
+  "changes": [
+    "CHANGELOG.md",
+    "docs/api/API_RUNTIME.md",
+    "docs/api/openapi-draft.yaml",
+    "docs/security/PERMISSION_MATRIX_DRAFT.md",
+    "backend/platform_core/migrations/0014_dec056_owner_approval_rights.py",
+    "backend/platform_core/authz/policy.py",
+    "backend/platform_core/identity/roles.py",
+    "backend/platform_core/workflow/approvals.py",
+    "backend/platform_core/documents/service.py",
+    "backend/platform_core/params/service.py",
+    "backend/platform_core/api/views.py",
+    "backend/platform_core/api/phase01/auth_views.py",
+    "backend/platform_core/api/phase01/config_views.py",
+    "backend/platform_core/api/phase01/document_views.py",
+    "backend/platform_core/api/phase01/workflow_views.py",
+    "backend/platform_core/api/phase01/serializers.py",
+    "backend/platform_core/tests/ (engine_fixtures, golden/permission_decisions.golden.json, test_api_phase01_auth, test_api_phase01_flows, test_phase01_authz_engine, test_phase01_roles_approvals_engine, test_phase01_schema, new test_phase01_step5_backend)",
+    "frontend/src/ (api/http.ts, api/phase01.ts, api/client.ts, auth/, components/, lib/, pages/, styles/app.css, App.tsx, main.tsx, phase01.test.tsx, App.test.tsx, test/fetchStub.ts)",
+    "frontend/e2e/ (phase01.spec.ts, phase01-helpers.ts, global-setup.ts; system-status.spec.ts now opens #/status)",
+    "frontend/playwright.config.ts",
+    "frontend/scripts/e2e.sh",
+    "frontend/vite.config.ts",
+    "frontend/README.md",
+    "reports/phase-01/step-5/UAT_HOWTO_FA.md"
+  ],
+  "migrations": [
+    {
+      "id": "platform_core.0014_dec056_owner_approval_rights",
+      "reversible": true,
+      "evidence": "reports/phase-01/step-5/logs/db_roundtrip.log"
+    }
+  ],
+  "test_evidence": [
+    {
+      "command": "ruff check backend tools && ruff format --check backend tools",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-5/logs/ruff.log"
+    },
+    {
+      "command": "cd backend && mypy . (strict, 175 files)",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-5/logs/mypy.log"
+    },
+    {
+      "command": "manage.py makemigrations --check --dry-run",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-5/logs/makemigrations_check.log"
+    },
+    {
+      "command": "pytest -m 'not perf' --junitxml (1858 passed, 1 skipped: real-ClamAV contract test, clamd not reachable)",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-5/logs/pytest.log"
+    },
+    {
+      "command": "race tests -k 'concurrent or race or parallel' x3 (26 passed each run, incl. the REV-0120 HTTP race)",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-5/logs/concurrency_x3.log"
+    },
+    {
+      "command": "backend/scripts/db_roundtrip.sh (up/zero/up incl. 0014, schema diff empty)",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-5/logs/db_roundtrip.log"
+    },
+    {
+      "command": "ops/db/roles_check.sh (50/50)",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-5/logs/roles_check.log"
+    },
+    {
+      "command": "openapi_spec_validator: 0.6.1-draft, 88 paths, 107 operations, 0 planned",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-5/logs/openapi_validate.log"
+    },
+    {
+      "command": "frontend npm run lint (eslint --max-warnings=0)",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-5/logs/eslint.log"
+    },
+    {
+      "command": "frontend npm run typecheck",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-5/logs/typecheck.log"
+    },
+    {
+      "command": "frontend vitest run (34 tests in 4 files)",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-5/logs/vitest.log"
+    },
+    {
+      "command": "frontend npm run build",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-5/logs/build.log"
+    },
+    {
+      "command": "frontend scripts/e2e.sh, E2E_BROWSER_CHANNEL=msedge, workers=1 (real backend: 21 passed incl. 9 PHASE_01 flows; backend-down: 1 passed)",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-5/logs/e2e.log"
+    },
+    {
+      "command": "python tools/secret_scan.py and --history",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-5/logs/secret_scan.log"
+    },
+    {
+      "command": "python -m unittest discover -s tools/tests (42 tests)",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-5/logs/tools_unittest.log"
+    },
+    {
+      "command": "python tools/verify_handoff.py (OK=300, KNOWN_DEFECT=1 DEC-044, failures=0)",
+      "outcome": "PASS",
+      "log_path": "reports/phase-01/step-5/logs/verify_handoff.log"
+    }
+  ],
+  "security_evidence": [
+    "DEC-056 exception limited to (owner_admin, platform.workflow.approval.decide): the DB refuses any other TECHNICAL + business-approval pair (test_phase01_step5_backend, test_phase01_roles); engine counts_for_business_approval unit test; the owner still gets 403 SELF_APPROVAL_FORBIDDEN on his own requests (engine + HTTP)",
+    "REV-0123: csrftoken rotated after login and MFA verify; the pre-login token is refused (test_api_phase01_auth)",
+    "REV-0120: two concurrent uploads on the same parent -> exactly one 202 and one 409 over HTTP",
+    "UI hiding is cosmetic: E2E asserts the server answers 403 when a document controller calls /api/v1/admin/users",
+    "One-time passwords: shown once in a dialog that Escape does not close, not kept in client state after closing (unit + E2E)",
+    "E2E axe (wcag2a/aa, wcag21a/aa): zero violations on login, home, org tree, security users/assignments, work approvals, parameter detail, ops, document detail"
+  ],
+  "decisions": [
+    "DEC-003",
+    "DEC-032",
+    "DEC-043",
+    "DEC-048",
+    "DEC-049",
+    "DEC-050",
+    "DEC-051",
+    "DEC-052",
+    "DEC-053",
+    "DEC-055",
+    "DEC-056 (implemented: matrix v1.1)"
+  ],
+  "risks": [
+    "DEC-056 consequence (DEC-032 read literally): an in-app grant of owner_admin to another person now waits PENDING_APPROVAL for a second eligible person; the console bootstrap of the owner is exempt; owner assignments made before v1.1 stay valid (requires_second_approval fixed at grant time) - employer confirmation requested",
+    "owner_admin holds no platform.workflow.approval.request in v1.1: he cannot withdraw his own requests (matrix unchanged; employer question)",
+    "owner_admin holds no platform.workflow.task.read: the task tab is hidden for the owner (matrix v1.1)",
+    "Contract gap closed additively: ParameterValueRevision.row_version (0.6.1-draft); reviewer to confirm it is acceptable inside 01.5",
+    "Not in the UI yet: createTask / reassign / verify-close / cancel task, dynamic fields, role create/edit/activate/retire, unit move, end position assignment, audit event query page, QR code for MFA enrolment (no new dependency; the key is shown as text)",
+    "ClamAV is not configured on this machine: uploaded files stay QUARANTINED, so the CLEAN download path is covered by backend tests and UI logic only",
+    "E2E uses ALEEKHAN_INTERNAL_CIDRS=127.0.0.1/32 and an ephemeral data key for the local run only; real CIDRs and keys come from server config (DEC-052)",
+    "Bundled Playwright Chromium is not installed on the work machine; E2E ran on the installed Microsoft Edge 157 (Chromium) via E2E_BROWSER_CHANNEL=msedge"
+  ],
+  "evidence_paths": [
+    "reports/phase-01/step-5/logs/",
+    "reports/phase-01/step-5/screenshots/",
+    "reports/phase-01/step-5/UAT_HOWTO_FA.md",
+    "docs/security/PERMISSION_MATRIX_DRAFT.md",
+    "docs/api/openapi-draft.yaml",
+    "docs/api/API_RUNTIME.md"
+  ],
+  "screenshots": [
+    "phase01-document-detail-1180-laptop.png",
+    "phase01-document-detail-1440-desktop.png",
+    "phase01-document-detail-390-mobile.png",
+    "phase01-document-detail-768-tablet.png",
+    "phase01-documents-1180-laptop.png",
+    "phase01-documents-1440-desktop.png",
+    "phase01-documents-390-mobile.png",
+    "phase01-documents-768-tablet.png",
+    "phase01-forbidden-1180-laptop.png",
+    "phase01-forbidden-1440-desktop.png",
+    "phase01-forbidden-390-mobile.png",
+    "phase01-forbidden-768-tablet.png",
+    "phase01-home-owner-1180-laptop.png",
+    "phase01-home-owner-1440-desktop.png",
+    "phase01-home-owner-390-mobile.png",
+    "phase01-home-owner-768-tablet.png",
+    "phase01-login-1180-laptop.png",
+    "phase01-login-1440-desktop.png",
+    "phase01-login-390-mobile.png",
+    "phase01-login-768-tablet.png",
+    "phase01-my-sessions-1180-laptop.png",
+    "phase01-my-sessions-1440-desktop.png",
+    "phase01-my-sessions-390-mobile.png",
+    "phase01-my-sessions-768-tablet.png",
+    "phase01-ops-1180-laptop.png",
+    "phase01-ops-1440-desktop.png",
+    "phase01-ops-390-mobile.png",
+    "phase01-ops-768-tablet.png",
+    "phase01-org-empty-1180-laptop.png",
+    "phase01-org-empty-1440-desktop.png",
+    "phase01-org-empty-390-mobile.png",
+    "phase01-org-empty-768-tablet.png",
+    "phase01-org-tree-1180-laptop.png",
+    "phase01-org-tree-1440-desktop.png",
+    "phase01-org-tree-390-mobile.png",
+    "phase01-org-tree-768-tablet.png",
+    "phase01-parameter-detail-1180-laptop.png",
+    "phase01-parameter-detail-1440-desktop.png",
+    "phase01-parameter-detail-390-mobile.png",
+    "phase01-parameter-detail-768-tablet.png",
+    "phase01-parameters-1180-laptop.png",
+    "phase01-parameters-1440-desktop.png",
+    "phase01-parameters-390-mobile.png",
+    "phase01-parameters-768-tablet.png",
+    "phase01-security-assignments-1180-laptop.png",
+    "phase01-security-assignments-1440-desktop.png",
+    "phase01-security-assignments-390-mobile.png",
+    "phase01-security-assignments-768-tablet.png",
+    "phase01-security-roles-1180-laptop.png",
+    "phase01-security-roles-1440-desktop.png",
+    "phase01-security-roles-390-mobile.png",
+    "phase01-security-roles-768-tablet.png",
+    "phase01-security-users-1180-laptop.png",
+    "phase01-security-users-1440-desktop.png",
+    "phase01-security-users-390-mobile.png",
+    "phase01-security-users-768-tablet.png",
+    "phase01-work-approvals-1180-laptop.png",
+    "phase01-work-approvals-1440-desktop.png",
+    "phase01-work-approvals-390-mobile.png",
+    "phase01-work-approvals-768-tablet.png",
+    "system-status_SIMULATED-error_390-mobile.png",
+    "system-status_SIMULATED-stale_1440-desktop.png",
+    "system-status_real-backend-down_1440-desktop.png",
+    "system-status_real_1180-laptop.png",
+    "system-status_real_1440-desktop.png",
+    "system-status_real_390-mobile.png",
+    "system-status_real_768-tablet.png"
+  ],
+  "rollback": "migrate platform_core 0013 (removes the two owner grants, restores owner_admin matrix_version 1.0 and the 0008/0013 guard bodies; decisions already taken stay in the append-only audit), then revert the commit (contract back to 0.6.0-draft, UI back to the PHASE_00 smoke page)",
+  "review_request": "PASS"
+}

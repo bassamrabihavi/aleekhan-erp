@@ -46,17 +46,47 @@ def test_golden_action_decisions_equal_the_approved_matrix() -> None:
 
 @pytest.mark.django_db
 def test_technical_roles_never_pass_business_approval_checks() -> None:
+    """DEC-003 and its single exception DEC-056: owner_admin passes platform.workflow.approval.decide."""
     owner = person()
     give_role(owner, "owner_admin")
     c = caller(owner)
-    for action in (
-        "platform.workflow.approval.decide",
-        "platform.document.approve",
-        "platform.config.parameter.publish",
-    ):
+    assert P.can(c, "platform.workflow.approval.decide") is True  # DEC-056 (matrix v1.1)
+    assert P.can(c, "platform.workflow.approval.read") is True
+    for action in ("platform.document.approve", "platform.config.parameter.publish"):
         assert P.can(c, action) is False
         with pytest.raises(AccessDenied):
             P.require_permission(c, action)
+    for code in ("it_ops", "security_auditor"):
+        tech = person()
+        give_role(tech, code)
+        for action in (
+            "platform.workflow.approval.decide",
+            "platform.document.approve",
+            "platform.config.parameter.publish",
+        ):
+            assert P.can(caller(tech), action) is False
+
+
+@pytest.mark.django_db
+def test_dec056_exception_counts_only_for_the_owner_decide_grant() -> None:
+    def grant(code: str, kind: str, action: str) -> P.Grant:
+        return P.Grant(
+            role_code=code,
+            role_kind=kind,
+            action=action,
+            mode="SCOPE",
+            max_sensitivity="",
+            scope_kind="GLOBAL",
+            scope_unit_id=None,
+            assignment_id=uuid.uuid4(),
+            self_assignment=False,
+        )
+
+    decide = "platform.workflow.approval.decide"
+    assert P.counts_for_business_approval(grant("owner_admin", "TECHNICAL", decide))
+    assert not P.counts_for_business_approval(grant("owner_admin", "TECHNICAL", "platform.document.approve"))
+    assert not P.counts_for_business_approval(grant("it_ops", "TECHNICAL", decide))
+    assert P.counts_for_business_approval(grant("workflow_approver", "BUSINESS", decide))
 
 
 @pytest.mark.django_db

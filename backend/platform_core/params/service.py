@@ -115,8 +115,11 @@ def propose(
     return pv
 
 
-def publish(caller: Caller, value_id: uuid.UUID, *, request_id: uuid.UUID | None = None) -> ParameterValue:
-    """PENDING_APPROVAL -> PUBLISHED (TECHNICAL / BUSINESS_RULE)."""
+def publish(
+    caller: Caller, value_id: uuid.UUID, *, note: str = "", request_id: uuid.UUID | None = None
+) -> ParameterValue:
+    """PENDING_APPROVAL -> PUBLISHED (TECHNICAL / BUSINESS_RULE). An optional publisher note becomes the
+    audit reason (REV-0122); without a note the audit keeps the proposal's reason."""
     require_permission(caller, "platform.config.parameter.publish")
     require_step_up(caller, "platform.config.parameter.publish")
     ctx = caller.context(request_id)
@@ -139,7 +142,12 @@ def publish(caller: Caller, value_id: uuid.UUID, *, request_id: uuid.UUID | None
         )
         pv.refresh_from_db()
         _audit(
-            uow, "platform.config.parameter.publish", "platform.config.parameter.published", pv, before=before
+            uow,
+            "platform.config.parameter.publish",
+            "platform.config.parameter.published",
+            pv,
+            before=before,
+            reason=note.strip()[:500],
         )
     return pv
 

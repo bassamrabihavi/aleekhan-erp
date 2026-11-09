@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from django.middleware.csrf import get_token
+from django.middleware.csrf import get_token, rotate_token
 from rest_framework.request import Request
 from rest_framework.response import Response
 
@@ -74,6 +74,7 @@ class LoginView(AleekhanAPIView):
         )
         response = Response(body, headers=NO_STORE)
         set_session_cookie(response, result.token)
+        rotate_token(request._request)  # REV-0123: new CSRF token once the session exists (no token fixation)
         return response
 
     @staticmethod
@@ -107,6 +108,7 @@ class VerifyMfaView(SessionView):
             headers=NO_STORE,
         )
         set_session_cookie(response, result.token)
+        rotate_token(request._request)  # REV-0123: rotate the CSRF token with the session token
         return response
 
 

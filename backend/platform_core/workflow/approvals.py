@@ -4,7 +4,8 @@
   BUSINESS_RULE parameter publish). One PENDING request per (resource, revision, action) - DB unique index.
 * Route (DEC-048, PHASE_01): role + org-unit scope only. The decider needs :func:`decider_permission` of the
   request's action within the request's ``route_scope_unit`` (NULL route = GLOBAL scope), from a BUSINESS role
-  (technical/admin roles never qualify, DEC-003), and a fresh MFA step-up.
+  (technical/admin roles never qualify, DEC-003; single exception DEC-056: ``owner_admin`` holds
+  ``platform.workflow.approval.decide``), and a fresh MFA step-up. The audit row names the deciding role.
 * Never self-approved (DEC-032 D1): the requester - and for role assignments also the grantee - gets 403
   ``SELF_APPROVAL_FORBIDDEN``; a single-person deadlock stays PENDING until it expires. No auto-approval.
 * Decided exactly once: the decision locks the request row; a concurrent second decision finds it decided ->
@@ -195,8 +196,8 @@ def _lock(request_id: uuid.UUID) -> ApprovalRequest:
     return r
 
 
-def _check_decider(caller: Caller, r: ApprovalRequest) -> bool:
-    """Returns ``via_self_assignment``. Order: scope (404) -> SoD (403) -> MFA (401)."""
+def _check_decider(caller: Caller, r: ApprovalRequest) -> tuple[bool, str]:
+    """Returns ``(via_self_assignment, deciding role code)``. Order: scope (404) -> SoD (403) -> MFA (401)."""
     perm = decider_permission(r.action_id)
     require_permission(caller, perm)
     decision = decide(caller, perm, record_scope(r))
@@ -209,7 +210,7 @@ def _check_decider(caller: Caller, r: ApprovalRequest) -> bool:
     if caller.user_id in makers:
         raise SelfApprovalForbidden()
     require_step_up(caller, perm)
-    return decision.via_self_assignment
+    return decision.via_self_assignment, decision.grant.role_code if decision.grant else ""
 
 
 def _decide(
@@ -223,7 +224,7 @@ def _decide(
 ) -> Outcome:
     with unit_of_work(caller.context(request_ctx_id)) as uow:
         r = _lock(request_id)
-        via_self = _check_decider(caller, r)
+        via_self, via_role = _check_decider(caller, r)
         APPROVAL_MACHINE.assert_transition(r.status, status)
         if r.expires_at <= db_now():
             raise StateTransitionNotAllowed("the approval request has expired")
@@ -240,7 +241,8 @@ def _decide(
             r,
             before=before,
             reason=note,
-            scope={"via_self_assigned_role": via_self},
+            # DEC-056: every decision is audited with the deciding role
+            scope={"via_self_assigned_role": via_self, "via_role": via_role},
         )
         handler = _handler(r.resource_type)
         if handler is not None:
@@ -362,15 +364,20 @@ def bootstrap_self_approve(
 
 
 def withdraw(
-    caller: Caller, request_id: uuid.UUID, *, request_ctx_id: uuid.UUID | None = None
+    caller: Caller,
+    request_id: uuid.UUID,
+    *,
+    reason: str = "",
+    request_ctx_id: uuid.UUID | None = None,
 ) -> ApprovalRequest:
-    """``withdrawRequest``: only the requester (``platform.workflow.approval.request`` ○ own requests)."""
+    """``withdrawRequest``: only the requester (``platform.workflow.approval.request`` ○ own requests). The
+    reason is stored as the closing note and in the audit row (REV-0121)."""
     require_permission(caller, "platform.workflow.approval.request")
     with unit_of_work(caller.context(request_ctx_id)) as uow:
         r = _lock(request_id)
         if r.requested_by_id != caller.user_id:
             raise NotFound()
-        close(uow, r, ApprovalStatus.WITHDRAWN, by=caller.user_id)
+        close(uow, r, ApprovalStatus.WITHDRAWN, by=caller.user_id, note=reason.strip()[:500])
     return r
 
 

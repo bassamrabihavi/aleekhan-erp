@@ -24,6 +24,10 @@ export class ApiError extends Error {
   readonly code: string | null;
   readonly messageFa: string;
   readonly requestId: string | null;
+  /** DEC-xxx of a RULE_NOT_APPROVED answer (MOCK_UI_BINDING §2 rule 3). */
+  readonly decisionId: string | null;
+  /** Field paths + machine codes of a VALIDATION_FAILED answer (values are never echoed). */
+  readonly fieldErrors: readonly { field: string; code: string }[];
 
   constructor(init: {
     kind: ApiErrorKind;
@@ -31,6 +35,8 @@ export class ApiError extends Error {
     code?: string | null;
     messageFa?: string | null;
     requestId?: string | null;
+    decisionId?: string | null;
+    fieldErrors?: readonly { field: string; code: string }[];
   }) {
     super(init.code ?? init.kind);
     this.name = "ApiError";
@@ -39,6 +45,8 @@ export class ApiError extends Error {
     this.code = init.code ?? null;
     this.messageFa = init.messageFa ?? FALLBACK_MESSAGES[init.kind];
     this.requestId = init.requestId ?? null;
+    this.decisionId = init.decisionId ?? null;
+    this.fieldErrors = init.fieldErrors ?? [];
   }
 
   static fromProblem(p: Problem, headerRequestId: string | null): ApiError {
@@ -48,6 +56,17 @@ export class ApiError extends Error {
       code: p.code,
       messageFa: p.message_fa ?? null,
       requestId: p.request_id || headerRequestId,
+      decisionId: p.decision_id ?? null,
+      fieldErrors: (p.errors ?? []).flatMap((x) =>
+        typeof x === "object" && x !== null && typeof (x as Record<string, unknown>).code === "string"
+          ? [
+              {
+                field: typeof (x as Record<string, unknown>).field === "string" ? String((x as Record<string, unknown>).field) : "",
+                code: String((x as Record<string, unknown>).code),
+              },
+            ]
+          : [],
+      ),
     });
   }
 }

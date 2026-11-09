@@ -60,10 +60,16 @@ def test_login_context_sets_csrf_cookie_and_login_requires_csrf() -> None:
     assert body(r)["state"] == "ACTIVE" and body(r)["is_current"] is True
     cookie = r.cookies["aleekhan_session"]
     assert cookie["httponly"] and cookie["samesite"] == "Lax" and cookie["path"] == "/"
+    # REV-0123: the CSRF token is rotated on a successful login (no token fixation)
+    assert "csrftoken" in r.cookies
+    rotated = c.cookies["csrftoken"].value
+    assert rotated and rotated != token
     # an unsafe call of the authenticated session without the CSRF header is refused
     r = post(c, "/auth/logout")
     assert r.status_code == 403 and code(r) == "ACCESS_DENIED"
-    r = post(c, "/auth/logout", HTTP_X_CSRFTOKEN=token)
+    r = post(c, "/auth/logout", HTTP_X_CSRFTOKEN=token)  # the pre-login token no longer works
+    assert r.status_code == 403 and code(r) == "ACCESS_DENIED"
+    r = post(c, "/auth/logout", HTTP_X_CSRFTOKEN=rotated)
     assert r.status_code == 204
     oc.validate_response("/auth/logout", "post", r)
     assert r.cookies["aleekhan_session"].value == ""
@@ -126,6 +132,7 @@ def test_mfa_enrolment_login_verify_and_step_up() -> None:
     r = _login(c, u.username, PASSWORD)
     assert r.status_code == 200 and body(r)["state"] == "MFA_PENDING"
     old_cookie = c.cookies["aleekhan_session"].value
+    old_csrf = c.cookies["csrftoken"].value
     r = get(c, "/me")
     assert r.status_code == 401 and code(r) == "MFA_REQUIRED"
     r = post(c, "/auth/mfa/verify", {"code": totp.totp(secret, time.time() + totp.STEP_SECONDS)})
@@ -133,6 +140,7 @@ def test_mfa_enrolment_login_verify_and_step_up() -> None:
     oc.validate_response("/auth/mfa/verify", "post", r)
     assert body(r)["state"] == "ACTIVE" and body(r)["mfa_verified_at"]
     assert c.cookies["aleekhan_session"].value != old_cookie  # token rotated at MFA
+    assert c.cookies["csrftoken"].value != old_csrf  # REV-0123: CSRF token rotated at MFA verify too
     assert get(c, "/me").status_code == 200
     r = post(c, "/auth/mfa/step-up", {"code": "000000"})
     assert r.status_code == 401 and code(r) == "INVALID_CREDENTIALS"

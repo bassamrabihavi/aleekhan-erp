@@ -123,8 +123,8 @@ def effective_permissions(user_id: uuid.UUID, computed_at: datetime) -> dict[str
     grants: list[dict[str, Any]] = []
     for g in P.grants_for(user_id):
         perm = flags.get(g.action)
-        if perm is None or (perm.business_approval and g.role_kind != "BUSINESS"):
-            continue  # DEC-003: technical roles never carry business approval (also refused by the engine)
+        if perm is None or (perm.business_approval and not P.counts_for_business_approval(g)):
+            continue  # DEC-003 (+ DEC-056 owner decide): same rule as the engine
         grants.append(
             {
                 "action": g.action,
@@ -399,6 +399,7 @@ def parameter_value(pv: ParameterValue) -> dict[str, Any]:
         "published_by": sid(pv.published_by_id),
         "published_at": utc(pv.published_at),
         "approval_id": sid(pv.approval_request_id),
+        "row_version": pv.row_version,  # 0.6.1-draft: If-Match of publishParameterValue
     }
 
 

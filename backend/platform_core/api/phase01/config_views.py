@@ -144,7 +144,8 @@ class PublishValueView(Phase01View):
 
     def post(self, request: Request, parameter_key: str, value_revision_id: uuid.UUID) -> Response:
         expected = if_match(self)
-        body_of(request, "OptionalNoteRequest")
+        data = body_of(request, "OptionalNoteRequest")
+        note = data.get("note") or ""
 
         def run(caller: Caller, rid: uuid.UUID) -> StoredResponse:
             def scope(pv: ParameterValue) -> None:
@@ -153,7 +154,7 @@ class PublishValueView(Phase01View):
                 in_scope(caller, PUBLISH, NO_UNIT)
 
             lock_checked(ParameterValue, value_revision_id, scope=scope, expected=expected)
-            pv = params.publish(caller, value_revision_id, request_id=rid)
+            pv = params.publish(caller, value_revision_id, note=note, request_id=rid)
             pv = ParameterValue.objects.select_related("definition").get(pk=pv.pk)
             return stored(200, S.parameter_value(pv), etag_version=pv.row_version)
 

@@ -295,8 +295,8 @@ def test_roles_and_assignments_with_dec049_and_dec032() -> None:
         "/workflow/approvals/{approval_id}/approve",
         "post",
         403,
-        "ACCESS_DENIED",
-    )  # fmt: skip  - owner_admin is TECHNICAL: no business approval (DEC-003)
+        "SELF_APPROVAL_FORBIDDEN",
+    )  # fmt: skip  - DEC-056: the owner holds decide, but never decides his own request (DEC-032)
     decider = with_roles("workflow_approver")
     dc = session_client(decider)
     inbox = ok(get(dc, "/workflow/approvals", {"inbox": "to_decide"}), "/workflow/approvals", "get")
@@ -348,9 +348,10 @@ def test_dec055_bootstrap_self_approval_over_http() -> None:
     )
     assert p["self_assignment"] is True and p["status"] == "PENDING_APPROVAL"
     path = "/workflow/approvals/{approval_id}/bootstrap-approve"
-    # owner_admin holds no platform.workflow.approval.read (matrix v1.0): a fresh request has row_version 1
-    assert get(c, f"/workflow/approvals/{p['approval_id']}").status_code == 403
-    v = 1
+    # DEC-056 (matrix v1.1): the owner reads his own request; If-Match comes from its ETag
+    r = get(c, f"/workflow/approvals/{p['approval_id']}")
+    ok(r, "/workflow/approvals/{approval_id}", "get")
+    v = etag_version(r)
     refused(
         post(c, f"/workflow/approvals/{p['approval_id']}/bootstrap-approve", {"reason": "x"}, **if_match(v)),
         path,

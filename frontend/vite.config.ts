@@ -13,7 +13,9 @@ export default defineConfig({
     port: 5173,
     strictPort: true,
     proxy: {
-      "/api": { target: backend, changeOrigin: true },
+      // changeOrigin false: Django sees the browser's Host (127.0.0.1:5173), so the CSRF Origin check of the
+      // PHASE_01 session writes matches the page origin (same as behind the production reverse proxy).
+      "/api": { target: backend, changeOrigin: false },
     },
   },
   preview: { host: "127.0.0.1", port: 4173, strictPort: true },

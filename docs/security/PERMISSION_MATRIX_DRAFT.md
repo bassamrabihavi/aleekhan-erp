@@ -1,6 +1,21 @@
-# Permission matrix — PHASE_01 platform actions (APPROVED v1.0)
+# Permission matrix — PHASE_01 platform actions (APPROVED v1.1)
 
-**Status: APPROVED v1.0 — DEC-049 (employer بسام ربیهاوی, 2026-11-04). In force from PHASE_01 / 01.2.**
+**Status: APPROVED v1.1 — DEC-049 (v1.0, employer بسام ربیهاوی, 2026-11-04) + DEC-056 (v1.1, 2026-11-06).
+v1.0 in force from PHASE_01 / 01.2; v1.1 from PHASE_01 / 01.5 (migration `platform_core.0014_dec056_owner_approval_rights`).**
+
+**Change note v1.1 (DEC-056, APPROVED 2026-11-06).** Two cells of the `owner_admin` (OA) column change from `—` to
+`●`: `platform.workflow.approval.read` (the owner reads every approval request; his assignment is GLOBAL) and
+`platform.workflow.approval.decide` (the owner decides approval requests directly, without assigning himself a
+separate approver role). Principle 2 gets exactly one explicit exception (the pair `owner_admin` +
+`platform.workflow.approval.decide`), in the engine and in the DB guard `ck_role_technical_no_business_approval`.
+Unchanged: maker ≠ checker (principle 4) — the owner never decides his own request, except the one-time
+DEC-055 bootstrap approval; `it_ops` and `security_auditor` hold no business approval; `document.approve` and
+`config.parameter.publish` are not granted to the owner. Every owner decision is audited with the deciding role
+(`scope.via_role`). Consequence (DEC-032 read literally): `owner_admin` now holds a business-approval permission,
+so an in-app grant of `owner_admin` to another person waits PENDING_APPROVAL for a second eligible person; the
+console bootstrap of the first owner (DEC-049 item 4 / DEC-054 C) is not an in-app grant and is exempt. Only
+`owner_admin` carries `matrix_version = 1.1`; the other ten roles are unchanged and keep `1.0`.
+
 Approved content = the draft v0.1 below without a change of any cell; the employer's answers are recorded in
 section 5. Seeded by migration `platform_core.0010_seed_phase01_catalogue` (roles carry `matrix_version = 1.0`);
 the seed is compared cell by cell with this file by
@@ -19,6 +34,8 @@ its own xx.1 and the matrix version increases.
    (+ field) on every request; hiding a button is not a control.
 2. **Admin ≠ business approval (DEC-003).** Roles of kind TECHNICAL never contain a permission flagged
    `business_approval` (rows marked **BA**). The database refuses such a role (DATA_TABLE: Role CHECK).
+   **Single exception (DEC-056, v1.1):** `owner_admin` holds `platform.workflow.approval.decide`; maker ≠ checker
+   (principle 4) still applies to the owner.
 3. **The owner may hold business roles only explicitly.** The owner/admin may assign himself a BUSINESS role;
    the assignment is flagged `self_assignment=true` and audited (DEC-003). DEC-032 (APPROVED): an assignment
    of a role holding a **BA** permission waits `PENDING_APPROVAL` until a second eligible person approves it
@@ -78,9 +95,9 @@ APPROVED since 2026-11-04, so no row is blocked in v1.0.)
 | platform.workflow.task.assign | reassignTask | | — | — | — | — | — | ● | — | — | — | — | — |
 | platform.workflow.task.verify | verifyCloseTask | SoD (≠ completer) | — | — | — | — | — | ● | — | — | — | — | — |
 | platform.workflow.task.cancel | cancelTask | | — | — | — | — | ○ (created by me) | ● | — | — | — | — | — |
-| platform.workflow.approval.read | listApprovals, getApproval, getWorkflowInstance | | — | — | ● | ● | ○ | ● | ○ | ● | ● | ● | — |
+| platform.workflow.approval.read | listApprovals, getApproval, getWorkflowInstance | | ● | — | ● | ● | ○ | ● | ○ | ● | ● | ● | — |
 | platform.workflow.approval.request | withdrawRequest | | — | — | — | — | ○ | ○ | ○ | ○ | ○ | ○ | — |
-| platform.workflow.approval.decide | approveRequest, rejectRequest | MFA, BA, SoD | — | — | — | — | — | — | — | — | — | ● | — |
+| platform.workflow.approval.decide | approveRequest, rejectRequest | MFA, BA, SoD | ● | — | — | — | — | — | — | — | — | ● | — |
 | platform.workflow.definition.read | listWorkflowDefinitions, getWorkflowDefinition | | ● | — | ● | — | — | ● | — | — | — | ● | — |
 | platform.workflow.instance.cancel | cancelWorkflowInstance | MFA | — | — | — | — | — | ● | — | — | — | — | — |
 | platform.audit.read | listAuditEvents, getAuditEvent | MFA | ● | — | ● | — | — | — | — | — | — | — | — |
@@ -128,5 +145,8 @@ audit events for anyone (append-only, DB triggers since 00.2).
 5. MFA step-up is required on every MFA row, also inside the factory network.
 
 ## 6. Change control
+- v1.0 (DEC-049, 2026-11-04): approved draft v0.1 unchanged.
+- v1.1 (DEC-056, 2026-11-06): owner_admin `approval.read` ● and `approval.decide` ● (change note at the top).
+
 A change to this matrix = new matrix version + reviewed commit + DEC entry; roles keep `matrix_version`. Seeds
 for dev/test use synthetic users only (`محیط آزمایشی — داده ساختگی`).

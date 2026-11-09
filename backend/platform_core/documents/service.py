@@ -49,6 +49,7 @@ from platform_core.engine.errors import (
     NotFound,
     PayloadTooLarge,
     SelfApprovalForbidden,
+    StateTransitionNotAllowed,
     ValidationFailed,
 )
 from platform_core.engine.state import StateMachine
@@ -332,8 +333,12 @@ def upload_revision(
     filename: str,
     data: bytes,
     change_note: str = "",
+    expected_parent_id: uuid.UUID | None = None,
     request_id: uuid.UUID | None = None,
 ) -> DocumentRevision:
+    """``expected_parent_id`` (optional lost-update guard): the latest revision the client based this upload
+    on. Checked after the document row lock, so of two concurrent uploads on the same parent exactly one wins;
+    the other gets 409 ``STATE_TRANSITION_NOT_ALLOWED`` (REV-0120)."""
     import hashlib
 
     action = "platform.document.upload"
@@ -358,6 +363,8 @@ def upload_revision(
         with unit_of_work(caller.context(request_id)) as uow:
             doc = _lock_doc(document_id)
             last = DocumentRevision.objects.filter(document=doc).order_by("-revision_no").first()
+            if expected_parent_id is not None and (last is None or last.pk != expected_parent_id):
+                raise StateTransitionNotAllowed("parent_revision_id is not the latest revision")
             obj = StoredObject.objects.create(
                 storage_key=key,
                 volume=storage.volume_name(),

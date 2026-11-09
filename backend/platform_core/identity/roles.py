@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
+from importlib import import_module
 from typing import Final
 
 from django.db.models import Q
@@ -88,16 +89,23 @@ def _reason(text: str) -> str:
 
 
 def approved_matrix_grants() -> dict[str, frozenset[tuple[str, str, str]]]:
-    """Role code -> set of (action, grant_mode, max_sensitivity) of the approved matrix v1.0 (frozen seed)."""
-    from importlib import import_module
-
+    """Role code -> set of (action, grant_mode, max_sensitivity) of the approved matrix v1.1: the frozen v1.0
+    seed (0010) plus the cells added by DEC-056 (0014)."""
     seed = import_module("platform_core.migrations.0010_seed_phase01_catalogue")
+    v11 = import_module("platform_core.migrations.0014_dec056_owner_approval_rights")
     out: dict[str, set[tuple[str, str, str]]] = {code: set() for code in seed.ROLES}
-    for action, cells in seed.GRANTS.items():
-        for code, cell in cells.items():
-            mode, max_sens = cell if isinstance(cell, tuple) else (cell, "")
-            out[code].add((action, mode, max_sens))
+    for grants in (seed.GRANTS, v11.ADDED_GRANTS):
+        for action, cells in grants.items():
+            for code, cell in cells.items():
+                mode, max_sens = cell if isinstance(cell, tuple) else (cell, "")
+                out[code].add((action, mode, max_sens))
     return {k: frozenset(v) for k, v in out.items()}
+
+
+def current_matrix_version() -> str:
+    """Matrix version recorded on a role activated now (v1.1 since DEC-056)."""
+    v: str = import_module("platform_core.migrations.0014_dec056_owner_approval_rights").MATRIX_VERSION
+    return v
 
 
 def role_holds_business_approval(role_id: uuid.UUID) -> bool:
@@ -201,7 +209,7 @@ def activate_role(
             )
         before: dict[str, object] = {"status": role.status}
         Role.objects.filter(pk=role.pk).update(
-            status=RoleStatus.ACTIVE, matrix_version="1.0", updated_by_id=caller.user_id
+            status=RoleStatus.ACTIVE, matrix_version=current_matrix_version(), updated_by_id=caller.user_id
         )
         role.refresh_from_db()
         _audit_role(uow, "activate", role, before=before, reason=text)

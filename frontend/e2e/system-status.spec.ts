@@ -11,7 +11,7 @@ import { BACKEND_URL, SCREENSHOT_DIR, UUID_RE, VIEWPORTS } from "./env";
 const READY_PATH = "**/api/v1/health/ready";
 
 async function openReady(page: Page): Promise<void> {
-  await page.goto("/");
+  await page.goto("/#/status");
   await expect(page.getByTestId("ready-chip")).toBeVisible();
   await page.evaluate(() => document.fonts.ready);
 }
@@ -183,7 +183,7 @@ test.describe("system status page - [simulated failure] states (network intercep
       realRequestId = resp.headers()["x-request-id"] ?? "";
       await route.fulfill({ response: resp });
     });
-    await page.goto("/");
+    await page.goto("/#/status");
     const err = page.getByTestId("state-error").first();
     await expect(err).toBeVisible();
     await expect(err.getByTestId("error-code")).toHaveText("NOT_FOUND");
@@ -246,7 +246,7 @@ test.describe("system status page - backend stopped", () => {
     const health = await page.request.get(`${BACKEND_URL}/api/v1/health/live`).catch(() => null);
     expect(health, "backend must really be down for this test").toBeNull();
 
-    await page.goto("/");
+    await page.goto("/#/status");
     const err = page.getByTestId("state-error").first();
     await expect(err).toBeVisible();
     await expect(err.getByTestId("error-code")).toHaveText("NETWORK");

@@ -48,6 +48,7 @@ echo "E2E_SCREENSHOT_DIR set: $([ -n "${E2E_SCREENSHOT_DIR:-}" ] && echo yes || 
 (cd "$HERE" && node scripts/browser-preflight.mjs) || exit 2
 
 cleanup() {
+  [ -n "${E2E_STORAGE:-}" ] && rm -rf "$E2E_STORAGE"
   echo "== drop throw-away database $DB"
   "$PSQL" -d postgres -v ON_ERROR_STOP=1 -qc "DROP DATABASE IF EXISTS $DB WITH (FORCE)" >/dev/null || echo "WARN: drop failed" >&2
 }
@@ -68,6 +69,21 @@ export E2E_EXPECT_COMMIT="${ALEEKHAN_BUILD_COMMIT:0:12}"
 # The suite loads the page ~20 times within a minute from one IP; raise the dev limits for this run only.
 export ALEEKHAN_RATE_HEALTH="${ALEEKHAN_RATE_HEALTH:-2000/min}"
 export ALEEKHAN_RATE_ANON="${ALEEKHAN_RATE_ANON:-2000/min}"
+export ALEEKHAN_RATE_PRINCIPAL="${ALEEKHAN_RATE_PRINCIPAL:-5000/min}"
+export ALEEKHAN_RATE_LOGIN_IP="${ALEEKHAN_RATE_LOGIN_IP:-200/min}"
+# 01.5: loopback counts as the factory network for this local run only (DEC-052: real CIDRs live in server
+# config, never in Git). Documents are written to a throw-away directory outside the repo.
+export ALEEKHAN_INTERNAL_CIDRS="${ALEEKHAN_INTERNAL_CIDRS:-127.0.0.1/32}"
+# Ephemeral data key for TOTP seeds and stored files of this throw-away run (random per run, never printed).
+ALEEKHAN_DATA_KEYS="e2e:$("$E2E_PYTHON" -c 'import base64, secrets; print(base64.urlsafe_b64encode(secrets.token_bytes(32)).decode().rstrip("="))')"
+export ALEEKHAN_DATA_KEYS
+export ALEEKHAN_DATA_KEY_CURRENT=e2e
+E2E_STORAGE="$(mktemp -d)"
+if command -v cygpath >/dev/null 2>&1; then
+  export ALEEKHAN_DOCUMENT_STORAGE_ROOT="$(cygpath -m "$E2E_STORAGE")"  # Windows Python needs a native path
+else
+  export ALEEKHAN_DOCUMENT_STORAGE_ROOT="$E2E_STORAGE"
+fi
 
 echo "== migrate (ALEEKHAN_ENV=dev, db=$DB)"
 (cd "$ROOT/backend" && "$E2E_PYTHON" manage.py migrate --noinput) || exit 1

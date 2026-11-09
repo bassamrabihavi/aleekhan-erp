@@ -122,8 +122,9 @@ def test_ba_role_waits_for_a_third_person() -> None:
         "role_assignment",
         "PENDING",
     )
-    # the owner (TECHNICAL) cannot decide; the grantee cannot decide; the grantor cannot decide
-    with pytest.raises(AccessDenied):
+    # the owner holds decide since DEC-056 but is the requester (DEC-032 maker != checker); the grantee
+    # cannot decide; the grantor cannot decide
+    with pytest.raises(SelfApprovalForbidden):
         approvals.approve(owner, req.pk)
     give_role(target, "workflow_approver")
     with pytest.raises(SelfApprovalForbidden):

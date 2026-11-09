@@ -178,3 +178,30 @@ Review verdicts are in `reports/phase-00/step-N/REVIEW.md`. No version number is
 - Fixed: `mfa.reset_factors` wrote no outbox event for a user without factors/sessions (500); REV-0118 (test
   assertion that was always true for the download branch).
 - No migration.
+
+### 01.5 UI
+- Added (frontend): PHASE_01 shell bound to the real API - login ceremony (password -> MFA code -> forced
+  password change -> TOTP enrolment with 10 recovery codes shown once), session-ended handling (401 -> login
+  with notice), logout, role-aware navigation from `GET /me/permissions` (cosmetic; server re-checks), MFA
+  step-up dialog on `401 MFA_REQUIRED` (one retry with a new Idempotency-Key), hash router; pages 46 (users with
+  server-generated one-time password shown once, lock/unlock, reset password/MFA, sessions, effective
+  permissions; roles; role assignments with explicit self-assignment and DEC-032 pending notice), org tree
+  (WAI-ARIA tree, keyboard, create unit / unit-head position / holder from now on only), 39 (approval inbox,
+  approve / reject / withdraw with reason, DEC-055 bootstrap approval; task inbox start / complete / block /
+  unblock), 40 (documents, quarantine upload with parent check, download only CLEAN, submit / approve / reject),
+  42 (parameters by classification, OWNER_POLICY one step, RULE_NOT_APPROVED shown with its DEC id), 36 (health
+  counters, audit integrity, job definitions, safe cancel; protected jobs not cancellable); my sessions.
+  Loading / error (code + request id) / forbidden / empty / stale states on every query; RTL; responsive
+  1440/1180/768/390. Vitest unit tests (`src/phase01.test.tsx`) and Playwright E2E against the real backend
+  (`e2e/phase01.spec.ts`, console-bootstrapped synthetic owner in `e2e/global-setup.ts`).
+- DEC-056 (APPROVED 2026-11-06): permission matrix v1.1 - `owner_admin` holds `platform.workflow.approval.read`
+  and `platform.workflow.approval.decide`; engine + DB guard exception for exactly that pair; maker != checker
+  unchanged; owner decisions audited with `scope.via_role`. Migration `0014_dec056_owner_approval_rights`
+  (reversible; also fixes `requires_second_approval` at grant time and exempts the console bootstrap of the
+  owner from the DEC-032 second approval).
+- Fixed: REV-0120 (upload parent check under the document row lock), REV-0121 (withdraw reason stored in the
+  closing note and audit), REV-0122 (publish note -> audit reason), REV-0123 (CSRF token rotated on login and
+  MFA verify).
+- Contract `0.6.1-draft`: optional `ParameterValueRevision.row_version` (If-Match of `publishParameterValue`).
+- Dev: Vite proxy keeps the browser Host (`changeOrigin: false`) so the CSRF Origin check matches; `/` is the
+  login / dashboard, the PHASE_00 smoke page moved to `#/status`.

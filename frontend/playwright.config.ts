@@ -42,6 +42,8 @@ const django = {
 
 export default defineConfig({
   testDir: "./e2e",
+  // 01.5: console bootstrap of the synthetic owner + synthetic job runs (skipped in backend-down mode)
+  globalSetup: "./e2e/global-setup.ts",
   outputDir: process.env.E2E_OUTPUT_DIR ?? "./test-results",
   fullyParallel: false,
   workers: 1,

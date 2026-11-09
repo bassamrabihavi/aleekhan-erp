@@ -326,11 +326,11 @@ class WithdrawRequestView(Phase01View):
 
     def post(self, request: Request, approval_id: uuid.UUID) -> Response:
         expected = if_match(self)
-        body_of(request, "ReasonRequest")
+        data = body_of(request, "ReasonRequest")
 
         def run(caller: Caller, rid: uuid.UUID) -> StoredResponse:
             lock_checked(ApprovalRequest, approval_id, scope=_own_request(caller), expected=expected)
-            r = approvals.withdraw(caller, approval_id, request_ctx_id=rid)
+            r = approvals.withdraw(caller, approval_id, reason=data["reason"], request_ctx_id=rid)
             r.refresh_from_db()
             return stored(200, S.approval(r), etag_version=r.row_version)
 

@@ -47,6 +47,7 @@ export function defaultRoutes(): Record<string, Handler> {
     "/api/v1/health/live": () => json({ status: "ok" }),
     "/api/v1/version": () => json(VERSION_BODY),
     "/api/v1/access-gate/check": () => problem(UNAUTH_PROBLEM, 401),
+    "/api/v1/auth/session": () => problem(UNAUTH_PROBLEM, 401),
   };
 }
 

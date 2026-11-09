@@ -1,6 +1,6 @@
 {
- "_note": "Golden permission decisions at action level (PHASE_01 / 01.3), derived cell by cell from docs/security/PERMISSION_MATRIX_DRAFT.md section 3 (APPROVED v1.0, DEC-049): true = the role holds the action (any cell other than '—'). Record scope (●/○/own unit, sensitivity) is tested separately. Regenerate only with a new approved matrix version.",
- "matrix_version": "1.0",
+ "_note": "Golden permission decisions at action level (PHASE_01 / 01.3), derived cell by cell from docs/security/PERMISSION_MATRIX_DRAFT.md section 3 (APPROVED v1.1, DEC-049 + DEC-056: owner_admin approval.read and approval.decide): true = the role holds the action (any cell other than '—'). Record scope (●/○/own unit, sensitivity) is tested separately. Regenerate only with a new approved matrix version.",
+ "matrix_version": "1.1",
  "roles": [
   "owner_admin",
   "it_ops",
@@ -289,7 +289,7 @@
    "operator_terminal": false
   },
   "platform.workflow.approval.read": {
-   "owner_admin": false,
+   "owner_admin": true,
    "it_ops": false,
    "security_auditor": true,
    "management_viewer": true,
@@ -315,7 +315,7 @@
    "operator_terminal": false
   },
   "platform.workflow.approval.decide": {
-   "owner_admin": false,
+   "owner_admin": true,
    "it_ops": false,
    "security_auditor": false,
    "management_viewer": false,

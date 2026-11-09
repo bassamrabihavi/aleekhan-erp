@@ -34,3 +34,12 @@ evidence); for acceptance evidence pass the report folder explicitly, e.g.
 
 Tests named `[simulated failure] …` intercept network traffic to produce error/stale states; every other E2E
 test reads real backend responses. The `@backend-down` test runs with Django stopped (real failure).
+
+## PHASE_01 (01.5)
+- `/` = login / role-aware dashboard; the PHASE_00 smoke page is `#/status` (public). Hash routing, no router
+  dependency.
+- `scripts/e2e.sh` additionally: bootstraps a synthetic owner through `manage.py bootstrap_owner --password-stdin`
+  (`e2e/global-setup.ts`), seeds synthetic job runs, sets an ephemeral random `ALEEKHAN_DATA_KEYS` (TOTP seeds,
+  stored files; never printed), a temporary `ALEEKHAN_DOCUMENT_STORAGE_ROOT` outside the repo, and
+  `ALEEKHAN_INTERNAL_CIDRS=127.0.0.1/32` for this local run only. The suite computes TOTP codes (RFC 6238) itself.
+- The Vite proxy keeps the browser Host (`changeOrigin: false`) so Django's CSRF Origin check matches.
