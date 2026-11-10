@@ -80,7 +80,7 @@ Test counts (S8, from the logs):
 | 01.5 | pages, Farsi RTL responsive, loading/error/empty/stale, keyboard, 4-size screenshots, E2E | `ef4902a` | `step-5/REVIEW.md` PASS | DONE; employer UAT T-003 open (section 4) |
 | 01.6 | related sources/events only; staging, retries, backoff, compensation, freshness, conflict queue; no direct change of another module | `7c1a93d` | `step-6/REVIEW.md` PASS | DONE |
 | 01.7 | secret scan, dependency scan, privacy/permission tests, perf, backup/rollback, job monitoring; checklist signed | `bccd109` | `step-7/REVIEW.md` PASS | DONE except the checklist signature (EMPLOYER, G9) |
-| 01.8 | report template, commit hash, migrations, test results, UI snapshots, trace map, issues; STOP | PENDING (orchestrator) | `step-8/REVIEW.md` (pending) | IN_PROGRESS |
+| 01.8 | report template, commit hash, migrations, test results, UI snapshots, trace map, issues; STOP | 7a360eb | `step-8/REVIEW.md` | PASS |
 
 ## 3. Cross-cutting requirements
 
@@ -107,9 +107,9 @@ Test counts (S8, from the logs):
 | G8 | No mandatory test FAIL / unexplained SKIP | S8: 1 skip with reason (ClamAV real-scanner contract test, clamd not configured on work-windows); 7 perf tests deselected in the unit stage and run in the perf stage; informational dev-venv pip-audit not performed (network), not a gate | DONE |
 | G9 | Migrations reversible or approved compensation plan | S8 `05_migration.log` (round trip), rollback rehearsal (S8 `12_ops.log`): down to 0010 with data; reverse of 0011 refused by design while job runs exist -> restore from backup (`docs/ops/ROLLBACK.md` §3a) | DONE (the refusal is documented, not a compensation plan the employer approved: **EMPLOYER** acknowledges at the Gate) |
 | G10 | Permission Matrix approved | `docs/security/PERMISSION_MATRIX_DRAFT.md` APPROVED v1.3 (DEC-049 + DEC-056 + extensions 2026-11-10) | DONE |
-| G11 | CI report linked to commit | S8 `summary.md` (tree ids per directory; `commit.txt` filled by the orchestrator after the commit) | DONE when the orchestrator fills `commit.txt` and verifies the tree ids |
+| G11 | CI report linked to commit | S8 `summary.md` (tree ids per directory; `commit.txt` filled by the orchestrator after the commit) | DONE (`commit.txt` = 7a360eb; all 6 tree ids match, verified by orchestrator and reviewer) |
 | G12 | Real, non-demo UI | every PHASE_01 page bound to the real API; E2E against real Django + PostgreSQL; synthetic-data banner on synthetic data | DONE |
-| G13 | Whole scope traceable | this file | DONE when 01.8 is reviewed |
+| G13 | Whole scope traceable | this file | DONE (01.8 PASS, `step-8/REVIEW.md`) |
 | G14 | Employer and auditor acceptance; security checklist signed (01.7 text) | `docs/security/PHASE_01_SECURITY_CHECKLIST.md` sign-off rows blank on purpose | **EMPLOYER** |
 
 Other items that need the employer at the Gate (one at a time):
