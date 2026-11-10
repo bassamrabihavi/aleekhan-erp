@@ -80,8 +80,8 @@ def test_owner_discard_releases_the_aggregate_and_is_audited_with_reason() -> No
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize("role", ["it_ops", "security_auditor", "employee", None])
-def test_only_the_owner_may_discard_or_replay(role: str | None) -> None:
+@pytest.mark.parametrize("role", ["security_auditor", "employee", "management_viewer", None])
+def test_only_the_owner_or_it_may_replay_and_only_the_owner_may_discard(role: str | None) -> None:
     head, _tail = _poisoned(f"agg-deny-{role}")
     u = with_roles(role) if role else person()
     for action in ("discard", "replay"):
@@ -92,6 +92,64 @@ def test_only_the_owner_may_discard_or_replay(role: str | None) -> None:
     head.refresh_from_db()
     assert head.delivery_status == S.DEAD_LETTER
     assert not AuditEvent.objects.filter(resource_id=str(head.event_id)).exists()
+
+
+# ------------------------------------------------------- REV-0133 (employer decision 2026-11-10)
+@pytest.mark.django_db
+def test_it_ops_may_replay_a_dead_letter_and_it_is_audited() -> None:
+    head, _tail = _poisoned("agg-it-replay")
+    it = with_roles("it_ops")
+    status = dead_letters.handle(
+        action="replay", username=it.username, event_id=head.event_id, reason="علت رفع شد (آزمون)"
+    )
+    assert status == S.PENDING
+    head.refresh_from_db()
+    assert head.delivery_status == S.PENDING
+    audit = AuditEvent.objects.get(action="platform.outbox.replay", resource_id=str(head.event_id))
+    assert audit.reason == "علت رفع شد (آزمون)" and audit.actor_type == "USER"
+    assert str(audit.actor_id) == str(it.pk)
+
+
+@pytest.mark.django_db
+def test_it_ops_may_not_discard_a_dead_letter() -> None:
+    head, _tail = _poisoned("agg-it-discard")
+    it = with_roles("it_ops")
+    with pytest.raises(AccessDenied):
+        dead_letters.handle(action="discard", username=it.username, event_id=head.event_id, reason="ساختگی")
+    head.refresh_from_db()
+    assert head.delivery_status == S.DEAD_LETTER
+    assert not AuditEvent.objects.filter(resource_id=str(head.event_id)).exists()
+
+
+@pytest.mark.django_db
+def test_owner_may_replay_a_dead_letter_and_it_is_audited() -> None:
+    head, _tail = _poisoned("agg-owner-replay")
+    status = dead_letters.handle(
+        action="replay", username=_owner_name(), event_id=head.event_id, reason="بازپخش مالک (آزمون)"
+    )
+    assert status == S.PENDING
+    assert AuditEvent.objects.filter(
+        action="platform.outbox.replay", resource_id=str(head.event_id), reason="بازپخش مالک (آزمون)"
+    ).exists()
+
+
+@pytest.mark.django_db
+def test_disabled_or_revoked_it_ops_cannot_replay() -> None:
+    from platform_core.identity.models import RoleAssignment, User
+
+    head, _tail = _poisoned("agg-it-disabled")
+    it = with_roles("it_ops")
+    User.objects.filter(pk=it.pk).update(status="DISABLED")
+    with pytest.raises(AccessDenied):
+        dead_letters.handle(action="replay", username=it.username, event_id=head.event_id, reason="ساختگی")
+    it2 = with_roles("it_ops")
+    RoleAssignment.objects.filter(user_id=it2.pk).update(
+        status="REVOKED", revoked_at=datetime.now(UTC), revoke_reason="لغو ساختگی"
+    )
+    with pytest.raises(AccessDenied):
+        dead_letters.handle(action="replay", username=it2.username, event_id=head.event_id, reason="ساختگی")
+    head.refresh_from_db()
+    assert head.delivery_status == S.DEAD_LETTER
 
 
 @pytest.mark.django_db
@@ -140,7 +198,7 @@ def test_console_command_lists_and_discards(capsys: Any) -> None:
             "outbox_dead_letter", "discard", "--owner", _owner_name(), "--event-id", str(head.event_id)
         )
     it = with_roles("it_ops").username
-    with pytest.raises(CommandError, match="ACCESS_DENIED"):
+    with pytest.raises(CommandError, match="ACCESS_DENIED"):  # REV-0133: IT replays, never discards
         call_command(
             "outbox_dead_letter",
             "discard",

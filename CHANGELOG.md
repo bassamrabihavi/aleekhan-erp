@@ -252,3 +252,22 @@ Review verdicts are in `reports/phase-00/step-N/REVIEW.md`. No version number is
 - Fixed: REV-0129 (owner-only discard of dead letters, console, audited, reason required), REV-0130
   (`blocked_aggregates` = aggregates with events waiting behind a dead letter), REV-0131 (page 36 in Farsi), the
   Parameters page hides the publish button for the owner on TECHNICAL values.
+
+### 01.8 Report & Review (this step; commit SHA added by the orchestrator when committed)
+- Phase report set: `reports/phase-01/PHASE_REPORT.md` + `.json`, `reports/phase-01/TRACE_MAP.md`,
+  `reports/phase-01/step-8/REPORT.md` + `.json`; full local CI evidence on the final tree in
+  `reports/phase-01/step-8/logs/ci/`; all PHASE_01 screenshots regenerated from the final tree at
+  1440/1180/768/390 in `reports/phase-01/step-8/screenshots/` (REV-0127, REV-0135).
+- Fixed REV-0132 [P2]: direct unit tests of `authz.policy.request_cache`
+  (`tests/test_authz_request_cache.py`: nothing cached outside the block, memo gone after the block and after an
+  exception, nested blocks, two users in one block, a revoked / new grant seen by the next request).
+- REV-0133 (employer decision 2026-11-10): `manage.py outbox_dead_letter replay` is allowed for an ACTIVE
+  `owner_admin` or `it_ops` holder; `discard` stays `owner_admin` only; both need a reason and are audited
+  (`ops/dead_letters.ALLOWED_ROLES`; `--user`, `--owner` kept as alias); tests for both roles and refusal of
+  others; docs (integration README, JOB_MONITORING, STATE_TRANSITIONS, security checklist 4.5).
+- REV-0134: `tools/ci_local.sh` logs start with the stage's exact commands and end with `# exit code: N`;
+  `summary.md` has an exit-code column, the worktree state and the git tree id of every code directory as
+  tested. The contract stage validates `docs/api/openapi-draft.yaml`; the perf stage runs the PHASE_01 perf
+  suite too; the ops stage runs the rollback rehearsal; `makemigrations --check` uses `aleekhan.settings_test`;
+  E2E artefact folders can be redirected (`CI_E2E_*`). `docs/ops/CI.md` updated.
+- `docs/db/ERD.md`: migration rows 0014-0018.

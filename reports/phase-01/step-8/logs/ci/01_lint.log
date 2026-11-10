@@ -1,0 +1,11 @@
+# stage lint | 2026-11-10T18:08:41Z | machine work-windows | MINGW64_NT-10.0-22000
+# command (bash tools/ci_local.sh <out> lint runs this function):
+#   stage_lint () 
+#   { 
+#       "$PYTHON" -m ruff --version && "$PYTHON" -m ruff check . && "$PYTHON" -m ruff format --check .
+#   }
+# ---- output
+ruff 0.17.1
+All checks passed!
+290 files already formatted
+# exit code: 0

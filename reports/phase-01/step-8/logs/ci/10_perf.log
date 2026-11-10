@@ -1,0 +1,137 @@
+# stage perf | 2026-11-10T18:20:36Z | machine work-windows | MINGW64_NT-10.0-22000
+# command (bash tools/ci_local.sh <out> perf runs this function):
+#   stage_perf () 
+#   { 
+#       need_pg || return $?;
+#       ( cd backend && ALEEKHAN_PERF_OUT="$OUT/perf.json" "$PYTHON" -m pytest -q -m perf platform_core/tests/test_perf_smoke.py && cat "$OUT/perf.json" && ALEEKHAN_PERF_OUT="$OUT/perf_phase01.json" "$PYTHON" -m pytest -q -m perf platform_core/tests/test_perf_phase01.py && cat "$OUT/perf_phase01.json" )
+#   }
+# ---- output
+.                                                                        [100%]
+1 passed in 19.86s
+{
+  "iterations": 200,
+  "warmup": 10,
+  "p95_budget_ms": 250.0,
+  "budget_basis": "TECHNICAL_DEFAULT (gross-regression guard, in-process test client, not an SLA)",
+  "results": {
+    "health_live": {
+      "n": 200.0,
+      "p50_ms": 0.567,
+      "p95_ms": 0.76,
+      "max_ms": 1.015
+    },
+    "health_ready": {
+      "n": 200.0,
+      "p50_ms": 0.93,
+      "p95_ms": 1.24,
+      "max_ms": 1.79
+    },
+    "version": {
+      "n": 200.0,
+      "p50_ms": 0.631,
+      "p95_ms": 0.987,
+      "max_ms": 1.616
+    },
+    "integration_freshness_page25": {
+      "n": 200.0,
+      "p50_ms": 3.345,
+      "p95_ms": 3.853,
+      "max_ms": 4.316
+    }
+  }
+}......                                                                   [100%]
+6 passed in 97.76s (0:01:37)
+{
+  "inboxes": {
+    "machine": "work-windows",
+    "python": "3.12.10",
+    "postgres_server_version": 170009,
+    "budget_basis": "TECHNICAL_DEFAULT (gross-regression guard, in-process, synthetic data, not an SLA)",
+    "rows": 1000,
+    "p95_budget_ms": 5000.0,
+    "results": {
+      "approvals_to_decide_1000_scanned": {
+        "n": 15.0,
+        "p50_ms": 1987.9,
+        "p95_ms": 2638.0,
+        "max_ms": 2779.4
+      },
+      "tasks_mine_1000_scanned": {
+        "n": 15.0,
+        "p50_ms": 1506.2,
+        "p95_ms": 2086.5,
+        "max_ms": 2179.6
+      }
+    }
+  },
+  "audit_chain_writers_1": {
+    "machine": "work-windows",
+    "python": "3.12.10",
+    "postgres_server_version": 170009,
+    "budget_basis": "TECHNICAL_DEFAULT (gross-regression guard, in-process, synthetic data, not an SLA)",
+    "writers": 1,
+    "units_of_work": 50,
+    "elapsed_s": 0.329,
+    "rows_per_s": 152.0,
+    "min_rows_per_s_budget": 20.0,
+    "chain_contiguous": true
+  },
+  "audit_chain_writers_4": {
+    "machine": "work-windows",
+    "python": "3.12.10",
+    "postgres_server_version": 170009,
+    "budget_basis": "TECHNICAL_DEFAULT (gross-regression guard, in-process, synthetic data, not an SLA)",
+    "writers": 4,
+    "units_of_work": 200,
+    "elapsed_s": 0.722,
+    "rows_per_s": 277.2,
+    "min_rows_per_s_budget": 20.0,
+    "chain_contiguous": true
+  },
+  "audit_chain_writers_8": {
+    "machine": "work-windows",
+    "python": "3.12.10",
+    "postgres_server_version": 170009,
+    "budget_basis": "TECHNICAL_DEFAULT (gross-regression guard, in-process, synthetic data, not an SLA)",
+    "writers": 8,
+    "units_of_work": 400,
+    "elapsed_s": 1.662,
+    "rows_per_s": 240.7,
+    "min_rows_per_s_budget": 20.0,
+    "chain_contiguous": true
+  },
+  "outbox_dispatch_1": {
+    "machine": "work-windows",
+    "python": "3.12.10",
+    "postgres_server_version": 170009,
+    "budget_basis": "TECHNICAL_DEFAULT (gross-regression guard, in-process, synthetic data, not an SLA)",
+    "events": 2000,
+    "aggregates": 50,
+    "dispatchers": 1,
+    "batch_size": 100,
+    "elapsed_s": 4.527,
+    "events_per_s": 441.8,
+    "lag_p50_s": 3.052,
+    "lag_p95_s": 4.472,
+    "lag_max_s": 4.647,
+    "min_events_per_s_budget": 50.0,
+    "note": "lag includes the backlog wait: every event was enqueued before dispatch started"
+  },
+  "outbox_dispatch_4": {
+    "machine": "work-windows",
+    "python": "3.12.10",
+    "postgres_server_version": 170009,
+    "budget_basis": "TECHNICAL_DEFAULT (gross-regression guard, in-process, synthetic data, not an SLA)",
+    "events": 2000,
+    "aggregates": 50,
+    "dispatchers": 4,
+    "batch_size": 100,
+    "elapsed_s": 4.848,
+    "events_per_s": 412.5,
+    "lag_p50_s": 2.716,
+    "lag_p95_s": 4.758,
+    "lag_max_s": 4.954,
+    "min_events_per_s_budget": 50.0,
+    "note": "lag includes the backlog wait: every event was enqueued before dispatch started"
+  }
+}# exit code: 0

@@ -193,12 +193,14 @@ consumer; the pipeline is tested with synthetic consumers only.
 | Retries / backoff / jitter | `INTEGRATION_POLICY` (00.6, TECHNICAL DEFAULT) - unchanged; `PublishError(permanent=True)` skips the remaining attempts for poison events | `test_incompatible_payload_is_dead_lettered_at_once_with_compensation` |
 | Dead letter / conflict queue | DEAD_LETTER rows + `platform_compensation_record` (`MANUAL_REQUIRED` / `HOOK_FAILED` / `COMPLETED`) per consumer; data conflicts of imported sources stay in `platform_conflict_item` (section 6) | 00.6 tests + the above |
 | Compensation | `EventHandler.compensate` hook, run in a savepoint on dead letter (00.6) - unchanged; no PHASE_01 consumer has a side effect to undo | - |
-| Ordering | per aggregate: a row is claimed only when no earlier row of the same aggregate is undelivered (`OutboxPolicy.per_aggregate_order`, default on; partial index `ix_outbox_event_agg_open`). Outbox ids follow commit order because every unit of work holds the audit chain lock until commit. A DEAD_LETTER head blocks its aggregate until replayed or discarded by the owner (01.7); other aggregates flow | `test_a_failing_event_holds_back_*`, `test_dead_letter_head_blocks_*`, race `test_concurrent_dispatchers_keep_per_aggregate_order_with_retries` |
+| Ordering | per aggregate: a row is claimed only when no earlier row of the same aggregate is undelivered (`OutboxPolicy.per_aggregate_order`, default on; partial index `ix_outbox_event_agg_open`). Outbox ids follow commit order because every unit of work holds the audit chain lock until commit. A DEAD_LETTER head blocks its aggregate until replayed (owner or IT, `it_ops`) or discarded by the owner (01.7; roles REV-0133); other aggregates flow | `test_a_failing_event_holds_back_*`, `test_dead_letter_head_blocks_*`, race `test_concurrent_dispatchers_keep_per_aggregate_order_with_retries` |
 | Freshness | `ops.monitoring.integration_health`: `lag_seconds` (oldest undelivered event), `stale` (> 900 s, TECHNICAL DEFAULT), `blocked_aggregates`, `held_events`, `open_conflicts`, `compensation_open`, `last_acked_at`; in `GET /admin/health` (`integration`, contract 0.6.2-draft), page 36 and `manage.py outbox_status` (reasons `DELIVERY_STALE`, `ORDERING_BLOCKED`) | `test_lag_and_stale_flag`, `test_health_endpoint_exposes_integration_freshness`, vitest page 36 |
 
 Contract items (not invented here; need a contract change in a later step / phase):
 - **Dead-letter replay / discard over HTTP**: the contract has no operation. Since 01.7 (REV-0129) both exist on
-  the server console only, owner only, reason required, audited: `manage.py outbox_dead_letter replay|discard`
+  the server console only, reason required, audited: `manage.py outbox_dead_letter replay|discard`. Roles
+  (employer decision 2026-11-10, REV-0133): `replay` - ACTIVE `owner_admin` or `it_ops`; `discard` - ACTIVE
+  `owner_admin` only
   (`ops.dead_letters`; engine `outbox.replay_dead_letter` / `outbox.discard_dead_letter`). DISCARDED is a new
   terminal delivery state (migration 0018) that no longer holds later events of its aggregate back
   (`outbox.SETTLED`). An HTTP operation remains a contract item. Counts on page 36 and through `outbox_status`.

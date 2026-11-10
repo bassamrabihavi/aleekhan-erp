@@ -1,0 +1,45 @@
+$ cd backend && python -m pytest -v platform_core/tests/test_authz_request_cache.py platform_core/tests/test_phase01_step7_ops.py
+============================= test session starts =============================
+platform win32 -- Python 3.12.10, pytest-9.1.1, pluggy-1.7.0 -- F:\aleekhan\aleekhan-erp\.venv\Scripts\python.exe
+hypothesis profile 'aleekhan' -> database=None, deadline=None, max_examples=200, derandomize=True
+django: version: 5.2.18, settings: aleekhan.settings_test (from ini)
+rootdir: F:\aleekhan\aleekhan-erp\backend
+configfile: pyproject.toml
+plugins: hypothesis-6.170.4, platformdirs-4.14.3, django-4.14.0
+collecting ... collected 32 items
+
+platform_core/tests/test_authz_request_cache.py::test_a_nothing_is_cached_outside_the_block PASSED [  3%]
+platform_core/tests/test_authz_request_cache.py::test_inside_the_block_the_grants_are_read_once PASSED [  6%]
+platform_core/tests/test_authz_request_cache.py::test_b_the_memo_is_gone_after_the_block PASSED [  9%]
+platform_core/tests/test_authz_request_cache.py::test_b_the_memo_is_gone_after_an_exception_in_the_block PASSED [ 12%]
+platform_core/tests/test_authz_request_cache.py::test_b_nested_blocks_restore_the_outer_memo PASSED [ 15%]
+platform_core/tests/test_authz_request_cache.py::test_c_two_users_in_one_block_get_their_own_grants PASSED [ 18%]
+platform_core/tests/test_authz_request_cache.py::test_d_a_grant_revoked_between_two_requests_is_seen_by_the_second PASSED [ 21%]
+platform_core/tests/test_authz_request_cache.py::test_d_a_grant_given_between_two_requests_is_seen_by_the_second PASSED [ 25%]
+platform_core/tests/test_phase01_step7_ops.py::test_owner_discard_releases_the_aggregate_and_is_audited_with_reason PASSED [ 28%]
+platform_core/tests/test_phase01_step7_ops.py::test_only_the_owner_or_it_may_replay_and_only_the_owner_may_discard[security_auditor] PASSED [ 31%]
+platform_core/tests/test_phase01_step7_ops.py::test_only_the_owner_or_it_may_replay_and_only_the_owner_may_discard[employee] PASSED [ 34%]
+platform_core/tests/test_phase01_step7_ops.py::test_only_the_owner_or_it_may_replay_and_only_the_owner_may_discard[management_viewer] PASSED [ 37%]
+platform_core/tests/test_phase01_step7_ops.py::test_only_the_owner_or_it_may_replay_and_only_the_owner_may_discard[None] PASSED [ 40%]
+platform_core/tests/test_phase01_step7_ops.py::test_it_ops_may_replay_a_dead_letter_and_it_is_audited PASSED [ 43%]
+platform_core/tests/test_phase01_step7_ops.py::test_it_ops_may_not_discard_a_dead_letter PASSED [ 46%]
+platform_core/tests/test_phase01_step7_ops.py::test_owner_may_replay_a_dead_letter_and_it_is_audited PASSED [ 50%]
+platform_core/tests/test_phase01_step7_ops.py::test_disabled_or_revoked_it_ops_cannot_replay PASSED [ 53%]
+platform_core/tests/test_phase01_step7_ops.py::test_discard_needs_a_reason_a_user_and_a_dead_letter PASSED [ 56%]
+platform_core/tests/test_phase01_step7_ops.py::test_disabled_owner_cannot_discard PASSED [ 59%]
+platform_core/tests/test_phase01_step7_ops.py::test_console_command_lists_and_discards PASSED [ 62%]
+platform_core/tests/test_phase01_step7_ops.py::test_discarded_counts_as_settled_in_health PASSED [ 65%]
+platform_core/tests/test_phase01_step7_ops.py::test_dead_letter_without_followers_blocks_nothing PASSED [ 68%]
+platform_core/tests/test_phase01_step7_ops.py::test_never_run_housekeeping_jobs_are_overdue_and_a_success_clears_it PASSED [ 71%]
+platform_core/tests/test_phase01_step7_ops.py::test_failed_housekeeping_run_is_failing_with_its_code PASSED [ 75%]
+platform_core/tests/test_phase01_step7_ops.py::test_run_housekeeping_command_runs_under_the_job_lifecycle PASSED [ 78%]
+platform_core/tests/test_phase01_step7_ops.py::test_orphan_cleanup_job_is_seeded_safe_and_runs PASSED [ 81%]
+platform_core/tests/test_phase01_step7_ops.py::test_orphan_cleanup_without_storage_is_a_no_op PASSED [ 84%]
+platform_core/tests/test_phase01_step7_ops.py::test_oversized_upload_is_refused_from_content_length_before_parsing PASSED [ 87%]
+platform_core/tests/test_phase01_step7_ops.py::test_upload_within_the_limit_passes_to_the_normal_checks PASSED [ 90%]
+platform_core/tests/test_phase01_step7_ops.py::test_health_endpoint_shows_housekeeping_alerts PASSED [ 93%]
+platform_core/tests/test_phase01_step7_ops.py::test_orphan_cleanup_removes_only_old_bytes_without_a_row PASSED [ 96%]
+platform_core/tests/test_phase01_step7_ops.py::test_real_upload_still_works_through_the_middleware PASSED [100%]
+
+============================= 32 passed in 20.87s =============================
+# exit code: 0

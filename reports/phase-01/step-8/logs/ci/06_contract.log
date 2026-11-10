@@ -1,0 +1,15 @@
+# stage contract | 2026-11-10T18:14:10Z | machine work-windows | MINGW64_NT-10.0-22000
+# command (bash tools/ci_local.sh <out> contract runs this function):
+#   stage_contract () 
+#   { 
+#       need_pg || return $?;
+#       "$PYTHON" -c 'import sys, yaml; from openapi_spec_validator import validate
+#   spec = yaml.safe_load(open("docs/api/openapi-draft.yaml", encoding="utf-8")); validate(spec)
+#   ops = sum(1 for p in spec["paths"].values() for m in p if m in ("get","put","post","delete","patch"))
+#   print("OpenAPI valid", spec["openapi"], spec["info"]["version"], len(spec["paths"]), "paths", ops, "operations")' && ( cd backend && "$PYTHON" -m pytest -q --junitxml="$OUT/pytest-contract.xml" platform_core/tests/test_api_contract.py )
+#   }
+# ---- output
+OpenAPI valid 3.1.0 0.6.3-draft 88 paths 107 operations
+..................                                                       [100%]
+18 passed in 20.63s
+# exit code: 0

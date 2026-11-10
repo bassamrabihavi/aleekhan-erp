@@ -1,0 +1,47 @@
+# stage artifacts | 2026-11-10T18:28:31Z | machine work-windows | MINGW64_NT-10.0-22000
+# command (bash tools/ci_local.sh <out> artifacts runs this function):
+#   stage_artifacts () 
+#   { 
+#       local rc=0;
+#       git rev-parse HEAD > "$OUT/commit.txt";
+#       git status --porcelain --untracked-files=no | wc -l | tr -d ' ' > "$OUT/worktree_modified_files.txt";
+#       echo "commit $(cat "$OUT/commit.txt"), modified tracked files: $(cat "$OUT/worktree_modified_files.txt")";
+#       local sbom_rc=75;
+#       if "$PYTHON" -m pip_audit --version > /dev/null 2>&1; then
+#           pip_audit_retry -r backend/requirements.lock --no-deps --disable-pip -f cyclonedx-json -o "$OUT/sbom-python-runtime.cdx.json";
+#           sbom_rc=$?;
+#       else
+#           echo "pip-audit not installed in $PYTHON";
+#       fi;
+#       case "$sbom_rc" in 
+#           0)
+#               echo "SBOM python: sbom-python-runtime.cdx.json (pip-audit CycloneDX)"
+#           ;;
+#           75)
+#               echo "FALLBACK (sub-check): pip-audit SBOM unavailable (network or pip-audit missing) -> offline inventory SBOM from backend/requirements.lock";
+#               "$PYTHON" tools/offline_sbom.py "$OUT/sbom-python-runtime.offline.cdx.json" && echo "SBOM python: sbom-python-runtime.offline.cdx.json (offline, no vulnerability data)" || rc=1
+#           ;;
+#           *)
+#               echo "FAIL: pip-audit SBOM generation failed (non-network error, see above)";
+#               rc=1
+#           ;;
+#       esac;
+#       if have_node && [ -d frontend/node_modules ]; then
+#           ( cd frontend && "$NPM" sbom --sbom-format cyclonedx --omit dev > "$OUT/sbom-frontend.cdx.json" ) && echo "SBOM frontend: sbom-frontend.cdx.json" || rc=1;
+#           if [ -d frontend/dist ]; then
+#               ( cd frontend/dist && find . -type f | LC_ALL=C sort | xargs sha256sum ) > "$OUT/frontend-dist.sha256" && echo "frontend dist files hashed: $(wc -l < "$OUT/frontend-dist.sha256" | tr -d ' ')";
+#           else
+#               echo "SKIPPED (sub-check): frontend/dist missing (frontend stage not run)";
+#           fi;
+#       else
+#           echo "SKIPPED (sub-check): frontend SBOM needs node + node_modules";
+#       fi;
+#       return $rc
+#   }
+# ---- output
+commit e3d56a03a4a08dfe3557dffd14687be4787449b5, modified tracked files: 12
+No known vulnerabilities found
+SBOM python: sbom-python-runtime.cdx.json (pip-audit CycloneDX)
+SBOM frontend: sbom-frontend.cdx.json
+frontend dist files hashed: 5
+# exit code: 0

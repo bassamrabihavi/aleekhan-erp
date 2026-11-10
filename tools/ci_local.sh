@@ -9,12 +9,17 @@
 # Every stage writes <out>/NN_<stage>.log; all output passes tools/redact_paths.py (REV-0502: no home paths
 # or account names in evidence; REV-0103: junit xml files are redacted in place, incl. the host name). A stage
 # that cannot run prints "SKIPPED: <reason>" and is listed with that reason in <out>/summary.md - never silently.
+# REV-0134 (01.8): every log starts with the exact commands of the stage ("# command" block = the stage
+# function) and ends with "# exit code: N", so a short tool output is still verifiable evidence. The summary
+# also records the worktree state and, per code directory, the git tree id of the tested files (so evidence
+# produced before the commit can be matched to it: `git rev-parse <sha>:backend` == the recorded id).
 # Passwords are never printed (libpq env only).
 #
 # Usage: tools/ci_local.sh <out-dir> [stage ...]          (default: all stages, keep going after a failure)
 # Stages: lint type tools unit migration contract authz frontend e2e perf security ops artifacts
 # Env:    PYTHON (default repo .venv), PG_BIN, NPM (default npm), E2E_BROWSER_CHANNEL, CI_SKIP="e2e ops",
-#         CI_SKIP_REASON="..." (printed for skipped stages), PLAYWRIGHT_BROWSERS_PATH, CI_APPEND=1
+#         CI_SKIP_REASON="..." (printed for skipped stages), PLAYWRIGHT_BROWSERS_PATH, CI_APPEND=1,
+#         CI_E2E_SCREENSHOT_DIR / CI_E2E_HTML_REPORT / CI_E2E_OUTPUT_DIR (e2e artefact folders)
 set -uo pipefail
 
 OUT="${1:?usage: ci_local.sh <out-dir> [stage ...]}"
@@ -82,11 +87,16 @@ stage_unit() {
 stage_migration() {
   need_pg || return $?
   bash backend/scripts/db_roundtrip.sh "$OUT/migration" && \
-    (cd backend && "$PYTHON" manage.py makemigrations --check --dry-run)
+    (cd backend && DJANGO_SETTINGS_MODULE=aleekhan.settings_test "$PYTHON" manage.py makemigrations --check --dry-run)
 }
 stage_contract() {
   need_pg || return $?
-  (cd backend && "$PYTHON" -m pytest -q --junitxml="$OUT/pytest-contract.xml" platform_core/tests/test_api_contract.py)
+  # 01.8: the draft contract itself is validated as OpenAPI (openapi-spec-validator, requirements-dev.txt)
+  "$PYTHON" -c 'import sys, yaml; from openapi_spec_validator import validate
+spec = yaml.safe_load(open("docs/api/openapi-draft.yaml", encoding="utf-8")); validate(spec)
+ops = sum(1 for p in spec["paths"].values() for m in p if m in ("get","put","post","delete","patch"))
+print("OpenAPI valid", spec["openapi"], spec["info"]["version"], len(spec["paths"]), "paths", ops, "operations")' \
+    && (cd backend && "$PYTHON" -m pytest -q --junitxml="$OUT/pytest-contract.xml" platform_core/tests/test_api_contract.py)
 }
 stage_authz() {
   need_pg || return $?
@@ -103,13 +113,19 @@ stage_e2e() {
   need_pg || return $?
   need_node || return $?
   [ -d frontend/node_modules ] || skip "frontend/node_modules missing (run the frontend stage first)" || return $?
-  (cd frontend && E2E_SCREENSHOT_DIR="$OUT/screenshots" E2E_HTML_REPORT="$OUT/playwright-report" \
-    E2E_OUTPUT_DIR="$OUT/playwright-output" bash scripts/e2e.sh)
+  # CI_E2E_SCREENSHOT_DIR / CI_E2E_HTML_REPORT / CI_E2E_OUTPUT_DIR override the defaults below (01.8: the
+  # screenshots go to the step report folder, the bulky Playwright report/output stay outside the repo)
+  (cd frontend && E2E_SCREENSHOT_DIR="${CI_E2E_SCREENSHOT_DIR:-$OUT/screenshots}" \
+    E2E_HTML_REPORT="${CI_E2E_HTML_REPORT:-$OUT/playwright-report}" \
+    E2E_OUTPUT_DIR="${CI_E2E_OUTPUT_DIR:-$OUT/playwright-output}" bash scripts/e2e.sh)
 }
 stage_perf() {
   need_pg || return $?
+  # PHASE_00 smoke + PHASE_01 perf (01.7), each with its own numbers file
   (cd backend && ALEEKHAN_PERF_OUT="$OUT/perf.json" "$PYTHON" -m pytest -q -m perf platform_core/tests/test_perf_smoke.py \
-    && cat "$OUT/perf.json")
+    && cat "$OUT/perf.json" \
+    && ALEEKHAN_PERF_OUT="$OUT/perf_phase01.json" "$PYTHON" -m pytest -q -m perf platform_core/tests/test_perf_phase01.py \
+    && cat "$OUT/perf_phase01.json")
 }
 stage_security() {
   local rc=0
@@ -156,6 +172,8 @@ stage_ops() {
   bash ops/db/roles_check.sh "$OUT/roles" || rc=1
   echo "== backup / restore drill"
   bash ops/backup/drill.sh "$OUT/drill" || rc=1
+  echo "== rollback rehearsal (01.7: down to the PHASE_01 baseline 0010 with data, forward to head)"
+  bash ops/backup/rollback_rehearsal.sh "$OUT/rollback" || rc=1
   echo "== outbox monitoring command (on a throw-away migrated DB is covered by the drill; here: help)"
   (cd backend && "$PYTHON" manage.py outbox_status --help >/dev/null && echo "outbox_status: available") || rc=1
   return $rc
@@ -198,6 +216,20 @@ stage_artifacts() {
   return $rc
 }
 
+# Git tree id of every code directory as it is in the worktree (tracked + untracked, .gitignore honoured), via a
+# throw-away index: the real index and the worktree are not touched.
+CODE_DIRS=(backend frontend tools ops docs .github)
+code_trees() {
+  local idx tree d
+  idx="$(mktemp)"
+  rm -f "$idx"
+  GIT_INDEX_FILE="$idx" git read-tree HEAD \
+    && GIT_INDEX_FILE="$idx" git add -A -- "${CODE_DIRS[@]}" 2>/dev/null \
+    && tree="$(GIT_INDEX_FILE="$idx" git write-tree)" \
+    && for d in "${CODE_DIRS[@]}"; do echo "$d $(git rev-parse "$tree:$d")"; done
+  rm -f "$idx"
+}
+
 # ------------------------------------------------------------------------------------------------ runner
 cd "$ROOT" || exit 2
 # CI_APPEND=1 (GitHub workflow: one stage per step) keeps the summary of earlier steps.
@@ -217,10 +249,14 @@ for s in "${STAGES[@]}"; do
   else
     {
       echo "# stage $s | $(date -u +%Y-%m-%dT%H:%M:%SZ) | machine ${ALEEKHAN_MACHINE:-unnamed} | $(uname -s)"
+      echo "# command (bash tools/ci_local.sh <out> $s runs this function):"
+      declare -f "stage_$s" | sed 's/^/#   /'
+      echo "# ---- output"
       "stage_$s"
     } 2>&1 | "$PYTHON" tools/redact_paths.py | tee "$log"
     rc="${PIPESTATUS[0]}"
   fi
+  echo "# exit code: $rc" | tee -a "$log"
   # REV-0103: junit xml is written by pytest directly (not through the log filter): redact host/account names
   "$PYTHON" tools/redact_paths.py --in-place "$OUT"/*.xml >/dev/null 2>&1 || true
   secs=$(( $(date +%s) - start ))
@@ -231,7 +267,7 @@ for s in "${STAGES[@]}"; do
   esac
   reason=""
   [ "$result" = SKIPPED ] && reason="$(grep -m1 '^SKIPPED:' "$log" | sed 's/^SKIPPED: //')"
-  printf '%s\t%s\t%s\t%s\t%s\n' "$s" "$result" "$secs" "$(basename "$log")" "$reason" >> "$OUT/summary.tsv"
+  printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$s" "$result" "$rc" "$secs" "$(basename "$log")" "$reason" >> "$OUT/summary.tsv"
   echo "---------------------------------------------------------------- [$IDX] $s: $result (${secs}s)"
 done
 
@@ -240,9 +276,17 @@ done
   echo
   echo "Commit \`$(git rev-parse HEAD)\` | machine ${ALEEKHAN_MACHINE:-unnamed} | $(date -u +%Y-%m-%dT%H:%M:%SZ)"
   echo
-  echo "| Stage | Result | Seconds | Log | Skip reason |"
-  echo "|---|---|---|---|---|"
-  while IFS=$'\t' read -r s r secs l why; do echo "| $s | $r | $secs | $l | ${why:-} |"; done < "$OUT/summary.tsv"
+  echo "Worktree at the end of the run: $(git status --porcelain --untracked-files=no | wc -l | tr -d ' ') modified" \
+    "tracked file(s), $(git status --porcelain --untracked-files=normal | grep -c '^??') untracked path(s)" \
+    "(0/0 = exactly the commit above)."
+  echo
+  echo "Tested code (git tree id of the worktree per directory; compare with \`git rev-parse <commit>:<dir>\`):"
+  echo
+  code_trees | while read -r d t; do echo "- \`$d\` $t"; done
+  echo
+  echo "| Stage | Result | Exit code | Seconds | Log | Skip reason |"
+  echo "|---|---|---|---|---|---|"
+  while IFS=$'\t' read -r s r code secs l why; do echo "| $s | $r | $code | $secs | $l | ${why:-} |"; done < "$OUT/summary.tsv"
 } > "$OUT/summary.md"
 cat "$OUT/summary.md"
 [ "$FAILED" -eq 0 ]

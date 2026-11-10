@@ -1,4 +1,4 @@
-"""Owner-only dead-letter handling from the server console (PHASE_01 / 01.7, REV-0129).
+"""Dead-letter handling from the server console (PHASE_01 / 01.7, REV-0129; roles REV-0133).
 
 The contract has no HTTP operation for dead letters (docs/integration/README.md section 9), so the two human
 moves on a DEAD_LETTER event run as ``manage.py outbox_dead_letter`` on the server console:
@@ -31,6 +31,12 @@ from platform_core.identity.models import User, UserStatus
 from platform_core.models import DeliveryStatus, OutboxEvent
 
 ACTIONS: Final = ("replay", "discard")
+IT_OPS_ROLE: Final = "it_ops"
+# Employer decision 2026-11-10 (REV-0133): IT may replay; discard (terminal) stays with the owner.
+ALLOWED_ROLES: Final[dict[str, tuple[str, ...]]] = {
+    "replay": (OWNER_ROLE, IT_OPS_ROLE),
+    "discard": (OWNER_ROLE,),
+}
 
 
 @dataclass(frozen=True)
@@ -43,19 +49,21 @@ class DeadLetterRow:
     held_behind: int
 
 
-def _owner(username: str) -> User:
+def _authorised(username: str, action: str) -> User:
+    roles = ALLOWED_ROLES[action]
     user = User.objects.filter(username=username, status=UserStatus.ACTIVE).first()
-    if user is None or not holds_role(user.pk, OWNER_ROLE):
-        raise AccessDenied("only the owner (owner_admin) may handle dead-letter events")
+    if user is None or not any(holds_role(user.pk, r) for r in roles):
+        raise AccessDenied(f"{action} of a dead-letter event needs an active role in: {', '.join(roles)}")
     return user
 
 
 def handle(*, action: str, username: str, event_id: uuid.UUID, reason: str) -> str:
-    """Replay or discard one DEAD_LETTER event as the owner ``username``. Returns the new delivery status."""
+    """Replay or discard one DEAD_LETTER event as ``username`` (see :data:`ALLOWED_ROLES`). Returns the new
+    delivery status."""
     if action not in ACTIONS:
         raise ValueError(action)
     with transaction.atomic():
-        user = _owner(username)
+        user = _authorised(username, action)
         ctx = RequestContext(Actor.user(user.pk), request_id=uuid.uuid4(), network_zone="INTERNAL")
         if action == "replay":
             outbox.replay_dead_letter(ctx, event_id, reason=reason)

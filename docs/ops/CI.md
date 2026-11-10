@@ -51,6 +51,13 @@ bash tools/ci_local.sh /tmp/ci lint type unit                      # selected st
 The machine has little memory: stages run strictly one after another; the E2E stage starts and stops its own
 servers.
 
+Evidence format (REV-0134, step 01.8): every `NN_<stage>.log` starts with a `# command` block (the exact stage
+function that ran) and ends with `# exit code: N`; `summary.md` has an exit-code column, the worktree state at
+the end of the run (modified tracked / untracked counts) and the git tree id of every code directory as tested
+(`backend`, `frontend`, `tools`, `ops`, `docs`, `.github`). Evidence produced before the commit is matched to it
+with `git rev-parse <commit>:<dir>` (must equal the recorded id). E2E artefact folders can be redirected with
+`CI_E2E_SCREENSHOT_DIR`, `CI_E2E_HTML_REPORT`, `CI_E2E_OUTPUT_DIR`.
+
 ## GitHub Actions (`.github/workflows/ci.yml`)
 
 push / pull_request to `main` (+ manual). ubuntu-latest, PostgreSQL 17 service container (trust auth on the

@@ -25,7 +25,7 @@ Verdicts (TECHNICAL DEFAULT thresholds, `platform_core/ops/monitoring.py`; ops t
 
 | Verdict | Reason code | Meaning / action |
 |---|---|---|
-| critical | `DEAD_LETTER_PRESENT` | an event exhausted its retries: a human replays (`engine.outbox.replay_dead_letter`) or compensates (`consumers.record_compensation`) |
+| critical | `DEAD_LETTER_PRESENT` | an event exhausted its retries: owner or IT replays (`manage.py outbox_dead_letter replay`) or compensates (`consumers.record_compensation`) |
 | warn | `STALE_DISPATCHED` | a dispatcher died holding a lease: run `recover_stale` (the dispatcher loop does it) and check the worker |
 | warn | `DUE_BACKLOG` | the oldest due event waited > 15 min: dispatcher not running or too slow |
 | ok | - | - |
@@ -91,16 +91,17 @@ of work, the file is deleted only after the audit row (`platform.document.object
 kind - never content) is committed. Idempotent; storage not configured = nothing to do. Other files in the
 storage folder are never touched.
 
-### Dead letters (REV-0129) - owner only, server console
+### Dead letters (REV-0129, REV-0133) - server console; replay: owner or IT, discard: owner only
 ```bash
 python manage.py outbox_dead_letter list [--json]   # event id, type, aggregate type, time, attempts, held_behind
-python manage.py outbox_dead_letter replay  --owner <username> --event-id <uuid> --reason "<why>"
-python manage.py outbox_dead_letter discard --owner <username> --event-id <uuid> --reason "<why>"
+python manage.py outbox_dead_letter replay  --user <username> --event-id <uuid> --reason "<why>"
+python manage.py outbox_dead_letter discard --user <username> --event-id <uuid> --reason "<why>"
 ```
 `replay`: DEAD_LETTER -> PENDING (after the cause is fixed). `discard`: DEAD_LETTER -> DISCARDED (terminal, new in
 0018): the event is never delivered and later events of the same aggregate are released, so a poison event
-(e.g. SCHEMA_VERSION_UNSUPPORTED) no longer blocks its aggregate forever. Both need an ACTIVE `owner_admin` and a
-reason, and are audited as that user (`platform.outbox.replay` / `platform.outbox.discard`). A compensation
+(e.g. SCHEMA_VERSION_UNSUPPORTED) no longer blocks its aggregate forever. `replay` needs an ACTIVE `owner_admin` or
+`it_ops` holder, `discard` an ACTIVE `owner_admin` (employer decision 2026-11-10, REV-0133; `--owner` is kept as
+an alias of `--user`). Both need a reason and are audited as that user (`platform.outbox.replay` / `platform.outbox.discard`). A compensation
 record of the dead letter stays open for the consuming module. No HTTP operation (contract item).
 
 `blocked_aggregates` (REV-0130) now counts only aggregates with events really waiting behind a dead letter (=

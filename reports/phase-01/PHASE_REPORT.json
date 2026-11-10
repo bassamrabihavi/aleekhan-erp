@@ -1,0 +1,157 @@
+{
+ "phase": "PHASE_01",
+ "step": "01.8",
+ "commit_sha": "PENDING",
+ "status": "PARTIAL",
+ "scope": [
+  "PHASE_01 phase report over steps 01.1-01.8 (DEVELOPER_REPORT_TEMPLATE sections 1-10)",
+  "Platform & Identity: in-system users (DEC-003), roles/scopes/permissions matrix v1.3, MFA, sessions, org tree (DEC-043/048), approvals/tasks, documents with quarantine (SEC-03), parameters, jobs with safe cancel, audit hash chain, outbox event catalogue",
+  "API 0.6.3-draft (88 paths, 107 operations); UI pages 36/39/40/42/46 + org tree",
+  "Acceptance cases SEC-01, SEC-03",
+  "01.8: REV-0132, REV-0133, REV-0134, REV-0127/REV-0135, ERD rows 0014-0018, TRACE_MAP, CHANGELOG"
+ ],
+ "changes": [
+  "Step commits: 01.1 89e5f0d, 01.2 153651f, 01.3 3f1f3ab, 01.4 f6a60a5, 01.5 ef4902a, 01.6 7c1a93d, 01.7 bccd109, 01.8 PENDING",
+  "backend/platform_core/ops/dead_letters.py (ALLOWED_ROLES)",
+  "backend/platform_core/management/commands/outbox_dead_letter.py (--user, --owner alias)",
+  "backend/platform_core/tests/test_authz_request_cache.py (new)",
+  "backend/platform_core/tests/test_phase01_step7_ops.py (REV-0133 tests)",
+  "tools/ci_local.sh (command + exit code per log, tree ids, OpenAPI validation, PHASE_01 perf, rollback rehearsal, settings_test for makemigrations, CI_E2E_* dirs)",
+  "docs/ops/CI.md, docs/ops/JOB_MONITORING.md, docs/integration/README.md, docs/discovery/STATE_TRANSITIONS.md, docs/security/PHASE_01_SECURITY_CHECKLIST.md, docs/db/ERD.md",
+  "CHANGELOG.md",
+  "reports/phase-01/PHASE_REPORT.md, reports/phase-01/PHASE_REPORT.json, reports/phase-01/TRACE_MAP.md",
+  "reports/phase-01/step-8/logs/, reports/phase-01/step-8/screenshots/"
+ ],
+ "migrations": [
+  "platform_core.0007_phase01_platform_schema",
+  "platform_core.0008_phase01_db_guards",
+  "platform_core.0009_phase01_constraint_names",
+  "platform_core.0010_seed_phase01_catalogue",
+  "platform_core.0011_phase01_engine",
+  "platform_core.0012_phase01_engine_rework",
+  "platform_core.0013_dec055_bootstrap_self_approval",
+  "platform_core.0014_dec056_owner_approval_rights",
+  "platform_core.0015_dec056_matrix_v12",
+  "platform_core.0016_outbox_provenance_and_order",
+  "platform_core.0017_dec056_matrix_v13",
+  "platform_core.0018_outbox_discard_and_orphan_job"
+ ],
+ "test_evidence": [
+  {
+   "command": "tools/ci_local.sh reports/phase-01/step-8/logs/ci (13 stages, final PHASE_01 tree, exit 0)",
+   "outcome": "PASS",
+   "log_path": "reports/phase-01/step-8/logs/ci/summary.md"
+  },
+  {
+   "command": "ruff check + format: All checks passed, 290 files formatted",
+   "outcome": "PASS",
+   "log_path": "reports/phase-01/step-8/logs/ci/01_lint.log"
+  },
+  {
+   "command": "mypy strict: no issues in 192 source files",
+   "outcome": "PASS",
+   "log_path": "reports/phase-01/step-8/logs/ci/02_type.log"
+  },
+  {
+   "command": "tools unittest: 42 tests OK",
+   "outcome": "PASS",
+   "log_path": "reports/phase-01/step-8/logs/ci/03_tools.log"
+  },
+  {
+   "command": "pytest unit+integration: 1070 passed, 1 skipped (real ClamAV contract test, clamd not configured), 7 deselected (perf)",
+   "outcome": "PASS",
+   "log_path": "reports/phase-01/step-8/logs/ci/04_unit.log"
+  },
+  {
+   "command": "real ClamAV contract test (test_phase01_documents_engine.py:277), reason recorded",
+   "outcome": "SKIPPED",
+   "log_path": "reports/phase-01/step-8/logs/ci/04_unit.log"
+  },
+  {
+   "command": "db_roundtrip up/zero/up + partial 0006: ROUNDTRIP OK, schema diff EMPTY (6073 lines); makemigrations --check: No changes detected",
+   "outcome": "PASS",
+   "log_path": "reports/phase-01/step-8/logs/ci/05_migration.log"
+  },
+  {
+   "command": "OpenAPI 3.1.0 0.6.3-draft valid (88 paths, 107 operations) + contract tests 18 passed",
+   "outcome": "PASS",
+   "log_path": "reports/phase-01/step-8/logs/ci/06_contract.log"
+  },
+  {
+   "command": "authz: route parity + log redaction 961 passed",
+   "outcome": "PASS",
+   "log_path": "reports/phase-01/step-8/logs/ci/07_authz.log"
+  },
+  {
+   "command": "frontend npm ci, eslint, typecheck, vitest 44 passed (4 files), build",
+   "outcome": "PASS",
+   "log_path": "reports/phase-01/step-8/logs/ci/08_frontend.log"
+  },
+  {
+   "command": "Playwright E2E real Django + PostgreSQL (Edge): 22 passed + 1 passed (backend-down); 71 screenshots",
+   "outcome": "PASS",
+   "log_path": "reports/phase-01/step-8/logs/ci/09_e2e.log"
+  },
+  {
+   "command": "perf: PHASE_00 smoke 1 passed; PHASE_01 6 passed (TECHNICAL DEFAULT budgets)",
+   "outcome": "PASS",
+   "log_path": "reports/phase-01/step-8/logs/ci/10_perf.log"
+  },
+  {
+   "command": "security: secret scan tree + 98 history commits findings=0; pip-audit runtime lock no known vulnerabilities; npm audit --omit=dev 0",
+   "outcome": "PASS",
+   "log_path": "reports/phase-01/step-8/logs/ci/11_security.log"
+  },
+  {
+   "command": "pip-audit of the whole dev/QA venv (informational, not a gate): network unavailable",
+   "outcome": "SKIPPED",
+   "log_path": "reports/phase-01/step-8/logs/ci/11_security.log"
+  },
+  {
+   "command": "ops: roles check passed=50 failed=0; backup drill PASS (14 checks); rollback rehearsal PASS (17 checks)",
+   "outcome": "PASS",
+   "log_path": "reports/phase-01/step-8/logs/ci/12_ops.log"
+  },
+  {
+   "command": "artifacts: SBOM python (pip-audit CycloneDX), SBOM frontend, 5 dist files hashed",
+   "outcome": "PASS",
+   "log_path": "reports/phase-01/step-8/logs/ci/13_artifacts.log"
+  },
+  {
+   "command": "verify_handoff: OK=300, KNOWN_DEFECT=1, EXCLUDED=46, failures=0",
+   "outcome": "PASS",
+   "log_path": "reports/phase-01/step-8/logs/impl/verify_handoff.log"
+  },
+  {
+   "command": "pytest -v test_authz_request_cache.py test_phase01_step7_ops.py: 32 passed",
+   "outcome": "PASS",
+   "log_path": "reports/phase-01/step-8/logs/impl/pytest_rev0132_0133.log"
+  }
+ ],
+ "security_evidence": [
+  "Secret scan tree + history findings=0 (reports/phase-01/step-8/logs/ci/secret_scan.json)",
+  "pip-audit runtime lock: no known vulnerabilities (pip_audit_runtime.json); npm audit --omit=dev: 0",
+  "Dead-letter roles checked in the same transaction as the write; refused callers write nothing (tests)",
+  "Logs redacted (tools/redact_paths.py --in-place); grep for account name / host name / DB password value = 0 hits"
+ ],
+ "decisions": [
+  "DEC-002, DEC-003, DEC-032, DEC-043, DEC-048..DEC-056 APPROVED and implemented (TRACE_MAP section 7)",
+  "Employer follow-ups 2026-11-10: owner_admin in-app grant needs a second approver; matrix v1.2/v1.3; it_ops may replay dead letters, discard owner-only",
+  "Open for the Gate: UAT T-003, security checklist sign-off, TECHNICAL DEFAULTS confirmation, scope splits C-33/C-34/C-46, rollback boundary of 0011; DEC-016 OPEN (PHASE_06, not used in PHASE_01)"
+ ],
+ "risks": [
+  "Deployment items before production/pilot: break-glass account, TLS, encrypted backups, CSP, proxy body limit, artifact signing, job scheduler, RPO/RTO on staging (checklist 1.10, 2.6, 2.7, 3.4, 3.6, 3.11, 4.4, 4.8)",
+  "S8 ran on the uncommitted final tree: the orchestrator must check the tree ids in summary.md against the commit",
+  "Informational dev-venv pip-audit not performed (network); ClamAV real-scanner test skipped (no clamd)",
+  "REV-0013/C-42 wording drift (WWW-Authenticate: Cookie vs proposed Session realm), no dedicated test (P3)"
+ ],
+ "evidence_paths": [
+  "reports/phase-01/TRACE_MAP.md",
+  "reports/phase-01/PHASE_REPORT.md",
+  "reports/phase-01/step-8/logs/ci/",
+  "reports/phase-01/step-8/screenshots/",
+  "reports/phase-01/step-8/logs/impl/"
+ ],
+ "rollback": "01.8: git revert <01.8 commit> (no migration); database: reverse migrations newest first (docs/db/ERD.md section 4, docs/ops/ROLLBACK.md section 3a), rehearsed to 0010 with data; below 0011 restore from backup",
+ "review_request": "PASS"
+}

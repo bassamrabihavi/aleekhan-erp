@@ -1,0 +1,10 @@
+# stage type | 2026-11-10T18:08:42Z | machine work-windows | MINGW64_NT-10.0-22000
+# command (bash tools/ci_local.sh <out> type runs this function):
+#   stage_type () 
+#   { 
+#       ( cd backend && "$PYTHON" -m mypy --version && "$PYTHON" -m mypy . )
+#   }
+# ---- output
+mypy 2.3.1 (compiled: yes)
+Success: no issues found in 192 source files
+# exit code: 0

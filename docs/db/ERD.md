@@ -1,4 +1,4 @@
-# ERD - platform tables (PHASE_00 migrations 0001-0006, PHASE_01 / 01.2 migrations 0007-0010)
+# ERD - platform tables (PHASE_00 migrations 0001-0006, PHASE_01 migrations 0007-0018)
 
 Status: as of step 00.8 (code identical to commit `d6b6de96784d8d4d715e5978a2552c3531798faa` for the schema; no
 migration was added after 00.6). Source of every column, constraint and index below: the schema dump of the
@@ -217,9 +217,17 @@ unit of work instead of a FK.
 | `0011_phase01_engine` | `RunSQL` + schema + seed | REV-0109: trigger `trg_position_assignment_a_not_backdated` (`ck_position_assignment_not_backdated`: start >= now - 60 s, a new end >= now - 60 s, an ended assignment never changes); `ck_session_end_reason` + `CONCURRENT_LIMIT` (Q-0101); 7 housekeeping job types (not protected, cancellable) | drop trigger/function; restore the old CHECK (only while no session uses `CONCURRENT_LIMIT`); delete the job types (refused once a run references them) |
 | `0012_phase01_engine_rework` | `RunSQL` + schema | REV-0113: `platform_param_value_at(key, at)` (a value superseded before its `effective_from` never applies) and `platform_param_value(key)` redefined on top of it (grant: EXECUTE on the new function, `ops/db/grants.sql`); REV-0114: `ck_login_attempt_outcome` + `MFA_ENROLMENT_REQUIRED` | restore the 0008 function body, drop the new function; restore the old CHECK (only while no login event uses the new value) |
 | `0013_dec055_bootstrap_self_approval` | schema + `RunSQL` | DEC-055 B: `platform_approval_request.bootstrap_self_approval`; CHECKs `ck_approval_request_maker_checker` (self-decision only with the flag) and `ck_approval_request_bootstrap_scope`; trigger `trg_approval_request_bootstrap_guard` (owner_admin requester, first holder of the role, once per role, reason, per-role advisory lock); `platform_role_assignment_guard` accepts only such a flagged self-decision | restore the 0008 guard body, drop trigger/function, CHECKs and column (only while no row carries the flag) |
+| `0014_dec056_owner_approval_rights` | `RunPython` + `RunSQL` | DEC-056 matrix v1.1: `owner_admin` gets `platform.workflow.approval.read` + `.decide`; the three "TECHNICAL role holds no business approval" guards allow exactly the pair (`owner_admin`, `approval.decide`); `requires_second_approval` fixed at creation (console bootstrap exempt) | remove the two grants, `matrix_version` 1.0, restore the 0008/0013 guard bodies |
+| `0015_dec056_matrix_v12` | `RunPython` + `RunSQL` | DEC-056 extension (REV-0125) matrix v1.2: `owner_admin` also gets `platform.document.approve` + `platform.config.parameter.publish`; guard exception widened to exactly three owner pairs | remove the two grants, `matrix_version` 1.1, restore the 0014 guard bodies |
+| `0016_outbox_provenance_and_order` | schema | `platform_outbox_event.producer`, `build_commit`, `schema_migration` (format CHECKs; `''` = row older than 0016); partial index `ix_outbox_event_agg_open` (per-aggregate ordering) | drop index, CHECKs and columns (provenance values lost) |
+| `0017_dec056_matrix_v13` | `RunPython` | DEC-056 extension 2 matrix v1.3: `owner_admin` gets `platform.document.read` + `platform.document.download` (not business approval; guards unchanged) | remove the two grants, `matrix_version` 1.2 |
+| `0018_outbox_discard_and_orphan_job` | schema + seed | REV-0129: delivery state `DISCARDED` + `discarded_at` + CHECK `ck_outbox_event_discarded_has_ts`; `ix_outbox_event_agg_open` excludes settled rows; job type `document_orphan_cleanup` | DISCARDED rows back to DEAD_LETTER; orphan job runs/definition removed; old index restored |
 
 No users, no org units, no network ranges, no secrets are seeded. Round trip (up -> zero -> up, partial rollback
-to 0006, empty schema diff, no extension left): `reports/phase-01/step-2/logs/migration/`.
+to 0006, empty schema diff, no extension left): `reports/phase-01/step-2/logs/migration/`; on the final PHASE_01
+tree (0001-0018): `reports/phase-01/step-8/logs/ci/05_migration.log` + `migration/`. Rows 0014-0018 were added
+in 01.8 from the migration docstrings (the table/column sections below describe the 01.2 schema; the 0016/0018
+outbox columns are listed in the row above).
 
 ## 5. PHASE_01 tables
 
