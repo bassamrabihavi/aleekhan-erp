@@ -1,7 +1,7 @@
 {
  "phase": "PHASE_01",
  "step": "01.6",
- "commit_sha": "PENDING",
+ "commit_sha": "7c1a93d",
  "status": "COMPLETE",
  "scope": [
   "Event catalogue for every outbox event type of PHASE_00 + PHASE_01 (52 types: identity, roles, org, workflow, documents, params, jobs, integration framework): name, version(s), payload JSON Schema, producer module, aggregate type, sensitivity S1 (ids / codes / counts only) - backend/platform_core/engine/events.py, golden tests/golden/event_catalogue.golden.json, docs/integration/EVENT_CATALOGUE.md",

@@ -172,9 +172,9 @@
         },
         "01.6": {
           "name": "Integration",
-          "state": "IN_PROGRESS",
-          "commit": null,
-          "report": null,
+          "state": "IN_REVIEW",
+          "commit": "7c1a93d",
+          "report": "reports/phase-01/step-6/REPORT.md",
           "review": null,
           "rework_cycles": 0,
           "started_at": "2026-11-10T09:23:33+00:00",
@@ -3061,7 +3061,16 @@
       "state": "IN_PROGRESS",
       "note": null,
       "commit": null
+    },
+    {
+      "at": "2026-11-10T10:44:27+00:00",
+      "kind": "step",
+      "phase": "PHASE_01",
+      "step": "01.6",
+      "state": "IN_REVIEW",
+      "note": null,
+      "commit": "7c1a93d"
     }
   ],
-  "updated_at": "2026-11-10T09:23:33+00:00"
+  "updated_at": "2026-11-10T10:44:27+00:00"
 }
