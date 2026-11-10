@@ -89,12 +89,13 @@ def _reason(text: str) -> str:
 
 
 def approved_matrix_grants() -> dict[str, frozenset[tuple[str, str, str]]]:
-    """Role code -> set of (action, grant_mode, max_sensitivity) of the approved matrix v1.1: the frozen v1.0
-    seed (0010) plus the cells added by DEC-056 (0014)."""
+    """Role code -> set of (action, grant_mode, max_sensitivity) of the approved matrix v1.2: the frozen v1.0
+    seed (0010) plus the cells added by DEC-056 (0014, v1.1) and its extension (0015, v1.2)."""
     seed = import_module("platform_core.migrations.0010_seed_phase01_catalogue")
     v11 = import_module("platform_core.migrations.0014_dec056_owner_approval_rights")
+    v12 = import_module("platform_core.migrations.0015_dec056_matrix_v12")
     out: dict[str, set[tuple[str, str, str]]] = {code: set() for code in seed.ROLES}
-    for grants in (seed.GRANTS, v11.ADDED_GRANTS):
+    for grants in (seed.GRANTS, v11.ADDED_GRANTS, v12.ADDED_GRANTS):
         for action, cells in grants.items():
             for code, cell in cells.items():
                 mode, max_sens = cell if isinstance(cell, tuple) else (cell, "")
@@ -103,8 +104,8 @@ def approved_matrix_grants() -> dict[str, frozenset[tuple[str, str, str]]]:
 
 
 def current_matrix_version() -> str:
-    """Matrix version recorded on a role activated now (v1.1 since DEC-056)."""
-    v: str = import_module("platform_core.migrations.0014_dec056_owner_approval_rights").MATRIX_VERSION
+    """Matrix version recorded on a role activated now (v1.2 since the DEC-056 extension)."""
+    v: str = import_module("platform_core.migrations.0015_dec056_matrix_v12").MATRIX_VERSION
     return v
 
 

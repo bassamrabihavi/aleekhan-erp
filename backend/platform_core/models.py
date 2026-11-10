@@ -174,6 +174,11 @@ class OutboxEvent(models.Model):
     updated_at = models.DateTimeField(db_default=Now())
     # Bumped by DB trigger trg_outbox_event_touch on every UPDATE (optimistic concurrency / ETag).
     row_version = models.BigIntegerField(db_default=1)
+    # Provenance (PHASE_01 / 01.6, engine/events.py): owning module, build commit and newest migration of the
+    # producing code. '' = row written before migration 0016 (or by a test factory) - provenance unknown.
+    producer = models.CharField(max_length=100, db_default="", blank=True)
+    build_commit = models.CharField(max_length=12, db_default="", blank=True)
+    schema_migration = models.CharField(max_length=100, db_default="", blank=True)
 
     class Meta:
         db_table = "platform_outbox_event"
@@ -201,6 +206,19 @@ class OutboxEvent(models.Model):
                 condition=~Q(delivery_status=DeliveryStatus.DISPATCHED) | Q(dispatched_at__isnull=False),
                 name="ck_outbox_event_dispatched_has_ts",
             ),
+            CheckConstraint(
+                condition=Q(producer="") | Q(producer__regex=r"^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)*$"),
+                name="ck_outbox_event_producer_fmt",
+            ),
+            CheckConstraint(
+                condition=Q(build_commit__regex=r"^([0-9a-f]{7,12})?$"),
+                name="ck_outbox_event_build_commit_fmt",
+            ),
+            CheckConstraint(
+                condition=Q(schema_migration="")
+                | Q(schema_migration__regex=r"^[a-z][a-z0-9_]*\.[0-9]{4}_[a-z0-9_]+$"),
+                name="ck_outbox_event_schema_migration_fmt",
+            ),
         ]
         indexes = [
             # Dispatcher poll: WHERE delivery_status IN ('PENDING','FAILED') ORDER BY next_attempt_at, id
@@ -219,6 +237,12 @@ class OutboxEvent(models.Model):
                 name="ix_outbox_event_aggregate",
             ),
             models.Index(fields=["correlation_id"], name="ix_outbox_event_correlation"),
+            # Per-aggregate ordering (01.6): "is there an earlier undelivered event of this aggregate?"
+            models.Index(
+                fields=["aggregate_type", "aggregate_id", "id"],
+                name="ix_outbox_event_agg_open",
+                condition=~Q(delivery_status=DeliveryStatus.ACKED),
+            ),
         ]
 
     def __str__(self) -> str:

@@ -1,0 +1,22 @@
+== partial down check 0016 -> 0014 (throw-away DB)
+NOTICE:  database "aleekhan_rt0015" does not exist, skipping
+-- fresh at 0014
+platform_permission_ba_guard|911992879c68330dd4637ed528617bae
+platform_role_assignment_guard|7307ab46acbf495c04743ae1afaf2e34
+platform_role_kind_guard|11771a2d4ca0e063adf6a36742bb2a8c
+platform_role_permission_guard|8cec4e49970c6f4bbd7ae033fae7d50c
+owner_admin|1.1|1
+-- at head
+platform_permission_ba_guard|00f35c68cd66cbebfab38f16399ee37b
+platform_role_assignment_guard|7307ab46acbf495c04743ae1afaf2e34
+platform_role_kind_guard|045a9942fbb6e37f3a8a12d07a0eb564
+platform_role_permission_guard|52655031d7a9a9309e2cb717c5f0de57
+owner_admin|1.2|3
+-- back at 0014
+platform_permission_ba_guard|911992879c68330dd4637ed528617bae
+platform_role_assignment_guard|7307ab46acbf495c04743ae1afaf2e34
+platform_role_kind_guard|11771a2d4ca0e063adf6a36742bb2a8c
+platform_role_permission_guard|8cec4e49970c6f4bbd7ae033fae7d50c
+owner_admin|1.1|1
+0
+guard functions identical to fresh 0014: OK

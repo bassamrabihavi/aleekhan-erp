@@ -1,0 +1,1746 @@
+{
+ "_note": "Golden event catalogue (PHASE_01 / 01.6). Generated from platform_core/engine/events.py and reviewed: every outbox event type of PHASE_00 + PHASE_01 with producer module, aggregate type, sensitivity (S1: ids, status codes, counts only), current and accepted schema versions and the JSON Schema of each payload version. A change of this file is a contract change (new version + reviewed commit). Human-readable copy: docs/integration/EVENT_CATALOGUE.md.",
+ "source_system": "aleekhan-erp",
+ "schema_migration_head": "platform_core.0016_outbox_provenance_and_order",
+ "catalogue": {
+  "platform.config.field.changed": {
+   "event_type": "platform.config.field.changed",
+   "producer": "platform_core.params",
+   "aggregate_type": "platform.dynamic_field",
+   "description": "dynamic field definition created/changed",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "key",
+      "status"
+     ],
+     "properties": {
+      "key": {
+       "type": "string",
+       "pattern": "^[a-z][a-z0-9_]{0,99}$"
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      }
+     }
+    }
+   }
+  },
+  "platform.config.parameter.defined": {
+   "event_type": "platform.config.parameter.defined",
+   "producer": "platform_core.params",
+   "aggregate_type": "platform.parameter_definition",
+   "description": "parameter definition created",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "key"
+     ],
+     "properties": {
+      "key": {
+       "type": "string",
+       "pattern": "^[a-z][a-z0-9_]{0,99}$"
+      }
+     }
+    }
+   }
+  },
+  "platform.config.parameter.proposed": {
+   "event_type": "platform.config.parameter.proposed",
+   "producer": "platform_core.params",
+   "aggregate_type": "platform.parameter_value",
+   "description": "parameter value proposed",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "parameter_key",
+      "status"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "parameter_key": {
+       "type": "string",
+       "pattern": "^[a-z][a-z0-9_]{0,99}$"
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      }
+     }
+    }
+   }
+  },
+  "platform.config.parameter.published": {
+   "event_type": "platform.config.parameter.published",
+   "producer": "platform_core.params",
+   "aggregate_type": "platform.parameter_value",
+   "description": "parameter value published",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "parameter_key",
+      "status"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "parameter_key": {
+       "type": "string",
+       "pattern": "^[a-z][a-z0-9_]{0,99}$"
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      }
+     }
+    }
+   }
+  },
+  "platform.config.parameter.rejected": {
+   "event_type": "platform.config.parameter.rejected",
+   "producer": "platform_core.params",
+   "aggregate_type": "platform.parameter_value",
+   "description": "parameter value rejected",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "parameter_key",
+      "status"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "parameter_key": {
+       "type": "string",
+       "pattern": "^[a-z][a-z0-9_]{0,99}$"
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      }
+     }
+    }
+   }
+  },
+  "platform.document.created": {
+   "event_type": "platform.document.created",
+   "producer": "platform_core.documents",
+   "aggregate_type": "platform.document",
+   "description": "document registered",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      }
+     }
+    }
+   }
+  },
+  "platform.document.object.purged": {
+   "event_type": "platform.document.object.purged",
+   "producer": "platform_core.documents",
+   "aggregate_type": "platform.stored_object",
+   "description": "bytes of a rejected upload purged (DEC-053); hash kept",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "sha256"
+     ],
+     "properties": {
+      "sha256": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{64}$"
+      }
+     }
+    }
+   }
+  },
+  "platform.document.revision.changed": {
+   "event_type": "platform.document.revision.changed",
+   "producer": "platform_core.documents",
+   "aggregate_type": "platform.document_revision",
+   "description": "revision uploaded/scanned/submitted/approved/rejected/superseded",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "document_id",
+      "id",
+      "scan_status",
+      "status"
+     ],
+     "properties": {
+      "document_id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "scan_status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      }
+     }
+    }
+   }
+  },
+  "platform.document.updated": {
+   "event_type": "platform.document.updated",
+   "producer": "platform_core.documents",
+   "aggregate_type": "platform.document",
+   "description": "document metadata changed",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      }
+     }
+    }
+   }
+  },
+  "platform.identity.assignment.changed": {
+   "event_type": "platform.identity.assignment.changed",
+   "producer": "platform_core.identity",
+   "aggregate_type": "platform.role_assignment",
+   "description": "role assignment granted/approved/revoked",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "status"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      }
+     }
+    }
+   }
+  },
+  "platform.identity.mfa.enrolled": {
+   "event_type": "platform.identity.mfa.enrolled",
+   "producer": "platform_core.identity",
+   "aggregate_type": "platform.mfa_factor",
+   "description": "TOTP factor confirmed",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "status",
+      "user_id"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      },
+      "user_id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      }
+     }
+    }
+   }
+  },
+  "platform.identity.mfa.enrolment_failed": {
+   "event_type": "platform.identity.mfa.enrolment_failed",
+   "producer": "platform_core.identity",
+   "aggregate_type": "platform.mfa_factor",
+   "description": "wrong enrolment code",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      }
+     }
+    }
+   }
+  },
+  "platform.identity.mfa.enrolment_started": {
+   "event_type": "platform.identity.mfa.enrolment_started",
+   "producer": "platform_core.identity",
+   "aggregate_type": "platform.mfa_factor",
+   "description": "TOTP enrolment started",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "status",
+      "user_id"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      },
+      "user_id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      }
+     }
+    }
+   }
+  },
+  "platform.identity.mfa.revoked": {
+   "event_type": "platform.identity.mfa.revoked",
+   "producer": "platform_core.identity",
+   "aggregate_type": "platform.mfa_factor",
+   "description": "factor revoked",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "status",
+      "user_id"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      },
+      "user_id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      }
+     }
+    }
+   }
+  },
+  "platform.identity.owner.bootstrapped": {
+   "event_type": "platform.identity.owner.bootstrapped",
+   "producer": "platform_core.identity",
+   "aggregate_type": "platform.user",
+   "description": "console owner bootstrap",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "status"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      }
+     }
+    }
+   }
+  },
+  "platform.identity.owner.recovered": {
+   "event_type": "platform.identity.owner.recovered",
+   "producer": "platform_core.identity",
+   "aggregate_type": "platform.user",
+   "description": "console owner recovery",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "status"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      }
+     }
+    }
+   }
+  },
+  "platform.identity.role.changed": {
+   "event_type": "platform.identity.role.changed",
+   "producer": "platform_core.identity",
+   "aggregate_type": "platform.role",
+   "description": "role created/changed/activated/retired",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "status"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      }
+     }
+    }
+   }
+  },
+  "platform.identity.session.activated": {
+   "event_type": "platform.identity.session.activated",
+   "producer": "platform_core.identity",
+   "aggregate_type": "platform.session",
+   "description": "session activated",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "state",
+      "user_id"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "state": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      },
+      "user_id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      }
+     }
+    }
+   }
+  },
+  "platform.identity.session.created": {
+   "event_type": "platform.identity.session.created",
+   "producer": "platform_core.identity",
+   "aggregate_type": "platform.session",
+   "description": "session created",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "state",
+      "user_id"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "state": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      },
+      "user_id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      }
+     }
+    }
+   }
+  },
+  "platform.identity.session.expired": {
+   "event_type": "platform.identity.session.expired",
+   "producer": "platform_core.identity",
+   "aggregate_type": "platform.session",
+   "description": "session expired",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "state",
+      "user_id"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "state": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      },
+      "user_id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      }
+     }
+    }
+   }
+  },
+  "platform.identity.session.logged_out": {
+   "event_type": "platform.identity.session.logged_out",
+   "producer": "platform_core.identity",
+   "aggregate_type": "platform.session",
+   "description": "session logged out",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "state",
+      "user_id"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "state": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      },
+      "user_id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      }
+     }
+    }
+   }
+  },
+  "platform.identity.session.revoked": {
+   "event_type": "platform.identity.session.revoked",
+   "producer": "platform_core.identity",
+   "aggregate_type": "platform.session",
+   "description": "session revoked",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "state",
+      "user_id"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "state": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      },
+      "user_id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      }
+     }
+    }
+   }
+  },
+  "platform.identity.session.stepped_up": {
+   "event_type": "platform.identity.session.stepped_up",
+   "producer": "platform_core.identity",
+   "aggregate_type": "platform.session",
+   "description": "MFA step-up recorded on the session",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "user_id"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "user_id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      }
+     }
+    }
+   }
+  },
+  "platform.identity.user.created": {
+   "event_type": "platform.identity.user.created",
+   "producer": "platform_core.identity",
+   "aggregate_type": "platform.user",
+   "description": "user created in-app (DEC-003)",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "status"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      }
+     }
+    }
+   }
+  },
+  "platform.identity.user.mfa_reset": {
+   "event_type": "platform.identity.user.mfa_reset",
+   "producer": "platform_core.identity",
+   "aggregate_type": "platform.user",
+   "description": "admin MFA reset (factors revoked, sessions ended)",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "revoked_factors"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "revoked_factors": {
+       "type": "integer",
+       "minimum": 0
+      }
+     }
+    }
+   }
+  },
+  "platform.identity.user.password_reset": {
+   "event_type": "platform.identity.user.password_reset",
+   "producer": "platform_core.identity",
+   "aggregate_type": "platform.user",
+   "description": "admin password reset",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "status"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      }
+     }
+    }
+   }
+  },
+  "platform.identity.user.status_changed": {
+   "event_type": "platform.identity.user.status_changed",
+   "producer": "platform_core.identity",
+   "aggregate_type": "platform.user",
+   "description": "lock/unlock/disable/enable",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "status"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      }
+     }
+    }
+   }
+  },
+  "platform.identity.user.updated": {
+   "event_type": "platform.identity.user.updated",
+   "producer": "platform_core.identity",
+   "aggregate_type": "platform.user",
+   "description": "user profile fields changed",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "status"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      }
+     }
+    }
+   }
+  },
+  "platform.integration.batch_received": {
+   "event_type": "platform.integration.batch_received",
+   "producer": "platform_core.integration",
+   "aggregate_type": "platform.import_batch",
+   "description": "file received (hash only, no content)",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "batch_id",
+      "byte_size",
+      "sha256",
+      "source_code"
+     ],
+     "properties": {
+      "batch_id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "byte_size": {
+       "type": "integer",
+       "minimum": 0
+      },
+      "sha256": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{64}$"
+      },
+      "source_code": {
+       "type": "string",
+       "pattern": "^[a-z][a-z0-9_]{0,99}$"
+      }
+     }
+    }
+   }
+  },
+  "platform.integration.batch_rejected": {
+   "event_type": "platform.integration.batch_rejected",
+   "producer": "platform_core.integration",
+   "aggregate_type": "platform.import_batch",
+   "description": "batch rejected",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "batch_id",
+      "source_code"
+     ],
+     "properties": {
+      "batch_id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "source_code": {
+       "type": "string",
+       "pattern": "^[a-z][a-z0-9_]{0,99}$"
+      }
+     }
+    }
+   }
+  },
+  "platform.integration.batch_staged": {
+   "event_type": "platform.integration.batch_staged",
+   "producer": "platform_core.integration",
+   "aggregate_type": "platform.import_batch",
+   "description": "rows staged",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "batch_id",
+      "row_count",
+      "source_code"
+     ],
+     "properties": {
+      "batch_id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "row_count": {
+       "type": "integer",
+       "minimum": 0
+      },
+      "source_code": {
+       "type": "string",
+       "pattern": "^[a-z][a-z0-9_]{0,99}$"
+      }
+     }
+    }
+   }
+  },
+  "platform.integration.batch_validated": {
+   "event_type": "platform.integration.batch_validated",
+   "producer": "platform_core.integration",
+   "aggregate_type": "platform.import_batch",
+   "description": "rows validated",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "batch_id",
+      "error_row_count",
+      "row_count",
+      "source_code"
+     ],
+     "properties": {
+      "batch_id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "error_row_count": {
+       "type": "integer",
+       "minimum": 0
+      },
+      "row_count": {
+       "type": "integer",
+       "minimum": 0
+      },
+      "source_code": {
+       "type": "string",
+       "pattern": "^[a-z][a-z0-9_]{0,99}$"
+      }
+     }
+    }
+   }
+  },
+  "platform.integration.compensation_recorded": {
+   "event_type": "platform.integration.compensation_recorded",
+   "producer": "platform_core.integration",
+   "aggregate_type": "platform.compensation_record",
+   "description": "compensation recorded for a dead-lettered event",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "compensation_id",
+      "consumer",
+      "event_id",
+      "outcome"
+     ],
+     "properties": {
+      "compensation_id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "consumer": {
+       "type": "string",
+       "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_-]*)*$"
+      },
+      "event_id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "outcome": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      }
+     }
+    }
+   }
+  },
+  "platform.integration.conflict_raised": {
+   "event_type": "platform.integration.conflict_raised",
+   "producer": "platform_core.integration",
+   "aggregate_type": "platform.conflict_item",
+   "description": "conflict queue item opened",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "batch_id",
+      "conflict_id",
+      "kind",
+      "source_code"
+     ],
+     "properties": {
+      "batch_id": {
+       "oneOf": [
+        {
+         "type": "string",
+         "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "conflict_id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "kind": {
+       "type": "string",
+       "pattern": "^[a-z][a-z0-9_]{0,99}$"
+      },
+      "source_code": {
+       "type": "string",
+       "pattern": "^[a-z][a-z0-9_]{0,99}$"
+      }
+     }
+    }
+   }
+  },
+  "platform.integration.conflict_resolved": {
+   "event_type": "platform.integration.conflict_resolved",
+   "producer": "platform_core.integration",
+   "aggregate_type": "platform.conflict_item",
+   "description": "conflict queue item resolved / dismissed",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "conflict_id",
+      "source_code",
+      "status"
+     ],
+     "properties": {
+      "conflict_id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "source_code": {
+       "type": "string",
+       "pattern": "^[a-z][a-z0-9_]{0,99}$"
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      }
+     }
+    }
+   }
+  },
+  "platform.ops.job.changed": {
+   "event_type": "platform.ops.job.changed",
+   "producer": "platform_core.jobs",
+   "aggregate_type": "platform.job_run",
+   "description": "job run queued/started/cancel requested/finished",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "job_type",
+      "state"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "job_type": {
+       "type": "string",
+       "pattern": "^[a-z][a-z0-9_]{0,99}$"
+      },
+      "state": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      }
+     }
+    }
+   }
+  },
+  "platform.org.position.created": {
+   "event_type": "platform.org.position.created",
+   "producer": "platform_core.org",
+   "aggregate_type": "platform.position",
+   "description": "position created",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      }
+     }
+    }
+   }
+  },
+  "platform.org.position.updated": {
+   "event_type": "platform.org.position.updated",
+   "producer": "platform_core.org",
+   "aggregate_type": "platform.position",
+   "description": "position changed",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      }
+     }
+    }
+   }
+  },
+  "platform.org.position_assignment.created": {
+   "event_type": "platform.org.position_assignment.created",
+   "producer": "platform_core.org",
+   "aggregate_type": "platform.position_assignment",
+   "description": "person assigned to a position",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      }
+     }
+    }
+   }
+  },
+  "platform.org.position_assignment.ended": {
+   "event_type": "platform.org.position_assignment.ended",
+   "producer": "platform_core.org",
+   "aggregate_type": "platform.position_assignment",
+   "description": "position assignment ended",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      }
+     }
+    }
+   }
+  },
+  "platform.org.unit.created": {
+   "event_type": "platform.org.unit.created",
+   "producer": "platform_core.org",
+   "aggregate_type": "platform.org_unit",
+   "description": "org unit created",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      }
+     }
+    }
+   }
+  },
+  "platform.org.unit.deactivated": {
+   "event_type": "platform.org.unit.deactivated",
+   "producer": "platform_core.org",
+   "aggregate_type": "platform.org_unit",
+   "description": "org unit deactivated",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      }
+     }
+    }
+   }
+  },
+  "platform.org.unit.moved": {
+   "event_type": "platform.org.unit.moved",
+   "producer": "platform_core.org",
+   "aggregate_type": "platform.org_unit",
+   "description": "org unit moved in the tree",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      }
+     }
+    }
+   }
+  },
+  "platform.org.unit.updated": {
+   "event_type": "platform.org.unit.updated",
+   "producer": "platform_core.org",
+   "aggregate_type": "platform.org_unit",
+   "description": "org unit renamed / changed",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      }
+     }
+    }
+   }
+  },
+  "platform.workflow.approval.approved": {
+   "event_type": "platform.workflow.approval.approved",
+   "producer": "platform_core.workflow",
+   "aggregate_type": "platform.approval_request",
+   "description": "approval request approved (DEC-032)",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "resource_id",
+      "resource_type",
+      "status"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "resource_id": {
+       "type": "string",
+       "pattern": "^[A-Za-z0-9_.:-]{1,64}$"
+      },
+      "resource_type": {
+       "type": "string",
+       "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_-]*)*$"
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      }
+     }
+    }
+   }
+  },
+  "platform.workflow.approval.expired": {
+   "event_type": "platform.workflow.approval.expired",
+   "producer": "platform_core.workflow",
+   "aggregate_type": "platform.approval_request",
+   "description": "approval request expired (DEC-032)",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "resource_id",
+      "resource_type",
+      "status"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "resource_id": {
+       "type": "string",
+       "pattern": "^[A-Za-z0-9_.:-]{1,64}$"
+      },
+      "resource_type": {
+       "type": "string",
+       "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_-]*)*$"
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      }
+     }
+    }
+   }
+  },
+  "platform.workflow.approval.raised": {
+   "event_type": "platform.workflow.approval.raised",
+   "producer": "platform_core.workflow",
+   "aggregate_type": "platform.approval_request",
+   "description": "approval request raised (DEC-032)",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "resource_id",
+      "resource_type",
+      "status"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "resource_id": {
+       "type": "string",
+       "pattern": "^[A-Za-z0-9_.:-]{1,64}$"
+      },
+      "resource_type": {
+       "type": "string",
+       "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_-]*)*$"
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      }
+     }
+    }
+   }
+  },
+  "platform.workflow.approval.rejected": {
+   "event_type": "platform.workflow.approval.rejected",
+   "producer": "platform_core.workflow",
+   "aggregate_type": "platform.approval_request",
+   "description": "approval request rejected (DEC-032)",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "resource_id",
+      "resource_type",
+      "status"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "resource_id": {
+       "type": "string",
+       "pattern": "^[A-Za-z0-9_.:-]{1,64}$"
+      },
+      "resource_type": {
+       "type": "string",
+       "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_-]*)*$"
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      }
+     }
+    }
+   }
+  },
+  "platform.workflow.approval.superseded": {
+   "event_type": "platform.workflow.approval.superseded",
+   "producer": "platform_core.workflow",
+   "aggregate_type": "platform.approval_request",
+   "description": "approval request superseded (DEC-032)",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "resource_id",
+      "resource_type",
+      "status"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "resource_id": {
+       "type": "string",
+       "pattern": "^[A-Za-z0-9_.:-]{1,64}$"
+      },
+      "resource_type": {
+       "type": "string",
+       "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_-]*)*$"
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      }
+     }
+    }
+   }
+  },
+  "platform.workflow.approval.withdrawn": {
+   "event_type": "platform.workflow.approval.withdrawn",
+   "producer": "platform_core.workflow",
+   "aggregate_type": "platform.approval_request",
+   "description": "approval request withdrawn (DEC-032)",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "resource_id",
+      "resource_type",
+      "status"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "resource_id": {
+       "type": "string",
+       "pattern": "^[A-Za-z0-9_.:-]{1,64}$"
+      },
+      "resource_type": {
+       "type": "string",
+       "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_-]*)*$"
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      }
+     }
+    }
+   }
+  },
+  "platform.workflow.instance.changed": {
+   "event_type": "platform.workflow.instance.changed",
+   "producer": "platform_core.workflow",
+   "aggregate_type": "platform.workflow_instance",
+   "description": "workflow instance started/advanced/finished",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "status"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      }
+     }
+    }
+   }
+  },
+  "platform.workflow.task.changed": {
+   "event_type": "platform.workflow.task.changed",
+   "producer": "platform_core.workflow",
+   "aggregate_type": "platform.work_task",
+   "description": "work task state changed (verb = transition)",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "status",
+      "verb"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      },
+      "verb": {
+       "type": "string",
+       "pattern": "^[a-z][a-z0-9_]{0,99}$"
+      }
+     }
+    }
+   }
+  }
+ }
+}

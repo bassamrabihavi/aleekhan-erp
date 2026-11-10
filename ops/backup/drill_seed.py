@@ -53,7 +53,8 @@ def main() -> int:
                 action="platform.ops.drill_seed", resource_type="platform.synthetic", resource_id=f"d{i}"
             )
             uow.emit(
-                event_type="platform.ops.drill_seeded",
+                # 01.6: uncatalogued types are refused; dev/test accept only the synthetic namespace
+                event_type="platform.synthetic.drill_seeded",
                 aggregate_type="platform.synthetic",
                 aggregate_id=f"d{i}",
                 aggregate_version=1,

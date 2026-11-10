@@ -27,6 +27,7 @@ from platform_core.identity.models import LoginAttempt, User
 from platform_core.jobs import service as jobs
 from platform_core.jobs.models import AuditIntegrityRun, JobDefinition, JobRun
 from platform_core.models import AuditEvent, OutboxEvent
+from platform_core.ops.monitoring import integration_health
 
 from .. import views as probes
 from . import serializers as S
@@ -106,6 +107,8 @@ class HealthDetailView(Phase01View):
                     state="FAILED", finished_at__gte=now - timedelta(hours=24)
                 ).count(),
             },
+            # 01.6: event delivery freshness / ordering / compensation (counts only, no payloads or ids)
+            "integration": _integration(now),
             "security": {
                 "failed_logins_24h": LoginAttempt.objects.filter(
                     outcome__in=FAILED_LOGIN_OUTCOMES, occurred_at__gte=now - timedelta(hours=24)
@@ -114,6 +117,20 @@ class HealthDetailView(Phase01View):
             },
         }
         return Response(body, headers=NO_STORE)
+
+
+def _integration(now: Any) -> dict[str, Any]:
+    h = integration_health(now=now)
+    return {
+        "lag_seconds": h.lag_seconds,
+        "stale": h.stale,
+        "stale_after_seconds": h.stale_after_seconds,
+        "blocked_aggregates": h.blocked_aggregates,
+        "held_events": h.held_events,
+        "open_conflicts": h.open_conflicts,
+        "compensation_open": h.compensation_open,
+        "last_acked_at": utc(h.last_acked_at),
+    }
 
 
 class JobDefinitionsView(Phase01View):

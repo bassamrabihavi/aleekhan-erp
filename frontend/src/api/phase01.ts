@@ -1,4 +1,4 @@
-// PHASE_01 operations (docs/api/openapi-draft.yaml 0.6.1-draft) used by the UI of step 01.5. Types mirror the
+// PHASE_01 operations (docs/api/openapi-draft.yaml 0.6.2-draft) used by the UI of step 01.5. Types mirror the
 // contract schemas; guards check the required keys of every body (a body without them is a contract error).
 import { apiRequest, newIdempotencyKey, type ApiResponse, type Query } from "./http";
 
@@ -347,6 +347,17 @@ export interface HealthDetail {
   components: { name: string; status: "up" | "down" | "unknown" }[];
   outbox: { pending: number; failed: number; dead_letter: number; oldest_pending_at: string | null };
   jobs: { running: number; queued: number; failed_24h: number };
+  // 0.6.2-draft (01.6): event delivery freshness between modules (counts only)
+  integration?: {
+    lag_seconds: number | null;
+    stale: boolean;
+    stale_after_seconds: number;
+    blocked_aggregates: number;
+    held_events: number;
+    open_conflicts: number;
+    compensation_open: number;
+    last_acked_at: string | null;
+  };
   security?: { failed_logins_24h: number; locked_users: number };
 }
 export interface JobDefinition {

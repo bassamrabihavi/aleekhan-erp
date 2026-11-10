@@ -187,3 +187,18 @@ All 99 PHASE_01 operations are served (`backend/platform_core/api/phase01/`, rou
 - `withdrawRequest` stores its reason (closing note + audit reason, REV-0121); `publishParameterValue` stores the
   optional note as the audit reason (REV-0122).
 - `ParameterValueRevision.row_version` (optional, additive): the If-Match of `publishParameterValue`.
+
+## 11. PHASE_01 / 01.6 changes (contract 0.6.2-draft)
+
+- `getHealthDetail` (page 36) returns the optional `integration` object: event delivery lag, `stale` flag,
+  aggregates blocked by a dead letter and the events held behind them, open conflicts, compensation records that
+  need a human, last acknowledgement (counts only; docs/integration/README.md section 9). Additive.
+- Every outbox event follows the event catalogue (docs/integration/EVENT_CATALOGUE.md) and carries provenance
+  (`producer`, `build_commit`, `schema_migration`); delivery is ordered per aggregate.
+- Policy runs over matrix **v1.2** (DEC-056 extension 2026-11-10, migration `0015`): `owner_admin` also holds
+  `platform.document.approve` (approve / reject document revisions: `approveRequest` / `rejectRequest` on a
+  `document_revision` request, `approveDocumentRevision` / `rejectDocumentRevision`) and
+  `platform.config.parameter.publish` for **BUSINESS_RULE** values (`publishParameterValue`; a TECHNICAL value
+  answers 403 `ACCESS_DENIED` for an owner without a BUSINESS publishing role; BUSINESS_RULE values still answer
+  409 `RULE_NOT_APPROVED` while their decision is open). Maker != checker unchanged: own request / upload /
+  proposal -> 403 `SELF_APPROVAL_FORBIDDEN` (now also for rejecting one's own BUSINESS_RULE proposal).

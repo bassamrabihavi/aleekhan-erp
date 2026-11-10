@@ -1,7 +1,7 @@
-"""PHASE_01 / 01.5 backend items: DEC-056 (owner approval rights, matrix v1.1), REV-0120 (upload parent check
-under the document row lock, HTTP race), REV-0121 (withdraw reason in the audit row, HTTP happy path),
-REV-0122 (publish note -> audit reason). REV-0123 (CSRF rotation) is asserted in test_api_phase01_auth.py.
-Synthetic data only."""
+"""PHASE_01 / 01.5 backend items: DEC-056 (owner approval rights, matrix v1.1; v1.2 since 01.6), REV-0120
+(upload parent check under the document row lock, HTTP race), REV-0121 (withdraw reason in the audit row,
+HTTP happy path), REV-0122 (publish note -> audit reason). REV-0123 (CSRF rotation) is asserted in
+test_api_phase01_auth.py. Synthetic data only."""
 
 from __future__ import annotations
 
@@ -50,31 +50,32 @@ def test_dec056_owner_holds_approval_read_and_decide_in_the_db() -> None:
     owner = Role.objects.get(code="owner_admin")
     held = set(RolePermission.objects.filter(role=owner).values_list("permission_id", "grant_mode"))
     assert {("platform.workflow.approval.read", "SCOPE"), (DECIDE, "SCOPE")} <= held
-    assert owner.matrix_version == "1.1" and owner.kind == "TECHNICAL"
+    # matrix v1.2 (DEC-056 extension, 0015): document.approve + parameter.publish as well
+    assert {("platform.document.approve", "SCOPE"), ("platform.config.parameter.publish", "SCOPE")} <= held
+    assert owner.matrix_version == "1.2" and owner.kind == "TECHNICAL"
     # no other business-approval permission for the owner, and none at all for it_ops / security_auditor
-    assert (
-        not RolePermission.objects.filter(role__code="owner_admin", permission__business_approval=True)
-        .exclude(permission_id=DECIDE)
-        .exists()
-    )
+    assert set(
+        RolePermission.objects.filter(
+            role__code="owner_admin", permission__business_approval=True
+        ).values_list("permission_id", flat=True)
+    ) == {DECIDE, "platform.document.approve", "platform.config.parameter.publish"}
     assert not RolePermission.objects.filter(
         role__code__in=["it_ops", "security_auditor"], permission__business_approval=True
     ).exists()
 
 
 @pytest.mark.django_db
-def test_dec056_guard_exception_is_only_the_owner_decide_pair() -> None:
+def test_dec056_guard_exception_is_only_the_three_owner_pairs() -> None:
     """Any other TECHNICAL + business-approval pair is still refused by the DB (DEC-003)."""
     tech = Role.objects.create(code="syn_tech56", name_fa="نقش فنی ساختگی", kind="TECHNICAL", status="DRAFT")
-    with db_refuses("ck_role_technical_no_business_approval"):
-        RolePermission.objects.create(role=tech, permission_id=DECIDE, grant_mode="SCOPE")
-    # the owner's grants are frozen like every ACTIVE role (no runtime way to add document.approve)
+    for action in (DECIDE, "platform.document.approve", "platform.config.parameter.publish"):
+        with db_refuses("ck_role_technical_no_business_approval"):
+            RolePermission.objects.create(role=tech, permission_id=action, grant_mode="SCOPE")
+    # the owner's grants are frozen like every ACTIVE role (no runtime way to add or drop a cell)
     with db_refuses("ck_role_permission_draft_only"):
-        RolePermission.objects.create(
-            role=Role.objects.get(code="owner_admin"),
-            permission_id="platform.document.approve",
-            grant_mode="SCOPE",
-        )
+        RolePermission.objects.filter(
+            role=Role.objects.get(code="owner_admin"), permission_id="platform.document.approve"
+        ).delete()
 
 
 @pytest.mark.django_db

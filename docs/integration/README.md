@@ -173,3 +173,35 @@ server-side code only (the upload page belongs to the owning phase, with SEC-03 
 - Denied/failed attempts inside a rolled-back unit of work leave no audit row (known 00.3 limit).
 - Freshness thresholds and the re-import / supersede policy wait for **DEC-016**; legacy workbook mapping for
   **DEC-025**.
+
+## 9. PHASE_01 / 01.6 — platform events between modules
+
+Scope: only the platform's own sources/events (identity, roles, org, workflow, documents, parameters, jobs and the
+00.6 integration framework). No business module exists yet; Rahkaran stays read-only and is not touched here; no
+real data. Modules still never write each other's tables: the only channel is the outbox event + an in-process
+consumer (`RegistryPublisher`) in the consuming module's own unit of work. PHASE_01 registers **no** production
+consumer; the pipeline is tested with synthetic consumers only.
+
+| Concern | Mechanism | Code / evidence |
+|---|---|---|
+| Event catalogue | every event type, producer module, aggregate type, version(s), payload JSON Schema, sensitivity S1 | `engine/events.py`, `docs/integration/EVENT_CATALOGUE.md`, golden `tests/golden/event_catalogue.golden.json` |
+| Producer contract | `UnitOfWork.emit` refuses an uncatalogued type, a wrong aggregate type, a non-current version or a payload that does not match (unknown / missing / wrongly typed key) - inside the transaction, so the business write rolls back | `tests/test_integration_events.py::test_emit_refuses_*`; the full suite runs every emit site through the check |
+| Synthetic namespace | `platform.synthetic.*` is accepted uncatalogued (payload unchecked) only when `ALEEKHAN_ENV` is `test` or `dev` (engine tests, `ops/db/roles_check.sh`, `ops/backup/drill_seed.py`); staging / prod refuse it | `test_emit_refuses_*` |
+| Provenance | `producer`, `build_commit`, `schema_migration` columns on `platform_outbox_event` (migration `0016`), also on `EventEnvelope.provenance`; `''` = written before 0016 | `test_golden_flow_*`, `test_handler_sees_the_provenance_*` |
+| Staging / dedupe | consumer inbox `platform_inbox_event` (00.6, unique consumer + event id) - unchanged | `test_integration_consumers.py` |
+| Versioning | consumer accepts N and N-1 (upcaster in the spec); older / invalid -> dead letter at once (permanent `PublishError`), newer -> retried with backoff | `test_consumer_accepts_n_and_upcasts_n_minus_1`, `test_unsupported_old_version_*` |
+| Retries / backoff / jitter | `INTEGRATION_POLICY` (00.6, TECHNICAL DEFAULT) - unchanged; `PublishError(permanent=True)` skips the remaining attempts for poison events | `test_incompatible_payload_is_dead_lettered_at_once_with_compensation` |
+| Dead letter / conflict queue | DEAD_LETTER rows + `platform_compensation_record` (`MANUAL_REQUIRED` / `HOOK_FAILED` / `COMPLETED`) per consumer; data conflicts of imported sources stay in `platform_conflict_item` (section 6) | 00.6 tests + the above |
+| Compensation | `EventHandler.compensate` hook, run in a savepoint on dead letter (00.6) - unchanged; no PHASE_01 consumer has a side effect to undo | - |
+| Ordering | per aggregate: a row is claimed only when no earlier row of the same aggregate is undelivered (`OutboxPolicy.per_aggregate_order`, default on; partial index `ix_outbox_event_agg_open`). Outbox ids follow commit order because every unit of work holds the audit chain lock until commit. A DEAD_LETTER head blocks its aggregate until replayed; other aggregates flow | `test_a_failing_event_holds_back_*`, `test_dead_letter_head_blocks_*`, race `test_concurrent_dispatchers_keep_per_aggregate_order_with_retries` |
+| Freshness | `ops.monitoring.integration_health`: `lag_seconds` (oldest undelivered event), `stale` (> 900 s, TECHNICAL DEFAULT), `blocked_aggregates`, `held_events`, `open_conflicts`, `compensation_open`, `last_acked_at`; in `GET /admin/health` (`integration`, contract 0.6.2-draft), page 36 and `manage.py outbox_status` (reasons `DELIVERY_STALE`, `ORDERING_BLOCKED`) | `test_lag_and_stale_flag`, `test_health_endpoint_exposes_integration_freshness`, vitest page 36 |
+
+Contract items (not invented here; need a contract change in a later step / phase):
+- **Dead-letter replay / discard over HTTP**: the contract has no operation; replay exists as the audited engine
+  function `outbox.replay_dead_letter` (identified user + reason). A "discard" (DEAD_LETTER -> terminal) needs a
+  new delivery state and an owner decision about who may drop an event. Until then the counts are visible on
+  page 36 and through `outbox_status`.
+- **Compensation resolution**: `MANUAL_REQUIRED` records have no "resolved" state; resolution belongs to the
+  consuming module's phase.
+- **Worker process**: still no Celery/worker (unchanged since 00.6); `dispatch_once` / `recover_stale` /
+  `sweep_dead_letters` are library calls; the health component `worker` is reported `unknown` honestly.

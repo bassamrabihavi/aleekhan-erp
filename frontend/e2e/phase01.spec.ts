@@ -6,7 +6,9 @@ import { expect, test, type Browser, type BrowserContext, type Page } from "@pla
 import {
   answerStepUp,
   expectNoAxeViolations,
+  manage,
   OWNER_USERNAME,
+  SCAN_WITH_TEST_DOUBLE,
   screenshots,
   SYN_LABEL,
   SYN_PW_DOCCTL_NEW,
@@ -283,6 +285,9 @@ test("page 42: OWNER_POLICY value published by the owner in one step", async () 
 test("page 36: health counters, audit integrity, protected job not cancellable, safe cancel with reason", async () => {
   await go(owner, "/ops", "page-ops");
   await expect(owner.getByTestId("health-panel")).toContainText("پایگاه داده");
+  // 01.6: delivery freshness from the server (no worker runs in E2E, so events wait - never shown as "up to date")
+  await expect(owner.getByTestId("integration-health")).toBeVisible();
+  await expect(owner.getByTestId("integration-stale")).not.toHaveText("همه رویدادها تحویل شده");
   await expect(owner.getByTestId("integrity-status")).toHaveText("سالم");
   await expect(owner.getByTestId("job-db_backup").getByTestId("job-not-cancellable")).toContainText("محافظت‌شده");
   await expectNoAxeViolations(owner);
@@ -367,6 +372,48 @@ test("document controller: first login, role-sensitive nav, server-side 403, upl
   await ctx.clearCookies({ name: "aleekhan_session" });
   await page.goto("/#/documents");
   await expect(page.getByTestId("login")).toBeVisible();
+  await ctx.close();
+});
+
+test("page 39 + 40: the owner decides a document revision submitted by another person (DEC-056 v1.2, REV-0128)", async ({ browser }) => {
+  manage(["shell", "-c", SCAN_WITH_TEST_DOUBLE]); // TEST DOUBLE scanner (no ClamAV in the local E2E run)
+  const [ctx, page] = await newPage(browser);
+  await go(page, "/", "login");
+  await page.getByTestId("login-username").fill(DOCCTL);
+  await page.getByTestId("login-password").fill(SYN_PW_DOCCTL_NEW);
+  await page.getByTestId("login-submit").click();
+  await expect(page.getByTestId("page-home")).toBeVisible();
+  await go(page, "/documents", "page-documents");
+  await page.getByTestId("doc-link").first().click();
+  const rev = page.getByTestId("revision-1");
+  await expect(rev.getByTestId("scan-status")).toContainText("پاک");
+  await rev.getByTestId("rev-submit").click();
+  await page.getByTestId("reason-input").fill("ارسال ساختگی برای بازبینی");
+  await page.getByTestId("reason-submit").click();
+  await expect(rev).toContainText("در بازبینی");
+
+  // the owner sees it in "to decide" (requested by someone else) and decides it directly
+  await go(owner, "/work", "page-work");
+  await owner.getByTestId("approval-inbox").selectOption("to_decide");
+  const card = owner.getByTestId("approval-card").filter({ hasText: "document_revision" });
+  await expect(card).toHaveCount(1);
+  await expect(card).not.toContainText("شما"); // not his own request
+  await card.getByTestId("approval-open").click();
+  await owner.getByTestId("approval-approve").click();
+  await owner.getByTestId("reason-input").fill("تأیید ساختگی مالک (DEC-056)");
+  await owner.getByTestId("reason-submit").click();
+  await answerStepUp(owner, totp, 2500);
+  await expect(owner.getByTestId("approval-actions")).toBeHidden();
+  await owner.getByTestId("approval-inbox").selectOption(""); // all visible requests
+  await owner.getByTestId("approval-status").selectOption("APPROVED");
+  await expect(owner.getByTestId("approval-card").filter({ hasText: "document_revision" })).toContainText("تأیید ساختگی مالک");
+  await expectNoAxeViolations(owner);
+  await screenshots(owner, "work-approvals-owner-decided", async () => {
+    await expect(owner.getByTestId("approvals-list")).toBeVisible();
+  });
+  // the uploader sees the revision approved
+  await page.reload();
+  await expect(page.getByTestId("revision-1")).toContainText("تأییدشده");
   await ctx.close();
 });
 

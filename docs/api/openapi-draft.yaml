@@ -2,7 +2,7 @@ openapi: 3.1.0
 jsonSchemaDialect: https://spec.openapis.org/oas/3.1/dialect/base
 info:
   title: Aleekhan Factory Platform API
-  version: 0.6.1-draft
+  version: 0.6.2-draft
   summary: PHASE_00 + PHASE_01 platform contract (implemented in 00.4 / 01.4). Platform only, NO business writes.
   description: |
     Status: DRAFT (PHASE_00 / 00.1 Discovery & Contract, implemented in 00.4). Not approved. This hand-written
@@ -58,6 +58,14 @@ info:
     else (there is no GET of a single value revision). Additive; no path, operation or existing field changed.
     The authorization policy runs over the APPROVED permission matrix v1.1 (DEC-056: owner_admin reads all
     approval requests and holds platform.workflow.approval.decide; maker != checker unchanged).
+
+    0.6.2-draft (PHASE_01 / 01.6 Integration): optional `HealthDetail.integration` (event delivery lag, stale flag,
+    aggregates blocked by a dead letter and events held behind them, open conflicts, compensation records that
+    need a human, last acknowledgement) for page 36. Additive; no path, operation or existing field changed.
+    There is still no dead-letter replay/discard operation (engine function only; listed as a contract item in
+    docs/integration/README.md section 9). Matrix v1.2 (DEC-056 extension, 2026-11-10): owner_admin also holds
+    platform.document.approve and platform.config.parameter.publish (BUSINESS_RULE values only); maker != checker
+    unchanged. Every outbox event follows the event catalogue (docs/integration/EVENT_CATALOGUE.md).
 
     Stack: Django 5.2 LTS + DRF (DEC-001). Base path is versioned: every endpoint lives under `/api/v1`.
     A breaking change requires `/api/v2` (or an explicitly approved deprecation window); additive changes only
@@ -7226,6 +7234,51 @@ components:
             failed_24h:
               type: integer
               minimum: 0
+        integration:
+          description: |
+            0.6.2-draft (01.6). Event delivery freshness: `lag_seconds` = age of the oldest event not yet delivered
+            (PENDING / FAILED / DISPATCHED; null when none); `stale` = lag > `stale_after_seconds` (TECHNICAL
+            DEFAULT 900 s); `blocked_aggregates` = aggregates whose events wait behind a DEAD_LETTER event
+            (per-aggregate ordering), `held_events` = undelivered events behind such a head; `compensation_open` =
+            compensation records with outcome MANUAL_REQUIRED or HOOK_FAILED. Counts only.
+          type: object
+          additionalProperties: false
+          required:
+          - lag_seconds
+          - stale
+          - stale_after_seconds
+          - blocked_aggregates
+          - held_events
+          - open_conflicts
+          - compensation_open
+          - last_acked_at
+          properties:
+            lag_seconds:
+              oneOf:
+              - type: integer
+                minimum: 0
+              - type: 'null'
+            stale:
+              type: boolean
+            stale_after_seconds:
+              type: integer
+              minimum: 1
+            blocked_aggregates:
+              type: integer
+              minimum: 0
+            held_events:
+              type: integer
+              minimum: 0
+            open_conflicts:
+              type: integer
+              minimum: 0
+            compensation_open:
+              type: integer
+              minimum: 0
+            last_acked_at:
+              oneOf:
+              - $ref: '#/components/schemas/UtcTimestamp'
+              - type: 'null'
         security:
           type: object
           additionalProperties: false

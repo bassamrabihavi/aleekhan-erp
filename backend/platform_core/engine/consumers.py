@@ -27,7 +27,7 @@ from __future__ import annotations
 
 import re
 from collections.abc import Callable, Iterable
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 
 from django.db import connections, transaction
 
@@ -43,6 +43,7 @@ from platform_core.models import (
 
 from .context import Actor, RequestContext
 from .errors import EngineContractError
+from .events import CATALOGUE, Catalogue, IncompatibleEvent, admit
 from .outbox import EventEnvelope, PublishError, _envelope
 from .uow import unit_of_work
 
@@ -148,15 +149,35 @@ def handler_failure_code(consumer: str, exc: BaseException) -> str:
 
 
 class RegistryPublisher:
-    """``OutboxPublisher`` that delivers to the in-process handlers of a :class:`HandlerRegistry`."""
+    """``OutboxPublisher`` that delivers to the in-process handlers of a :class:`HandlerRegistry`.
 
-    def __init__(self, registry: HandlerRegistry, *, using: str = "default") -> None:
+    01.6: before any handler runs, the envelope is admitted against the event catalogue
+    (:func:`~platform_core.engine.events.admit`): versions N and N-1 are accepted (N-1 upcast to N, handlers
+    only ever see the current version); an older or invalid payload is a permanent failure (DEAD_LETTER at
+    once, compensation recorded), a newer version a transient one (retried with backoff).
+    """
+
+    def __init__(
+        self, registry: HandlerRegistry, *, using: str = "default", catalogue: Catalogue = CATALOGUE
+    ) -> None:
         self.registry = registry
         self.using = using
+        self.catalogue = catalogue
 
     def publish(self, envelope: EventEnvelope) -> None:
+        handlers = self.registry.handlers_for(envelope.event_type)
+        if not handlers:
+            return  # nobody listens: acknowledged (no admission needed)
+        try:
+            version, payload = admit(
+                envelope.event_type, envelope.schema_version, envelope.payload, catalogue=self.catalogue
+            )
+        except IncompatibleEvent as exc:
+            raise PublishError(exc.code, permanent=exc.permanent) from None
+        if version != envelope.schema_version:
+            envelope = replace(envelope, schema_version=version, payload=payload)
         failure: str | None = None
-        for handler in self.registry.handlers_for(envelope.event_type):
+        for handler in handlers:
             try:
                 process_once(handler, envelope, using=self.using)
             except Exception as exc:  # keep going: other consumers must not wait for a failing one

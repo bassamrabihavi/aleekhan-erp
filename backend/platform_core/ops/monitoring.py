@@ -10,6 +10,13 @@ Verdict thresholds are TECHNICAL DEFAULTS (not business rules; ops to confirm on
 * ``warn``     - a DISPATCHED event older than the lease (dispatcher crashed; ``recover_stale`` needed), or
   the oldest due PENDING/FAILED event has waited longer than :data:`DUE_BACKLOG_WARN`;
 * ``ok``       - otherwise.
+
+01.6 (integration freshness, page 36): :func:`integration_health` - delivery lag (age of the oldest event not
+yet delivered and not dead), a ``stale`` flag (lag > :data:`DELIVERY_STALE_AFTER`), aggregates blocked by a
+dead-letter head (per-aggregate ordering, ``outbox.claim_batch``) and the events held behind them, open
+conflicts and compensation records that still need a human (``MANUAL_REQUIRED`` / ``HOOK_FAILED``).
+Exposed in ``GET /admin/health`` (``integration``) and in ``outbox_snapshot`` (reasons ``DELIVERY_STALE`` /
+``ORDERING_BLOCKED``).
 """
 
 from __future__ import annotations
@@ -18,16 +25,79 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from typing import Any, Final
 
-from django.db.models import Count, Max, Min, Q
+from django.db.models import Count, Exists, Max, Min, OuterRef, Q
 
 from platform_core.engine.context import db_now
 from platform_core.engine.outbox import INTEGRATION_POLICY, OutboxPolicy
 from platform_core.integration.models import ConflictItem, ConflictStatus
-from platform_core.models import DeliveryStatus, OutboxEvent
+from platform_core.models import CompensationOutcome, CompensationRecord, DeliveryStatus, OutboxEvent
 
 # TECHNICAL DEFAULT: a due event waiting longer than this = the dispatcher is not keeping up / not running.
 DUE_BACKLOG_WARN: Final = timedelta(minutes=15)
+# TECHNICAL DEFAULT (01.6): consumers are "stale" when the oldest undelivered event is older than this.
+DELIVERY_STALE_AFTER: Final = timedelta(minutes=15)
 VERDICTS: Final = ("ok", "warn", "critical")
+UNDELIVERED: Final = (DeliveryStatus.PENDING, DeliveryStatus.FAILED, DeliveryStatus.DISPATCHED)
+
+
+@dataclass(frozen=True)
+class IntegrationHealth:
+    lag_seconds: int | None
+    stale: bool
+    stale_after_seconds: int
+    blocked_aggregates: int
+    held_events: int
+    open_conflicts: int
+    compensation_open: int
+    last_acked_at: datetime | None
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "lag_seconds": self.lag_seconds,
+            "stale": self.stale,
+            "stale_after_seconds": self.stale_after_seconds,
+            "blocked_aggregates": self.blocked_aggregates,
+            "held_events": self.held_events,
+            "open_conflicts": self.open_conflicts,
+            "compensation_open": self.compensation_open,
+            "last_acked_at": self.last_acked_at.isoformat() if self.last_acked_at else None,
+        }
+
+
+def integration_health(*, using: str = "default", now: datetime | None = None) -> IntegrationHealth:
+    """Read-only freshness / ordering / compensation view of the event pipeline (plain SELECTs)."""
+    now = now if now is not None else db_now(using)
+    qs = OutboxEvent.objects.using(using)
+    oldest = qs.filter(delivery_status__in=UNDELIVERED).aggregate(o=Min("created_at"))["o"]
+    lag = _age(now, oldest)
+    dead = qs.filter(delivery_status=DeliveryStatus.DEAD_LETTER)
+    blocked = dead.values("aggregate_type", "aggregate_id").distinct().count()
+    held = (
+        qs.filter(delivery_status__in=UNDELIVERED)
+        .filter(
+            Exists(
+                OutboxEvent.objects.using(using).filter(
+                    aggregate_type=OuterRef("aggregate_type"),
+                    aggregate_id=OuterRef("aggregate_id"),
+                    id__lt=OuterRef("id"),
+                    delivery_status=DeliveryStatus.DEAD_LETTER,
+                )
+            )
+        )
+        .count()
+    )
+    return IntegrationHealth(
+        lag_seconds=lag,
+        stale=lag is not None and lag > DELIVERY_STALE_AFTER.total_seconds(),
+        stale_after_seconds=int(DELIVERY_STALE_AFTER.total_seconds()),
+        blocked_aggregates=blocked,
+        held_events=held,
+        open_conflicts=ConflictItem.objects.using(using).filter(status=ConflictStatus.OPEN).count(),
+        compensation_open=CompensationRecord.objects.using(using)
+        .filter(outcome__in=[CompensationOutcome.MANUAL_REQUIRED, CompensationOutcome.HOOK_FAILED])
+        .count(),
+        last_acked_at=qs.aggregate(a=Max("acked_at"))["a"],
+    )
 
 
 @dataclass(frozen=True)
@@ -46,6 +116,7 @@ class OutboxSnapshot:
     lease_seconds: int
     verdict: str
     reasons: list[str] = field(default_factory=list)
+    integration: IntegrationHealth | None = None
 
     def as_dict(self) -> dict[str, Any]:
         def ts(v: datetime | None) -> str | None:
@@ -66,6 +137,7 @@ class OutboxSnapshot:
             "lease_seconds": self.lease_seconds,
             "verdict": self.verdict,
             "reasons": list(self.reasons),
+            "integration": self.integration.as_dict() if self.integration is not None else None,
         }
 
 
@@ -101,6 +173,11 @@ def outbox_snapshot(
         reasons.append("STALE_DISPATCHED")
     if oldest_due_age is not None and oldest_due_age > DUE_BACKLOG_WARN.total_seconds():
         reasons.append("DUE_BACKLOG")
+    health = integration_health(using=using, now=now)
+    if health.stale:
+        reasons.append("DELIVERY_STALE")
+    if health.held_events:
+        reasons.append("ORDERING_BLOCKED")
     verdict = "critical" if dead else ("warn" if reasons else "ok")
     return OutboxSnapshot(
         checked_at=now,
@@ -117,4 +194,5 @@ def outbox_snapshot(
         lease_seconds=int(policy.lease.total_seconds()),
         verdict=verdict,
         reasons=reasons,
+        integration=health,
     )

@@ -1,7 +1,9 @@
 // Helpers of the PHASE_01 E2E suite (real Django + PostgreSQL). Synthetic test credentials only (SYN_PW_*);
 // the TOTP generator is RFC 6238 (SHA-1, 30 s, 6 digits) on node:crypto - the same algorithm the backend checks.
+import { spawnSync } from "node:child_process";
 import { createHmac } from "node:crypto";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 import AxeBuilder from "@axe-core/playwright";
 import { expect, type Page } from "@playwright/test";
@@ -82,3 +84,20 @@ export async function screenshots(page: Page, name: string, ready: () => Promise
   }
   await page.setViewportSize({ width: 1440, height: 900 });
 }
+
+/** Run `manage.py <args>` against the throw-away E2E database (env from scripts/e2e.sh; nothing printed). */
+export function manage(args: string[], input?: string): void {
+  const python = process.env.E2E_PYTHON;
+  if (!python) throw new Error("E2E_PYTHON not set (run through scripts/e2e.sh)");
+  const backendDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../backend");
+  const r = spawnSync(python, ["manage.py", ...args], { cwd: backendDir, input, encoding: "utf8", env: process.env });
+  if (r.status !== 0) throw new Error(`manage.py ${args[0] ?? ""} failed (exit ${String(r.status)}): ${r.stderr.slice(-400)}`);
+}
+
+// 01.6 / REV-0128: the local E2E run has no ClamAV. The clearly named TEST DOUBLE scanner (refused outside
+// ALEEKHAN_ENV dev/test, flags the EICAR string) scans the quarantined synthetic PDFs so a revision can be submitted
+// for review. Nothing is executed; in production only ClamAV can release a file (DEC-053).
+export const SCAN_WITH_TEST_DOUBLE = `
+from platform_core.documents import scanner, service
+print(service.scan_pending(scanner.FakeScannerForTests()))
+`;

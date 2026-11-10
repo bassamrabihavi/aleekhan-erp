@@ -1,10 +1,11 @@
 // Page 36 «سلامت سامانه و Job» (MOCK_UI_BINDING §6.1, PHASE_01 part): component status, outbox / job / security
 // counters from GET /admin/health, audit integrity, job definitions (protected / cancellable flags), job runs
 // with safe cancel (reason + MFA step-up). Force cancel is not offered (C-31); no invented "overall health %".
+// 01.6: event delivery freshness (lag, stale flag, aggregates blocked by a dead letter, open compensations).
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
-import { opsGuards, read, write, type Job, type JobDefinition } from "../api/phase01";
+import { opsGuards, read, write, type HealthDetail, type Job, type JobDefinition } from "../api/phase01";
 import { useAuth } from "../auth/context";
 import { ActionError } from "../components/ActionError";
 import { DataView } from "../components/DataView";
@@ -100,10 +101,47 @@ function HealthPanel() {
               ) : null}
             </div>
             {h.outbox.oldest_pending_at ? <p className="panel__meta">قدیمی‌ترین رویداد در انتظار: {formatJalaliDateTime(h.outbox.oldest_pending_at)}</p> : null}
+            {h.integration ? <IntegrationBlock i={h.integration} /> : null}
           </>
         )}
       </DataView>
     </section>
+  );
+}
+
+function lagText(seconds: number | null): string {
+  if (seconds === null) return "رویداد تحویل‌نشده‌ای نیست";
+  if (seconds < 60) return `${toFaDigits(seconds)} ثانیه`;
+  return `${toFaDigits(Math.floor(seconds / 60))} دقیقه`;
+}
+
+// 01.6: delivery of events between modules (outbox -> consumers). "Stale" = the oldest undelivered event is older
+// than the server's TECHNICAL DEFAULT threshold; aggregates blocked by a dead letter wait for an administrator.
+function IntegrationBlock({ i }: { i: NonNullable<HealthDetail["integration"]> }) {
+  // never "up to date" while events are still waiting: no lag -> all delivered; lag under the threshold -> in progress
+  const [tone, label] =
+    i.blocked_aggregates > 0
+      ? (["danger", "رویداد متوقف پشت dead letter"] as const)
+      : i.stale
+        ? (["warning", "تأخیر در تحویل"] as const)
+        : i.lag_seconds === null
+          ? (["success", "همه رویدادها تحویل شده"] as const)
+          : (["info", "در انتظار تحویل (زیر آستانه)"] as const);
+  return (
+    <div className="detail" data-testid="integration-health">
+      <h3>تحویل رویداد بین ماژول‌ها</h3>
+      <p className="panel__meta">
+        وضعیت: <StatusChip tone={tone} label={label} testId="integration-stale" /> · تأخیر قدیمی‌ترین رویداد: {lagText(i.lag_seconds)}
+        {" "}(آستانه {toFaDigits(Math.round(i.stale_after_seconds / 60))} دقیقه، پیش‌فرض فنی)
+      </p>
+      <div className="counters">
+        <Counter label="جریان متوقف پشت dead letter" value={i.blocked_aggregates} testId="c-int-blocked" />
+        <Counter label="رویداد منتظر پشت آن" value={i.held_events} testId="c-int-held" />
+        <Counter label="تعارض باز" value={i.open_conflicts} testId="c-int-conflicts" />
+        <Counter label="جبران دستی لازم" value={i.compensation_open} testId="c-int-compensation" />
+      </div>
+      {i.last_acked_at ? <p className="panel__meta">آخرین تحویل موفق: {formatJalaliDateTime(i.last_acked_at)}</p> : null}
+    </div>
   );
 }
 

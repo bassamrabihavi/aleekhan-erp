@@ -11,6 +11,12 @@ Reading effective values: ``params/values.py``. Writing (proposal / publication)
 * ``BUSINESS_RULE``  maker-checker (publisher != proposer, DB trigger) **and** blocked by the definition's own
   decision until that decision is in the reviewed approved-rule registry: ``RULE_NOT_APPROVED``.
 
+DEC-056 extension (matrix v1.2, 2026-11-10): the owner (``owner_admin``) holds
+``platform.config.parameter.publish`` directly, for **BUSINESS_RULE** values only; for a TECHNICAL value his
+grant does not count (403 ``ACCESS_DENIED`` unless he also holds a BUSINESS publishing role). Deciding
+(publish or reject) a BUSINESS_RULE value one proposed oneself is ``SELF_APPROVAL_FORBIDDEN`` (DEC-032), for
+everyone.
+
 ``effective_from`` in the past is refused (TECH clock tolerance 60 s, same as the org tree guard); a published
 value is immutable; a newer published revision supersedes the previous one (history is never rewritten).
 """
@@ -21,10 +27,18 @@ import uuid
 from datetime import datetime, timedelta
 from typing import Final
 
-from platform_core.authz.policy import Caller, require_owner_admin, require_permission, require_step_up
+from platform_core.authz.policy import (
+    Caller,
+    business_grants,
+    is_owner_exception,
+    require_owner_admin,
+    require_permission,
+    require_step_up,
+)
 from platform_core.engine.context import db_now
 from platform_core.engine.dbrules import db_rules
 from platform_core.engine.errors import (
+    AccessDenied,
     FieldError,
     NotFound,
     SelfApprovalForbidden,
@@ -37,6 +51,7 @@ from platform_core.engine.uow import UnitOfWork, unit_of_work
 
 from .models import Classification, DynamicFieldDefinition, ParameterDefinition, ParameterValue, ValueStatus
 
+PUBLISH: Final = "platform.config.parameter.publish"
 CLOCK_TOLERANCE: Final = timedelta(seconds=60)  # TECHNICAL (app/DB clock skew), not a business rule
 
 PARAMETER_VALUE_MACHINE: Final = StateMachine(
@@ -120,8 +135,8 @@ def publish(
 ) -> ParameterValue:
     """PENDING_APPROVAL -> PUBLISHED (TECHNICAL / BUSINESS_RULE). An optional publisher note becomes the
     audit reason (REV-0122); without a note the audit keeps the proposal's reason."""
-    require_permission(caller, "platform.config.parameter.publish")
-    require_step_up(caller, "platform.config.parameter.publish")
+    require_permission(caller, PUBLISH)
+    require_step_up(caller, PUBLISH)
     ctx = caller.context(request_id)
     actor = caller.user_id
     with unit_of_work(ctx) as uow:
@@ -129,6 +144,7 @@ def publish(
         definition = pv.definition
         if definition.classification == Classification.OWNER_POLICY:
             raise StateTransitionNotAllowed("OWNER_POLICY values are published by the owner directly")
+        _require_publisher_for(caller, definition)
         if definition.classification == Classification.BUSINESS_RULE:
             require_approved_rule(definition.decision_id, rule=f"parameter {definition.key}")
             if pv.proposed_by_id == actor:
@@ -194,10 +210,16 @@ def publish_owner_policy(
 def reject(
     caller: Caller, value_id: uuid.UUID, *, reason: str, request_id: uuid.UUID | None = None
 ) -> ParameterValue:
-    require_permission(caller, "platform.config.parameter.publish")
+    require_permission(caller, PUBLISH)
     text = _reason(reason)
     with unit_of_work(caller.context(request_id)) as uow:
         pv = _lock_value(value_id)
+        _require_publisher_for(caller, pv.definition)
+        if (
+            pv.definition.classification == Classification.BUSINESS_RULE
+            and pv.proposed_by_id == caller.user_id
+        ):
+            raise SelfApprovalForbidden()  # DEC-032: no decision (also no rejection) on one's own proposal
         PARAMETER_VALUE_MACHINE.assert_transition(pv.status, ValueStatus.REJECTED)
         before = _snapshot(pv)
         ParameterValue.objects.filter(pk=pv.pk).update(status=ValueStatus.REJECTED)
@@ -214,6 +236,14 @@ def reject(
 
 
 # ---------------------------------------------------------------------------------------------- helpers
+def _require_publisher_for(caller: Caller, definition: ParameterDefinition) -> None:
+    """DEC-056 v1.2: the owner's own publish grant counts for BUSINESS_RULE values only."""
+    if definition.classification == Classification.BUSINESS_RULE:
+        return
+    if all(is_owner_exception(g) for g in business_grants(caller, PUBLISH)):
+        raise AccessDenied()
+
+
 def _lock_value(value_id: uuid.UUID) -> ParameterValue:
     try:
         return ParameterValue.objects.select_for_update().select_related("definition").get(pk=value_id)

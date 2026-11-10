@@ -46,16 +46,19 @@ def test_golden_action_decisions_equal_the_approved_matrix() -> None:
 
 @pytest.mark.django_db
 def test_technical_roles_never_pass_business_approval_checks() -> None:
-    """DEC-003 and its single exception DEC-056: owner_admin passes platform.workflow.approval.decide."""
+    """DEC-003 and its single exception DEC-056 (matrix v1.2): owner_admin passes approval.decide,
+    document.approve and config.parameter.publish; it_ops / security_auditor pass none of them."""
     owner = person()
     give_role(owner, "owner_admin")
     c = caller(owner)
-    assert P.can(c, "platform.workflow.approval.decide") is True  # DEC-056 (matrix v1.1)
     assert P.can(c, "platform.workflow.approval.read") is True
-    for action in ("platform.document.approve", "platform.config.parameter.publish"):
-        assert P.can(c, action) is False
-        with pytest.raises(AccessDenied):
-            P.require_permission(c, action)
+    for action in (
+        "platform.workflow.approval.decide",  # v1.1
+        "platform.document.approve",  # v1.2
+        "platform.config.parameter.publish",  # v1.2 (BUSINESS_RULE values only: params.service)
+    ):
+        assert P.can(c, action) is True
+        assert P.require_permission(c, action).grant.role_code == "owner_admin"  # type: ignore[union-attr]
     for code in ("it_ops", "security_auditor"):
         tech = person()
         give_role(tech, code)
@@ -65,10 +68,12 @@ def test_technical_roles_never_pass_business_approval_checks() -> None:
             "platform.config.parameter.publish",
         ):
             assert P.can(caller(tech), action) is False
+            with pytest.raises(AccessDenied):
+                P.require_permission(caller(tech), action)
 
 
 @pytest.mark.django_db
-def test_dec056_exception_counts_only_for_the_owner_decide_grant() -> None:
+def test_dec056_exception_counts_only_for_the_owner_ba_grants() -> None:
     def grant(code: str, kind: str, action: str) -> P.Grant:
         return P.Grant(
             role_code=code,
@@ -82,11 +87,22 @@ def test_dec056_exception_counts_only_for_the_owner_decide_grant() -> None:
             self_assignment=False,
         )
 
-    decide = "platform.workflow.approval.decide"
-    assert P.counts_for_business_approval(grant("owner_admin", "TECHNICAL", decide))
-    assert not P.counts_for_business_approval(grant("owner_admin", "TECHNICAL", "platform.document.approve"))
-    assert not P.counts_for_business_approval(grant("it_ops", "TECHNICAL", decide))
-    assert P.counts_for_business_approval(grant("workflow_approver", "BUSINESS", decide))
+    assert P.OWNER_BA_ACTIONS == frozenset(
+        {
+            "platform.workflow.approval.decide",
+            "platform.document.approve",
+            "platform.config.parameter.publish",
+        }
+    )
+    for action in P.OWNER_BA_ACTIONS:
+        assert P.counts_for_business_approval(grant("owner_admin", "TECHNICAL", action))
+        assert P.is_owner_exception(grant("owner_admin", "TECHNICAL", action))
+        assert not P.counts_for_business_approval(grant("it_ops", "TECHNICAL", action))
+        assert not P.counts_for_business_approval(grant("security_auditor", "TECHNICAL", action))
+        assert P.counts_for_business_approval(grant("workflow_approver", "BUSINESS", action))
+        assert not P.is_owner_exception(grant("workflow_approver", "BUSINESS", action))
+    # a business-approval action outside the exception list never counts for the owner (future BA rows)
+    assert not P.counts_for_business_approval(grant("owner_admin", "TECHNICAL", "platform.future.ba"))
 
 
 @pytest.mark.django_db

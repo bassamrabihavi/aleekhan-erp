@@ -1,0 +1,163 @@
+{
+ "phase": "PHASE_01",
+ "step": "01.6",
+ "commit_sha": "PENDING",
+ "status": "COMPLETE",
+ "scope": [
+  "Event catalogue for every outbox event type of PHASE_00 + PHASE_01 (52 types: identity, roles, org, workflow, documents, params, jobs, integration framework): name, version(s), payload JSON Schema, producer module, aggregate type, sensitivity S1 (ids / codes / counts only) - backend/platform_core/engine/events.py, golden tests/golden/event_catalogue.golden.json, docs/integration/EVENT_CATALOGUE.md",
+  "Producer contract enforced in UnitOfWork.emit: uncatalogued type, wrong aggregate type, non-current version or payload mismatch -> EngineContractError inside the transaction (business write rolled back); the full backend suite runs every emit site through it",
+  "Provenance on every new outbox row: producer, build_commit, schema_migration (migration 0016; '' = row written before 0016), also on EventEnvelope.provenance",
+  "Consumer pipeline hardening: catalogue admission in RegistryPublisher (accepts N and N-1 via upcaster; older / invalid -> dead letter at once via PublishError(permanent=True) + compensation record; newer -> retried with backoff); inbox dedupe, retries/backoff/jitter, dead letter and compensation hook from 00.6 unchanged",
+  "Per-aggregate delivery order in claim_batch (OutboxPolicy.per_aggregate_order, default on; partial index ix_outbox_event_agg_open); a dead-letter head blocks only its aggregate until replayed",
+  "Freshness: ops.monitoring.integration_health (lag, stale flag > 900 s TECHNICAL DEFAULT, blocked aggregates, held events, open conflicts, open compensations, last ack) in outbox_status (reasons DELIVERY_STALE / ORDERING_BLOCKED), GET /admin/health (optional HealthDetail.integration, contract 0.6.2-draft, additive) and page 36",
+  "No dead-letter replay/discard API invented: the contract has no operation; counts surfaced in health; listed as a contract item (docs/integration/README.md section 9)",
+  "DEC-056 extension (employer 2026-11-10, matrix v1.2, REV-0125): owner_admin holds platform.document.approve and platform.config.parameter.publish (BUSINESS_RULE values only; TECHNICAL values -> 403 for an owner without a BUSINESS publishing role); DB guard exception widened to exactly three pairs; maker != checker unchanged (also: rejecting one's own BUSINESS_RULE proposal -> SELF_APPROVAL_FORBIDDEN)",
+  "REV-0128: service + HTTP tests and an E2E test of the owner deciding a document revision submitted by another synthetic user; UAT steps 3.9 / 3.10 added to reports/phase-01/step-5/UAT_HOWTO_FA.md",
+  "REV-0126: page 46 subtitle reflects DEC-056 (vitest text assertion)"
+ ],
+ "changes": [
+  "backend/platform_core/engine/events.py (new)",
+  "backend/platform_core/engine/uow.py",
+  "backend/platform_core/engine/outbox.py",
+  "backend/platform_core/engine/consumers.py",
+  "backend/platform_core/ops/monitoring.py",
+  "backend/platform_core/management/commands/outbox_status.py",
+  "backend/platform_core/api/phase01/ops_views.py",
+  "backend/platform_core/api/views.py (CONTRACT_VERSION 0.6.2-draft)",
+  "backend/platform_core/models.py (OutboxEvent provenance fields, CHECKs, partial index)",
+  "backend/platform_core/authz/policy.py",
+  "backend/platform_core/params/service.py",
+  "backend/platform_core/identity/roles.py",
+  "backend/platform_core/migrations/0015_dec056_matrix_v12.py (new)",
+  "backend/platform_core/migrations/0016_outbox_provenance_and_order.py (new)",
+  "backend/platform_core/tests/ (new test_integration_events.py, test_phase01_step6_dec056.py, golden/event_catalogue.golden.json; updated engine_fixtures.py, golden/permission_decisions.golden.json, test_phase01_authz_engine.py, test_phase01_schema.py, test_phase01_step5_backend.py)",
+  "ops/db/roles_check.sh, ops/backup/drill_seed.py (probe events moved to the platform.synthetic namespace)",
+  "frontend/src/pages/OpsPage.tsx, frontend/src/pages/SecurityPage.tsx, frontend/src/api/phase01.ts, frontend/src/phase01.test.tsx",
+  "frontend/e2e/phase01.spec.ts, frontend/e2e/phase01-helpers.ts, frontend/e2e/global-setup.ts",
+  "docs/api/openapi-draft.yaml (0.6.2-draft), docs/api/API_RUNTIME.md (section 11), docs/integration/README.md (section 9), docs/integration/EVENT_CATALOGUE.md (new), docs/ops/JOB_MONITORING.md, docs/security/PERMISSION_MATRIX_DRAFT.md (v1.2), docs/engine/PHASE01_ENGINE.md (section 8), CHANGELOG.md",
+  "reports/phase-01/step-5/UAT_HOWTO_FA.md (sections 3.9, 3.10)"
+ ],
+ "migrations": [
+  "platform_core.0015_dec056_matrix_v12 (reversible; evidence: reports/phase-01/step-6/logs/db_roundtrip.log and logs/migration/partial_down_0014.log - 0016 -> 0014 restores guard bodies md5-identical to a fresh 0014, owner_admin back to matrix 1.1 with one BA grant)",
+  "platform_core.0016_outbox_provenance_and_order (reversible; evidence: reports/phase-01/step-6/logs/db_roundtrip.log - up -> zero -> up, schema diff EMPTY, 6071 lines)"
+ ],
+ "test_evidence": [
+  {
+   "command": "ruff check backend tools ops && ruff format --check backend tools ops",
+   "outcome": "PASS",
+   "log_path": "reports/phase-01/step-6/logs/ruff.log"
+  },
+  {
+   "command": "cd backend && mypy . (strict, 180 files)",
+   "outcome": "PASS",
+   "log_path": "reports/phase-01/step-6/logs/mypy.log"
+  },
+  {
+   "command": "manage.py makemigrations --check --dry-run",
+   "outcome": "PASS",
+   "log_path": "reports/phase-01/step-6/logs/makemigrations_check.log"
+  },
+  {
+   "command": "pytest -m 'not perf' --junitxml (1887 passed, 1 skipped: real-ClamAV contract test, clamd not reachable)",
+   "outcome": "PASS",
+   "log_path": "reports/phase-01/step-6/logs/pytest.log"
+  },
+  {
+   "command": "race tests -k 'concurrent or race or parallel' x3 (27 passed each run, incl. the new per-aggregate ordering race)",
+   "outcome": "PASS",
+   "log_path": "reports/phase-01/step-6/logs/concurrency_x3.log"
+  },
+  {
+   "command": "backend/scripts/db_roundtrip.sh (up/zero/up incl. 0015 + 0016, schema diff empty) + partial down 0016 -> 0014",
+   "outcome": "PASS",
+   "log_path": "reports/phase-01/step-6/logs/db_roundtrip.log"
+  },
+  {
+   "command": "ops/db/roles_check.sh (50/50)",
+   "outcome": "PASS",
+   "log_path": "reports/phase-01/step-6/logs/roles_check.log"
+  },
+  {
+   "command": "ops/backup/drill.sh with DRILL_ROWS=50 (seed uses the synthetic event namespace)",
+   "outcome": "PASS",
+   "log_path": "reports/phase-01/step-6/logs/backup_drill.log"
+  },
+  {
+   "command": "openapi_spec_validator: 0.6.2-draft, 88 paths, 107 operations, 0 planned",
+   "outcome": "PASS",
+   "log_path": "reports/phase-01/step-6/logs/openapi_validate.log"
+  },
+  {
+   "command": "frontend npm run lint (eslint --max-warnings=0)",
+   "outcome": "PASS",
+   "log_path": "reports/phase-01/step-6/logs/eslint.log"
+  },
+  {
+   "command": "frontend npm run typecheck",
+   "outcome": "PASS",
+   "log_path": "reports/phase-01/step-6/logs/typecheck.log"
+  },
+  {
+   "command": "frontend vitest run (38 tests in 4 files)",
+   "outcome": "PASS",
+   "log_path": "reports/phase-01/step-6/logs/vitest.log"
+  },
+  {
+   "command": "frontend tsc + vite build (outDir outside the repo)",
+   "outcome": "PASS",
+   "log_path": "reports/phase-01/step-6/logs/build.log"
+  },
+  {
+   "command": "frontend/scripts/e2e.sh (real Django + PostgreSQL + Vite, Edge, workers 1; artefacts outside the repo): 22 passed + 1 passed (backend-down run); first attempt failed on a wrong <option> value in the new test, fixed and re-run",
+   "outcome": "PASS",
+   "log_path": "reports/phase-01/step-6/logs/e2e.log"
+  },
+  {
+   "command": "tools unittest (42) + lock_runtime --check",
+   "outcome": "PASS",
+   "log_path": "reports/phase-01/step-6/logs/tools_unittest.log"
+  },
+  {
+   "command": "tools/verify_handoff.py (failures=0, KNOWN_DEFECT=1 per DEC-044)",
+   "outcome": "PASS",
+   "log_path": "reports/phase-01/step-6/logs/verify_handoff.log"
+  }
+ ],
+ "security_evidence": [
+  "Secret scan tree (findings=0) and history (findings=0, 1 pre-existing allowlisted test literal): reports/phase-01/step-6/logs/secret_scan.log, secret_scan_history.log",
+  "Event payloads are S1 by catalogue: no names, free text, secrets or personal data beyond surrogate ids; the sensitive-key filter of emit still runs first; stored failure codes are safe codes (SCHEMA_INVALID:v2 etc.), never payload values",
+  "DEC-056 v1.2 exception limited to three (owner_admin, permission) pairs: DB refuses the same permissions for any other TECHNICAL role (test_phase01_step5_backend::test_dec056_guard_exception_is_only_the_three_owner_pairs); it_ops / security_auditor still deny (engine + service tests); the owner's publish grant does not count for TECHNICAL values; own request / upload / proposal -> SELF_APPROVAL_FORBIDDEN (service + HTTP + E2E inbox check)",
+  "Synthetic event namespace platform.synthetic.* accepted only with ALEEKHAN_ENV test/dev, refused in staging/prod (test_emit_refuses_events_outside_the_catalogue_contract)",
+  "Health integration block exposes counts only (no ids, payloads or error texts); permission platform.ops.health.read unchanged (employee -> 403, tested)"
+ ],
+ "decisions": [
+  "DEC-003",
+  "DEC-016 (BUSINESS_RULE parameters stay RULE_NOT_APPROVED)",
+  "DEC-032",
+  "DEC-053",
+  "DEC-055",
+  "DEC-056 (extension 2026-11-10 implemented: matrix v1.2)"
+ ],
+ "risks": [
+  "Open question: DEC-056 extension does not mention platform.document.read / download for the owner - not granted; the owner decides document approvals from the approval request (resource id) without opening the file. Employer to confirm whether the owner should also read/download documents (new matrix cells)",
+  "Interpretation (traceable, conservative): 'BUSINESS_RULE parameter publish' read literally - the owner's publish grant does not count for TECHNICAL values; and rejecting one's own BUSINESS_RULE proposal is treated as a decision (SELF_APPROVAL_FORBIDDEN). In PHASE_01 every BUSINESS_RULE parameter is still blocked by its own decision (RULE_NOT_APPROVED), so the owner's new publish right has no visible effect yet",
+  "Per-aggregate ordering is now the default for every dispatcher: a DEAD_LETTER head holds back later events of the same aggregate until replayed (visible as blocked_aggregates / ORDERING_BLOCKED); one event per aggregate per dispatch pass (throughput trade-off, TECHNICAL)",
+  "Producer strictness: an emit site missed by the catalogue would fail its write (500) - mitigated by the full suite (every emit path) and the AST scan test of literal event types; dynamic f-string types (approval verbs, session events) are covered by the catalogue and runtime tests",
+  "Contract items not invented: dead-letter replay / discard over HTTP, compensation resolution state; no worker process yet (worker component stays 'unknown')",
+  "E2E has no ClamAV: the new owner-decides E2E releases the synthetic PDF with the clearly named TEST DOUBLE scanner (FakeScannerForTests, refused outside dev/test) via manage.py shell; production release only through ClamAV (DEC-053)",
+  "Screenshots of this step were regenerated outside the repo from the uncommitted working tree (footer shows the base commit 3c590eee8940); committing screenshots from the final commit is the orchestrator's job (REV-0127)"
+ ],
+ "evidence_paths": [
+  "reports/phase-01/step-6/logs/",
+  "docs/integration/README.md",
+  "docs/integration/EVENT_CATALOGUE.md",
+  "backend/platform_core/tests/golden/event_catalogue.golden.json",
+  "docs/security/PERMISSION_MATRIX_DRAFT.md",
+  "docs/api/openapi-draft.yaml",
+  "docs/api/API_RUNTIME.md",
+  "reports/phase-01/step-5/UAT_HOWTO_FA.md",
+  "screenshots: regenerated outside the repo (71 files, 4 sizes incl. new phase01-work-approvals-owner-decided-*); to be regenerated from the final commit by the orchestrator (REV-0127)"
+ ],
+ "rollback": "migrate platform_core 0014 (drops the provenance columns, CHECKs and ordering index; removes the owner's document.approve / parameter.publish grants, owner_admin back to matrix 1.1, restores the 0014 guard bodies; decisions already taken stay in the append-only audit), then revert the commit (contract back to 0.6.1-draft, catalogue enforcement and ordering removed)",
+ "review_request": "PASS"
+}

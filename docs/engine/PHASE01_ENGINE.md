@@ -111,3 +111,15 @@ the contract carries allowed values), `params.create_dynamic_field` / `update_dy
 optional task notes (audit reason) and `due_at` (informational), `approvals.makers_of` / `can_decide` (inbox).
 Fix: `mfa.reset_factors` now always emits `platform.identity.user.mfa_reset` (a reset of a user without
 factors or sessions violated the unit-of-work contract -> 500).
+
+## 8. Step 01.6 additions to the engine
+
+- `engine/events.py` — event catalogue (producer contract in `UnitOfWork.emit`, consumer admission N / N-1 in
+  `RegistryPublisher`, provenance stamp). Details and the full list: docs/integration/README.md section 9 and
+  docs/integration/EVENT_CATALOGUE.md.
+- `engine/outbox.py` — `PublishError(permanent=True)` dead-letters at once; `claim_batch` delivers per aggregate in
+  order (`OutboxPolicy.per_aggregate_order`, default on).
+- `authz/policy.py` — DEC-056 extension (matrix v1.2): `OWNER_BA_ACTIONS` = approval decide, document approve,
+  parameter publish; `is_owner_exception` / `business_grants` let `params.service` refuse the owner's publish grant
+  for TECHNICAL values (the extension names BUSINESS_RULE publish only). Rejecting one's own BUSINESS_RULE proposal
+  is `SELF_APPROVAL_FORBIDDEN` (DEC-032: a rejection is a decision too).

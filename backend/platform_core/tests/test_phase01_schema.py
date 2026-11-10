@@ -236,27 +236,32 @@ def test_seeded_grants_equal_the_approved_matrix_document() -> None:
         )
 
 
-def test_matrix_document_is_approved_v1_1() -> None:
+def test_matrix_document_is_approved_v1_2() -> None:
     head = MATRIX_DOC.read_text(encoding="utf-8")[:600]
-    assert "APPROVED v1.1" in head and "DEC-049" in head and "DEC-056" in head
+    assert "APPROVED v1.2" in head and "DEC-049" in head and "DEC-056" in head
+    assert "0015_dec056_matrix_v12" in MATRIX_DOC.read_text(encoding="utf-8")
 
 
 def test_roles_seeded_active_v1_and_technical_roles_have_no_business_approval() -> None:
     roles = {r.code: r for r in Role.objects.all()}
     assert set(roles) == set(ROLE_COLUMNS.values())
     assert {r.status for r in roles.values()} == {"ACTIVE"}
-    # DEC-056: only owner_admin moved to matrix v1.1; the other ten roles are unchanged (v1.0)
+    # DEC-056 (+ extension): only owner_admin moved (v1.1 -> v1.2); the other ten roles are unchanged (v1.0)
     changed = {c: r.matrix_version for c, r in roles.items() if r.matrix_version != "1.0"}
-    assert changed == {"owner_admin": "1.1"}
+    assert changed == {"owner_admin": "1.2"}
     technical = {c for c, r in roles.items() if r.kind == "TECHNICAL"}
     assert technical == {"owner_admin", "it_ops", "security_auditor"}
-    # the single explicit exception of DEC-003 (DEC-056): owner_admin + platform.workflow.approval.decide
+    # the explicit exception of DEC-003 (DEC-056, matrix v1.2): owner_admin + exactly three BA permissions
     ba_technical = set(
         RolePermission.objects.filter(role__kind="TECHNICAL", permission__business_approval=True).values_list(
             "role__code", "permission_id"
         )
     )
-    assert ba_technical == {("owner_admin", "platform.workflow.approval.decide")}
+    assert ba_technical == {
+        ("owner_admin", "platform.workflow.approval.decide"),
+        ("owner_admin", "platform.document.approve"),
+        ("owner_admin", "platform.config.parameter.publish"),
+    }
 
 
 EXPECTED_PARAMETERS = {

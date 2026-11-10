@@ -35,7 +35,7 @@ from datetime import datetime, timedelta
 from typing import Any, Protocol
 
 from django.db import transaction
-from django.db.models import DateTimeField, DurationField, ExpressionWrapper, F, Value
+from django.db.models import DateTimeField, DurationField, Exists, ExpressionWrapper, F, OuterRef, Value
 from django.db.models.functions import Now
 
 from platform_core.models import ActorType, AuditOutcome, DeliveryStatus, OutboxEvent
@@ -132,6 +132,8 @@ class OutboxPolicy:
     lease: timedelta = timedelta(minutes=5)
     batch_size: int = 100
     jitter_source: JitterSource | None = field(default=None, compare=False, repr=False)
+    # 01.6: deliver the events of one aggregate in order (see claim_batch)
+    per_aggregate_order: bool = True
 
     def __post_init__(self) -> None:
         if self.max_attempts < 1 or self.batch_size < 1:
@@ -186,6 +188,8 @@ class EventEnvelope:
     causation_id: uuid.UUID | None
     payload: Mapping[str, Any]
     attempt: int
+    # 01.6 provenance of the producing code: producer module, build commit, schema migration ('' = unknown)
+    provenance: Mapping[str, str] = field(default_factory=dict)
 
 
 class OutboxPublisher(Protocol):
@@ -194,11 +198,15 @@ class OutboxPublisher(Protocol):
 
 
 class PublishError(Exception):
-    """Publisher failure with a *safe* machine code (stored in ``last_error``; no message text is stored)."""
+    """Publisher failure with a *safe* machine code (stored in ``last_error``; no message text is stored).
 
-    def __init__(self, safe_code: str) -> None:
+    ``permanent=True`` (01.6): retrying cannot help (e.g. an incompatible schema version) - the event goes to
+    DEAD_LETTER at once instead of after ``max_attempts`` (poison message; compensation hook runs)."""
+
+    def __init__(self, safe_code: str, *, permanent: bool = False) -> None:
         super().__init__(safe_code)
         self.safe_code = safe_code
+        self.permanent = permanent
 
 
 def _safe_error(exc: BaseException) -> str:
@@ -231,6 +239,22 @@ def _envelope(row: OutboxEvent, attempt: int) -> EventEnvelope:
         causation_id=row.causation_id,
         payload=dict(row.payload),
         attempt=attempt,
+        provenance={
+            "producer": row.producer,
+            "build_commit": row.build_commit,
+            "schema_migration": row.schema_migration,
+        },
+    )
+
+
+def _earlier_open_event() -> Exists:
+    """An earlier (lower ``id``) not yet ACKED event of the same aggregate exists."""
+    return Exists(
+        OutboxEvent.objects.filter(
+            aggregate_type=OuterRef("aggregate_type"),
+            aggregate_id=OuterRef("aggregate_id"),
+            id__lt=OuterRef("id"),
+        ).exclude(delivery_status=S.ACKED)
     )
 
 
@@ -241,14 +265,24 @@ def claim_batch(
 
     Concurrent dispatchers never claim the same row (each locked row is skipped by the others). ``now``
     overrides the database clock (tests / deterministic simulations).
+
+    Per-aggregate ordering (01.6, ``policy.per_aggregate_order``): a row is claimed only if no earlier row of
+    the same aggregate is still undelivered (PENDING / FAILED / DISPATCHED / DEAD_LETTER). So the events of
+    one aggregate are delivered one after the other in ``id`` order (= commit order: every unit of work holds
+    the audit chain lock from its start to its commit, so outbox ids are allocated in commit order); a failing
+    event holds back the later events of *its* aggregate only, and a DEAD_LETTER head blocks its aggregate
+    until it is replayed (visible as ``blocked_aggregates`` in the health snapshot). Other aggregates are not
+    affected.
     """
     with transaction.atomic(using=using):
         now = now if now is not None else db_now(using)
+        qs = OutboxEvent.objects.using(using).filter(
+            delivery_status__in=[S.PENDING, S.FAILED], next_attempt_at__lte=now
+        )
+        if policy.per_aggregate_order:
+            qs = qs.exclude(_earlier_open_event())
         rows = list(
-            OutboxEvent.objects.using(using)
-            .select_for_update(skip_locked=True)
-            .filter(delivery_status__in=[S.PENDING, S.FAILED], next_attempt_at__lte=now)
-            .order_by("next_attempt_at", "id")[: policy.batch_size]
+            qs.select_for_update(skip_locked=True).order_by("next_attempt_at", "id")[: policy.batch_size]
         )
         claimed: list[ClaimedEvent] = []
         for row in rows:
@@ -281,13 +315,15 @@ def mark_failed(
     *,
     using: str = "default",
     now: datetime | None = None,
+    permanent: bool = False,
 ) -> str | None:
     """DISPATCHED -> FAILED (backoff) or -> FAILED -> DEAD_LETTER. Returns the new status, None if lost.
 
     ``next_attempt_at = now + backoff``; ``now`` defaults to the statement clock of the UPDATE itself.
+    ``permanent`` (a :class:`PublishError` with ``permanent=True``) dead-letters at once.
     """
     attempt = claimed.envelope.attempt
-    if attempt >= policy.max_attempts:
+    if permanent or attempt >= policy.max_attempts:
         _assert_path(S.DISPATCHED, S.FAILED, S.DEAD_LETTER)
         new_status: str = S.DEAD_LETTER
         delay = timedelta(0)
@@ -358,7 +394,8 @@ def dispatch_once(
         except Exception as exc:
             error = _safe_error(exc)
             stats.errors.append(error)
-            status = mark_failed(claimed, error, policy, using=using, now=now)
+            permanent = isinstance(exc, PublishError) and exc.permanent
+            status = mark_failed(claimed, error, policy, using=using, now=now, permanent=permanent)
             if status == S.DEAD_LETTER:
                 stats.dead_lettered += 1
                 _after_dead_letter(on_dead_letter, claimed.envelope, error, stats)

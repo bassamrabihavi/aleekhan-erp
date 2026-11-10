@@ -17,6 +17,9 @@ event"; openapi-draft ``write_requirements``)::
   rejected. ``reason`` is free text and ``resource_id`` an identifier: neither can be redacted by key, so
   callers must never put personal data or secrets there (reason = short operator justification, resource_id
   = surrogate id / 14-digit code only). This is a code-review rule (docs/engine/README.md section 1).
+* PHASE_01 / 01.6: every event must be in the event catalogue (``engine/events.py``: type, aggregate type,
+  current schema version, exact payload schema) and is stamped with its provenance (producer module, build
+  commit, schema migration head). A violation is an :class:`EngineContractError` inside the transaction.
 * Nested use joins the outer transaction as a savepoint (the outer commit decides durability).
 * PHASE_01 / 01.3: audit rows carry the caller's ``session_id`` and ``network_zone`` and are hash-chained
   (``audit_chain``). The **outermost** unit of work takes the chain lock when it starts - before any business
@@ -42,6 +45,7 @@ from platform_core.models import AuditEvent, AuditOutcome, OutboxEvent
 from .audit_chain import acquire_chain_lock, append_chained
 from .context import RequestContext
 from .errors import EngineContractError
+from .events import check_emit, provenance
 from .redaction import redact, sensitive_paths
 
 _ACTION_RE = re.compile(r"^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_-]*)+$")  # = models.DOTTED_NAME_PATTERN
@@ -116,6 +120,9 @@ class UnitOfWork:
         leaked = list(sensitive_paths(body))
         if leaked:
             raise EngineContractError(f"outbox payload contains sensitive keys: {leaked}")
+        # 01.6: the event catalogue is the producer contract (type, aggregate, version, payload schema)
+        spec = check_emit(event_type, aggregate_type, schema_version, body)
+        origin = provenance(spec.producer) if spec is not None else {}
         event = OutboxEvent(
             event_type=event_type,
             schema_version=schema_version,
@@ -128,6 +135,7 @@ class UnitOfWork:
             correlation_id=self.ctx.effective_correlation_id,
             causation_id=causation_id,
             payload=body,
+            **origin,
         )
         event.save(using=self.using, force_insert=True)
         self.outbox_events.append(event)

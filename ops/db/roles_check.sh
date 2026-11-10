@@ -111,7 +111,8 @@ from platform_core.engine.context import Actor, RequestContext
 from platform_core.engine.uow import unit_of_work
 with unit_of_work(RequestContext(Actor.system())) as uow:
     uow.audit(action='platform.ops.roles_check', resource_type='platform.synthetic', resource_id='roles-check')
-    uow.emit(event_type='platform.ops.roles_checked', aggregate_type='platform.synthetic',
+    # 01.6: the event catalogue refuses unknown types; ALEEKHAN_ENV test/dev accept only the synthetic namespace
+    uow.emit(event_type='platform.synthetic.roles_checked', aggregate_type='platform.synthetic',
              aggregate_id='roles-check', aggregate_version=1, payload={'note': 'synthetic'})
 " >/dev/null 2>&1
 ); then record "app: unit of work (audit + outbox) via Django" PASS; else record "app: unit of work (audit + outbox) via Django" FAIL; fi

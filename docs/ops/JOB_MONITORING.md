@@ -39,3 +39,16 @@ Verdicts (TECHNICAL DEFAULT thresholds, `platform_core/ops/monitoring.py`; ops t
   information); an authenticated ops page arrives with PHASE_01 roles.
 - Logs: JSON lines on stdout (`platform_core/api/logging.py`), with `request_id`; collected by Docker.
 - Backups: see docs/ops/BACKUP_RESTORE.md section 2 (age of the newest backup).
+
+## 01.6 additions (integration freshness)
+
+`outbox_snapshot` / `outbox_status --json` carry an `integration` object (also served on page 36 by
+`GET /admin/health`): `lag_seconds` (age of the oldest PENDING / FAILED / DISPATCHED event), `stale`
+(lag > 900 s, TECHNICAL DEFAULT `DELIVERY_STALE_AFTER`), `blocked_aggregates` (aggregates with a DEAD_LETTER
+event), `held_events` (undelivered events behind such a head - per-aggregate ordering), `open_conflicts`,
+`compensation_open` (MANUAL_REQUIRED / HOOK_FAILED records), `last_acked_at`. New reasons:
+
+| Verdict | Reason code | Meaning / action |
+|---|---|---|
+| warn | `DELIVERY_STALE` | consumers are behind by more than 15 min (dispatcher stopped or a consumer keeps failing) |
+| critical (with `DEAD_LETTER_PRESENT`) | `ORDERING_BLOCKED` | later events of an aggregate wait behind a dead letter: replay it after the cause is fixed |

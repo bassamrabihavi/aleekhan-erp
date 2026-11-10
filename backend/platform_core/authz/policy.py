@@ -1,5 +1,5 @@
-"""Role/scope authorization engine (PHASE_01 / 01.3) over the APPROVED permission matrix v1.1
-(DEC-049, DEC-056).
+"""Role/scope authorization engine (PHASE_01 / 01.3) over the APPROVED permission matrix v1.2
+(DEC-049, DEC-056 + its 2026-11-10 extension).
 
 Inputs are only database rows written by reviewed migrations and audited services: ``platform_permission``
 (catalogue + MFA/BA/SoD flags), ``platform_role`` / ``platform_role_permission`` (grant mode per role) and the
@@ -19,7 +19,9 @@ Rules (docs/security/PERMISSION_MATRIX_DRAFT.md section 1):
   (``max_sensitivity``).
 * **Admin != business approval (DEC-003)**: grants coming from a TECHNICAL role never satisfy a permission
   flagged ``business_approval`` (the DB also refuses such grants; this is defence in depth). Single explicit
-  exception (DEC-056, matrix v1.1): ``owner_admin`` holds ``platform.workflow.approval.decide``.
+  exception (DEC-056, matrix v1.1 / v1.2): ``owner_admin`` holds ``platform.workflow.approval.decide``,
+  ``platform.document.approve`` and ``platform.config.parameter.publish`` (the last one for BUSINESS_RULE
+  values only - enforced by ``params.service``).
 * **MFA step-up**: a permission flagged ``mfa_step_up`` needs an MFA verification younger than
   ``mfa_step_up_window_minutes`` (DEC-051: 15) - also inside the factory network while
   ``mfa_step_up_inside_network`` is true (DEC-049 item 5) -> 401 ``MFA_REQUIRED``.
@@ -61,6 +63,10 @@ from platform_core.params.values import effective_bool, effective_minutes
 SENSITIVITY_RANK: Final = {"S0": 0, "S1": 1, "S2": 2, "S3": 3}
 DECIDE_GENERIC: Final = "platform.workflow.approval.decide"
 OWNER_ROLE: Final = "owner_admin"
+# DEC-056 (matrix v1.1 + v1.2 extension 2026-11-10): business-approval permissions the owner holds directly
+OWNER_BA_ACTIONS: Final = frozenset(
+    {DECIDE_GENERIC, "platform.document.approve", "platform.config.parameter.publish"}
+)
 
 
 # ---------------------------------------------------------------------------------------------- caller
@@ -213,10 +219,20 @@ def _effective_grants(user_id: uuid.UUID, action: str) -> list[Grant]:
 
 
 def counts_for_business_approval(g: Grant) -> bool:
-    """DEC-003 + its single exception DEC-056 (matrix v1.1): a business-approval grant counts only from a
-    BUSINESS role, or the owner's ``owner_admin`` grant of ``platform.workflow.approval.decide``. Maker !=
-    checker is checked by the deciding use case and stays unchanged (DEC-032)."""
-    return g.role_kind == RoleKind.BUSINESS or (g.role_code == OWNER_ROLE and g.action == DECIDE_GENERIC)
+    """DEC-003 + its single exception DEC-056 (matrix v1.2): a business-approval grant counts only from a
+    BUSINESS role, or the owner's ``owner_admin`` grant of one of :data:`OWNER_BA_ACTIONS`. Maker != checker
+    is checked by the deciding use case and stays unchanged (DEC-032)."""
+    return g.role_kind == RoleKind.BUSINESS or is_owner_exception(g)
+
+
+def is_owner_exception(g: Grant) -> bool:
+    """The grant counts only through the DEC-056 owner exception (TECHNICAL ``owner_admin`` role)."""
+    return g.role_code == OWNER_ROLE and g.role_kind != RoleKind.BUSINESS and g.action in OWNER_BA_ACTIONS
+
+
+def business_grants(caller: Caller, action: str) -> list[Grant]:
+    """Counting grants of ``action`` for ``caller`` (TECHNICAL roles removed, owner exception kept)."""
+    return _effective_grants(caller.user_id, action)
 
 
 def own_units(user_id: uuid.UUID) -> frozenset[uuid.UUID]:

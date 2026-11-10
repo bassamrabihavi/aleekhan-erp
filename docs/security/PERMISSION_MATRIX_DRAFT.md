@@ -1,7 +1,22 @@
-# Permission matrix — PHASE_01 platform actions (APPROVED v1.1)
+# Permission matrix — PHASE_01 platform actions (APPROVED v1.2)
 
-**Status: APPROVED v1.1 — DEC-049 (v1.0, employer بسام ربیهاوی, 2026-11-04) + DEC-056 (v1.1, 2026-11-06).
-v1.0 in force from PHASE_01 / 01.2; v1.1 from PHASE_01 / 01.5 (migration `platform_core.0014_dec056_owner_approval_rights`).**
+**Status: APPROVED v1.2 — DEC-049 (v1.0, employer بسام ربیهاوی, 2026-11-04) + DEC-056 (v1.1, 2026-11-06) + DEC-056
+extension (v1.2, 2026-11-10). v1.0 in force from PHASE_01 / 01.2; v1.1 from PHASE_01 / 01.5 (migration
+`platform_core.0014_dec056_owner_approval_rights`); v1.2 from PHASE_01 / 01.6 (migration
+`platform_core.0015_dec056_matrix_v12`).**
+
+**Change note v1.2 (DEC-056 extension, employer 2026-11-10, REV-0125).** Two more cells of the `owner_admin` (OA)
+column change from `—` to `●`: `platform.document.approve` (the owner approves / rejects document revisions
+directly) and `platform.config.parameter.publish` (the owner publishes / rejects proposed values of
+**BUSINESS_RULE** parameters directly; for TECHNICAL values his grant does not count — the engine answers 403
+`ACCESS_DENIED` — because the decision names BUSINESS_RULE publish only). The explicit exception of principle 2
+now covers exactly three pairs (`owner_admin` + `platform.workflow.approval.decide`, `platform.document.approve`,
+`platform.config.parameter.publish`), in the engine (`authz.policy.OWNER_BA_ACTIONS`) and in the DB guard
+`ck_role_technical_no_business_approval`. Unchanged: maker ≠ checker — the owner never decides his own request,
+his own upload or his own proposal (also no rejection of his own BUSINESS_RULE proposal), except the one-time
+DEC-055 bootstrap approval; `it_ops` and `security_auditor` hold no business approval; the owner gets **no**
+`platform.document.read` / `download` (not part of the decision: he decides from the approval request; see the
+01.6 report, open question). `owner_admin` carries `matrix_version = 1.2`; the other ten roles keep `1.0`.
 
 **Change note v1.1 (DEC-056, APPROVED 2026-11-06).** Two cells of the `owner_admin` (OA) column change from `—` to
 `●`: `platform.workflow.approval.read` (the owner reads every approval request; his assignment is GLOBAL) and
@@ -10,7 +25,7 @@ separate approver role). Principle 2 gets exactly one explicit exception (the pa
 `platform.workflow.approval.decide`), in the engine and in the DB guard `ck_role_technical_no_business_approval`.
 Unchanged: maker ≠ checker (principle 4) — the owner never decides his own request, except the one-time
 DEC-055 bootstrap approval; `it_ops` and `security_auditor` hold no business approval; `document.approve` and
-`config.parameter.publish` are not granted to the owner. Every owner decision is audited with the deciding role
+`config.parameter.publish` are not granted to the owner (in v1.1; granted by v1.2 above). Every owner decision is audited with the deciding role
 (`scope.via_role`). Consequence (DEC-032 read literally): `owner_admin` now holds a business-approval permission,
 so an in-app grant of `owner_admin` to another person waits PENDING_APPROVAL for a second eligible person; the
 console bootstrap of the first owner (DEC-049 item 4 / DEC-054 C) is not an in-app grant and is exempt. Only
@@ -34,8 +49,9 @@ its own xx.1 and the matrix version increases.
    (+ field) on every request; hiding a button is not a control.
 2. **Admin ≠ business approval (DEC-003).** Roles of kind TECHNICAL never contain a permission flagged
    `business_approval` (rows marked **BA**). The database refuses such a role (DATA_TABLE: Role CHECK).
-   **Single exception (DEC-056, v1.1):** `owner_admin` holds `platform.workflow.approval.decide`; maker ≠ checker
-   (principle 4) still applies to the owner.
+   **Single exception (DEC-056, v1.1 / v1.2):** `owner_admin` holds `platform.workflow.approval.decide`,
+   `platform.document.approve` and `platform.config.parameter.publish` (BUSINESS_RULE values only); maker ≠
+   checker (principle 4) still applies to the owner.
 3. **The owner may hold business roles only explicitly.** The owner/admin may assign himself a BUSINESS role;
    the assignment is flagged `self_assignment=true` and audited (DEC-003). DEC-032 (APPROVED): an assignment
    of a role holding a **BA** permission waits `PENDING_APPROVAL` until a second eligible person approves it
@@ -110,11 +126,11 @@ APPROVED since 2026-11-04, so no row is blocked in v1.0.)
 | platform.document.create | createDocument | | — | — | — | — | — | — | ● | — | — | — | — |
 | platform.document.update | updateDocument, submitDocumentRevision | | — | — | — | — | — | — | ● | — | — | — | — |
 | platform.document.upload | uploadDocumentRevision | quarantine (DEC-053) | — | — | — | — | — | — | ● | — | — | — | — |
-| platform.document.approve | approveDocumentRevision, rejectDocumentRevision | MFA, BA, SoD (≠ uploader) | — | — | — | — | — | — | — | ● | — | — | — |
+| platform.document.approve | approveDocumentRevision, rejectDocumentRevision | MFA, BA, SoD (≠ uploader) | ● | — | — | — | — | — | — | ● | — | — | — |
 | platform.config.parameter.read | listParameters, getParameter, listParameterValues | | ● | ● | ● | — | — | — | — | — | ● | — | — |
 | platform.config.parameter.define | createParameterDefinition | MFA | ● | — | — | — | — | — | — | — | — | — | — |
 | platform.config.parameter.propose | proposeParameterValue | | ● | ● | — | — | — | — | — | — | — | — | — |
-| platform.config.parameter.publish | publishParameterValue | MFA, BA, SoD (≠ proposer) | — | — | — | — | — | — | — | — | ● | — | — |
+| platform.config.parameter.publish | publishParameterValue | MFA, BA, SoD (≠ proposer) | ● | — | — | — | — | — | — | — | ● | — | — |
 | platform.config.field.read | listDynamicFields, getDynamicField | | ● | ● | — | — | — | — | — | — | — | — | — |
 | platform.config.field.define | createDynamicField, updateDynamicField (DRAFT only) | | ● | — | — | — | — | — | — | — | — | — | — |
 
@@ -147,6 +163,8 @@ audit events for anyone (append-only, DB triggers since 00.2).
 ## 6. Change control
 - v1.0 (DEC-049, 2026-11-04): approved draft v0.1 unchanged.
 - v1.1 (DEC-056, 2026-11-06): owner_admin `approval.read` ● and `approval.decide` ● (change note at the top).
+- v1.2 (DEC-056 extension, 2026-11-10): owner_admin `document.approve` ● and `config.parameter.publish` ●
+  (BUSINESS_RULE values only) (change note at the top).
 
 A change to this matrix = new matrix version + reviewed commit + DEC entry; roles keep `matrix_version`. Seeds
 for dev/test use synthetic users only (`محیط آزمایشی — داده ساختگی`).

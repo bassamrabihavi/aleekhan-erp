@@ -1,0 +1,11 @@
+..........................................
+----------------------------------------------------------------------
+Ran 42 tests in 2.878s
+
+OK
+lock_runtime: requirements.lock matches the venv (12 packages for this platform)
+EOL_ONLY        t.csv
+summary: EOL_ONLY=1 | failures=0
+EOL_ONLY        t.csv
+summary: EOL_ONLY=1 | failures=1 (strict)
+lock_runtime: requirements.lock matches the venv (12 packages for this platform)

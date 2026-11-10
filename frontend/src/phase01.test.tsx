@@ -1,5 +1,5 @@
 // Unit tests of the PHASE_01 shell and pages (01.5). fetch is stubbed here only (MOCK_UI_BINDING §2 rule 1);
-// bodies follow docs/api/openapi-draft.yaml 0.6.1-draft with synthetic values. The E2E suite runs the same
+// bodies follow docs/api/openapi-draft.yaml 0.6.2-draft with synthetic values. The E2E suite runs the same
 // flows against the real Django backend.
 import { QueryClientProvider } from "@tanstack/react-query";
 import { act, render, screen, waitFor, within } from "@testing-library/react";
@@ -82,7 +82,7 @@ const USER = {
   created_by: null,
   row_version: 3,
 };
-const VERSION = { api_version: "v1", contract_version: "0.6.1-draft", build_commit: "abcdef1234567", environment: "dev" };
+const VERSION = { api_version: "v1", contract_version: "0.6.2-draft", build_commit: "abcdef1234567", environment: "dev" };
 
 function grants(actions: string[]) {
   return {
@@ -265,6 +265,59 @@ describe("MFA step-up", () => {
     renderAt("#/ops");
     expect(await screen.findByTestId("job-not-cancellable")).toHaveTextContent("محافظت‌شده");
     expect(screen.queryByTestId("job-cancel")).not.toBeInTheDocument();
+  });
+});
+
+describe("page 36: event delivery freshness (01.6)", () => {
+  const HEALTH = {
+    checked_at: NOW,
+    components: [{ name: "database", status: "up" }],
+    outbox: { pending: 2, failed: 0, dead_letter: 1, oldest_pending_at: NOW },
+    jobs: { running: 0, queued: 0, failed_24h: 0 },
+  };
+  it("shows lag, stale flag and the aggregates blocked behind a dead letter from the server counts", async () => {
+    stub(
+      signedIn(["platform.ops.health.read"], {
+        "GET /admin/health": () =>
+          ok({
+            ...HEALTH,
+            integration: { lag_seconds: 1260, stale: true, stale_after_seconds: 900, blocked_aggregates: 1, held_events: 3, open_conflicts: 0, compensation_open: 2, last_acked_at: NOW },
+          }),
+      }),
+    );
+    renderAt("#/ops");
+    const block = await screen.findByTestId("integration-health");
+    expect(within(block).getByTestId("integration-stale")).toHaveTextContent("رویداد متوقف");
+    expect(within(block).getByTestId("integration-stale")).toHaveAttribute("data-tone", "danger");
+    expect(block).toHaveTextContent("۲۱ دقیقه");
+    expect(within(block).getByTestId("c-int-blocked")).toHaveTextContent("۱");
+    expect(within(block).getByTestId("c-int-held")).toHaveTextContent("۳");
+    expect(within(block).getByTestId("c-int-compensation")).toHaveTextContent("۲");
+  });
+  it("events waiting under the threshold are 'waiting', never 'up to date'; stale is a warning", async () => {
+    const base = { lag_seconds: 30, stale: false, stale_after_seconds: 900, blocked_aggregates: 0, held_events: 0, open_conflicts: 0, compensation_open: 0, last_acked_at: null };
+    stub(signedIn(["platform.ops.health.read"], { "GET /admin/health": () => ok({ ...HEALTH, integration: base }) }));
+    renderAt("#/ops");
+    const chip = await screen.findByTestId("integration-stale");
+    expect(chip).toHaveTextContent("در انتظار تحویل");
+    expect(chip).toHaveAttribute("data-tone", "info");
+  });
+  it("an older server without the optional block shows no invented freshness", async () => {
+    stub(signedIn(["platform.ops.health.read"], { "GET /admin/health": () => ok(HEALTH) }));
+    renderAt("#/ops");
+    expect(await screen.findByTestId("c-outbox-dead")).toHaveTextContent("۱");
+    expect(screen.queryByTestId("integration-health")).not.toBeInTheDocument();
+  });
+});
+
+describe("page 46: DEC-056 wording (REV-0126)", () => {
+  it("says the owner decides directly but never his own request, other technical roles do not", async () => {
+    stub(signedIn(["platform.identity.user.read"], { "GET /admin/users": () => ok({ items: [USER], page: { page_size: 25, next_cursor: null } }) }));
+    renderAt("#/security");
+    const page = await screen.findByTestId("page-security");
+    expect(page).toHaveTextContent("مستقیم تصمیم می‌گیرد");
+    expect(page).toHaveTextContent("DEC-056");
+    expect(page).toHaveTextContent("حق تأیید کسب‌وکار ندارند");
   });
 });
 

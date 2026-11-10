@@ -205,3 +205,23 @@ Review verdicts are in `reports/phase-00/step-N/REVIEW.md`. No version number is
 - Contract `0.6.1-draft`: optional `ParameterValueRevision.row_version` (If-Match of `publishParameterValue`).
 - Dev: Vite proxy keeps the browser Host (`changeOrigin: false`) so the CSRF Origin check matches; `/` is the
   login / dashboard, the PHASE_00 smoke page moved to `#/status`.
+
+### 01.6 Integration
+- Added: event catalogue `backend/platform_core/engine/events.py` (52 platform event types of PHASE_00 + PHASE_01:
+  producer module, aggregate type, versions, payload JSON Schema, sensitivity S1; golden
+  `tests/golden/event_catalogue.golden.json`; `docs/integration/EVENT_CATALOGUE.md`). `UnitOfWork.emit` enforces
+  it (unknown type / wrong aggregate / non-current version / payload mismatch -> `EngineContractError`, write rolled
+  back) and stamps provenance (`producer`, `build_commit`, `schema_migration`).
+- Consumer pipeline: catalogue admission in `RegistryPublisher` (accepts N and N-1 with upcast; older / invalid ->
+  dead letter at once via `PublishError(permanent=True)`; newer -> backoff), per-aggregate delivery order in
+  `claim_batch` (`OutboxPolicy.per_aggregate_order`), integration freshness (`ops.monitoring.integration_health`:
+  lag, stale flag, blocked aggregates, held events, open conflicts, open compensations) in `outbox_status`,
+  `GET /admin/health` (`integration`, contract `0.6.2-draft`, additive) and page 36.
+- Migrations: `0015_dec056_matrix_v12` (DEC-056 extension 2026-11-10: owner_admin `document.approve` +
+  `config.parameter.publish`, DB guard exception widened to exactly three pairs; reversible),
+  `0016_outbox_provenance_and_order` (three provenance columns + format CHECKs + partial index; reversible).
+- DEC-056 extension (matrix v1.2, REV-0125): the owner decides document revisions and BUSINESS_RULE publish
+  directly; TECHNICAL values still need a config approver; never his own request / upload / proposal. HTTP + E2E
+  coverage of the owner deciding another person's request (REV-0128); UAT steps added.
+- Fixed: REV-0126 (page 46 subtitle reflects DEC-056).
+

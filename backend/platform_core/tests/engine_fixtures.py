@@ -129,7 +129,7 @@ def network(settings: Any) -> None:
 def ensure_catalogue() -> None:
     """After a transactional flush: parameters + permissions (``ensure_parameters``) + roles/grants and job
     types
-    with the frozen v1.0 / 0011 / v1.1 (0014) values (race tests)."""
+    with the frozen v1.0 / 0011 / v1.1 (0014) / v1.2 (0015) values (race tests)."""
     from importlib import import_module
 
     from platform_core.jobs.models import JobDefinition
@@ -138,6 +138,7 @@ def ensure_catalogue() -> None:
     seed = import_module("platform_core.migrations.0010_seed_phase01_catalogue")
     eng = import_module("platform_core.migrations.0011_phase01_engine")
     v11 = import_module("platform_core.migrations.0014_dec056_owner_approval_rights")
+    v12 = import_module("platform_core.migrations.0015_dec056_matrix_v12")
     if not Role.objects.exists():
         roles = {
             code: Role.objects.create(
@@ -151,11 +152,12 @@ def ensure_catalogue() -> None:
                 RolePermission.objects.create(
                     role=roles[code], permission_id=action, grant_mode=mode, max_sensitivity=max_sens
                 )
-        for action, cells in v11.ADDED_GRANTS.items():  # matrix v1.1 (DEC-056)
-            for code, mode in cells.items():
-                RolePermission.objects.create(role=roles[code], permission_id=action, grant_mode=mode)
+        for added in (v11.ADDED_GRANTS, v12.ADDED_GRANTS):  # matrix v1.1 / v1.2 (DEC-056 + extension)
+            for action, cells in added.items():
+                for code, mode in cells.items():
+                    RolePermission.objects.create(role=roles[code], permission_id=action, grant_mode=mode)
         Role.objects.exclude(code=v11.OWNER).update(status="ACTIVE", matrix_version="1.0")
-        Role.objects.filter(code=v11.OWNER).update(status="ACTIVE", matrix_version=v11.MATRIX_VERSION)
+        Role.objects.filter(code=v11.OWNER).update(status="ACTIVE", matrix_version=v12.MATRIX_VERSION)
     with connection.cursor() as cur:
         for job_type, name_fa in seed.JOB_TYPES:
             cur.execute(
