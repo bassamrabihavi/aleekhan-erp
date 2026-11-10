@@ -5,7 +5,7 @@
 ## خلاصه
 
 - **فاز فعال:** PHASE_01 هسته سازمانی، امنیت، اسناد و گردش کار (فعال)
-- **گام جاری:** 01.8 Report & Review (در صف)
+- **گام جاری:** 01.8 Report & Review (در ممیزی)
 - **پیشرفت:** 15/120 گام قبول‌شده
 - **آماده تست شما:** 1 مورد
 - **تصمیم P0 باز (کل پروژه):** 17
@@ -114,6 +114,8 @@ flowchart LR
 
 ## آخرین رویدادها
 
+- `2026-11-10T18:36:57+00:00` step phase=PHASE_01 step=01.8 state=IN_REVIEW commit=7a360eb
+- `2026-11-10T17:57:11+00:00` step phase=PHASE_01 step=01.8 state=IN_PROGRESS
 - `2026-11-10T17:57:07+00:00` step phase=PHASE_01 step=01.7 state=PASS
 - `2026-11-10T16:43:48+00:00` step phase=PHASE_01 step=01.7 state=IN_REVIEW commit=bccd109
 - `2026-11-10T15:06:48+00:00` step phase=PHASE_01 step=01.7 state=IN_PROGRESS
@@ -127,5 +129,3 @@ flowchart LR
 - `2026-11-06T01:15:34+00:00` decision id=DEC-056 status=APPROVED by=بسام ربیهاوی note=owner_admin: approval.read همه + approval.decide مستقیم؛ maker≠checker (DEC-032) بدون تغییر؛ ماتریس v1.1
 - `2026-11-06T01:15:34+00:00` decision_added id=DEC-056 status=OPEN
 - `2026-11-06T01:12:44+00:00` step phase=PHASE_01 step=01.4 state=PASS
-- `2026-11-05T23:20:43+00:00` step phase=PHASE_01 step=01.4 state=IN_REVIEW commit=f6a60a5
-- `2026-11-05T18:39:39+00:00` step phase=PHASE_01 step=01.4 state=IN_PROGRESS
