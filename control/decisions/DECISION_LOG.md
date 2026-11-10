@@ -66,3 +66,4 @@
 - **Implementation:** permission matrix v1.1, a seed migration, and the DB guard "TECHNICAL role holds no business-approval permission" gets an explicit owner_admin exception. Scheduled with step 01.5.
 - **Decided by:** بسام ربیهاوی (کارفرما), in the Claude Code session, as the answer to the 01.4 review question.
 - **2026-11-10 (DEC-056 follow-up):** an in-app grant of `owner_admin` to another person needs a second approver (DEC-032); the console bootstrap of the owner stays exempt. Decided by بسام ربیهاوی (کارفرما).
+- **2026-11-10 (DEC-056 extension, REV-0125; matrix v1.2):** the owner (`owner_admin`) also decides document revisions (approve/reject) and BUSINESS_RULE parameter publish requests directly. Maker ≠ checker unchanged: never his own request/proposal (except DEC-055). Decided by بسام ربیهاوی (کارفرما).
