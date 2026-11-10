@@ -172,13 +172,13 @@
         },
         "01.6": {
           "name": "Integration",
-          "state": "IN_REVIEW",
+          "state": "PASS",
           "commit": "7c1a93d",
           "report": "reports/phase-01/step-6/REPORT.md",
-          "review": null,
+          "review": "reports/phase-01/step-6/REVIEW.md",
           "rework_cycles": 0,
           "started_at": "2026-11-10T09:23:33+00:00",
-          "done_at": null
+          "done_at": "2026-11-10T15:06:35+00:00"
         },
         "01.7": {
           "name": "Security & Ops",
@@ -3070,7 +3070,16 @@
       "state": "IN_REVIEW",
       "note": null,
       "commit": "7c1a93d"
+    },
+    {
+      "at": "2026-11-10T15:06:35+00:00",
+      "kind": "step",
+      "phase": "PHASE_01",
+      "step": "01.6",
+      "state": "PASS",
+      "note": null,
+      "commit": null
     }
   ],
-  "updated_at": "2026-11-10T10:44:27+00:00"
+  "updated_at": "2026-11-10T15:06:35+00:00"
 }
