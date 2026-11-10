@@ -4,7 +4,7 @@
 PROJECT: Aleekhan
 PHASE: PHASE_01 (هسته سازمانی، امنیت، اسناد و گردش کار)
 STEP: 01.8 (phase report over 01.1-01.8)
-COMMIT SHA: PENDING (01.8 commit, filled by the orchestrator; S8 evidence = final tree, matched by the git tree ids in reports/phase-01/step-8/logs/ci/summary.md)
+COMMIT SHA: 7a360eb (01.8 commit; S8 evidence = final tree, matched by the git tree ids in reports/phase-01/step-8/logs/ci/summary.md)
 BRANCH/PR: main (GitHub, public per DEC-046)
 STATUS: PARTIAL - all engineering scope done; step 01.8 IN_PROGRESS -> review; Gate items that need the employer are open (section 7)
 TIME OF REPORT (UTC): 2026-11-10
@@ -43,7 +43,7 @@ Traceability of every scope item, step, Gate criterion, acceptance case, UI page
 | 01.5 | UI: login/MFA shell, pages 36/39/40/42/46 + org tree on the real API, E2E + screenshots; DEC-056 matrix v1.1 (0014); REV-0120..0123 | `ef4902a` |
 | 01.6 | event catalogue + producer contract, N/N-1 consumers, per-aggregate order, freshness on page 36 (0016); DEC-056 matrix v1.2 (0015); REV-0126/0128 | `7c1a93d` |
 | 01.7 | privacy/permission matrix tests, perf, backup drill + rollback rehearsal, housekeeping monitoring, orphan cleanup, upload limit (REV-0124); matrix v1.3 (0017); dead-letter discard (0018, REV-0129..0131); security checklist | `bccd109` |
-| 01.8 | REV-0132 `tests/test_authz_request_cache.py`; REV-0133 `ops/dead_letters.py` + `manage.py outbox_dead_letter` (replay: owner_admin or it_ops; discard: owner_admin) + docs; REV-0134 `tools/ci_local.sh` (command + exit code in every log, tree ids, OpenAPI validation, PHASE_01 perf, rollback rehearsal in the ops stage) + `docs/ops/CI.md`; `docs/db/ERD.md`; phase report set; S8 evidence and screenshots | PENDING |
+| 01.8 | REV-0132 `tests/test_authz_request_cache.py`; REV-0133 `ops/dead_letters.py` + `manage.py outbox_dead_letter` (replay: owner_admin or it_ops; discard: owner_admin) + docs; REV-0134 `tools/ci_local.sh` (command + exit code in every log, tree ids, OpenAPI validation, PHASE_01 perf, rollback rehearsal in the ops stage) + `docs/ops/CI.md`; `docs/db/ERD.md`; phase report set; S8 evidence and screenshots | 7a360eb |
 
 - API: 107 operations on 88 paths (S8 `06_contract.log`: "OpenAPI valid 3.1.0 0.6.3-draft 88 paths 107
   operations"); `CONTRACT_VERSION` 0.6.3-draft; additive versions since 0.5.0.

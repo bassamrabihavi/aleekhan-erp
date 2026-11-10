@@ -1,7 +1,7 @@
 {
  "phase": "PHASE_01",
  "step": "01.8",
- "commit_sha": "PENDING",
+ "commit_sha": "7a360eb",
  "status": "PARTIAL",
  "scope": [
   "PHASE_01 phase report over steps 01.1-01.8 (DEVELOPER_REPORT_TEMPLATE sections 1-10)",
@@ -11,7 +11,7 @@
   "01.8: REV-0132, REV-0133, REV-0134, REV-0127/REV-0135, ERD rows 0014-0018, TRACE_MAP, CHANGELOG"
  ],
  "changes": [
-  "Step commits: 01.1 89e5f0d, 01.2 153651f, 01.3 3f1f3ab, 01.4 f6a60a5, 01.5 ef4902a, 01.6 7c1a93d, 01.7 bccd109, 01.8 PENDING",
+  "Step commits: 01.1 89e5f0d, 01.2 153651f, 01.3 3f1f3ab, 01.4 f6a60a5, 01.5 ef4902a, 01.6 7c1a93d, 01.7 bccd109, 01.8 7a360eb",
   "backend/platform_core/ops/dead_letters.py (ALLOWED_ROLES)",
   "backend/platform_core/management/commands/outbox_dead_letter.py (--user, --owner alias)",
   "backend/platform_core/tests/test_authz_request_cache.py (new)",
