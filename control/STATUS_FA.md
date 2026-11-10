@@ -5,7 +5,7 @@
 ## خلاصه
 
 - **فاز فعال:** PHASE_01 هسته سازمانی، امنیت، اسناد و گردش کار (فعال)
-- **گام جاری:** 01.7 Security & Ops (در صف)
+- **گام جاری:** 01.7 Security & Ops (در ممیزی)
 - **پیشرفت:** 14/120 گام قبول‌شده
 - **آماده تست شما:** 1 مورد
 - **تصمیم P0 باز (کل پروژه):** 17
@@ -114,6 +114,8 @@ flowchart LR
 
 ## آخرین رویدادها
 
+- `2026-11-10T16:43:48+00:00` step phase=PHASE_01 step=01.7 state=IN_REVIEW commit=bccd109
+- `2026-11-10T15:06:48+00:00` step phase=PHASE_01 step=01.7 state=IN_PROGRESS
 - `2026-11-10T15:06:35+00:00` step phase=PHASE_01 step=01.6 state=PASS
 - `2026-11-10T10:44:27+00:00` step phase=PHASE_01 step=01.6 state=IN_REVIEW commit=7c1a93d
 - `2026-11-10T09:23:33+00:00` step phase=PHASE_01 step=01.6 state=IN_PROGRESS
@@ -127,5 +129,3 @@ flowchart LR
 - `2026-11-05T23:20:43+00:00` step phase=PHASE_01 step=01.4 state=IN_REVIEW commit=f6a60a5
 - `2026-11-05T18:39:39+00:00` step phase=PHASE_01 step=01.4 state=IN_PROGRESS
 - `2026-11-05T18:39:26+00:00` step phase=PHASE_01 step=01.3 state=PASS
-- `2026-11-05T18:31:27+00:00` step phase=PHASE_01 step=01.3 state=IN_REVIEW commit=3f1f3ab
-- `2026-11-05T18:12:46+00:00` decision id=DEC-055 status=APPROVED by=بسام ربیهاوی note=B: خودتأییدی یک‌باره مالک فقط برای اولین دارنده هر نقش تأیید کسب‌وکار؛ تأیید دومرحله‌ای تازه + علامت ویژه در Audit
