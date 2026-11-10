@@ -101,6 +101,8 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     # first: every response (including 400/404/500 produced by later layers) carries X-Request-ID
     "platform_core.api.request_id.RequestIdMiddleware",
+    # 01.7 (REV-0124): 413 for an oversized multipart upload from Content-Length, before any byte is parsed
+    "platform_core.api.upload_limit.UploadSizeLimitMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.middleware.common.CommonMiddleware",
     # DRF APIViews are csrf-exempt at this layer; DRF's SessionAuthentication (PHASE_01) enforces CSRF itself.

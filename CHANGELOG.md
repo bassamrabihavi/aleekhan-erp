@@ -225,3 +225,30 @@ Review verdicts are in `reports/phase-00/step-N/REVIEW.md`. No version number is
   coverage of the owner deciding another person's request (REV-0128); UAT steps added.
 - Fixed: REV-0126 (page 46 subtitle reflects DEC-056).
 
+
+### 01.7 Security & Ops
+- Security & ops evidence: `docs/security/PHASE_01_SECURITY_CHECKLIST.md` (status per item with evidence;
+  signature rows open), secret scan (tree + history), dependency scan (pip-audit / npm audit), logs in
+  `reports/phase-01/step-7/logs/`.
+- Privacy / permission tests `tests/test_phase01_step7_privacy.py`: every role x every PHASE_01 operation the
+  matrix does not grant -> 403; every MFA-flagged operation -> 401 `MFA_REQUIRED` without a fresh step-up;
+  document sensitivity caps (EMP S1, MGR/MGT S2) -> 404 above the cap; no never-exposed field or value in any GET
+  response; no plaintext password / one-time password / TOTP secret / OTP / recovery code / session token in any
+  row of any `platform_*` table or any log record after a full ceremony.
+- Perf (`pytest -m perf`, `tests/test_perf_phase01.py`): inboxes at the 1000-row per-record check limit, audit
+  chain lock throughput with 1 / 4 / 8 writers, outbox dispatch lag with 1 / 4 dispatchers (TECHNICAL DEFAULT
+  budgets). Fix found by it: `authz.policy.request_cache` (grants / scope facts read once per list request).
+- Ops: housekeeping job monitoring (`ops.monitoring.housekeeping_health`, `manage.py job_status`,
+  `manage.py run_housekeeping`, page 36 block, `GET /admin/health` `jobs.housekeeping`, contract
+  `0.6.3-draft`, additive); orphan upload cleanup job `document_orphan_cleanup` (audited, idempotent, 24 h
+  grace); upload size limit before parsing (`api/upload_limit.py`, REV-0124) + proxy limits
+  (`docs/ops/DEPLOYMENT_LIMITS.md`); backup drill covers PHASE_01 tables, migrations 0011-0018 and the audit
+  chain; rollback rehearsal to 0010 (`ops/backup/rollback_rehearsal.sh`, docs/ops/ROLLBACK.md section 3a).
+- Migrations: `0017_dec056_matrix_v13` (owner_admin `document.read` + `document.download`, not business
+  approval, guard unchanged; reversible), `0018_outbox_discard_and_orphan_job` (delivery state DISCARDED +
+  `discarded_at` + CHECK + ordering index without settled rows; orphan cleanup job type; reversible).
+- DEC-056 extension 2 (matrix v1.3): the owner opens and downloads the documents he decides (service, HTTP, E2E,
+  UAT step 3.11).
+- Fixed: REV-0129 (owner-only discard of dead letters, console, audited, reason required), REV-0130
+  (`blocked_aggregates` = aggregates with events waiting behind a dead letter), REV-0131 (page 36 in Farsi), the
+  Parameters page hides the publish button for the owner on TECHNICAL values.

@@ -1,0 +1,31 @@
+{
+  "rehearsal": "rollback-to-0010",
+  "status": "PASS",
+  "started_at": "2026-11-10T16:16:05Z",
+  "finished_at": "2026-11-10T16:18:08Z",
+  "machine": "work-windows",
+  "commit": "48bec48a2d6e4e2e3128e64cbb1e802de1c7e18f",
+  "server_version": "17.9",
+  "synthetic_rows": 50,
+  "scenario_a_counts": "users=1 units=1 tasks=1 approvals=1 revisions=1 audit=54 outbox=55",
+  "scenario_b_counts": "users=1 units=1 tasks=1 approvals=1 revisions=1 audit=60 outbox=61",
+  "checks": [
+    {"check": "A: migrate down 0018 -> 0010 with synthetic data", "result": "PASS"},
+    {"check": "A: schema after rollback == fresh 0010 schema", "result": "PASS"},
+    {"check": "A: business rows kept by the rollback (users=1 units=1 tasks=1 approvals=1 revisions=1 audit=54 outbox=55)", "result": "PASS"},
+    {"check": "A: DISCARDED events are DEAD_LETTER again (0018 reverse)", "result": "PASS"},
+    {"check": "A: owner_admin back to matrix 1.0 (0017/0015/0014 reversed)", "result": "PASS"},
+    {"check": "A: migrations 0011-0018 unrecorded", "result": "PASS"},
+    {"check": "A: migrate forward to head again, migrate --check clean", "result": "PASS"},
+    {"check": "A: schema after forward == fresh head schema", "result": "PASS"},
+    {"check": "A: application reads the rolled-forward DB (outbox_status, job_status)", "result": "PASS"},
+    {"check": "A: owner_admin matrix/grants restored by forward (1.3/32)", "result": "PASS"},
+    {"check": "B: rollback below 0011 is refused while job runs exist (PROTECT, by design)", "result": "PASS"},
+    {"check": "B: stopped at a consistent state (0011 applied, 0012-0018 reversed)", "result": "PASS"},
+    {"check": "B: schema == fresh 0011 schema", "result": "PASS"},
+    {"check": "B: business rows kept (users=1 units=1 tasks=1 approvals=1 revisions=1 audit=60 outbox=61)", "result": "PASS"},
+    {"check": "B: migrate forward to head again, migrate --check clean", "result": "PASS"},
+    {"check": "B: schema after forward == fresh head schema", "result": "PASS"},
+    {"check": "B: application reads the rolled-forward DB (outbox_status, job_status)", "result": "PASS"}
+  ]
+}

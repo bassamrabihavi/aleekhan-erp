@@ -1,7 +1,7 @@
 {
  "_note": "Golden event catalogue (PHASE_01 / 01.6). Generated from platform_core/engine/events.py and reviewed: every outbox event type of PHASE_00 + PHASE_01 with producer module, aggregate type, sensitivity (S1: ids, status codes, counts only), current and accepted schema versions and the JSON Schema of each payload version. A change of this file is a contract change (new version + reviewed commit). Human-readable copy: docs/integration/EVENT_CATALOGUE.md.",
  "source_system": "aleekhan-erp",
- "schema_migration_head": "platform_core.0016_outbox_provenance_and_order",
+ "schema_migration_head": "platform_core.0018_outbox_discard_and_orphan_job",
  "catalogue": {
   "platform.config.field.changed": {
    "event_type": "platform.config.field.changed",

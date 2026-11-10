@@ -1,0 +1,26 @@
+== server 17.9 | machine work-windows | rows 50
+== [0] reference schemas: fresh 0010, fresh 0011, fresh head
+== [A] data without housekeeping job runs: migrate to head, seed, roll back to 0010, forward
+drill_seed: seeded n=50 source=synthetic_drill_6ddf3ea4 phase01_rows=11
+A before: users=1 units=1 tasks=1 approvals=1 revisions=1 audit=54 outbox=55 | owner 1.3/32 | discarded 1
+PASS A: migrate down 0018 -> 0010 with synthetic data
+PASS A: schema after rollback == fresh 0010 schema  (5926 lines)
+PASS A: business rows kept by the rollback (users=1 units=1 tasks=1 approvals=1 revisions=1 audit=54 outbox=55)
+PASS A: DISCARDED events are DEAD_LETTER again (0018 reverse)
+PASS A: owner_admin back to matrix 1.0 (0017/0015/0014 reversed)
+PASS A: migrations 0011-0018 unrecorded
+PASS A: migrate forward to head again, migrate --check clean
+PASS A: schema after forward == fresh head schema
+PASS A: application reads the rolled-forward DB (outbox_status, job_status)
+PASS A: owner_admin matrix/grants restored by forward (1.3/32)
+== [B] data with housekeeping job runs: the 0011 reverse must refuse (PROTECT), DB stays consistent
+drill_seed: seeded n=50 source=synthetic_drill_ecc5f886 phase01_rows=13
+PASS B: rollback below 0011 is refused while job runs exist (PROTECT, by design)
+PASS B: stopped at a consistent state (0011 applied, 0012-0018 reversed)
+PASS B: schema == fresh 0011 schema
+PASS B: business rows kept (users=1 units=1 tasks=1 approvals=1 revisions=1 audit=60 outbox=61)
+PASS B: migrate forward to head again, migrate --check clean
+PASS B: schema after forward == fresh head schema
+PASS B: application reads the rolled-forward DB (outbox_status, job_status)
+== rehearsal PASS (failures: 0)
+== cleanup: drop test_aleekhan_drill_rb_ref10 test_aleekhan_drill_rb_ref11 test_aleekhan_drill_rb_head test_aleekhan_drill_rb_a test_aleekhan_drill_rb_b

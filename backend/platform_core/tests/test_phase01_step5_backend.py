@@ -52,7 +52,7 @@ def test_dec056_owner_holds_approval_read_and_decide_in_the_db() -> None:
     assert {("platform.workflow.approval.read", "SCOPE"), (DECIDE, "SCOPE")} <= held
     # matrix v1.2 (DEC-056 extension, 0015): document.approve + parameter.publish as well
     assert {("platform.document.approve", "SCOPE"), ("platform.config.parameter.publish", "SCOPE")} <= held
-    assert owner.matrix_version == "1.2" and owner.kind == "TECHNICAL"
+    assert owner.matrix_version == "1.3" and owner.kind == "TECHNICAL"
     # no other business-approval permission for the owner, and none at all for it_ops / security_auditor
     assert set(
         RolePermission.objects.filter(

@@ -1,4 +1,4 @@
-// PHASE_01 operations (docs/api/openapi-draft.yaml 0.6.2-draft) used by the UI of step 01.5. Types mirror the
+// PHASE_01 operations (docs/api/openapi-draft.yaml 0.6.3-draft) used by the UI of step 01.5. Types mirror the
 // contract schemas; guards check the required keys of every body (a body without them is a contract error).
 import { apiRequest, newIdempotencyKey, type ApiResponse, type Query } from "./http";
 
@@ -346,7 +346,14 @@ export interface HealthDetail {
   checked_at: string;
   components: { name: string; status: "up" | "down" | "unknown" }[];
   outbox: { pending: number; failed: number; dead_letter: number; oldest_pending_at: string | null };
-  jobs: { running: number; queued: number; failed_24h: number };
+  jobs: {
+    running: number;
+    queued: number;
+    failed_24h: number;
+    // 0.6.3-draft (01.7): housekeeping job monitoring (overdue = no success within max_age_seconds, TECHNICAL DEFAULT)
+    housekeeping_alerts?: number;
+    housekeeping?: HousekeepingJobHealth[];
+  };
   // 0.6.2-draft (01.6): event delivery freshness between modules (counts only)
   integration?: {
     lag_seconds: number | null;
@@ -359,6 +366,16 @@ export interface HealthDetail {
     last_acked_at: string | null;
   };
   security?: { failed_logins_24h: number; locked_users: number };
+}
+export interface HousekeepingJobHealth {
+  job_type: string;
+  last_state: JobState | null;
+  last_succeeded_at: string | null;
+  last_failed_at: string | null;
+  last_error_code: string | null;
+  max_age_seconds: number;
+  overdue: boolean;
+  failing: boolean;
 }
 export interface JobDefinition {
   job_type: string;

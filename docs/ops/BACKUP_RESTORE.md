@@ -72,3 +72,19 @@ directory and is deleted (only its hash and size are reported).
 **Limits of the PHASE_00 drill:** tiny synthetic dataset on the local portable PostgreSQL 17 (no Docker on the
 work machine), so its timings prove the procedure, not production RTO; RPO is a property of the schedule/WAL
 archiving above and is not demonstrated by one dump. Repeat on staging with production-sized data (PHASE_01/12).
+
+## 6. PHASE_01 / 01.7 drill additions
+
+- The seed (`ops/backup/drill_seed.py`) also writes one labelled row set in the PHASE_01 tables (user with a
+  random credential that is never printed, org unit + position + holder, role assignment, task, approval
+  request, document + stored object + revision (metadata only), housekeeping job runs with an audit integrity
+  run, and one outbox event in the 0018 state DISCARDED).
+- Extra checks after restore: PHASE_01 rows present, migrations `0011`-`0018` recorded, the audit hash chain
+  verifies (`audit_chain.check_chain`), the application reads the restored DB through `job_status`.
+- Throw-away names may also start with `test_aleekhan_drill` (`DRILL_PREFIX=test_aleekhan_drill`), so every
+  database of the drill is a `test_*` database.
+- Document bytes live on the encrypted volume, not in PostgreSQL: they are backed up with the volume snapshot
+  (section 1); after a restore of the DB only, run `manage.py run_housekeeping document_orphan_cleanup` only
+  if the volume is newer than the DB (bytes without a row older than 24 h are removed, audited) - never the
+  other way round.
+- Rollback rehearsal of the PHASE_01 migrations: docs/ops/ROLLBACK.md section 3a.

@@ -143,6 +143,9 @@ class DeliveryStatus(models.TextChoices):
     ACKED = "ACKED", "Acknowledged"
     FAILED = "FAILED", "Failed (will retry)"
     DEAD_LETTER = "DEAD_LETTER", "Dead letter"
+    # PHASE_01 / 01.7 (REV-0129): terminal, set only by the owner from the server console (audited, reason
+    # required) so a poison dead-letter head no longer blocks its aggregate forever.
+    DISCARDED = "DISCARDED", "Discarded by the owner"
 
 
 class OutboxEvent(models.Model):
@@ -170,6 +173,7 @@ class OutboxEvent(models.Model):
     last_error = models.TextField(blank=True, default="")
     dispatched_at = models.DateTimeField(null=True, blank=True)
     acked_at = models.DateTimeField(null=True, blank=True)
+    discarded_at = models.DateTimeField(null=True, blank=True)  # 01.7: DEAD_LETTER -> DISCARDED (owner)
     created_at = models.DateTimeField(db_default=Now())
     updated_at = models.DateTimeField(db_default=Now())
     # Bumped by DB trigger trg_outbox_event_touch on every UPDATE (optimistic concurrency / ETag).
@@ -207,6 +211,10 @@ class OutboxEvent(models.Model):
                 name="ck_outbox_event_dispatched_has_ts",
             ),
             CheckConstraint(
+                condition=~Q(delivery_status=DeliveryStatus.DISCARDED) | Q(discarded_at__isnull=False),
+                name="ck_outbox_event_discarded_has_ts",
+            ),
+            CheckConstraint(
                 condition=Q(producer="") | Q(producer__regex=r"^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)*$"),
                 name="ck_outbox_event_producer_fmt",
             ),
@@ -238,10 +246,11 @@ class OutboxEvent(models.Model):
             ),
             models.Index(fields=["correlation_id"], name="ix_outbox_event_correlation"),
             # Per-aggregate ordering (01.6): "is there an earlier undelivered event of this aggregate?"
+            # (01.7: a DISCARDED event is settled like an ACKED one and no longer holds its aggregate back)
             models.Index(
                 fields=["aggregate_type", "aggregate_id", "id"],
                 name="ix_outbox_event_agg_open",
-                condition=~Q(delivery_status=DeliveryStatus.ACKED),
+                condition=~Q(delivery_status__in=[DeliveryStatus.ACKED, DeliveryStatus.DISCARDED]),
             ),
         ]
 

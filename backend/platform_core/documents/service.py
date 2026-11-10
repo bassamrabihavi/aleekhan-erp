@@ -24,9 +24,10 @@ PHASE_01,
 from __future__ import annotations
 
 import functools
+import time
 import uuid
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Final
 from urllib.parse import quote
 
@@ -668,6 +669,55 @@ def purge_rejected(
             # REV-0115: bytes are deleted only after the marker is committed (idempotent delete); a failed
             # commit leaves bytes and no marker, and the next run purges again.
             transaction.on_commit(functools.partial(storage.delete, key))
+            n += 1
+    return n
+
+
+# TECHNICAL DEFAULT (01.7): bytes younger than this are never treated as orphans (an upload writes its bytes
+# before its transaction commits; 24 h is far longer than any request).
+ORPHAN_GRACE: Final = timedelta(hours=24)
+
+
+def purge_orphans(
+    *,
+    limit: int = 200,
+    grace: timedelta = ORPHAN_GRACE,
+    now_epoch: float | None = None,
+    request_id: uuid.UUID | None = None,
+) -> int:
+    """Housekeeping job function (01.7, 01.4 report section 7): delete stored bytes that no
+    ``platform_stored_object`` row points to - left by an upload whose transaction failed after the bytes were
+    written - and stale ``.part`` files of interrupted writes. Safe: only files older than ``grace``, only
+    names the storage module writes, the row is re-checked under the audit chain lock, bytes are removed only
+    after the audit row is committed. Idempotent (a second run finds nothing). Audited per file as
+    ``platform.document.object.orphan_purge`` (key, size, kind - never content). Storage not configured =
+    nothing stored = 0. ``now_epoch`` is injectable for tests only."""
+    if not storage.is_configured():
+        return 0
+    cutoff = (now_epoch if now_epoch is not None else time.time()) - grace.total_seconds()
+    candidates = [f for f in storage.scan_files() if f.mtime <= cutoff]
+    if not candidates:
+        return 0
+    known = set(
+        StoredObject.objects.filter(pk__in=[f.storage_key for f in candidates]).values_list("pk", flat=True)
+    )
+    n = 0
+    for item in candidates:
+        if n >= limit:
+            break
+        if item.storage_key in known and not item.partial:
+            continue
+        with unit_of_work_or_nothing(_system_ctx(request_id), require_event=False) as uow:
+            if not item.partial and StoredObject.objects.filter(pk=item.storage_key).exists():
+                raise NothingToDo()  # a row appeared meanwhile: not an orphan
+            uow.audit(
+                action="platform.document.object.orphan_purge",
+                resource_type="platform.stored_object",
+                resource_id=item.storage_key[:64],
+                after={"size_bytes": item.size, "kind": "partial_write" if item.partial else "no_row"},
+                reason="orphan bytes without a stored-object row, older than the grace period (01.7)",
+            )
+            transaction.on_commit(functools.partial(storage.delete_file, item))
             n += 1
     return n
 

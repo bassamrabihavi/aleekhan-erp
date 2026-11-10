@@ -1,5 +1,5 @@
-"""Role/scope authorization engine (PHASE_01 / 01.3) over the APPROVED permission matrix v1.2
-(DEC-049, DEC-056 + its 2026-11-10 extension).
+"""Role/scope authorization engine (PHASE_01 / 01.3) over the APPROVED permission matrix v1.3
+(DEC-049, DEC-056 + its 2026-11-10 extensions; v1.3 adds owner document read/download, not business approval).
 
 Inputs are only database rows written by reviewed migrations and audited services: ``platform_permission``
 (catalogue + MFA/BA/SoD flags), ``platform_role`` / ``platform_role_permission`` (grant mode per role) and the
@@ -35,8 +35,10 @@ authentication (``api/session_auth.py``) gives every request a principal that ca
 
 from __future__ import annotations
 
+import contextvars
 import uuid
-from collections.abc import Callable, Iterable, Mapping
+from collections.abc import Callable, Iterable, Iterator, Mapping
+from contextlib import contextmanager
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any, Final
@@ -210,11 +212,39 @@ def effective_grants(user_id: uuid.UUID, action: str) -> list[Grant]:
     return _effective_grants(user_id, action)
 
 
+# 01.7 perf: a per-request memo of grants and scope facts, active only inside :func:`request_cache` (the list
+# endpoints that check every row, ``api.phase01.common.paginate_filtered``). Outside it nothing is cached.
+_REQUEST_CACHE: contextvars.ContextVar[dict[tuple[Any, ...], Any] | None] = contextvars.ContextVar(
+    "aleekhan_authz_request_cache", default=None
+)
+
+
+@contextmanager
+def request_cache() -> Iterator[None]:
+    """Memoise :func:`_effective_grants` and :func:`_facts` for the duration of ONE read request.
+
+    A list request that runs the per-record check on up to 1000 rows (SEC-01: list == object check) otherwise
+    reloads the same grants and facts for every row. Inside the block the caller's grants are read once - one
+    consistent snapshot for the whole page, the same answer a single object check at that moment gives. Never
+    used around writes; the memo is dropped when the block ends (context variable, per thread)."""
+    token = _REQUEST_CACHE.set({})
+    try:
+        yield
+    finally:
+        _REQUEST_CACHE.reset(token)
+
+
 def _effective_grants(user_id: uuid.UUID, action: str) -> list[Grant]:
+    cache = _REQUEST_CACHE.get()
+    key = ("grants", user_id, action)
+    if cache is not None and key in cache:
+        return list(cache[key])
     perm = permission_flags(action)
     grants = grants_for(user_id, action)
     if perm.business_approval:  # DEC-003: technical/admin roles never approve business ...
         grants = [g for g in grants if counts_for_business_approval(g)]
+    if cache is not None:
+        cache[key] = tuple(grants)
     return grants
 
 
@@ -258,6 +288,17 @@ def subtree_of(unit_id: uuid.UUID) -> frozenset[uuid.UUID]:
 
 
 def _facts(caller_id: uuid.UUID, grants: Iterable[Grant]) -> ScopeFacts:
+    cache = _REQUEST_CACHE.get()
+    if cache is None:
+        return _load_facts(caller_id, grants)
+    key = ("facts", caller_id, tuple(grants))
+    if key not in cache:
+        cache[key] = _load_facts(caller_id, key[2])
+    facts: ScopeFacts = cache[key]
+    return facts
+
+
+def _load_facts(caller_id: uuid.UUID, grants: Iterable[Grant]) -> ScopeFacts:
     subtrees = {
         g.scope_unit_id: subtree_of(g.scope_unit_id)
         for g in grants

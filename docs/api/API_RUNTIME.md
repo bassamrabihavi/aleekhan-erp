@@ -202,3 +202,23 @@ All 99 PHASE_01 operations are served (`backend/platform_core/api/phase01/`, rou
   answers 403 `ACCESS_DENIED` for an owner without a BUSINESS publishing role; BUSINESS_RULE values still answer
   409 `RULE_NOT_APPROVED` while their decision is open). Maker != checker unchanged: own request / upload /
   proposal -> 403 `SELF_APPROVAL_FORBIDDEN` (now also for rejecting one's own BUSINESS_RULE proposal).
+
+## 12. PHASE_01 / 01.7 changes (contract 0.6.3-draft)
+
+- `getHealthDetail` (page 36): optional `jobs.housekeeping` (per housekeeping job type: last state, last
+  success / failure, `overdue`, `failing`, `max_age_seconds`, error code only) and `jobs.housekeeping_alerts`.
+  `integration.blocked_aggregates` counts only aggregates with events waiting behind a dead letter (REV-0130).
+  Additive.
+- Upload size before parsing (REV-0124): `UploadSizeLimitMiddleware` answers 413 `PAYLOAD_TOO_LARGE`
+  (problem+json, with `X-Request-ID`) for a `multipart/form-data` request whose `Content-Length` exceeds
+  `document_upload_max_bytes` + 64 KiB, before any byte is read (the CSRF check of the session authentication
+  would otherwise parse - and spool - the body first). Proxy limit: docs/ops/DEPLOYMENT_LIMITS.md.
+- List endpoints with a per-record check (`paginate_filtered`: task / approval inboxes) read the caller's grants
+  and scope facts once per request (`authz.policy.request_cache`; perf evidence
+  `reports/phase-01/step-7/logs/perf.json`). Same answers, fewer queries.
+- Policy runs over matrix **v1.3** (DEC-056 extension 2, migration `0017`): `owner_admin` also holds
+  `platform.document.read` (`listDocuments`, `getDocument`, `listDocumentRevisions`, `getDocumentRevision`; every
+  sensitivity) and `platform.document.download` (`downloadDocumentRevision`, CLEAN only -> otherwise 409
+  `FILE_NOT_RELEASED`; every download audited). Not business-approval permissions.
+- Outbox delivery state `DISCARDED` (migration `0018`, REV-0129) - console only (`manage.py outbox_dead_letter`),
+  not exposed by any operation.

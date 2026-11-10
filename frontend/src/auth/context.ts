@@ -21,6 +21,8 @@ export interface AuthState {
   bootError: unknown;
   can: (action: string) => boolean;
   canAny: (actions: readonly string[]) => boolean;
+  /** Roles through which the caller holds ``action`` (``via_role`` of GET /me/permissions). */
+  rolesFor: (action: string) => ReadonlySet<string>;
   refresh: (notice?: string | null) => Promise<void>;
   logout: () => Promise<void>;
   /** Opens the MFA step-up dialog; resolves after a successful verification, rejects when cancelled. */

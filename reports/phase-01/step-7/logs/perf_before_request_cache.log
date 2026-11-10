@@ -1,0 +1,32 @@
+INFO     aleekhan.access:request_id.py:63 request
+INFO     aleekhan.access:request_id.py:63 request
+INFO     aleekhan.access:request_id.py:63 request
+INFO     aleekhan.access:request_id.py:63 request
+INFO     aleekhan.access:request_id.py:63 request
+INFO     aleekhan.access:request_id.py:63 request
+INFO     aleekhan.access:request_id.py:63 request
+INFO     aleekhan.access:request_id.py:63 request
+INFO     aleekhan.access:request_id.py:63 request
+INFO     aleekhan.access:request_id.py:63 request
+INFO     aleekhan.access:request_id.py:63 request
+INFO     aleekhan.access:request_id.py:63 request
+INFO     aleekhan.access:request_id.py:63 request
+INFO     aleekhan.access:request_id.py:63 request
+INFO     aleekhan.access:request_id.py:63 request
+INFO     aleekhan.access:request_id.py:63 request
+INFO     aleekhan.access:request_id.py:63 request
+INFO     aleekhan.access:request_id.py:63 request
+INFO     aleekhan.access:request_id.py:63 request
+INFO     aleekhan.access:request_id.py:63 request
+INFO     aleekhan.access:request_id.py:63 request
+INFO     aleekhan.access:request_id.py:63 request
+INFO     aleekhan.access:request_id.py:63 request
+INFO     aleekhan.access:request_id.py:63 request
+INFO     aleekhan.access:request_id.py:63 request
+INFO     aleekhan.access:request_id.py:63 request
+INFO     aleekhan.access:request_id.py:63 request
+=========================== short test summary info ===========================
+FAILED platform_core/tests/test_perf_phase01.py::test_perf_inboxes_at_the_per_record_check_limit
+1 failed, 5 passed in 274.75s (0:04:34)
+
+[exited with code 0]

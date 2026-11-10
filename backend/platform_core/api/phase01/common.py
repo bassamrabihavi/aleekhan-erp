@@ -513,13 +513,14 @@ def paginate_filtered[M: models.Model](
     items: list[M] = []
     last: uuid.UUID | None = None
     scanned = 0
-    for obj in rows.iterator(chunk_size=200):
-        scanned += 1
-        last = obj.pk
-        if allowed(obj):
-            items.append(obj)
-        if len(items) >= size or scanned >= FILTER_SCAN_CAP:
-            break
+    with P.request_cache():  # 01.7 perf: grants / scope facts read once for the whole scan
+        for obj in rows.iterator(chunk_size=200):
+            scanned += 1
+            last = obj.pk
+            if allowed(obj):
+                items.append(obj)
+            if len(items) >= size or scanned >= FILTER_SCAN_CAP:
+                break
     more = last is not None and base.filter(id__gt=last).exists()
     next_cursor = _encode_key_cursor(last) if more and last is not None else None
     body = {"items": [serialize(x) for x in items], "page": {"page_size": size, "next_cursor": next_cursor}}

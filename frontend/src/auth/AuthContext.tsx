@@ -16,6 +16,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<AuthStatus>("loading");
   const [me, setMe] = useState<Me | null>(null);
   const [permissions, setPermissions] = useState<ReadonlySet<string>>(new Set());
+  const [viaRoles, setViaRoles] = useState<ReadonlyMap<string, ReadonlySet<string>>>(new Map());
   const [notice, setNotice] = useState<string | null>(null);
   const [bootError, setBootError] = useState<unknown>(null);
   const [stepUp, setStepUp] = useState<{ resolve: () => void; reject: (e: unknown) => void } | null>(null);
@@ -37,6 +38,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } catch (e) {
         setMe(null);
         setPermissions(new Set());
+        setViaRoles(new Map());
         if (e instanceof ApiError && e.code === "MFA_REQUIRED") {
           setStatus("mfa_pending");
           return;
@@ -60,6 +62,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
         const p = (await auth.myPermissions()).data;
         setPermissions(new Set(p.grants.map((g) => g.action)));
+        const via = new Map<string, Set<string>>();
+        for (const g of p.grants) {
+          const set = via.get(g.action) ?? new Set<string>();
+          set.add(g.via_role);
+          via.set(g.action, set);
+        }
+        setViaRoles(via);
         setNotice(null);
         setStatus("ready");
       } catch (e) {
@@ -129,11 +138,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       bootError,
       can: (a) => permissions.has(a),
       canAny: (as) => as.some((a) => permissions.has(a)),
+      rolesFor: (a) => viaRoles.get(a) ?? new Set<string>(),
       refresh: resolveState,
       logout,
       requireStepUp,
     };
-  }, [status, me, permissions, notice, bootError, resolveState, logout, requireStepUp]);
+  }, [status, me, permissions, viaRoles, notice, bootError, resolveState, logout, requireStepUp]);
 
   return (
     <Ctx.Provider value={value}>

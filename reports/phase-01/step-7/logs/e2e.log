@@ -1,0 +1,699 @@
+== e2e environment
+PGHOST=127.0.0.1 PGPORT=5433 PGPASSWORD set: yes (value never printed)
+PG_BIN set: yes | E2E_DB=test_aleekhan_e2e_017 | E2E_PYTHON: python.exe
+E2E_BROWSER_CHANNEL=msedge
+E2E_SCREENSHOT_DIR set: no | E2E_HTML_REPORT set: yes | E2E_OUTPUT_DIR set: yes
+playwright: 1.64.1
+node: v24.20.0 (win32/x64)
+browser channel: msedge
+PLAYWRIGHT_BROWSERS_PATH set: no
+browser version: 157.0.4341.42
+== server: 17.9
+== create throw-away database test_aleekhan_e2e_017
+NOTICE:  database "test_aleekhan_e2e_017" does not exist, skipping
+== migrate (ALEEKHAN_ENV=dev, db=test_aleekhan_e2e_017)
+Operations to perform:
+  Apply all migrations: platform_core
+Running migrations:
+  Applying platform_core.0001_initial... OK
+  Applying platform_core.0002_db_triggers... OK
+  Applying platform_core.0003_seed_schema_meta... OK
+  Applying platform_core.0004_integration... OK
+  Applying platform_core.0005_integration_triggers... OK
+  Applying platform_core.0006_seed_integration_sources... OK
+  Applying platform_core.0007_phase01_platform_schema... OK
+  Applying platform_core.0008_phase01_db_guards... OK
+  Applying platform_core.0009_phase01_constraint_names... OK
+  Applying platform_core.0010_seed_phase01_catalogue... OK
+  Applying platform_core.0011_phase01_engine... OK
+  Applying platform_core.0012_phase01_engine_rework... OK
+  Applying platform_core.0013_dec055_bootstrap_self_approval... OK
+  Applying platform_core.0014_dec056_owner_approval_rights... OK
+  Applying platform_core.0015_dec056_matrix_v12... OK
+  Applying platform_core.0016_outbox_provenance_and_order... OK
+  Applying platform_core.0017_dec056_matrix_v13... OK
+  Applying platform_core.0018_outbox_discard_and_orphan_job... OK
+== playwright: real backend (build commit 48bec48a2d6e)
+[WebServer] {"ts": "2026-11-10T16:18:57.106+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "ed75d64a-7d31-4ff9-a34a-fec934529577", "event": "http_request", "method": "GET", "path": "/api/v1/health/live", "status": 200, "duration_ms": 4.4}
+[WebServer] [10/Nov/2026 19:48:57] "GET /api/v1/health/live HTTP/1.1" 200 15
+
+Running 22 tests using 1 worker
+
+[WebServer] {"ts": "2026-11-10T16:19:07.854+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "dc98fb61-fe9a-49b3-8a7d-a98dac437295", "event": "http_request", "method": "GET", "path": "/api/v1/version", "status": 200, "duration_ms": 2.9}
+[WebServer] {"ts": "2026-11-10T16:19:07.955+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "c57721cd-babd-4eb7-a001-6dade96c6544", "event": "http_request", "method": "GET", "path": "/api/v1/version", "status": 200, "duration_ms": 1.7}
+[WebServer] [10/Nov/2026 19:49:07] "GET /api/v1/version HTTP/1.1" 200 103
+[WebServer] {"ts": "2026-11-10T16:19:08.036+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "a6aebb28-907b-43b4-ac09-6ca65486a11d", "event": "http_request", "method": "GET", "path": "/api/v1/auth/session", "status": 401, "duration_ms": 1.5, "error_code": "AUTHENTICATION_REQUIRED"}
+[WebServer] {"ts": "2026-11-10T16:19:08.039+00:00", "level": "WARNING", "logger": "django.request", "msg": "Unauthorized: /api/v1/auth/session", "request_id": "a6aebb28-907b-43b4-ac09-6ca65486a11d"}
+[WebServer] [10/Nov/2026 19:49:08] "GET /api/v1/auth/session HTTP/1.1" 401 277
+[WebServer] {"ts": "2026-11-10T16:19:08.100+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "f562aa5a-84f4-4451-9cbb-132352e67b5c", "event": "http_request", "method": "GET", "path": "/api/v1/auth/login", "status": 200, "duration_ms": 8.3}
+[WebServer] [10/Nov/2026 19:49:08] "GET /api/v1/auth/login HTTP/1.1" 200 15
+[WebServer] {"ts": "2026-11-10T16:19:08.109+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "3bec5b63-5d10-4f6e-b5f5-86b537ddb9a6", "event": "http_request", "method": "GET", "path": "/api/v1/auth/login", "status": 200, "duration_ms": 1.6}
+[WebServer] [10/Nov/2026 19:49:08] "GET /api/v1/auth/login HTTP/1.1" 200 15
+[WebServer] {"ts": "2026-11-10T16:19:11.303+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "0c5d241d-3206-4ed0-adb1-573d52660d2e", "event": "http_request", "method": "POST", "path": "/api/v1/auth/login", "status": 401, "duration_ms": 2847.2, "error_code": "INVALID_CREDENTIALS"}
+[WebServer] {"ts": "2026-11-10T16:19:11.303+00:00", "level": "WARNING", "logger": "django.request", "msg": "Unauthorized: /api/v1/auth/login", "request_id": "0c5d241d-3206-4ed0-adb1-573d52660d2e"}
+[WebServer] [10/Nov/2026 19:49:11] "POST /api/v1/auth/login HTTP/1.1" 401 309
+  ok  1 [chromium] › e2e\phase01.spec.ts:47:1 › login page: Farsi RTL, synthetic-data banner, generic error, four sizes (7.2s)
+[WebServer] {"ts": "2026-11-10T16:19:14.898+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "0c9a49dc-1bb7-43cc-a376-8c80d3feb94c", "event": "http_request", "method": "POST", "path": "/api/v1/auth/login", "status": 200, "duration_ms": 1393.0}
+[WebServer] [10/Nov/2026 19:49:14] "POST /api/v1/auth/login HTTP/1.1" 200 383
+[WebServer] {"ts": "2026-11-10T16:19:14.984+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "b1f46762-8976-4c57-850f-b448cbecc8ce", "event": "http_request", "method": "GET", "path": "/api/v1/auth/session", "status": 200, "duration_ms": 77.6}
+[WebServer] [10/Nov/2026 19:49:14] "GET /api/v1/auth/session HTTP/1.1" 200 321
+[WebServer] {"ts": "2026-11-10T16:19:15.044+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "041ad6d7-863c-47a5-be8b-8a3ebe57e486", "event": "http_request", "method": "GET", "path": "/api/v1/me", "status": 403, "duration_ms": 53.8, "error_code": "PASSWORD_CHANGE_REQUIRED"}
+[WebServer] {"ts": "2026-11-10T16:19:15.044+00:00", "level": "WARNING", "logger": "django.request", "msg": "Forbidden: /api/v1/me", "request_id": "041ad6d7-863c-47a5-be8b-8a3ebe57e486"}
+[WebServer] [10/Nov/2026 19:49:15] "GET /api/v1/me HTTP/1.1" 403 285
+[WebServer] {"ts": "2026-11-10T16:19:19.338+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "a8052519-4b0b-4d1d-875d-c5c8b2e623db", "event": "http_request", "method": "POST", "path": "/api/v1/auth/password/change", "status": 204, "duration_ms": 3777.4}
+[WebServer] [10/Nov/2026 19:49:19] "POST /api/v1/auth/password/change HTTP/1.1" 204 0
+[WebServer] {"ts": "2026-11-10T16:19:19.444+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "7ce65db6-5903-4157-b5cd-cfbbb057996c", "event": "http_request", "method": "GET", "path": "/api/v1/auth/session", "status": 200, "duration_ms": 97.5}
+[WebServer] [10/Nov/2026 19:49:19] "GET /api/v1/auth/session HTTP/1.1" 200 321
+[WebServer] {"ts": "2026-11-10T16:19:19.610+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "5bab7248-f979-44ae-af30-a39f842179d6", "event": "http_request", "method": "GET", "path": "/api/v1/me", "status": 200, "duration_ms": 157.9}
+[WebServer] [10/Nov/2026 19:49:19] "GET /api/v1/me HTTP/1.1" 200 835
+[WebServer] {"ts": "2026-11-10T16:19:20.296+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "cee7e0ce-edea-4c93-ae71-b9397b38d2be", "event": "http_request", "method": "POST", "path": "/api/v1/auth/mfa/enrolment", "status": 200, "duration_ms": 245.9}
+[WebServer] [10/Nov/2026 19:49:20] "POST /api/v1/auth/mfa/enrolment HTTP/1.1" 200 168
+[WebServer] {"ts": "2026-11-10T16:19:20.676+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "5e18a546-c501-4a48-b9f9-d2696acc64bf", "event": "http_request", "method": "POST", "path": "/api/v1/auth/mfa/enrolment/confirm", "status": 200, "duration_ms": 190.3}
+[WebServer] [10/Nov/2026 19:49:20] "POST /api/v1/auth/mfa/enrolment/confirm HTTP/1.1" 200 180
+[WebServer] {"ts": "2026-11-10T16:19:20.863+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "ef96f2a2-5540-4174-8e44-7369f9365538", "event": "http_request", "method": "GET", "path": "/api/v1/auth/session", "status": 200, "duration_ms": 87.4}
+[WebServer] [10/Nov/2026 19:49:20] "GET /api/v1/auth/session HTTP/1.1" 200 346
+[WebServer] {"ts": "2026-11-10T16:19:21.013+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "e5c9926c-48c8-4ffd-add7-f225d25b08e0", "event": "http_request", "method": "GET", "path": "/api/v1/me", "status": 200, "duration_ms": 136.6}
+[WebServer] [10/Nov/2026 19:49:21] "GET /api/v1/me HTTP/1.1" 200 834
+[WebServer] {"ts": "2026-11-10T16:19:21.118+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "e6ee9759-f187-4771-ac7e-7ce187c23ac9", "event": "http_request", "method": "GET", "path": "/api/v1/me/permissions", "status": 200, "duration_ms": 98.6}
+[WebServer] [10/Nov/2026 19:49:21] "GET /api/v1/me/permissions HTTP/1.1" 200 4159
+[WebServer] {"ts": "2026-11-10T16:19:21.343+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "d75f6d82-71f4-4b37-b22a-c222068e3576", "event": "http_request", "method": "GET", "path": "/api/v1/admin/roles", "status": 200, "duration_ms": 165.1}
+[WebServer] {"ts": "2026-11-10T16:19:21.349+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "2c184c17-de6e-4d0b-acad-900aa6b269b1", "event": "http_request", "method": "GET", "path": "/api/v1/admin/roles", "status": 200, "duration_ms": 154.1}
+[WebServer] [10/Nov/2026 19:49:21] "GET /api/v1/admin/roles?page_size=100 HTTP/1.1" 200 5932
+  ok  2 [chromium] › e2e\phase01.spec.ts:64:1 › owner first login: one-time password -> forced change -> TOTP enrolment -> 10 recovery codes (9.0s)
+[WebServer] {"ts": "2026-11-10T16:19:23.006+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "e422ed14-96fa-4e55-89b0-779dd4765026", "event": "http_request", "method": "GET", "path": "/api/v1/org/tree", "status": 200, "duration_ms": 419.5}
+[WebServer] [10/Nov/2026 19:49:23] "GET /api/v1/org/tree?depth=6 HTTP/1.1" 200 50
+[WebServer] {"ts": "2026-11-10T16:19:23.035+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "2d37416b-385c-4216-b828-a3a42cf46e16", "event": "http_request", "method": "GET", "path": "/api/v1/org/tree", "status": 200, "duration_ms": 492.5}
+[WebServer] {"ts": "2026-11-10T16:19:24.184+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "f1166deb-6392-4958-b47c-cf74cf442728", "event": "http_request", "method": "GET", "path": "/api/v1/org/units", "status": 200, "duration_ms": 193.8}
+[WebServer] {"ts": "2026-11-10T16:19:24.351+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "43ff5af9-b3fa-4103-ad82-1ec0da517081", "event": "http_request", "method": "GET", "path": "/api/v1/org/units", "status": 200, "duration_ms": 302.3}
+[WebServer] [10/Nov/2026 19:49:24] "GET /api/v1/org/units?page_size=100 HTTP/1.1" 200 56
+[WebServer] {"ts": "2026-11-10T16:19:24.646+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "30db9852-9a73-4531-94da-ef7158c35ae4", "event": "http_request", "method": "POST", "path": "/api/v1/org/units", "status": 201, "duration_ms": 299.4}
+[WebServer] [10/Nov/2026 19:49:24] "POST /api/v1/org/units HTTP/1.1" 201 295
+[WebServer] {"ts": "2026-11-10T16:19:24.824+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "11562aef-38f4-454e-a080-db39e1b52831", "event": "http_request", "method": "GET", "path": "/api/v1/org/units", "status": 200, "duration_ms": 165.4}
+[WebServer] [10/Nov/2026 19:49:24] "GET /api/v1/org/units?page_size=100 HTTP/1.1" 200 351
+[WebServer] {"ts": "2026-11-10T16:19:24.878+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "4798ed6d-b8f5-4b7a-9931-6f477d7af673", "event": "http_request", "method": "GET", "path": "/api/v1/org/tree", "status": 200, "duration_ms": 223.5}
+[WebServer] [10/Nov/2026 19:49:24] "GET /api/v1/org/tree?depth=6 HTTP/1.1" 200 383
+[WebServer] {"ts": "2026-11-10T16:19:28.582+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "8eec2d1a-71ab-4dcc-8e9f-bfdbeea0181a", "event": "http_request", "method": "GET", "path": "/api/v1/org/units", "status": 200, "duration_ms": 132.8}
+[WebServer] {"ts": "2026-11-10T16:19:28.598+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "943cb61a-b3a6-43ba-ad79-612a7664d621", "event": "http_request", "method": "GET", "path": "/api/v1/org/units", "status": 200, "duration_ms": 140.2}
+[WebServer] [10/Nov/2026 19:49:28] "GET /api/v1/org/units?page_size=100 HTTP/1.1" 200 351
+[WebServer] {"ts": "2026-11-10T16:19:28.893+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "bc44a061-c7dd-4f82-a2b8-07c1b0538a8b", "event": "http_request", "method": "POST", "path": "/api/v1/org/units", "status": 201, "duration_ms": 149.5}
+[WebServer] [10/Nov/2026 19:49:28] "POST /api/v1/org/units HTTP/1.1" 201 335
+[WebServer] {"ts": "2026-11-10T16:19:29.019+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "5e575959-3b6e-43d1-8d58-5eb36dee3cb7", "event": "http_request", "method": "GET", "path": "/api/v1/org/units", "status": 200, "duration_ms": 107.9}
+[WebServer] [10/Nov/2026 19:49:29] "GET /api/v1/org/units?page_size=100 HTTP/1.1" 200 687
+[WebServer] {"ts": "2026-11-10T16:19:29.026+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "7bc6bd99-2463-4b42-a7c9-56cd1d58c14f", "event": "http_request", "method": "GET", "path": "/api/v1/org/tree", "status": 200, "duration_ms": 123.1}
+[WebServer] [10/Nov/2026 19:49:29] "GET /api/v1/org/tree?depth=6 HTTP/1.1" 200 756
+[WebServer] {"ts": "2026-11-10T16:19:30.498+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "379e361b-184e-4bfd-a0c7-328020759c35", "event": "http_request", "method": "GET", "path": "/api/v1/org/units", "status": 200, "duration_ms": 170.3}
+[WebServer] {"ts": "2026-11-10T16:19:30.502+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "99a95b42-5a43-4b0a-b7e4-a86c5744dfb8", "event": "http_request", "method": "GET", "path": "/api/v1/org/positions", "status": 200, "duration_ms": 164.7}
+[WebServer] {"ts": "2026-11-10T16:19:30.551+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "e7b99c2d-5065-4166-be58-ad8abedfc70a", "event": "http_request", "method": "GET", "path": "/api/v1/org/units", "status": 200, "duration_ms": 199.0}
+[WebServer] [10/Nov/2026 19:49:30] "GET /api/v1/org/units?page_size=100 HTTP/1.1" 200 687
+[WebServer] {"ts": "2026-11-10T16:19:30.568+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "d1c77bd2-cbfb-4b16-bddb-69613e5e0bde", "event": "http_request", "method": "GET", "path": "/api/v1/org/positions", "status": 200, "duration_ms": 187.7}
+[WebServer] [10/Nov/2026 19:49:30] "GET /api/v1/org/positions?page_size=100 HTTP/1.1" 200 56
+[WebServer] {"ts": "2026-11-10T16:19:30.904+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "f013c23a-5e54-4ca5-b6c2-777b7ea010ea", "event": "http_request", "method": "POST", "path": "/api/v1/org/positions", "status": 201, "duration_ms": 178.7}
+[WebServer] [10/Nov/2026 19:49:30] "POST /api/v1/org/positions HTTP/1.1" 201 278
+[WebServer] {"ts": "2026-11-10T16:19:31.062+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "63f16b68-73e9-46c8-babe-531d872633b0", "event": "http_request", "method": "GET", "path": "/api/v1/org/units", "status": 200, "duration_ms": 142.4}
+[WebServer] [10/Nov/2026 19:49:31] "GET /api/v1/org/units?page_size=100 HTTP/1.1" 200 687
+[WebServer] {"ts": "2026-11-10T16:19:31.086+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "d9a4b379-eb57-4cb6-961b-2e7f78693e73", "event": "http_request", "method": "GET", "path": "/api/v1/org/tree", "status": 200, "duration_ms": 172.2}
+[WebServer] [10/Nov/2026 19:49:31] "GET /api/v1/org/tree?depth=6 HTTP/1.1" 200 1060
+[WebServer] {"ts": "2026-11-10T16:19:31.116+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "1123e25d-7a8b-4589-84ea-1bcb4c4ea8b3", "event": "http_request", "method": "GET", "path": "/api/v1/org/positions", "status": 200, "duration_ms": 156.4}
+[WebServer] [10/Nov/2026 19:49:31] "GET /api/v1/org/positions?page_size=100 HTTP/1.1" 200 334
+[WebServer] {"ts": "2026-11-10T16:19:32.460+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "3798c3b6-99d4-40d7-814f-aecd32bbca07", "event": "http_request", "method": "GET", "path": "/api/v1/org/positions", "status": 200, "duration_ms": 125.5}
+[WebServer] {"ts": "2026-11-10T16:19:32.493+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "3f219c25-bd22-44d7-b44f-306cb8c71e15", "event": "http_request", "method": "GET", "path": "/api/v1/admin/users", "status": 200, "duration_ms": 139.8}
+[WebServer] {"ts": "2026-11-10T16:19:32.536+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "ea1a6497-c782-4854-82a0-42926333d882", "event": "http_request", "method": "GET", "path": "/api/v1/org/positions", "status": 200, "duration_ms": 168.8}
+[WebServer] [10/Nov/2026 19:49:32] "GET /api/v1/org/positions?page_size=100 HTTP/1.1" 200 334
+[WebServer] {"ts": "2026-11-10T16:19:32.556+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "b287dfe0-3bff-491f-99b4-d1f8d1e000b8", "event": "http_request", "method": "GET", "path": "/api/v1/admin/users", "status": 200, "duration_ms": 147.2}
+[WebServer] [10/Nov/2026 19:49:32] "GET /api/v1/admin/users?page_size=100 HTTP/1.1" 200 469
+[WebServer] {"ts": "2026-11-10T16:19:32.965+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "8f4998db-a078-481b-8933-482231db6481", "event": "http_request", "method": "POST", "path": "/api/v1/org/position-assignments", "status": 201, "duration_ms": 255.6}
+[WebServer] [10/Nov/2026 19:49:32] "POST /api/v1/org/position-assignments HTTP/1.1" 201 252
+[WebServer] {"ts": "2026-11-10T16:19:33.083+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "b004af1b-13f9-42a1-ae7e-21f69376f5fc", "event": "http_request", "method": "GET", "path": "/api/v1/org/positions", "status": 200, "duration_ms": 103.7}
+[WebServer] [10/Nov/2026 19:49:33] "GET /api/v1/org/positions?page_size=100 HTTP/1.1" 200 334
+[WebServer] {"ts": "2026-11-10T16:19:33.099+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "a731ecda-d2fc-4926-90f9-49c2baa47911", "event": "http_request", "method": "GET", "path": "/api/v1/org/tree", "status": 200, "duration_ms": 124.1}
+[WebServer] [10/Nov/2026 19:49:33] "GET /api/v1/org/tree?depth=6 HTTP/1.1" 200 1218
+  ok  3 [chromium] › e2e\phase01.spec.ts:90:1 › org tree: create units / unit-head position / holder (step-up MFA), keyboard tree (13.1s)
+[WebServer] {"ts": "2026-11-10T16:19:35.825+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "e94702fd-85be-44c0-9173-3aa892b31141", "event": "http_request", "method": "GET", "path": "/api/v1/admin/users", "status": 200, "duration_ms": 203.5}
+[WebServer] [10/Nov/2026 19:49:35] "GET /api/v1/admin/users?page_size=25 HTTP/1.1" 200 468
+[WebServer] {"ts": "2026-11-10T16:19:35.944+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "eb9f3b07-d069-451a-aa55-907b0620bc90", "event": "http_request", "method": "GET", "path": "/api/v1/admin/users", "status": 200, "duration_ms": 341.0}
+[WebServer] {"ts": "2026-11-10T16:19:37.263+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "72a8e390-6c48-42ec-b708-0e9a17eaf65f", "event": "http_request", "method": "POST", "path": "/api/v1/admin/users", "status": 201, "duration_ms": 1086.3}
+[WebServer] [10/Nov/2026 19:49:37] "POST /api/v1/admin/users HTTP/1.1" 201 609
+[WebServer] {"ts": "2026-11-10T16:19:37.405+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "b241f2b7-0a4d-4863-95af-b29f72a470de", "event": "http_request", "method": "GET", "path": "/api/v1/admin/users", "status": 200, "duration_ms": 132.2}
+[WebServer] [10/Nov/2026 19:49:37] "GET /api/v1/admin/users?page_size=25 HTTP/1.1" 200 914
+[WebServer] {"ts": "2026-11-10T16:19:40.613+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "c292d2fa-1cb2-40fd-babf-c55f9c0dc437", "event": "http_request", "method": "POST", "path": "/api/v1/admin/users", "status": 201, "duration_ms": 1438.1}
+[WebServer] [10/Nov/2026 19:49:40] "POST /api/v1/admin/users HTTP/1.1" 201 610
+[WebServer] {"ts": "2026-11-10T16:19:40.725+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "7e6cbd50-6cb7-432a-a726-2e4715f415ed", "event": "http_request", "method": "GET", "path": "/api/v1/admin/users", "status": 200, "duration_ms": 107.0}
+[WebServer] [10/Nov/2026 19:49:40] "GET /api/v1/admin/users?page_size=25 HTTP/1.1" 200 1361
+[WebServer] {"ts": "2026-11-10T16:19:42.538+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "bc48b598-2fd3-415c-9d50-149fad1f924b", "event": "http_request", "method": "GET", "path": "/api/v1/admin/users/f3e2ec9d-ccc0-40b4-b841-10102e19faa2/sessions", "status": 200, "duration_ms": 225.3}
+[WebServer] {"ts": "2026-11-10T16:19:42.664+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "591308d8-443a-4d23-8b8c-a21eed2f4a26", "event": "http_request", "method": "GET", "path": "/api/v1/admin/users/f3e2ec9d-ccc0-40b4-b841-10102e19faa2/effective-permissions", "status": 200, "duration_ms": 309.0}
+[WebServer] {"ts": "2026-11-10T16:19:42.877+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "688d61bd-0590-47ef-8c73-160e02dcd0eb", "event": "http_request", "method": "GET", "path": "/api/v1/admin/users/f3e2ec9d-ccc0-40b4-b841-10102e19faa2/sessions", "status": 200, "duration_ms": 457.2}
+[WebServer] [10/Nov/2026 19:49:42] "GET /api/v1/admin/users/f3e2ec9d-ccc0-40b4-b841-10102e19faa2/sessions HTTP/1.1" 200 55
+[WebServer] {"ts": "2026-11-10T16:19:42.892+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "bfe5e2cf-fe81-4615-8515-6966cdf55e49", "event": "http_request", "method": "GET", "path": "/api/v1/admin/users/f3e2ec9d-ccc0-40b4-b841-10102e19faa2", "status": 200, "duration_ms": 421.1}
+[WebServer] [10/Nov/2026 19:49:42] "GET /api/v1/admin/users/f3e2ec9d-ccc0-40b4-b841-10102e19faa2 HTTP/1.1" 200 445
+[WebServer] {"ts": "2026-11-10T16:19:42.937+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "22b05fa9-76d9-45c3-8f78-d9f51d1409fa", "event": "http_request", "method": "GET", "path": "/api/v1/admin/users/f3e2ec9d-ccc0-40b4-b841-10102e19faa2/effective-permissions", "status": 200, "duration_ms": 391.5}
+[WebServer] [10/Nov/2026 19:49:42] "GET /api/v1/admin/users/f3e2ec9d-ccc0-40b4-b841-10102e19faa2/effective-permissions HTTP/1.1" 200 106
+[WebServer] {"ts": "2026-11-10T16:19:42.980+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "afb0229a-9074-4d9c-a865-81c3a1b77349", "event": "http_request", "method": "GET", "path": "/api/v1/admin/users/f3e2ec9d-ccc0-40b4-b841-10102e19faa2", "status": 200, "duration_ms": 727.6}
+[WebServer] {"ts": "2026-11-10T16:19:43.724+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "781bfdd0-3c28-4627-859a-5af637159407", "event": "http_request", "method": "GET", "path": "/api/v1/admin/users", "status": 200, "duration_ms": 305.8}
+[WebServer] {"ts": "2026-11-10T16:19:43.849+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "8816a1ad-48d4-4629-83a7-ce2173d18f49", "event": "http_request", "method": "GET", "path": "/api/v1/admin/role-assignments", "status": 200, "duration_ms": 270.1}
+[WebServer] {"ts": "2026-11-10T16:19:43.861+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "b3ab45bc-3b4a-401a-98b4-5e67824f43d5", "event": "http_request", "method": "GET", "path": "/api/v1/admin/users", "status": 200, "duration_ms": 253.7}
+[WebServer] [10/Nov/2026 19:49:43] "GET /api/v1/admin/users?page_size=100 HTTP/1.1" 200 1362
+[WebServer] {"ts": "2026-11-10T16:19:43.955+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "e1335db2-18e2-46e8-9db8-ad28cccf1044", "event": "http_request", "method": "GET", "path": "/api/v1/admin/roles", "status": 200, "duration_ms": 399.1}
+[WebServer] {"ts": "2026-11-10T16:19:44.011+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "73ab0aea-75af-4a23-8414-7ab9832d3301", "event": "http_request", "method": "GET", "path": "/api/v1/admin/role-assignments", "status": 200, "duration_ms": 257.2}
+[WebServer] [10/Nov/2026 19:49:44] "GET /api/v1/admin/role-assignments?page_size=50 HTTP/1.1" 200 441
+[WebServer] {"ts": "2026-11-10T16:19:44.092+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "dfeb5a1f-11c9-4750-a1bf-0f0c0250370e", "event": "http_request", "method": "GET", "path": "/api/v1/admin/roles", "status": 200, "duration_ms": 406.6}
+[WebServer] [10/Nov/2026 19:49:44] "GET /api/v1/admin/roles?page_size=100 HTTP/1.1" 200 5932
+[WebServer] {"ts": "2026-11-10T16:19:44.133+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "fd15c77c-736a-43b2-849c-7a4fea87833b", "event": "http_request", "method": "GET", "path": "/api/v1/admin/permissions", "status": 200, "duration_ms": 315.4}
+[WebServer] [10/Nov/2026 19:49:44] "GET /api/v1/admin/permissions?page_size=100 HTTP/1.1" 200 8187
+[WebServer] {"ts": "2026-11-10T16:19:44.216+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "fd088eff-211e-46c6-b036-aa10fadc1edf", "event": "http_request", "method": "GET", "path": "/api/v1/org/units", "status": 200, "duration_ms": 310.0}
+[WebServer] [10/Nov/2026 19:49:44] "GET /api/v1/org/units?page_size=100 HTTP/1.1" 200 687
+[WebServer] {"ts": "2026-11-10T16:19:44.516+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "ae2d1ea3-d385-4daa-8071-290d7b4fbfa9", "event": "http_request", "method": "POST", "path": "/api/v1/admin/role-assignments", "status": 201, "duration_ms": 157.8}
+[WebServer] [10/Nov/2026 19:49:44] "POST /api/v1/admin/role-assignments HTTP/1.1" 201 419
+[WebServer] {"ts": "2026-11-10T16:19:44.628+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "863fb762-b571-4d6e-ada3-a261ebf6bb68", "event": "http_request", "method": "GET", "path": "/api/v1/admin/role-assignments", "status": 200, "duration_ms": 107.1}
+[WebServer] [10/Nov/2026 19:49:44] "GET /api/v1/admin/role-assignments?page_size=50 HTTP/1.1" 200 861
+[WebServer] {"ts": "2026-11-10T16:19:46.439+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "4b10d204-be61-4aba-9277-27ac9eb7a0db", "event": "http_request", "method": "GET", "path": "/api/v1/admin/roles", "status": 200, "duration_ms": 280.8}
+[WebServer] [10/Nov/2026 19:49:46] "GET /api/v1/admin/roles?page_size=100 HTTP/1.1" 200 5932
+[WebServer] {"ts": "2026-11-10T16:19:46.600+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "27b52b5c-33f6-4eb6-8357-602d6f74e5dc", "event": "http_request", "method": "GET", "path": "/api/v1/org/units", "status": 200, "duration_ms": 253.5}
+[WebServer] {"ts": "2026-11-10T16:19:46.605+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "f9d87054-364f-425b-a898-b00e6f90a805", "event": "http_request", "method": "GET", "path": "/api/v1/admin/permissions", "status": 200, "duration_ms": 403.9}
+[WebServer] {"ts": "2026-11-10T16:19:46.650+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "54fa0ca1-7bf0-43c8-8901-133c19cbb552", "event": "http_request", "method": "GET", "path": "/api/v1/admin/users", "status": 200, "duration_ms": 548.3}
+[WebServer] [10/Nov/2026 19:49:46] "GET /api/v1/admin/users?page_size=100 HTTP/1.1" 200 1362
+[WebServer] {"ts": "2026-11-10T16:19:46.651+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "5b657b9a-d85a-4eeb-abd6-ad9b0435afb1", "event": "http_request", "method": "GET", "path": "/api/v1/admin/permissions", "status": 200, "duration_ms": 253.7}
+[WebServer] [10/Nov/2026 19:49:46] "GET /api/v1/admin/permissions?page_size=100 HTTP/1.1" 200 8187
+[WebServer] {"ts": "2026-11-10T16:19:46.803+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "75099362-e354-4f1e-b6fe-9117f4473055", "event": "http_request", "method": "GET", "path": "/api/v1/org/units", "status": 200, "duration_ms": 330.3}
+[WebServer] [10/Nov/2026 19:49:46] "GET /api/v1/org/units?page_size=100 HTTP/1.1" 200 687
+[WebServer] {"ts": "2026-11-10T16:19:46.908+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "8efde2db-a90d-4291-8251-9d550d9271e5", "event": "http_request", "method": "POST", "path": "/api/v1/admin/role-assignments", "status": 201, "duration_ms": 302.6}
+[WebServer] [10/Nov/2026 19:49:46] "POST /api/v1/admin/role-assignments HTTP/1.1" 201 484
+[WebServer] {"ts": "2026-11-10T16:19:47.095+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "1f2e0511-e49c-4a73-9f03-c94bf2208e8a", "event": "http_request", "method": "GET", "path": "/api/v1/admin/role-assignments", "status": 200, "duration_ms": 166.9}
+[WebServer] [10/Nov/2026 19:49:47] "GET /api/v1/admin/role-assignments?page_size=50 HTTP/1.1" 200 1346
+[WebServer] {"ts": "2026-11-10T16:19:48.346+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "bb475202-4106-4920-895f-033cb9dd8bf6", "event": "http_request", "method": "GET", "path": "/api/v1/admin/permissions", "status": 200, "duration_ms": 357.1}
+[WebServer] {"ts": "2026-11-10T16:19:48.359+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "10cae83e-d983-420a-8db9-1aad814f1f78", "event": "http_request", "method": "GET", "path": "/api/v1/org/units", "status": 200, "duration_ms": 324.3}
+[WebServer] {"ts": "2026-11-10T16:19:48.372+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "a1d36cc2-a5b6-42ab-8526-136f33064c41", "event": "http_request", "method": "GET", "path": "/api/v1/admin/roles", "status": 200, "duration_ms": 403.5}
+[WebServer] [10/Nov/2026 19:49:48] "GET /api/v1/admin/roles?page_size=100 HTTP/1.1" 200 5932
+[WebServer] {"ts": "2026-11-10T16:19:48.483+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "72f368b1-ca25-4cb6-ada5-5b83bd28fc28", "event": "http_request", "method": "GET", "path": "/api/v1/admin/users", "status": 200, "duration_ms": 530.0}
+[WebServer] [10/Nov/2026 19:49:48] "GET /api/v1/admin/users?page_size=100 HTTP/1.1" 200 1362
+[WebServer] {"ts": "2026-11-10T16:19:48.602+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "57d8be3c-246d-4ff8-b60d-c211b67794b4", "event": "http_request", "method": "GET", "path": "/api/v1/admin/permissions", "status": 200, "duration_ms": 437.2}
+[WebServer] {"ts": "2026-11-10T16:19:48.737+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "8266d246-95f4-4499-9f5d-fea5d138304e", "event": "http_request", "method": "GET", "path": "/api/v1/org/units", "status": 200, "duration_ms": 382.7}
+[WebServer] {"ts": "2026-11-10T16:19:50.346+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "4bec2b99-de03-4340-aee4-7ec39fd21ef2", "event": "http_request", "method": "GET", "path": "/api/v1/admin/permissions", "status": 200, "duration_ms": 173.6}
+[WebServer] [10/Nov/2026 19:49:50] "GET /api/v1/admin/permissions?page_size=100 HTTP/1.1" 200 8187
+[WebServer] {"ts": "2026-11-10T16:19:50.367+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "480910b7-f57e-460f-b157-9f84d50dca83", "event": "http_request", "method": "GET", "path": "/api/v1/admin/roles", "status": 200, "duration_ms": 256.1}
+[WebServer] {"ts": "2026-11-10T16:19:50.370+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "9d883b8b-df8c-42c5-98d9-92892894382b", "event": "http_request", "method": "GET", "path": "/api/v1/admin/permissions", "status": 200, "duration_ms": 255.3}
+[WebServer] {"ts": "2026-11-10T16:19:50.509+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "1e7d201d-6ffa-48f1-84e8-9d2815d8c24d", "event": "http_request", "method": "GET", "path": "/api/v1/admin/roles", "status": 200, "duration_ms": 367.5}
+[WebServer] [10/Nov/2026 19:49:50] "GET /api/v1/admin/roles?page_size=100 HTTP/1.1" 200 5932
+  ok  4 [chromium] › e2e\phase01.spec.ts:162:1 › page 46: create users (one-time password shown once), grant roles, pending second approval (15.7s)
+[WebServer] {"ts": "2026-11-10T16:19:51.628+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "169cda51-1083-45c5-bc36-8c18636f67b0", "event": "http_request", "method": "GET", "path": "/api/v1/workflow/approvals", "status": 200, "duration_ms": 285.9}
+[WebServer] [10/Nov/2026 19:49:51] "GET /api/v1/workflow/approvals?inbox=to_decide&status=PENDING&page_size=25 HTTP/1.1" 200 55
+[WebServer] {"ts": "2026-11-10T16:19:51.677+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "00550fc4-01c3-4016-bff0-acf6cc5b1af7", "event": "http_request", "method": "GET", "path": "/api/v1/workflow/approvals", "status": 200, "duration_ms": 387.1}
+[WebServer] {"ts": "2026-11-10T16:19:51.860+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "e284a626-5b85-45fd-802d-e5d374c34594", "event": "http_request", "method": "GET", "path": "/api/v1/workflow/approvals", "status": 200, "duration_ms": 155.3}
+[WebServer] [10/Nov/2026 19:49:51] "GET /api/v1/workflow/approvals?inbox=requested_by_me&status=PENDING&page_size=25 HTTP/1.1" 200 558
+[WebServer] {"ts": "2026-11-10T16:19:53.708+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "b37fa0c1-7082-4f91-ad53-aa0259405488", "event": "http_request", "method": "GET", "path": "/api/v1/workflow/approvals/aa5ae042-e059-4f6a-9ea1-885bc9f79e9e", "status": 200, "duration_ms": 370.1}
+[WebServer] {"ts": "2026-11-10T16:19:53.984+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "f090d70b-fd38-48ea-ab87-16bc832d3fd5", "event": "http_request", "method": "GET", "path": "/api/v1/workflow/approvals/aa5ae042-e059-4f6a-9ea1-885bc9f79e9e", "status": 200, "duration_ms": 598.7}
+[WebServer] [10/Nov/2026 19:49:53] "GET /api/v1/workflow/approvals/aa5ae042-e059-4f6a-9ea1-885bc9f79e9e HTTP/1.1" 200 503
+[WebServer] {"ts": "2026-11-10T16:19:54.606+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "7b03ac91-f198-4b1a-bcab-778a3c92407b", "event": "http_request", "method": "POST", "path": "/api/v1/workflow/approvals/aa5ae042-e059-4f6a-9ea1-885bc9f79e9e/bootstrap-approve", "status": 200, "duration_ms": 282.1}
+[WebServer] [10/Nov/2026 19:49:54] "POST /api/v1/workflow/approvals/aa5ae042-e059-4f6a-9ea1-885bc9f79e9e/bootstrap-approve HTTP/1.1" 200 640
+[WebServer] {"ts": "2026-11-10T16:19:54.790+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "3f10bb5c-09cb-4f06-8bf4-acd41c69e892", "event": "http_request", "method": "GET", "path": "/api/v1/workflow/approvals", "status": 200, "duration_ms": 168.3}
+[WebServer] [10/Nov/2026 19:49:54] "GET /api/v1/workflow/approvals?inbox=requested_by_me&status=PENDING&page_size=25 HTTP/1.1" 200 55
+[WebServer] {"ts": "2026-11-10T16:19:54.819+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "53db5709-0fee-4b3a-9042-0fc416bb1ca6", "event": "http_request", "method": "GET", "path": "/api/v1/workflow/approvals/aa5ae042-e059-4f6a-9ea1-885bc9f79e9e", "status": 200, "duration_ms": 184.6}
+[WebServer] [10/Nov/2026 19:49:54] "GET /api/v1/workflow/approvals/aa5ae042-e059-4f6a-9ea1-885bc9f79e9e HTTP/1.1" 200 640
+[WebServer] {"ts": "2026-11-10T16:19:57.042+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "c2c4a4c9-fae5-437a-bd58-2e2b8c5d6ab3", "event": "http_request", "method": "GET", "path": "/api/v1/workflow/approvals", "status": 200, "duration_ms": 137.6}
+[WebServer] [10/Nov/2026 19:49:57] "GET /api/v1/workflow/approvals?inbox=requested_by_me&status=APPROVED&page_size=25 HTTP/1.1" 200 695
+  ok  5 [chromium] › e2e\phase01.spec.ts:239:1 › page 39: own request is not decided normally; DEC-055 bootstrap approval with reason (5.9s)
+[WebServer] {"ts": "2026-11-10T16:19:57.622+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "a969b491-47f2-4693-9771-f720c1e6cfc4", "event": "http_request", "method": "GET", "path": "/api/v1/admin/parameters", "status": 200, "duration_ms": 352.2}
+[WebServer] {"ts": "2026-11-10T16:19:57.648+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "a4a9254c-c2ce-4aec-9087-5cf39622a267", "event": "http_request", "method": "GET", "path": "/api/v1/admin/parameters", "status": 200, "duration_ms": 336.3}
+[WebServer] [10/Nov/2026 19:49:57] "GET /api/v1/admin/parameters?page_size=100 HTTP/1.1" 200 18375
+[WebServer] {"ts": "2026-11-10T16:19:59.923+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "759c535c-2543-478c-8c3f-5bed31ba984d", "event": "http_request", "method": "GET", "path": "/api/v1/admin/parameters/password_initial_validity_hours", "status": 200, "duration_ms": 302.9}
+[WebServer] {"ts": "2026-11-10T16:20:00.089+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "8bf0814d-a2c8-433b-a32a-1e6ae60d56e4", "event": "http_request", "method": "GET", "path": "/api/v1/admin/parameters/password_initial_validity_hours/values", "status": 200, "duration_ms": 244.8}
+[WebServer] [10/Nov/2026 19:50:00] "GET /api/v1/admin/parameters/password_initial_validity_hours/values?page_size=50 HTTP/1.1" 200 390
+[WebServer] {"ts": "2026-11-10T16:20:00.240+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "5e87e6ca-66b7-4f93-9993-f0900d98670c", "event": "http_request", "method": "GET", "path": "/api/v1/admin/parameters/password_initial_validity_hours", "status": 200, "duration_ms": 462.7}
+[WebServer] [10/Nov/2026 19:50:00] "GET /api/v1/admin/parameters/password_initial_validity_hours HTTP/1.1" 200 587
+[WebServer] {"ts": "2026-11-10T16:20:00.253+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "9622f224-9230-4a16-977e-1ade153207fe", "event": "http_request", "method": "GET", "path": "/api/v1/admin/parameters/password_initial_validity_hours/values", "status": 200, "duration_ms": 517.9}
+[WebServer] {"ts": "2026-11-10T16:20:01.038+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "ebf8eedb-f0e0-40f6-8f43-f49433105f60", "event": "http_request", "method": "POST", "path": "/api/v1/admin/parameters/password_initial_validity_hours/values", "status": 201, "duration_ms": 180.6}
+[WebServer] [10/Nov/2026 19:50:01] "POST /api/v1/admin/parameters/password_initial_validity_hours/values HTTP/1.1" 201 396
+[WebServer] {"ts": "2026-11-10T16:20:01.191+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "c29215f0-0a34-4141-9528-399716e2ecfe", "event": "http_request", "method": "GET", "path": "/api/v1/admin/parameters/password_initial_validity_hours", "status": 200, "duration_ms": 141.4}
+[WebServer] [10/Nov/2026 19:50:01] "GET /api/v1/admin/parameters/password_initial_validity_hours HTTP/1.1" 200 648
+[WebServer] {"ts": "2026-11-10T16:20:01.205+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "819e2aed-8d8e-4b88-ae28-87a820b2cdc5", "event": "http_request", "method": "GET", "path": "/api/v1/admin/parameters/password_initial_validity_hours/values", "status": 200, "duration_ms": 141.2}
+[WebServer] [10/Nov/2026 19:50:01] "GET /api/v1/admin/parameters/password_initial_validity_hours/values?page_size=50 HTTP/1.1" 200 788
+[WebServer] {"ts": "2026-11-10T16:20:01.250+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "6dca8640-3cc0-492e-9055-644172befaac", "event": "http_request", "method": "GET", "path": "/api/v1/admin/parameters", "status": 200, "duration_ms": 205.8}
+[WebServer] [10/Nov/2026 19:50:01] "GET /api/v1/admin/parameters?page_size=100 HTTP/1.1" 200 18436
+  ok  6 [chromium] › e2e\phase01.spec.ts:263:1 › page 42: OWNER_POLICY value published by the owner in one step (8.8s)
+[WebServer] {"ts": "2026-11-10T16:20:06.503+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "ccc6c3f7-2134-430c-8564-5090b12517f7", "event": "http_request", "method": "GET", "path": "/api/v1/audits/integrity", "status": 200, "duration_ms": 360.1}
+[WebServer] {"ts": "2026-11-10T16:20:06.510+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "0cead780-79e0-4040-b018-95041c8abda7", "event": "http_request", "method": "GET", "path": "/api/v1/admin/health", "status": 200, "duration_ms": 393.0}
+[WebServer] {"ts": "2026-11-10T16:20:06.661+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "e9d0d10d-e700-4793-9747-ae82ae400299", "event": "http_request", "method": "GET", "path": "/api/v1/admin/job-definitions", "status": 200, "duration_ms": 494.6}
+[WebServer] {"ts": "2026-11-10T16:20:06.704+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "af6e911f-74a8-48c5-bd38-10290be55d74", "event": "http_request", "method": "GET", "path": "/api/v1/admin/jobs", "status": 200, "duration_ms": 487.6}
+[WebServer] {"ts": "2026-11-10T16:20:06.811+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "7e3a3961-c480-416b-bfdf-dc0cd8d0e7d6", "event": "http_request", "method": "GET", "path": "/api/v1/admin/job-definitions", "status": 200, "duration_ms": 212.7}
+[WebServer] [10/Nov/2026 19:50:06] "GET /api/v1/admin/job-definitions?page_size=100 HTTP/1.1" 200 1569
+[WebServer] {"ts": "2026-11-10T16:20:06.942+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "756f2e65-334a-44a7-9fbc-ac2901f2ed91", "event": "http_request", "method": "GET", "path": "/api/v1/admin/jobs", "status": 200, "duration_ms": 316.4}
+[WebServer] [10/Nov/2026 19:50:06] "GET /api/v1/admin/jobs?page_size=25 HTTP/1.1" 200 1034
+[WebServer] {"ts": "2026-11-10T16:20:07.089+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "66e6474d-84d9-4f5b-8e47-ebf4a7220101", "event": "http_request", "method": "GET", "path": "/api/v1/admin/health", "status": 200, "duration_ms": 796.9}
+[WebServer] [10/Nov/2026 19:50:07] "GET /api/v1/admin/health HTTP/1.1" 200 2090
+[WebServer] {"ts": "2026-11-10T16:20:07.190+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "8c628153-83ce-4e6d-9230-f29783511f53", "event": "http_request", "method": "GET", "path": "/api/v1/audits/integrity", "status": 200, "duration_ms": 666.6}
+[WebServer] [10/Nov/2026 19:50:07] "GET /api/v1/audits/integrity HTTP/1.1" 200 106
+[WebServer] {"ts": "2026-11-10T16:20:07.379+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "1d29ef0f-acb6-4a47-b69c-2c6d242ea888", "event": "http_request", "method": "GET", "path": "/api/v1/admin/job-definitions", "status": 200, "duration_ms": 177.2}
+[WebServer] [10/Nov/2026 19:50:07] "GET /api/v1/admin/job-definitions?page_size=100 HTTP/1.1" 200 1569
+[WebServer] {"ts": "2026-11-10T16:20:10.498+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "60a12efa-dc2a-4a54-aaf5-357ba58d24d4", "event": "http_request", "method": "POST", "path": "/api/v1/admin/jobs/46ce206a-d264-4e45-8f78-9745e12167af/request-cancel", "status": 200, "duration_ms": 308.1}
+[WebServer] [10/Nov/2026 19:50:10] "POST /api/v1/admin/jobs/46ce206a-d264-4e45-8f78-9745e12167af/request-cancel HTTP/1.1" 200 393
+[WebServer] {"ts": "2026-11-10T16:20:10.736+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "8ef9e26f-8bd6-4603-9022-e464570f223d", "event": "http_request", "method": "GET", "path": "/api/v1/audits/integrity", "status": 200, "duration_ms": 203.4}
+[WebServer] {"ts": "2026-11-10T16:20:10.740+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "7e7d6340-0717-4a3b-8b8f-b2f05e20e75b", "event": "http_request", "method": "GET", "path": "/api/v1/admin/job-definitions", "status": 200, "duration_ms": 202.7}
+[WebServer] [10/Nov/2026 19:50:10] "GET /api/v1/audits/integrity HTTP/1.1" 200 106
+[WebServer] [10/Nov/2026 19:50:10] "GET /api/v1/admin/job-definitions?page_size=100 HTTP/1.1" 200 1569
+[WebServer] {"ts": "2026-11-10T16:20:10.754+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "782ab507-f3cc-4f8e-95bc-bb461c44582d", "event": "http_request", "method": "GET", "path": "/api/v1/admin/jobs", "status": 200, "duration_ms": 212.4}
+[WebServer] [10/Nov/2026 19:50:10] "GET /api/v1/admin/jobs?page_size=25 HTTP/1.1" 200 1124
+[WebServer] {"ts": "2026-11-10T16:20:10.838+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "8f754785-bfe4-4c8f-acf0-9d5d9772e8a4", "event": "http_request", "method": "GET", "path": "/api/v1/admin/health", "status": 200, "duration_ms": 323.0}
+[WebServer] [10/Nov/2026 19:50:10] "GET /api/v1/admin/health HTTP/1.1" 200 2093
+  ok  7 [chromium] › e2e\phase01.spec.ts:285:1 › page 36: health counters, audit integrity, protected job not cancellable, safe cancel with reason (6.8s)
+[WebServer] {"ts": "2026-11-10T16:20:13.676+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "205a102a-15e6-4802-b9c6-bf428ffa0a02", "event": "http_request", "method": "GET", "path": "/api/v1/version", "status": 200, "duration_ms": 0.8}
+[WebServer] {"ts": "2026-11-10T16:20:13.679+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "34aea33c-9c9c-4b46-b22c-9dbcda5f58a0", "event": "http_request", "method": "GET", "path": "/api/v1/version", "status": 200, "duration_ms": 1.2}
+[WebServer] [10/Nov/2026 19:50:13] "GET /api/v1/version HTTP/1.1" 200 103
+[WebServer] {"ts": "2026-11-10T16:20:13.721+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "054dcd34-e4b5-40f0-a552-b920eb27d5ec", "event": "http_request", "method": "GET", "path": "/api/v1/auth/session", "status": 401, "duration_ms": 0.7, "error_code": "AUTHENTICATION_REQUIRED"}
+[WebServer] {"ts": "2026-11-10T16:20:13.721+00:00", "level": "WARNING", "logger": "django.request", "msg": "Unauthorized: /api/v1/auth/session", "request_id": "054dcd34-e4b5-40f0-a552-b920eb27d5ec"}
+[WebServer] [10/Nov/2026 19:50:13] "GET /api/v1/auth/session HTTP/1.1" 401 277
+[WebServer] {"ts": "2026-11-10T16:20:13.974+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "9d6a3de7-faf0-4017-918f-9f97618785ad", "event": "http_request", "method": "GET", "path": "/api/v1/auth/login", "status": 200, "duration_ms": 0.8}
+[WebServer] [10/Nov/2026 19:50:13] "GET /api/v1/auth/login HTTP/1.1" 200 15
+[WebServer] {"ts": "2026-11-10T16:20:13.988+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "3f734783-f56e-4da2-8749-cac8f0369b89", "event": "http_request", "method": "GET", "path": "/api/v1/auth/login", "status": 200, "duration_ms": 1.1}
+[WebServer] [10/Nov/2026 19:50:13] "GET /api/v1/auth/login HTTP/1.1" 200 15
+[WebServer] {"ts": "2026-11-10T16:20:14.000+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "a3dc5d5d-ea6b-4d9a-a6f6-8eaef34b7be3", "event": "http_request", "method": "GET", "path": "/api/v1/auth/login", "status": 200, "duration_ms": 1.9}
+[WebServer] [10/Nov/2026 19:50:14] "GET /api/v1/auth/login HTTP/1.1" 200 15
+[WebServer] {"ts": "2026-11-10T16:20:15.084+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "baf3bbed-cded-4a70-953d-04d3b77c0915", "event": "http_request", "method": "POST", "path": "/api/v1/auth/login", "status": 200, "duration_ms": 1063.3}
+[WebServer] [10/Nov/2026 19:50:15] "POST /api/v1/auth/login HTTP/1.1" 200 384
+[WebServer] {"ts": "2026-11-10T16:20:15.292+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "4db11a0c-9d35-42f9-b99d-79910b400b07", "event": "http_request", "method": "GET", "path": "/api/v1/auth/session", "status": 200, "duration_ms": 200.3}
+[WebServer] [10/Nov/2026 19:50:15] "GET /api/v1/auth/session HTTP/1.1" 200 321
+[WebServer] {"ts": "2026-11-10T16:20:15.356+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "b4f9ab5e-e4cf-4d82-b08b-77baacd29b7a", "event": "http_request", "method": "GET", "path": "/api/v1/me", "status": 403, "duration_ms": 56.9, "error_code": "PASSWORD_CHANGE_REQUIRED"}
+[WebServer] {"ts": "2026-11-10T16:20:15.356+00:00", "level": "WARNING", "logger": "django.request", "msg": "Forbidden: /api/v1/me", "request_id": "b4f9ab5e-e4cf-4d82-b08b-77baacd29b7a"}
+[WebServer] [10/Nov/2026 19:50:15] "GET /api/v1/me HTTP/1.1" 403 285
+[WebServer] {"ts": "2026-11-10T16:20:19.788+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "78b8847c-0df4-400a-8983-9621f35d924c", "event": "http_request", "method": "POST", "path": "/api/v1/auth/password/change", "status": 204, "duration_ms": 3894.6}
+[WebServer] [10/Nov/2026 19:50:19] "POST /api/v1/auth/password/change HTTP/1.1" 204 0
+[WebServer] {"ts": "2026-11-10T16:20:19.901+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "f390b157-720a-4c3d-89e2-c2af9e1b0235", "event": "http_request", "method": "GET", "path": "/api/v1/auth/session", "status": 200, "duration_ms": 104.8}
+[WebServer] [10/Nov/2026 19:50:19] "GET /api/v1/auth/session HTTP/1.1" 200 321
+[WebServer] {"ts": "2026-11-10T16:20:20.033+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "34b7c0f8-9e45-4e3e-a47a-fbe043708dfc", "event": "http_request", "method": "GET", "path": "/api/v1/me", "status": 200, "duration_ms": 118.8}
+[WebServer] [10/Nov/2026 19:50:20] "GET /api/v1/me HTTP/1.1" 200 923
+[WebServer] {"ts": "2026-11-10T16:20:20.179+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "4b2f2539-7bd0-45a3-9c2c-6d345a24f1ce", "event": "http_request", "method": "GET", "path": "/api/v1/me/permissions", "status": 200, "duration_ms": 139.5}
+[WebServer] [10/Nov/2026 19:50:20] "GET /api/v1/me/permissions HTTP/1.1" 200 1431
+[WebServer] {"ts": "2026-11-10T16:20:20.572+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "e1fae796-e8ee-4244-ad19-3f005701290c", "event": "http_request", "method": "GET", "path": "/api/v1/admin/users", "status": 403, "duration_ms": 134.3, "error_code": "ACCESS_DENIED"}
+[WebServer] {"ts": "2026-11-10T16:20:20.572+00:00", "level": "WARNING", "logger": "django.request", "msg": "Forbidden: /api/v1/admin/users", "request_id": "e1fae796-e8ee-4244-ad19-3f005701290c"}
+[WebServer] [10/Nov/2026 19:50:20] "GET /api/v1/admin/users HTTP/1.1" 403 243
+[WebServer] {"ts": "2026-11-10T16:20:21.732+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "fc5a420d-e53d-4bc6-8c78-1d68049989ed", "event": "http_request", "method": "GET", "path": "/api/v1/documents", "status": 200, "duration_ms": 389.5}
+[WebServer] [10/Nov/2026 19:50:21] "GET /api/v1/documents?page_size=25 HTTP/1.1" 200 55
+[WebServer] {"ts": "2026-11-10T16:20:21.763+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "9cb009ea-619e-4c6c-a974-453593ea9051", "event": "http_request", "method": "GET", "path": "/api/v1/documents", "status": 200, "duration_ms": 482.7}
+[WebServer] {"ts": "2026-11-10T16:20:22.529+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "094925f3-bcb9-4d97-9d8f-36bcf5f8bdcf", "event": "http_request", "method": "POST", "path": "/api/v1/documents", "status": 201, "duration_ms": 137.0}
+[WebServer] [10/Nov/2026 19:50:22] "POST /api/v1/documents HTTP/1.1" 201 384
+[WebServer] {"ts": "2026-11-10T16:20:22.640+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "a0f990a0-546a-4f85-98ae-2295fdc3901c", "event": "http_request", "method": "GET", "path": "/api/v1/documents", "status": 200, "duration_ms": 103.7}
+[WebServer] [10/Nov/2026 19:50:22] "GET /api/v1/documents?page_size=25 HTTP/1.1" 200 439
+[WebServer] {"ts": "2026-11-10T16:20:22.856+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "4c37b960-ac49-48a3-ac80-2de637138405", "event": "http_request", "method": "GET", "path": "/api/v1/documents/5f36a823-61d3-4f7a-b41e-6bacaee78241", "status": 200, "duration_ms": 189.6}
+[WebServer] {"ts": "2026-11-10T16:20:22.915+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "549d3364-1f2c-457a-a388-b1fe3824fe5e", "event": "http_request", "method": "GET", "path": "/api/v1/documents/5f36a823-61d3-4f7a-b41e-6bacaee78241/revisions", "status": 200, "duration_ms": 244.6}
+[WebServer] {"ts": "2026-11-10T16:20:22.935+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "25ef7ecd-a4cd-49fe-aef4-21c130f4eead", "event": "http_request", "method": "GET", "path": "/api/v1/documents/5f36a823-61d3-4f7a-b41e-6bacaee78241", "status": 200, "duration_ms": 246.5}
+[WebServer] [10/Nov/2026 19:50:22] "GET /api/v1/documents/5f36a823-61d3-4f7a-b41e-6bacaee78241 HTTP/1.1" 200 384
+[WebServer] {"ts": "2026-11-10T16:20:23.029+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "e56763ec-7aa8-432e-b09a-7e8b2425a9a2", "event": "http_request", "method": "GET", "path": "/api/v1/documents/5f36a823-61d3-4f7a-b41e-6bacaee78241/revisions", "status": 200, "duration_ms": 307.3}
+[WebServer] [10/Nov/2026 19:50:23] "GET /api/v1/documents/5f36a823-61d3-4f7a-b41e-6bacaee78241/revisions?page_size=100 HTTP/1.1" 200 56
+[WebServer] {"ts": "2026-11-10T16:20:23.573+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "6068a6e4-2f4a-4f16-bdc1-42104dc2bc46", "event": "http_request", "method": "POST", "path": "/api/v1/documents/5f36a823-61d3-4f7a-b41e-6bacaee78241/revisions", "status": 202, "duration_ms": 164.0}
+[WebServer] [10/Nov/2026 19:50:23] "POST /api/v1/documents/5f36a823-61d3-4f7a-b41e-6bacaee78241/revisions HTTP/1.1" 202 567
+[WebServer] {"ts": "2026-11-10T16:20:23.690+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "e2513161-54ae-4745-834d-4de5e8b6cafa", "event": "http_request", "method": "GET", "path": "/api/v1/documents/5f36a823-61d3-4f7a-b41e-6bacaee78241", "status": 200, "duration_ms": 108.5}
+[WebServer] [10/Nov/2026 19:50:23] "GET /api/v1/documents/5f36a823-61d3-4f7a-b41e-6bacaee78241 HTTP/1.1" 200 384
+[WebServer] {"ts": "2026-11-10T16:20:23.720+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "01ca5a8b-aed2-436d-a0d1-5be8709349ce", "event": "http_request", "method": "GET", "path": "/api/v1/documents/5f36a823-61d3-4f7a-b41e-6bacaee78241/revisions", "status": 200, "duration_ms": 135.6}
+[WebServer] [10/Nov/2026 19:50:23] "GET /api/v1/documents/5f36a823-61d3-4f7a-b41e-6bacaee78241/revisions?page_size=100 HTTP/1.1" 200 623
+[WebServer] {"ts": "2026-11-10T16:20:23.972+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "5ba23ac1-a319-4d71-8ebb-08eeb83bca8a", "event": "http_request", "method": "POST", "path": "/api/v1/documents/5f36a823-61d3-4f7a-b41e-6bacaee78241/revisions", "status": 415, "duration_ms": 134.1, "error_code": "FILE_TYPE_NOT_ALLOWED"}
+[WebServer] {"ts": "2026-11-10T16:20:23.972+00:00", "level": "WARNING", "logger": "django.request", "msg": "Unsupported Media Type: /api/v1/documents/5f36a823-61d3-4f7a-b41e-6bacaee78241/revisions", "request_id": "5ba23ac1-a319-4d71-8ebb-08eeb83bca8a"}
+[WebServer] [10/Nov/2026 19:50:23] "POST /api/v1/documents/5f36a823-61d3-4f7a-b41e-6bacaee78241/revisions HTTP/1.1" 415 438
+[WebServer] {"ts": "2026-11-10T16:20:25.818+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "56e430de-f134-4769-ae37-3caf9393aa46", "event": "http_request", "method": "GET", "path": "/api/v1/documents", "status": 200, "duration_ms": 203.8}
+[WebServer] {"ts": "2026-11-10T16:20:25.846+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "c8bb4f63-68f3-4030-b657-2314a7116f5b", "event": "http_request", "method": "GET", "path": "/api/v1/documents", "status": 200, "duration_ms": 210.9}
+[WebServer] [10/Nov/2026 19:50:25] "GET /api/v1/documents?page_size=25 HTTP/1.1" 200 439
+[WebServer] {"ts": "2026-11-10T16:20:26.395+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "71363f26-8da1-4f4c-ba2f-13d7c46c823b", "event": "http_request", "method": "GET", "path": "/api/v1/auth/sessions", "status": 200, "duration_ms": 189.5}
+[WebServer] {"ts": "2026-11-10T16:20:26.410+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "d378502f-d12e-44eb-903b-6c47c916ed49", "event": "http_request", "method": "GET", "path": "/api/v1/auth/sessions", "status": 200, "duration_ms": 149.7}
+[WebServer] [10/Nov/2026 19:50:26] "GET /api/v1/auth/sessions HTTP/1.1" 200 376
+[WebServer] {"ts": "2026-11-10T16:20:26.925+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "416d9d6c-a36b-4a25-affe-efe922f813a3", "event": "http_request", "method": "GET", "path": "/api/v1/documents", "status": 401, "duration_ms": 2.8, "error_code": "AUTHENTICATION_REQUIRED"}
+[WebServer] {"ts": "2026-11-10T16:20:26.935+00:00", "level": "WARNING", "logger": "django.request", "msg": "Unauthorized: /api/v1/documents", "request_id": "416d9d6c-a36b-4a25-affe-efe922f813a3"}
+[WebServer] {"ts": "2026-11-10T16:20:26.941+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "1cc1e9e3-3d4e-467c-a9b4-cda1c95f4d50", "event": "http_request", "method": "GET", "path": "/api/v1/documents", "status": 401, "duration_ms": 0.6, "error_code": "AUTHENTICATION_REQUIRED"}
+[WebServer] {"ts": "2026-11-10T16:20:26.941+00:00", "level": "WARNING", "logger": "django.request", "msg": "Unauthorized: /api/v1/documents", "request_id": "1cc1e9e3-3d4e-467c-a9b4-cda1c95f4d50"}
+[WebServer] [10/Nov/2026 19:50:26] "GET /api/v1/documents?page_size=25 HTTP/1.1" 401 277
+[WebServer] {"ts": "2026-11-10T16:20:26.957+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "c7f4d693-fd28-4d14-847d-2ec86eb493df", "event": "http_request", "method": "GET", "path": "/api/v1/auth/session", "status": 401, "duration_ms": 0.8, "error_code": "AUTHENTICATION_REQUIRED"}
+[WebServer] {"ts": "2026-11-10T16:20:26.958+00:00", "level": "WARNING", "logger": "django.request", "msg": "Unauthorized: /api/v1/auth/session", "request_id": "c7f4d693-fd28-4d14-847d-2ec86eb493df"}
+[WebServer] [10/Nov/2026 19:50:26] "GET /api/v1/auth/session HTTP/1.1" 401 277
+[WebServer] {"ts": "2026-11-10T16:20:26.994+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "4c783687-d405-4540-953e-c3a737fd5d9c", "event": "http_request", "method": "GET", "path": "/api/v1/auth/login", "status": 200, "duration_ms": 0.7}
+[WebServer] [10/Nov/2026 19:50:26] "GET /api/v1/auth/login HTTP/1.1" 200 15
+[WebServer] {"ts": "2026-11-10T16:20:27.000+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "1b3bf524-87cc-4708-8c45-fa60c6d9a34d", "event": "http_request", "method": "GET", "path": "/api/v1/auth/login", "status": 200, "duration_ms": 1.2}
+[WebServer] [10/Nov/2026 19:50:27] "GET /api/v1/auth/login HTTP/1.1" 200 15
+  ok  8 [chromium] › e2e\phase01.spec.ts:310:1 › document controller: first login, role-sensitive nav, server-side 403, upload into quarantine (14.8s)
+[WebServer] {"ts": "2026-11-10T16:20:30.739+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "f29db275-160f-4d7f-8d67-0d653e04fd6b", "event": "http_request", "method": "GET", "path": "/api/v1/version", "status": 200, "duration_ms": 0.6}
+[WebServer] {"ts": "2026-11-10T16:20:30.805+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "9a614ba5-26e5-4168-81ff-b08198c2df22", "event": "http_request", "method": "GET", "path": "/api/v1/version", "status": 200, "duration_ms": 1.4}
+[WebServer] [10/Nov/2026 19:50:30] "GET /api/v1/version HTTP/1.1" 200 103
+[WebServer] {"ts": "2026-11-10T16:20:30.876+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "69098576-8a4f-4db9-babc-da96f608663b", "event": "http_request", "method": "GET", "path": "/api/v1/auth/session", "status": 401, "duration_ms": 0.7, "error_code": "AUTHENTICATION_REQUIRED"}
+[WebServer] {"ts": "2026-11-10T16:20:30.877+00:00", "level": "WARNING", "logger": "django.request", "msg": "Unauthorized: /api/v1/auth/session", "request_id": "69098576-8a4f-4db9-babc-da96f608663b"}
+[WebServer] [10/Nov/2026 19:50:30] "GET /api/v1/auth/session HTTP/1.1" 401 277
+[WebServer] {"ts": "2026-11-10T16:20:30.942+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "846411c5-5c76-4b78-967e-68735d2560c2", "event": "http_request", "method": "GET", "path": "/api/v1/auth/login", "status": 200, "duration_ms": 0.7}
+[WebServer] [10/Nov/2026 19:50:30] "GET /api/v1/auth/login HTTP/1.1" 200 15
+[WebServer] {"ts": "2026-11-10T16:20:30.972+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "7c5fc008-46eb-426f-96cd-57e80adc9714", "event": "http_request", "method": "GET", "path": "/api/v1/auth/login", "status": 200, "duration_ms": 1.0}
+[WebServer] [10/Nov/2026 19:50:30] "GET /api/v1/auth/login HTTP/1.1" 200 15
+[WebServer] {"ts": "2026-11-10T16:20:32.650+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "8562face-3a42-46d2-b658-2b4a46e62c2e", "event": "http_request", "method": "POST", "path": "/api/v1/auth/login", "status": 200, "duration_ms": 1517.7}
+[WebServer] [10/Nov/2026 19:50:32] "POST /api/v1/auth/login HTTP/1.1" 200 385
+[WebServer] {"ts": "2026-11-10T16:20:32.771+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "f228bb43-3403-4e85-aed3-746f09bf29b6", "event": "http_request", "method": "GET", "path": "/api/v1/auth/session", "status": 200, "duration_ms": 109.3}
+[WebServer] [10/Nov/2026 19:50:32] "GET /api/v1/auth/session HTTP/1.1" 200 321
+[WebServer] {"ts": "2026-11-10T16:20:32.925+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "f52a53ba-5d4c-4ceb-9842-46bc6806dd2b", "event": "http_request", "method": "GET", "path": "/api/v1/me", "status": 200, "duration_ms": 146.9}
+[WebServer] [10/Nov/2026 19:50:32] "GET /api/v1/me HTTP/1.1" 200 923
+[WebServer] {"ts": "2026-11-10T16:20:33.092+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "ea2084f4-1164-4b06-be7d-4077b7afa4d5", "event": "http_request", "method": "GET", "path": "/api/v1/me/permissions", "status": 200, "duration_ms": 157.8}
+[WebServer] [10/Nov/2026 19:50:33] "GET /api/v1/me/permissions HTTP/1.1" 200 1431
+[WebServer] {"ts": "2026-11-10T16:20:33.763+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "680498f4-acbc-4fca-9688-f1f80e592ee6", "event": "http_request", "method": "GET", "path": "/api/v1/documents", "status": 200, "duration_ms": 172.1}
+[WebServer] {"ts": "2026-11-10T16:20:33.802+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "fe7f0ef4-e1dc-4825-bdfd-97facfcc65e7", "event": "http_request", "method": "GET", "path": "/api/v1/documents", "status": 200, "duration_ms": 175.3}
+[WebServer] [10/Nov/2026 19:50:33] "GET /api/v1/documents?page_size=25 HTTP/1.1" 200 439
+[WebServer] {"ts": "2026-11-10T16:20:34.222+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "f6b9f728-b003-4ac8-bbbc-668bfe3589dd", "event": "http_request", "method": "GET", "path": "/api/v1/documents/5f36a823-61d3-4f7a-b41e-6bacaee78241", "status": 200, "duration_ms": 200.2}
+[WebServer] [10/Nov/2026 19:50:34] "GET /api/v1/documents/5f36a823-61d3-4f7a-b41e-6bacaee78241 HTTP/1.1" 200 384
+[WebServer] {"ts": "2026-11-10T16:20:34.289+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "a6e4f641-7e77-4360-ac01-bbba01042e94", "event": "http_request", "method": "GET", "path": "/api/v1/documents/5f36a823-61d3-4f7a-b41e-6bacaee78241/revisions", "status": 200, "duration_ms": 299.9}
+[WebServer] {"ts": "2026-11-10T16:20:34.310+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "c2d3d566-e094-44d5-9d76-dc82ae65877c", "event": "http_request", "method": "GET", "path": "/api/v1/documents/5f36a823-61d3-4f7a-b41e-6bacaee78241", "status": 200, "duration_ms": 356.6}
+[WebServer] {"ts": "2026-11-10T16:20:34.336+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "f25b474a-80cf-47fe-8a23-4169b0b996e7", "event": "http_request", "method": "GET", "path": "/api/v1/documents/5f36a823-61d3-4f7a-b41e-6bacaee78241/revisions", "status": 200, "duration_ms": 295.0}
+[WebServer] [10/Nov/2026 19:50:34] "GET /api/v1/documents/5f36a823-61d3-4f7a-b41e-6bacaee78241/revisions?page_size=100 HTTP/1.1" 200 617
+[WebServer] {"ts": "2026-11-10T16:20:35.165+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "8c83215b-3e84-4d7d-89ef-f7036189c2a0", "event": "http_request", "method": "POST", "path": "/api/v1/documents/5f36a823-61d3-4f7a-b41e-6bacaee78241/revisions/b6645523-291b-4fcd-910e-fe05de0cf73b/submit-review", "status": 200, "duration_ms": 174.0}
+[WebServer] [10/Nov/2026 19:50:35] "POST /api/v1/documents/5f36a823-61d3-4f7a-b41e-6bacaee78241/revisions/b6645523-291b-4fcd-910e-fe05de0cf73b/submit-review HTTP/1.1" 200 563
+[WebServer] {"ts": "2026-11-10T16:20:35.291+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "3d501b1b-795e-4607-8ecd-b182a3b3cf63", "event": "http_request", "method": "GET", "path": "/api/v1/documents/5f36a823-61d3-4f7a-b41e-6bacaee78241", "status": 200, "duration_ms": 117.9}
+[WebServer] [10/Nov/2026 19:50:35] "GET /api/v1/documents/5f36a823-61d3-4f7a-b41e-6bacaee78241 HTTP/1.1" 200 384
+[WebServer] {"ts": "2026-11-10T16:20:35.316+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "3c0f3aa7-7816-4170-b134-8d571129ddf3", "event": "http_request", "method": "GET", "path": "/api/v1/documents/5f36a823-61d3-4f7a-b41e-6bacaee78241/revisions", "status": 200, "duration_ms": 135.9}
+[WebServer] [10/Nov/2026 19:50:35] "GET /api/v1/documents/5f36a823-61d3-4f7a-b41e-6bacaee78241/revisions?page_size=100 HTTP/1.1" 200 619
+[WebServer] {"ts": "2026-11-10T16:20:35.592+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "b20037a1-e9bd-45a9-a631-939e78b0b306", "event": "http_request", "method": "GET", "path": "/api/v1/documents/5f36a823-61d3-4f7a-b41e-6bacaee78241", "status": 200, "duration_ms": 183.0}
+[WebServer] {"ts": "2026-11-10T16:20:35.674+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "b756f6b3-3f6d-4117-b5ad-7361245714d7", "event": "http_request", "method": "GET", "path": "/api/v1/documents/5f36a823-61d3-4f7a-b41e-6bacaee78241", "status": 200, "duration_ms": 197.4}
+[WebServer] [10/Nov/2026 19:50:35] "GET /api/v1/documents/5f36a823-61d3-4f7a-b41e-6bacaee78241 HTTP/1.1" 200 384
+[WebServer] {"ts": "2026-11-10T16:20:35.796+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "da298dcf-1e1c-4f30-9971-1eeec88bf19f", "event": "http_request", "method": "GET", "path": "/api/v1/documents/5f36a823-61d3-4f7a-b41e-6bacaee78241/revisions", "status": 200, "duration_ms": 361.6}
+[WebServer] {"ts": "2026-11-10T16:20:35.837+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "ffb39614-d480-4635-90dd-fbcc3c4ce31f", "event": "http_request", "method": "GET", "path": "/api/v1/documents/5f36a823-61d3-4f7a-b41e-6bacaee78241/revisions", "status": 200, "duration_ms": 331.5}
+[WebServer] [10/Nov/2026 19:50:35] "GET /api/v1/documents/5f36a823-61d3-4f7a-b41e-6bacaee78241/revisions?page_size=100 HTTP/1.1" 200 619
+[WebServer] {"ts": "2026-11-10T16:20:36.080+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "7467fa23-3d86-477f-94fb-6e3356a44ffd", "event": "http_request", "method": "GET", "path": "/api/v1/documents/5f36a823-61d3-4f7a-b41e-6bacaee78241/revisions/b6645523-291b-4fcd-910e-fe05de0cf73b/content", "status": 200, "duration_ms": 122.3}
+[WebServer] [10/Nov/2026 19:50:36] "GET /api/v1/documents/5f36a823-61d3-4f7a-b41e-6bacaee78241/revisions/b6645523-291b-4fcd-910e-fe05de0cf73b/content HTTP/1.1" 200 75
+[WebServer] {"ts": "2026-11-10T16:20:36.281+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "8ce59929-b613-4a99-9c97-dfe62f9136a5", "event": "http_request", "method": "GET", "path": "/api/v1/workflow/approvals", "status": 200, "duration_ms": 163.7}
+[WebServer] {"ts": "2026-11-10T16:20:36.286+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "aaa76774-8d36-4c48-a68c-05e2d27bcb1a", "event": "http_request", "method": "GET", "path": "/api/v1/workflow/approvals", "status": 200, "duration_ms": 147.6}
+[WebServer] [10/Nov/2026 19:50:36] "GET /api/v1/workflow/approvals?inbox=to_decide&status=PENDING&page_size=25 HTTP/1.1" 200 551
+[WebServer] {"ts": "2026-11-10T16:20:36.697+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "93313ddf-82fe-4c08-b84a-1f177f01542e", "event": "http_request", "method": "GET", "path": "/api/v1/workflow/approvals/680a45ea-597e-41ca-b7d7-56cd3df982b2", "status": 200, "duration_ms": 176.5}
+[WebServer] {"ts": "2026-11-10T16:20:36.744+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "8b3c4ba0-5f61-49b6-b6ce-7a8f12038312", "event": "http_request", "method": "GET", "path": "/api/v1/workflow/approvals/680a45ea-597e-41ca-b7d7-56cd3df982b2", "status": 200, "duration_ms": 184.2}
+[WebServer] [10/Nov/2026 19:50:36] "GET /api/v1/workflow/approvals/680a45ea-597e-41ca-b7d7-56cd3df982b2 HTTP/1.1" 200 496
+[WebServer] {"ts": "2026-11-10T16:20:37.175+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "5ab006db-62b6-488d-95fd-848e316cd967", "event": "http_request", "method": "POST", "path": "/api/v1/workflow/approvals/680a45ea-597e-41ca-b7d7-56cd3df982b2/approve", "status": 200, "duration_ms": 169.2}
+[WebServer] [10/Nov/2026 19:50:37] "POST /api/v1/workflow/approvals/680a45ea-597e-41ca-b7d7-56cd3df982b2/approve HTTP/1.1" 200 596
+[WebServer] {"ts": "2026-11-10T16:20:37.292+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "58bb7b9d-6272-43d1-9f7d-d08cdac4c1bd", "event": "http_request", "method": "GET", "path": "/api/v1/workflow/approvals", "status": 200, "duration_ms": 111.0}
+[WebServer] [10/Nov/2026 19:50:37] "GET /api/v1/workflow/approvals?inbox=to_decide&status=PENDING&page_size=25 HTTP/1.1" 200 55
+[WebServer] {"ts": "2026-11-10T16:20:37.311+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "6b9b1f16-5709-4a81-9d7b-d74ef497f7f8", "event": "http_request", "method": "GET", "path": "/api/v1/workflow/approvals/680a45ea-597e-41ca-b7d7-56cd3df982b2", "status": 200, "duration_ms": 126.6}
+[WebServer] [10/Nov/2026 19:50:37] "GET /api/v1/workflow/approvals/680a45ea-597e-41ca-b7d7-56cd3df982b2 HTTP/1.1" 200 596
+[WebServer] {"ts": "2026-11-10T16:20:39.791+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "2aa4f2ea-de56-4a1b-8a9a-056c7c2dbb87", "event": "http_request", "method": "GET", "path": "/api/v1/workflow/approvals", "status": 200, "duration_ms": 184.9}
+[WebServer] {"ts": "2026-11-10T16:20:39.836+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "32085536-3ba3-4837-99d0-dfeaeaec70fa", "event": "http_request", "method": "GET", "path": "/api/v1/workflow/approvals", "status": 200, "duration_ms": 185.5}
+[WebServer] [10/Nov/2026 19:50:39] "GET /api/v1/workflow/approvals?status=APPROVED&page_size=25 HTTP/1.1" 200 1292
+[WebServer] {"ts": "2026-11-10T16:20:41.438+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "23e200b7-f904-43d1-9b1f-1c47acc70c65", "event": "http_request", "method": "GET", "path": "/api/v1/version", "status": 200, "duration_ms": 1.4}
+[WebServer] {"ts": "2026-11-10T16:20:41.441+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "d3712bc1-9bbc-4b93-ae29-208685dc4050", "event": "http_request", "method": "GET", "path": "/api/v1/version", "status": 200, "duration_ms": 0.6}
+[WebServer] [10/Nov/2026 19:50:41] "GET /api/v1/version HTTP/1.1" 200 103
+[WebServer] {"ts": "2026-11-10T16:20:41.599+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "5730e7cd-8e37-4d6a-81c3-e8599fe6d666", "event": "http_request", "method": "GET", "path": "/api/v1/auth/session", "status": 200, "duration_ms": 129.2}
+[WebServer] [10/Nov/2026 19:50:41] "GET /api/v1/auth/session HTTP/1.1" 200 321
+[WebServer] {"ts": "2026-11-10T16:20:41.798+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "749eadc7-000e-42bc-b056-7b0f8899674e", "event": "http_request", "method": "GET", "path": "/api/v1/me", "status": 200, "duration_ms": 188.6}
+[WebServer] [10/Nov/2026 19:50:41] "GET /api/v1/me HTTP/1.1" 200 923
+[WebServer] {"ts": "2026-11-10T16:20:41.934+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "86a7335a-9d84-42ed-948b-780922da3d34", "event": "http_request", "method": "GET", "path": "/api/v1/me/permissions", "status": 200, "duration_ms": 119.0}
+[WebServer] [10/Nov/2026 19:50:41] "GET /api/v1/me/permissions HTTP/1.1" 200 1431
+[WebServer] {"ts": "2026-11-10T16:20:42.188+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "4f896a51-414c-4124-afb8-0e74575372b2", "event": "http_request", "method": "GET", "path": "/api/v1/documents/5f36a823-61d3-4f7a-b41e-6bacaee78241", "status": 200, "duration_ms": 211.7}
+[WebServer] {"ts": "2026-11-10T16:20:42.189+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "b8cfbe15-3bde-4425-93f0-ecb10ce8cc94", "event": "http_request", "method": "GET", "path": "/api/v1/documents/5f36a823-61d3-4f7a-b41e-6bacaee78241", "status": 200, "duration_ms": 221.3}
+[WebServer] [10/Nov/2026 19:50:42] "GET /api/v1/documents/5f36a823-61d3-4f7a-b41e-6bacaee78241 HTTP/1.1" 200 418
+[WebServer] {"ts": "2026-11-10T16:20:42.194+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "d34e1c88-adb7-47c3-b762-1d60b1af802a", "event": "http_request", "method": "GET", "path": "/api/v1/documents/5f36a823-61d3-4f7a-b41e-6bacaee78241/revisions", "status": 200, "duration_ms": 221.2}
+[WebServer] {"ts": "2026-11-10T16:20:42.260+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "8a7eb6f7-e11f-4fee-897f-10dc985f54da", "event": "http_request", "method": "GET", "path": "/api/v1/documents/5f36a823-61d3-4f7a-b41e-6bacaee78241/revisions", "status": 200, "duration_ms": 242.4}
+[WebServer] [10/Nov/2026 19:50:42] "GET /api/v1/documents/5f36a823-61d3-4f7a-b41e-6bacaee78241/revisions?page_size=100 HTTP/1.1" 200 677
+  ok  9 [chromium] › e2e\phase01.spec.ts:382:1 › page 39 + 40: the owner opens, downloads and decides a document revision submitted by another person (DEC-056 v1.2/v1.3, REV-0128) (14.9s)
+[WebServer] {"ts": "2026-11-10T16:20:42.812+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "f39cb15f-f639-42a5-9ead-389106b1c6dc", "event": "http_request", "method": "GET", "path": "/api/v1/admin/roles", "status": 200, "duration_ms": 138.4}
+[WebServer] {"ts": "2026-11-10T16:20:42.835+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "f0b159eb-becb-435a-a500-48d584a755ba", "event": "http_request", "method": "GET", "path": "/api/v1/admin/roles", "status": 200, "duration_ms": 146.2}
+[WebServer] [10/Nov/2026 19:50:42] "GET /api/v1/admin/roles?page_size=100 HTTP/1.1" 200 5932
+[WebServer] {"ts": "2026-11-10T16:20:42.860+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "def5b00e-c625-4d76-b502-04634bba2fa4", "event": "http_request", "method": "POST", "path": "/api/v1/auth/logout", "status": 204, "duration_ms": 93.5}
+[WebServer] [10/Nov/2026 19:50:42] "POST /api/v1/auth/logout HTTP/1.1" 204 0
+[WebServer] {"ts": "2026-11-10T16:20:42.866+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "6bdb902f-0294-487a-9ffc-0350d646aecc", "event": "http_request", "method": "GET", "path": "/api/v1/auth/session", "status": 401, "duration_ms": 0.6, "error_code": "AUTHENTICATION_REQUIRED"}
+[WebServer] {"ts": "2026-11-10T16:20:42.867+00:00", "level": "WARNING", "logger": "django.request", "msg": "Unauthorized: /api/v1/auth/session", "request_id": "6bdb902f-0294-487a-9ffc-0350d646aecc"}
+[WebServer] [10/Nov/2026 19:50:42] "GET /api/v1/auth/session HTTP/1.1" 401 277
+[WebServer] {"ts": "2026-11-10T16:20:42.884+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "e90cfe0b-95a0-4bc1-9468-64a85741c7d7", "event": "http_request", "method": "GET", "path": "/api/v1/auth/login", "status": 200, "duration_ms": 0.7}
+[WebServer] [10/Nov/2026 19:50:42] "GET /api/v1/auth/login HTTP/1.1" 200 15
+[WebServer] {"ts": "2026-11-10T16:20:42.888+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "2b512bc2-fffc-4169-84ed-886de72ce19e", "event": "http_request", "method": "GET", "path": "/api/v1/auth/login", "status": 200, "duration_ms": 1.0}
+[WebServer] [10/Nov/2026 19:50:42] "GET /api/v1/auth/login HTTP/1.1" 200 15
+[WebServer] {"ts": "2026-11-10T16:20:42.988+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "f25fe67c-1672-45d7-bd57-a18cdb879ef4", "event": "http_request", "method": "GET", "path": "/api/v1/me", "status": 401, "duration_ms": 0.9, "error_code": "AUTHENTICATION_REQUIRED"}
+[WebServer] {"ts": "2026-11-10T16:20:42.988+00:00", "level": "WARNING", "logger": "django.request", "msg": "Unauthorized: /api/v1/me", "request_id": "f25fe67c-1672-45d7-bd57-a18cdb879ef4"}
+[WebServer] [10/Nov/2026 19:50:42] "GET /api/v1/me HTTP/1.1" 401 277
+  ok 10 [chromium] › e2e\phase01.spec.ts:438:1 › logout ends the owner's session (391ms)
+[WebServer] {"ts": "2026-11-10T16:20:44.401+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "19e4ef3f-70b6-4d11-a158-875c0fc9a52c", "event": "http_request", "method": "GET", "path": "/api/v1/health/live", "status": 200, "duration_ms": 1.1}
+[WebServer] {"ts": "2026-11-10T16:20:44.538+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "a8dbb042-4f9e-4556-bbd1-09ff7afade1c", "event": "http_request", "method": "GET", "path": "/api/v1/version", "status": 200, "duration_ms": 0.7}
+[WebServer] {"ts": "2026-11-10T16:20:44.590+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "ae3ad39e-ecad-4ea9-8284-88fa2b6fb17d", "event": "http_request", "method": "GET", "path": "/api/v1/access-gate/check", "status": 401, "duration_ms": 1.2, "error_code": "AUTHENTICATION_REQUIRED"}
+[WebServer] {"ts": "2026-11-10T16:20:44.591+00:00", "level": "WARNING", "logger": "django.request", "msg": "Unauthorized: /api/v1/access-gate/check", "request_id": "ae3ad39e-ecad-4ea9-8284-88fa2b6fb17d"}
+[WebServer] {"ts": "2026-11-10T16:20:44.707+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "dbe7c06b-3d24-49fb-9c16-fd3b6d53c9c8", "event": "http_request", "method": "GET", "path": "/api/v1/health/ready", "status": 200, "duration_ms": 322.0}
+[WebServer] {"ts": "2026-11-10T16:20:44.710+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "090960b4-8cf4-4804-9de4-2827d207ade7", "event": "http_request", "method": "GET", "path": "/api/v1/health/live", "status": 200, "duration_ms": 0.9}
+[WebServer] [10/Nov/2026 19:50:44] "GET /api/v1/health/live HTTP/1.1" 200 15
+[WebServer] {"ts": "2026-11-10T16:20:44.785+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "c532495f-7540-4d38-b401-e1b80bbbfc19", "event": "http_request", "method": "GET", "path": "/api/v1/version", "status": 200, "duration_ms": 0.7}
+[WebServer] [10/Nov/2026 19:50:44] "GET /api/v1/version HTTP/1.1" 200 103
+[WebServer] {"ts": "2026-11-10T16:20:44.826+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "d7a44548-c603-4be3-855b-19ed5c73d12a", "event": "http_request", "method": "GET", "path": "/api/v1/access-gate/check", "status": 401, "duration_ms": 0.7, "error_code": "AUTHENTICATION_REQUIRED"}
+[WebServer] {"ts": "2026-11-10T16:20:44.835+00:00", "level": "WARNING", "logger": "django.request", "msg": "Unauthorized: /api/v1/access-gate/check", "request_id": "d7a44548-c603-4be3-855b-19ed5c73d12a"}
+[WebServer] [10/Nov/2026 19:50:44] "GET /api/v1/access-gate/check?action=platform.status.view HTTP/1.1" 401 277
+[WebServer] {"ts": "2026-11-10T16:20:44.847+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "694d8c4b-dac4-4d71-b540-1dbbaf743375", "event": "http_request", "method": "GET", "path": "/api/v1/health/ready", "status": 200, "duration_ms": 210.3}
+[WebServer] [10/Nov/2026 19:50:44] "GET /api/v1/health/ready HTTP/1.1" 200 170
+[WebServer] {"ts": "2026-11-10T16:20:44.964+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "7bd69d92-ef20-461e-9bcf-2c8154e78de2", "event": "http_request", "method": "GET", "path": "/api/v1/auth/session", "status": 401, "duration_ms": 4.1, "error_code": "AUTHENTICATION_REQUIRED"}
+[WebServer] {"ts": "2026-11-10T16:20:44.964+00:00", "level": "WARNING", "logger": "django.request", "msg": "Unauthorized: /api/v1/auth/session", "request_id": "7bd69d92-ef20-461e-9bcf-2c8154e78de2"}
+[WebServer] [10/Nov/2026 19:50:44] "GET /api/v1/auth/session HTTP/1.1" 401 277
+  ok 11 [chromium] › e2e\system-status.spec.ts:27:3 › system status page - real backend › shows the official logo with Persian alt text, unscaled ratio, served from the app origin (2.4s)
+[WebServer] {"ts": "2026-11-10T16:20:47.013+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "04988f10-438a-4805-a7c0-6b5c5897eeee", "event": "http_request", "method": "GET", "path": "/api/v1/health/live", "status": 200, "duration_ms": 1.0}
+[WebServer] {"ts": "2026-11-10T16:20:47.083+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "5f42363e-7ca0-4f8b-a075-6de608ccf2c7", "event": "http_request", "method": "GET", "path": "/api/v1/health/ready", "status": 200, "duration_ms": 195.5}
+[WebServer] {"ts": "2026-11-10T16:20:47.118+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "eee400ac-d403-4a0a-8e18-e9f4d709a475", "event": "http_request", "method": "GET", "path": "/api/v1/version", "status": 200, "duration_ms": 1.1}
+[WebServer] {"ts": "2026-11-10T16:20:47.140+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "5ab0ea37-a120-47b8-b302-c70f28f6b78e", "event": "http_request", "method": "GET", "path": "/api/v1/access-gate/check", "status": 401, "duration_ms": 5.5, "error_code": "AUTHENTICATION_REQUIRED"}
+[WebServer] {"ts": "2026-11-10T16:20:47.146+00:00", "level": "WARNING", "logger": "django.request", "msg": "Unauthorized: /api/v1/access-gate/check", "request_id": "5ab0ea37-a120-47b8-b302-c70f28f6b78e"}
+[WebServer] {"ts": "2026-11-10T16:20:47.173+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "7ce507a8-c46b-4bae-99a7-9e3380c52f6f", "event": "http_request", "method": "GET", "path": "/api/v1/health/live", "status": 200, "duration_ms": 0.5}
+[WebServer] [10/Nov/2026 19:50:47] "GET /api/v1/health/live HTTP/1.1" 200 15
+[WebServer] {"ts": "2026-11-10T16:20:47.212+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "061833ac-f8b8-402d-9947-860fc29f85be", "event": "http_request", "method": "GET", "path": "/api/v1/version", "status": 200, "duration_ms": 1.2}
+[WebServer] [10/Nov/2026 19:50:47] "GET /api/v1/version HTTP/1.1" 200 103
+[WebServer] {"ts": "2026-11-10T16:20:47.308+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "d75c7018-f7b4-4000-abd4-6587601d423c", "event": "http_request", "method": "GET", "path": "/api/v1/access-gate/check", "status": 401, "duration_ms": 0.9, "error_code": "AUTHENTICATION_REQUIRED"}
+[WebServer] {"ts": "2026-11-10T16:20:47.309+00:00", "level": "WARNING", "logger": "django.request", "msg": "Unauthorized: /api/v1/access-gate/check", "request_id": "d75c7018-f7b4-4000-abd4-6587601d423c"}
+[WebServer] [10/Nov/2026 19:50:47] "GET /api/v1/access-gate/check?action=platform.status.view HTTP/1.1" 401 277
+[WebServer] {"ts": "2026-11-10T16:20:47.330+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "18bc1550-397a-4f9b-9791-da068b21fbad", "event": "http_request", "method": "GET", "path": "/api/v1/auth/session", "status": 401, "duration_ms": 1.0, "error_code": "AUTHENTICATION_REQUIRED"}
+[WebServer] {"ts": "2026-11-10T16:20:47.331+00:00", "level": "WARNING", "logger": "django.request", "msg": "Unauthorized: /api/v1/auth/session", "request_id": "18bc1550-397a-4f9b-9791-da068b21fbad"}
+[WebServer] [10/Nov/2026 19:50:47] "GET /api/v1/auth/session HTTP/1.1" 401 277
+[WebServer] {"ts": "2026-11-10T16:20:47.355+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "c34308bb-00fe-4d0e-a4b4-9c35bd648af3", "event": "http_request", "method": "GET", "path": "/api/v1/health/ready", "status": 200, "duration_ms": 195.7}
+[WebServer] [10/Nov/2026 19:50:47] "GET /api/v1/health/ready HTTP/1.1" 200 170
+  ok 12 [chromium] › e2e\system-status.spec.ts:45:3 › system status page - real backend › brand primary is the logo green (design token wired) (2.4s)
+[WebServer] {"ts": "2026-11-10T16:20:49.328+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "42d76702-5370-4251-a579-0167847b5238", "event": "http_request", "method": "GET", "path": "/api/v1/health/live", "status": 200, "duration_ms": 1.7}
+[WebServer] {"ts": "2026-11-10T16:20:49.357+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "b1907758-820d-4097-ab1b-7b2bf9a664b9", "event": "http_request", "method": "GET", "path": "/api/v1/health/ready", "status": 200, "duration_ms": 89.8}
+[WebServer] {"ts": "2026-11-10T16:20:49.364+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "5211ce29-eb7d-4cee-891f-bb362155792a", "event": "http_request", "method": "GET", "path": "/api/v1/version", "status": 200, "duration_ms": 0.8}
+[WebServer] {"ts": "2026-11-10T16:20:49.390+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "7b9d3bcb-2fe1-467e-bcfc-47bf5052958c", "event": "http_request", "method": "GET", "path": "/api/v1/health/live", "status": 200, "duration_ms": 0.6}
+[WebServer] [10/Nov/2026 19:50:49] "GET /api/v1/health/live HTTP/1.1" 200 15
+[WebServer] {"ts": "2026-11-10T16:20:49.407+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "2cdb69f9-cff6-4273-b8a9-66d1480ea344", "event": "http_request", "method": "GET", "path": "/api/v1/version", "status": 200, "duration_ms": 4.4}
+[WebServer] [10/Nov/2026 19:50:49] "GET /api/v1/version HTTP/1.1" 200 103
+[WebServer] {"ts": "2026-11-10T16:20:49.437+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "a97d03f5-4a67-4267-a0d0-bd6cf6afb699", "event": "http_request", "method": "GET", "path": "/api/v1/health/ready", "status": 200, "duration_ms": 61.7}
+[WebServer] [10/Nov/2026 19:50:49] "GET /api/v1/health/ready HTTP/1.1" 200 170
+[WebServer] {"ts": "2026-11-10T16:20:49.441+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "a1b7ffaf-3b69-43c8-9a5b-9fe69058b276", "event": "http_request", "method": "GET", "path": "/api/v1/access-gate/check", "status": 401, "duration_ms": 0.6, "error_code": "AUTHENTICATION_REQUIRED"}
+[WebServer] {"ts": "2026-11-10T16:20:49.441+00:00", "level": "WARNING", "logger": "django.request", "msg": "Unauthorized: /api/v1/access-gate/check", "request_id": "a1b7ffaf-3b69-43c8-9a5b-9fe69058b276"}
+[WebServer] [10/Nov/2026 19:50:49] "GET /api/v1/access-gate/check?action=platform.status.view HTTP/1.1" 401 277
+[WebServer] {"ts": "2026-11-10T16:20:49.484+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "dc5d46e2-6afe-4d45-9560-93be9a4168aa", "event": "http_request", "method": "GET", "path": "/api/v1/auth/session", "status": 401, "duration_ms": 0.7, "error_code": "AUTHENTICATION_REQUIRED"}
+[WebServer] {"ts": "2026-11-10T16:20:49.485+00:00", "level": "WARNING", "logger": "django.request", "msg": "Unauthorized: /api/v1/auth/session", "request_id": "dc5d46e2-6afe-4d45-9560-93be9a4168aa"}
+[WebServer] [10/Nov/2026 19:50:49] "GET /api/v1/auth/session HTTP/1.1" 401 277
+  ok 13 [chromium] › e2e\system-status.spec.ts:51:3 › system status page - real backend › loads as Farsi RTL with the Persian font bundled locally (1.7s)
+[WebServer] {"ts": "2026-11-10T16:20:49.816+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "6d392b90-6c80-460e-9b71-c903c14a9281", "event": "http_request", "method": "GET", "path": "/api/v1/version", "status": 200, "duration_ms": 0.5}
+[WebServer] [10/Nov/2026 19:50:49] "GET /api/v1/version HTTP/1.1" 200 103
+[WebServer] {"ts": "2026-11-10T16:20:50.571+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "a6cd5f4c-1277-4c18-a7c2-d7a669429a38", "event": "http_request", "method": "GET", "path": "/api/v1/health/live", "status": 200, "duration_ms": 0.8}
+[WebServer] {"ts": "2026-11-10T16:20:50.609+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "68047eae-b999-4303-af68-db3e5cac3e0e", "event": "http_request", "method": "GET", "path": "/api/v1/version", "status": 200, "duration_ms": 0.6}
+[WebServer] {"ts": "2026-11-10T16:20:50.638+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "960e9d84-96ef-4dad-acd7-b2e3e3e99ad1", "event": "http_request", "method": "GET", "path": "/api/v1/health/ready", "status": 200, "duration_ms": 180.7}
+[WebServer] {"ts": "2026-11-10T16:20:50.640+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "a5d45236-fab4-4a19-952c-95e1a3b42984", "event": "http_request", "method": "GET", "path": "/api/v1/access-gate/check", "status": 401, "duration_ms": 0.6, "error_code": "AUTHENTICATION_REQUIRED"}
+[WebServer] {"ts": "2026-11-10T16:20:50.641+00:00", "level": "WARNING", "logger": "django.request", "msg": "Unauthorized: /api/v1/access-gate/check", "request_id": "a5d45236-fab4-4a19-952c-95e1a3b42984"}
+[WebServer] {"ts": "2026-11-10T16:20:50.658+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "0f8f6f67-0b0f-4ec5-b520-d25fc59e898f", "event": "http_request", "method": "GET", "path": "/api/v1/health/live", "status": 200, "duration_ms": 0.9}
+[WebServer] [10/Nov/2026 19:50:50] "GET /api/v1/health/live HTTP/1.1" 200 15
+[WebServer] {"ts": "2026-11-10T16:20:50.676+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "8466b08e-d683-40e4-90e1-715434d24238", "event": "http_request", "method": "GET", "path": "/api/v1/version", "status": 200, "duration_ms": 0.6}
+[WebServer] [10/Nov/2026 19:50:50] "GET /api/v1/version HTTP/1.1" 200 103
+[WebServer] {"ts": "2026-11-10T16:20:50.741+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "221f18fb-8565-41f1-b986-86fb390f894b", "event": "http_request", "method": "GET", "path": "/api/v1/access-gate/check", "status": 401, "duration_ms": 15.1, "error_code": "AUTHENTICATION_REQUIRED"}
+[WebServer] {"ts": "2026-11-10T16:20:50.742+00:00", "level": "WARNING", "logger": "django.request", "msg": "Unauthorized: /api/v1/access-gate/check", "request_id": "221f18fb-8565-41f1-b986-86fb390f894b"}
+[WebServer] {"ts": "2026-11-10T16:20:50.748+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "81709f47-9f2c-4ab4-8c1b-cd36c3cdbe99", "event": "http_request", "method": "GET", "path": "/api/v1/health/ready", "status": 200, "duration_ms": 97.1}
+[WebServer] [10/Nov/2026 19:50:50] "GET /api/v1/health/ready HTTP/1.1" 200 170
+[WebServer] [10/Nov/2026 19:50:50] "GET /api/v1/access-gate/check?action=platform.status.view HTTP/1.1" 401 277
+[WebServer] {"ts": "2026-11-10T16:20:50.784+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "4fd709f7-8181-49c4-a829-a49137216da6", "event": "http_request", "method": "GET", "path": "/api/v1/auth/session", "status": 401, "duration_ms": 7.3, "error_code": "AUTHENTICATION_REQUIRED"}
+[WebServer] {"ts": "2026-11-10T16:20:50.785+00:00", "level": "WARNING", "logger": "django.request", "msg": "Unauthorized: /api/v1/auth/session", "request_id": "4fd709f7-8181-49c4-a829-a49137216da6"}
+[WebServer] [10/Nov/2026 19:50:50] "GET /api/v1/auth/session HTTP/1.1" 401 277
+  ok 14 [chromium] › e2e\system-status.spec.ts:67:3 › system status page - real backend › shows the real version and build commit returned by /api/v1/version (1.3s)
+[WebServer] {"ts": "2026-11-10T16:20:51.193+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "88dc3e71-48c4-425e-997a-0d9a2424a889", "event": "http_request", "method": "GET", "path": "/api/v1/health/ready", "status": 200, "duration_ms": 39.7}
+[WebServer] [10/Nov/2026 19:50:51] "GET /api/v1/health/ready HTTP/1.1" 200 170
+[WebServer] {"ts": "2026-11-10T16:20:51.857+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "e37d98a7-24cb-4f6e-ae56-d1938a40eed7", "event": "http_request", "method": "GET", "path": "/api/v1/health/live", "status": 200, "duration_ms": 2.4}
+[WebServer] {"ts": "2026-11-10T16:20:51.990+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "179688f2-c7a4-440d-87c2-c5602bb60259", "event": "http_request", "method": "GET", "path": "/api/v1/version", "status": 200, "duration_ms": 1.7}
+[WebServer] {"ts": "2026-11-10T16:20:52.035+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "416648ec-aaa0-4ee6-a3fb-4f1d3b8cf78d", "event": "http_request", "method": "GET", "path": "/api/v1/health/ready", "status": 200, "duration_ms": 226.4}
+[WebServer] {"ts": "2026-11-10T16:20:52.109+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "bf787cc5-d6a4-42f5-b7e0-a870d3739613", "event": "http_request", "method": "GET", "path": "/api/v1/access-gate/check", "status": 401, "duration_ms": 0.8, "error_code": "AUTHENTICATION_REQUIRED"}
+[WebServer] {"ts": "2026-11-10T16:20:52.110+00:00", "level": "WARNING", "logger": "django.request", "msg": "Unauthorized: /api/v1/access-gate/check", "request_id": "bf787cc5-d6a4-42f5-b7e0-a870d3739613"}
+[WebServer] {"ts": "2026-11-10T16:20:52.135+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "1edfcaa9-a3e8-49e1-b90c-fa7d77a7922e", "event": "http_request", "method": "GET", "path": "/api/v1/health/live", "status": 200, "duration_ms": 0.5}
+[WebServer] [10/Nov/2026 19:50:52] "GET /api/v1/health/live HTTP/1.1" 200 15
+[WebServer] {"ts": "2026-11-10T16:20:52.181+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "37c28280-8c6a-4431-b917-b6e9511d287a", "event": "http_request", "method": "GET", "path": "/api/v1/version", "status": 200, "duration_ms": 1.0}
+[WebServer] [10/Nov/2026 19:50:52] "GET /api/v1/version HTTP/1.1" 200 103
+[WebServer] {"ts": "2026-11-10T16:20:52.222+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "c5d77a49-e567-4dfb-929c-300ce260a49b", "event": "http_request", "method": "GET", "path": "/api/v1/health/ready", "status": 200, "duration_ms": 106.1}
+[WebServer] [10/Nov/2026 19:50:52] "GET /api/v1/health/ready HTTP/1.1" 200 170
+[WebServer] {"ts": "2026-11-10T16:20:52.281+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "2af1e772-6059-42dd-ae26-5ac3872c96cb", "event": "http_request", "method": "GET", "path": "/api/v1/access-gate/check", "status": 401, "duration_ms": 1.4, "error_code": "AUTHENTICATION_REQUIRED"}
+[WebServer] {"ts": "2026-11-10T16:20:52.282+00:00", "level": "WARNING", "logger": "django.request", "msg": "Unauthorized: /api/v1/access-gate/check", "request_id": "2af1e772-6059-42dd-ae26-5ac3872c96cb"}
+[WebServer] [10/Nov/2026 19:50:52] "GET /api/v1/access-gate/check?action=platform.status.view HTTP/1.1" 401 277
+[WebServer] {"ts": "2026-11-10T16:20:52.423+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "a83f2ad7-f38c-4843-9e32-e2a6b82037bf", "event": "http_request", "method": "GET", "path": "/api/v1/auth/session", "status": 401, "duration_ms": 1.7, "error_code": "AUTHENTICATION_REQUIRED"}
+[WebServer] {"ts": "2026-11-10T16:20:52.424+00:00", "level": "WARNING", "logger": "django.request", "msg": "Unauthorized: /api/v1/auth/session", "request_id": "a83f2ad7-f38c-4843-9e32-e2a6b82037bf"}
+[WebServer] [10/Nov/2026 19:50:52] "GET /api/v1/auth/session HTTP/1.1" 401 277
+  ok 15 [chromium] › e2e\system-status.spec.ts:83:3 › system status page - real backend › shows real readiness: ready, with database / migrations / cache up (1.6s)
+[WebServer] {"ts": "2026-11-10T16:20:52.859+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "73058f72-d981-4d97-8f8c-c795419c912c", "event": "http_request", "method": "GET", "path": "/api/v1/access-gate/check", "status": 401, "duration_ms": 0.8, "error_code": "AUTHENTICATION_REQUIRED"}
+[WebServer] {"ts": "2026-11-10T16:20:52.860+00:00", "level": "WARNING", "logger": "django.request", "msg": "Unauthorized: /api/v1/access-gate/check", "request_id": "73058f72-d981-4d97-8f8c-c795419c912c"}
+[WebServer] [10/Nov/2026 19:50:52] "GET /api/v1/access-gate/check?action=platform.status.view HTTP/1.1" 401 277
+[WebServer] {"ts": "2026-11-10T16:20:53.968+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "c98d0781-29cf-46aa-9724-851bff96d666", "event": "http_request", "method": "GET", "path": "/api/v1/health/live", "status": 200, "duration_ms": 0.6}
+[WebServer] {"ts": "2026-11-10T16:20:54.010+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "75123024-cd66-4acf-94fb-b1094efdcb69", "event": "http_request", "method": "GET", "path": "/api/v1/version", "status": 200, "duration_ms": 1.4}
+[WebServer] {"ts": "2026-11-10T16:20:54.079+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "e877dcdd-afd5-4d3b-b2e9-2fc4fa780787", "event": "http_request", "method": "GET", "path": "/api/v1/health/live", "status": 200, "duration_ms": 1.0}
+[WebServer] [10/Nov/2026 19:50:54] "GET /api/v1/health/live HTTP/1.1" 200 15
+[WebServer] {"ts": "2026-11-10T16:20:54.102+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "d57c720e-19c1-43e3-b228-46ae0068dcb4", "event": "http_request", "method": "GET", "path": "/api/v1/health/ready", "status": 200, "duration_ms": 297.1}
+[WebServer] {"ts": "2026-11-10T16:20:54.178+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "2b9b2a01-06dc-430f-8110-424a51116f72", "event": "http_request", "method": "GET", "path": "/api/v1/version", "status": 200, "duration_ms": 1.1}
+[WebServer] [10/Nov/2026 19:50:54] "GET /api/v1/version HTTP/1.1" 200 103
+[WebServer] {"ts": "2026-11-10T16:20:54.182+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "feab37a8-7982-4ea6-a5f8-082ee4ca83f9", "event": "http_request", "method": "GET", "path": "/api/v1/health/ready", "status": 200, "duration_ms": 146.0}
+[WebServer] [10/Nov/2026 19:50:54] "GET /api/v1/health/ready HTTP/1.1" 200 170
+[WebServer] {"ts": "2026-11-10T16:20:54.236+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "ab75e830-c0b8-486b-aa8a-cfe35d7c0240", "event": "http_request", "method": "GET", "path": "/api/v1/access-gate/check", "status": 401, "duration_ms": 1.5, "error_code": "AUTHENTICATION_REQUIRED"}
+[WebServer] {"ts": "2026-11-10T16:20:54.237+00:00", "level": "WARNING", "logger": "django.request", "msg": "Unauthorized: /api/v1/access-gate/check", "request_id": "ab75e830-c0b8-486b-aa8a-cfe35d7c0240"}
+[WebServer] [10/Nov/2026 19:50:54] "GET /api/v1/access-gate/check?action=platform.status.view HTTP/1.1" 401 277
+[WebServer] {"ts": "2026-11-10T16:20:54.358+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "94c5cf17-0d01-4785-bc4d-c9ddcd046f89", "event": "http_request", "method": "GET", "path": "/api/v1/auth/session", "status": 401, "duration_ms": 0.9, "error_code": "AUTHENTICATION_REQUIRED"}
+[WebServer] {"ts": "2026-11-10T16:20:54.358+00:00", "level": "WARNING", "logger": "django.request", "msg": "Unauthorized: /api/v1/auth/session", "request_id": "94c5cf17-0d01-4785-bc4d-c9ddcd046f89"}
+[WebServer] [10/Nov/2026 19:50:54] "GET /api/v1/auth/session HTTP/1.1" 401 277
+  ok 16 [chromium] › e2e\system-status.spec.ts:103:3 › system status page - real backend › real no-access state: access gate answers 401 problem with message_fa and request id (1.8s)
+[WebServer] {"ts": "2026-11-10T16:20:55.765+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "e5266eb8-f203-46c4-88ca-0869e5f5dca8", "event": "http_request", "method": "GET", "path": "/api/v1/health/live", "status": 200, "duration_ms": 1.4}
+[WebServer] {"ts": "2026-11-10T16:20:55.872+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "ee84520c-defb-4b3f-9c8e-01182467ac63", "event": "http_request", "method": "GET", "path": "/api/v1/version", "status": 200, "duration_ms": 0.6}
+[WebServer] {"ts": "2026-11-10T16:20:55.953+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "4a610d6a-7510-4558-be9a-a427b6eb9940", "event": "http_request", "method": "GET", "path": "/api/v1/access-gate/check", "status": 401, "duration_ms": 0.9, "error_code": "AUTHENTICATION_REQUIRED"}
+[WebServer] {"ts": "2026-11-10T16:20:55.954+00:00", "level": "WARNING", "logger": "django.request", "msg": "Unauthorized: /api/v1/access-gate/check", "request_id": "4a610d6a-7510-4558-be9a-a427b6eb9940"}
+[WebServer] {"ts": "2026-11-10T16:20:56.023+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "405ce6cb-d9d0-405f-8adc-11fc5043424b", "event": "http_request", "method": "GET", "path": "/api/v1/health/ready", "status": 200, "duration_ms": 314.8}
+[WebServer] {"ts": "2026-11-10T16:20:56.055+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "134e72fb-8ef0-4c2a-bcf8-46e3e47d974c", "event": "http_request", "method": "GET", "path": "/api/v1/health/live", "status": 200, "duration_ms": 2.3}
+[WebServer] [10/Nov/2026 19:50:56] "GET /api/v1/health/live HTTP/1.1" 200 15
+[WebServer] {"ts": "2026-11-10T16:20:56.120+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "22a59139-5a7a-4ce2-9d59-020dc930f800", "event": "http_request", "method": "GET", "path": "/api/v1/version", "status": 200, "duration_ms": 1.0}
+[WebServer] [10/Nov/2026 19:50:56] "GET /api/v1/version HTTP/1.1" 200 103
+[WebServer] {"ts": "2026-11-10T16:20:56.185+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "9d530efe-b29f-4266-a237-22e2787074b2", "event": "http_request", "method": "GET", "path": "/api/v1/access-gate/check", "status": 401, "duration_ms": 1.6, "error_code": "AUTHENTICATION_REQUIRED"}
+[WebServer] {"ts": "2026-11-10T16:20:56.186+00:00", "level": "WARNING", "logger": "django.request", "msg": "Unauthorized: /api/v1/access-gate/check", "request_id": "9d530efe-b29f-4266-a237-22e2787074b2"}
+[WebServer] [10/Nov/2026 19:50:56] "GET /api/v1/access-gate/check?action=platform.status.view HTTP/1.1" 401 277
+[WebServer] {"ts": "2026-11-10T16:20:56.211+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "7c39be21-8a61-4269-91e0-cc436569f592", "event": "http_request", "method": "GET", "path": "/api/v1/health/ready", "status": 200, "duration_ms": 198.6}
+[WebServer] [10/Nov/2026 19:50:56] "GET /api/v1/health/ready HTTP/1.1" 200 170
+[WebServer] {"ts": "2026-11-10T16:20:56.222+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "b24b9728-5c9c-4d63-abdc-8cb1b2e5f23d", "event": "http_request", "method": "GET", "path": "/api/v1/auth/session", "status": 401, "duration_ms": 1.3, "error_code": "AUTHENTICATION_REQUIRED"}
+[WebServer] {"ts": "2026-11-10T16:20:56.223+00:00", "level": "WARNING", "logger": "django.request", "msg": "Unauthorized: /api/v1/auth/session", "request_id": "b24b9728-5c9c-4d63-abdc-8cb1b2e5f23d"}
+[WebServer] [10/Nov/2026 19:50:56] "GET /api/v1/auth/session HTTP/1.1" 401 277
+[WebServer] {"ts": "2026-11-10T16:20:56.965+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "f95372aa-66d0-43bb-8bb5-796b90ed4764", "event": "http_request", "method": "GET", "path": "/api/v1/health/live", "status": 200, "duration_ms": 1.1}
+[WebServer] [10/Nov/2026 19:50:56] "GET /api/v1/health/live HTTP/1.1" 200 15
+[WebServer] {"ts": "2026-11-10T16:20:57.008+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "ee2914e7-e693-47be-8b2d-1abc3a7f5c08", "event": "http_request", "method": "GET", "path": "/api/v1/version", "status": 200, "duration_ms": 0.9}
+[WebServer] [10/Nov/2026 19:50:57] "GET /api/v1/version HTTP/1.1" 200 103
+[WebServer] {"ts": "2026-11-10T16:20:57.127+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "7c9f6070-ee4d-4d99-8d93-a1d9912722d9", "event": "http_request", "method": "GET", "path": "/api/v1/health/ready", "status": 200, "duration_ms": 170.2}
+[WebServer] [10/Nov/2026 19:50:57] "GET /api/v1/health/ready HTTP/1.1" 200 170
+[WebServer] {"ts": "2026-11-10T16:20:57.134+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "600a93cb-b73c-4206-b3f4-2d8fa21bdcc6", "event": "http_request", "method": "GET", "path": "/api/v1/access-gate/check", "status": 401, "duration_ms": 0.7, "error_code": "AUTHENTICATION_REQUIRED"}
+[WebServer] {"ts": "2026-11-10T16:20:57.135+00:00", "level": "WARNING", "logger": "django.request", "msg": "Unauthorized: /api/v1/access-gate/check", "request_id": "600a93cb-b73c-4206-b3f4-2d8fa21bdcc6"}
+[WebServer] [10/Nov/2026 19:50:57] "GET /api/v1/access-gate/check?action=platform.status.view HTTP/1.1" 401 277
+  ok 17 [chromium] › e2e\system-status.spec.ts:120:3 › system status page - real backend › keyboard: skip link, focus to main, refresh with Enter triggers a real re-check (2.8s)
+[WebServer] {"ts": "2026-11-10T16:20:58.506+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "4c8d0153-4215-48ab-89bc-f1565cc42d27", "event": "http_request", "method": "GET", "path": "/api/v1/health/live", "status": 200, "duration_ms": 0.7}
+[WebServer] {"ts": "2026-11-10T16:20:58.558+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "89b55622-19d3-4fe3-940e-3b1fb7434654", "event": "http_request", "method": "GET", "path": "/api/v1/version", "status": 200, "duration_ms": 0.5}
+[WebServer] {"ts": "2026-11-10T16:20:58.576+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "d6c8fb90-2fe2-43a8-a346-33ff6ae0d85c", "event": "http_request", "method": "GET", "path": "/api/v1/access-gate/check", "status": 401, "duration_ms": 0.6, "error_code": "AUTHENTICATION_REQUIRED"}
+[WebServer] {"ts": "2026-11-10T16:20:58.576+00:00", "level": "WARNING", "logger": "django.request", "msg": "Unauthorized: /api/v1/access-gate/check", "request_id": "d6c8fb90-2fe2-43a8-a346-33ff6ae0d85c"}
+[WebServer] {"ts": "2026-11-10T16:20:58.587+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "31bd9ce6-5bac-4588-b113-330800d1a830", "event": "http_request", "method": "GET", "path": "/api/v1/health/ready", "status": 200, "duration_ms": 125.5}
+[WebServer] {"ts": "2026-11-10T16:20:58.592+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "306ec91d-2f46-4fad-a626-39653c054826", "event": "http_request", "method": "GET", "path": "/api/v1/health/live", "status": 200, "duration_ms": 0.5}
+[WebServer] [10/Nov/2026 19:50:58] "GET /api/v1/health/live HTTP/1.1" 200 15
+[WebServer] {"ts": "2026-11-10T16:20:58.607+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "3251603d-b5c4-4644-8299-2eab64670298", "event": "http_request", "method": "GET", "path": "/api/v1/version", "status": 200, "duration_ms": 0.7}
+[WebServer] [10/Nov/2026 19:50:58] "GET /api/v1/version HTTP/1.1" 200 103
+[WebServer] {"ts": "2026-11-10T16:20:58.641+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "7cd3fb2c-1104-4c50-a2f6-12912d1543ca", "event": "http_request", "method": "GET", "path": "/api/v1/access-gate/check", "status": 401, "duration_ms": 1.8, "error_code": "AUTHENTICATION_REQUIRED"}
+[WebServer] {"ts": "2026-11-10T16:20:58.642+00:00", "level": "WARNING", "logger": "django.request", "msg": "Unauthorized: /api/v1/access-gate/check", "request_id": "7cd3fb2c-1104-4c50-a2f6-12912d1543ca"}
+[WebServer] [10/Nov/2026 19:50:58] "GET /api/v1/access-gate/check?action=platform.status.view HTTP/1.1" 401 277
+[WebServer] {"ts": "2026-11-10T16:20:58.676+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "229815e4-3810-43e0-a612-af4e02a6c4c4", "event": "http_request", "method": "GET", "path": "/api/v1/auth/session", "status": 401, "duration_ms": 2.9, "error_code": "AUTHENTICATION_REQUIRED"}
+[WebServer] {"ts": "2026-11-10T16:20:58.685+00:00", "level": "WARNING", "logger": "django.request", "msg": "Unauthorized: /api/v1/auth/session", "request_id": "229815e4-3810-43e0-a612-af4e02a6c4c4"}
+[WebServer] [10/Nov/2026 19:50:58] "GET /api/v1/auth/session HTTP/1.1" 401 277
+[WebServer] {"ts": "2026-11-10T16:20:58.693+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "2dd209f9-f2cc-4070-bd0f-532b9f809f64", "event": "http_request", "method": "GET", "path": "/api/v1/health/ready", "status": 200, "duration_ms": 103.4}
+[WebServer] [10/Nov/2026 19:50:58] "GET /api/v1/health/ready HTTP/1.1" 200 170
+  ok 18 [chromium] › e2e\system-status.spec.ts:141:3 › system status page - real backend › axe: no WCAG 2.1 A/AA violations (ready state) (2.3s)
+[WebServer] {"ts": "2026-11-10T16:21:00.310+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "49e03599-77db-4e5f-a7ed-ce266be06f83", "event": "http_request", "method": "GET", "path": "/api/v1/health/live", "status": 200, "duration_ms": 0.4}
+[WebServer] [10/Nov/2026 19:51:00] "GET /api/v1/health/live HTTP/1.1" 200 15
+[WebServer] {"ts": "2026-11-10T16:21:00.327+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "40ab6b85-a566-4544-b1cb-377fd8450607", "event": "http_request", "method": "GET", "path": "/api/v1/version", "status": 200, "duration_ms": 0.5}
+[WebServer] [10/Nov/2026 19:51:00] "GET /api/v1/version HTTP/1.1" 200 103
+[WebServer] {"ts": "2026-11-10T16:21:00.335+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "bad44632-9cdb-464c-9aef-2f7de6f209a6", "event": "http_request", "method": "GET", "path": "/api/v1/access-gate/check", "status": 401, "duration_ms": 0.7, "error_code": "AUTHENTICATION_REQUIRED"}
+[WebServer] {"ts": "2026-11-10T16:21:00.339+00:00", "level": "WARNING", "logger": "django.request", "msg": "Unauthorized: /api/v1/access-gate/check", "request_id": "bad44632-9cdb-464c-9aef-2f7de6f209a6"}
+[WebServer] [10/Nov/2026 19:51:00] "GET /api/v1/access-gate/check?action=platform.status.view HTTP/1.1" 401 277
+[WebServer] {"ts": "2026-11-10T16:21:00.342+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "88cb59f6-207b-4be0-92b6-eb3d3a6f498c", "event": "http_request", "method": "GET", "path": "/api/v1/health/live", "status": 200, "duration_ms": 0.4}
+[WebServer] [10/Nov/2026 19:51:00] "GET /api/v1/health/live HTTP/1.1" 200 15
+[WebServer] {"ts": "2026-11-10T16:21:00.350+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "8d03ca81-4dcb-4ac2-8487-b088f63d911f", "event": "http_request", "method": "GET", "path": "/api/v1/version", "status": 200, "duration_ms": 0.6}
+[WebServer] [10/Nov/2026 19:51:00] "GET /api/v1/version HTTP/1.1" 200 103
+[WebServer] {"ts": "2026-11-10T16:21:00.368+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "d753cd60-703c-4fde-a4e0-e2f27b77657f", "event": "http_request", "method": "GET", "path": "/api/v1/health/ready", "status": 200, "duration_ms": 78.9}
+[WebServer] {"ts": "2026-11-10T16:21:00.437+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "f6476fa9-e458-42d7-af04-a6dcc4be40ce", "event": "http_request", "method": "GET", "path": "/api/v1/access-gate/check", "status": 401, "duration_ms": 4.7, "error_code": "AUTHENTICATION_REQUIRED"}
+[WebServer] {"ts": "2026-11-10T16:21:00.438+00:00", "level": "WARNING", "logger": "django.request", "msg": "Unauthorized: /api/v1/access-gate/check", "request_id": "f6476fa9-e458-42d7-af04-a6dcc4be40ce"}
+[WebServer] [10/Nov/2026 19:51:00] "GET /api/v1/access-gate/check?action=platform.status.view HTTP/1.1" 401 277
+[WebServer] {"ts": "2026-11-10T16:21:00.507+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "9e9d1180-4b28-476b-812c-1131c68f619e", "event": "http_request", "method": "GET", "path": "/api/v1/auth/session", "status": 401, "duration_ms": 0.7, "error_code": "AUTHENTICATION_REQUIRED"}
+[WebServer] {"ts": "2026-11-10T16:21:00.507+00:00", "level": "WARNING", "logger": "django.request", "msg": "Unauthorized: /api/v1/auth/session", "request_id": "9e9d1180-4b28-476b-812c-1131c68f619e"}
+[WebServer] [10/Nov/2026 19:51:00] "GET /api/v1/auth/session HTTP/1.1" 401 277
+[WebServer] {"ts": "2026-11-10T16:21:00.563+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "07689ca7-74d6-4d9a-bfb4-bae3df273189", "event": "http_request", "method": "GET", "path": "/api/v1/health/ready", "status": 200, "duration_ms": 226.2}
+[WebServer] [10/Nov/2026 19:51:00] "GET /api/v1/health/ready HTTP/1.1" 200 170
+  ok 19 [chromium] › e2e\system-status.spec.ts:147:3 › system status page - real backend › screenshots at 1440 / 1180 / 768 / 390 (real data) (2.0s)
+[WebServer] {"ts": "2026-11-10T16:21:03.143+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "37e7735d-544d-4930-95c8-2f2b447bdfb4", "event": "http_request", "method": "GET", "path": "/api/v1/health/live", "status": 200, "duration_ms": 0.9}
+[WebServer] {"ts": "2026-11-10T16:21:03.212+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "3a45dfb2-ebd8-4656-ade6-8f0e16d548a9", "event": "http_request", "method": "GET", "path": "/api/v1/version", "status": 200, "duration_ms": 1.5}
+[WebServer] {"ts": "2026-11-10T16:21:03.224+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "940746ab-20a5-4318-82aa-82ec13b631bd", "event": "http_request", "method": "GET", "path": "/api/v1/access-gate/check", "status": 401, "duration_ms": 0.7, "error_code": "AUTHENTICATION_REQUIRED"}
+[WebServer] {"ts": "2026-11-10T16:21:03.224+00:00", "level": "WARNING", "logger": "django.request", "msg": "Unauthorized: /api/v1/access-gate/check", "request_id": "940746ab-20a5-4318-82aa-82ec13b631bd"}
+[WebServer] {"ts": "2026-11-10T16:21:03.226+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "8c6757db-b628-4d7d-848f-87ff0fdca942", "event": "http_request", "method": "GET", "path": "/api/v1/health/live", "status": 200, "duration_ms": 0.5}
+[WebServer] [10/Nov/2026 19:51:03] "GET /api/v1/health/live HTTP/1.1" 200 15
+[WebServer] {"ts": "2026-11-10T16:21:03.236+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "a80a3700-ca09-4f31-adc1-064c87f910b7", "event": "http_request", "method": "GET", "path": "/api/v1/version", "status": 200, "duration_ms": 8.8}
+[WebServer] [10/Nov/2026 19:51:03] "GET /api/v1/version HTTP/1.1" 200 103
+[WebServer] {"ts": "2026-11-10T16:21:03.310+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "29f359e5-c1bd-4b8e-8ffc-dc577491b943", "event": "http_request", "method": "GET", "path": "/api/v1/access-gate/check", "status": 401, "duration_ms": 1.0, "error_code": "AUTHENTICATION_REQUIRED"}
+[WebServer] {"ts": "2026-11-10T16:21:03.310+00:00", "level": "WARNING", "logger": "django.request", "msg": "Unauthorized: /api/v1/access-gate/check", "request_id": "29f359e5-c1bd-4b8e-8ffc-dc577491b943"}
+[WebServer] [10/Nov/2026 19:51:03] "GET /api/v1/access-gate/check?action=platform.status.view HTTP/1.1" 401 277
+[WebServer] {"ts": "2026-11-10T16:21:03.379+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "c2f56f5f-bdc6-4459-9811-4dabfd834b1a", "event": "http_request", "method": "GET", "path": "/api/v1/__e2e_unknown_route__", "status": 404, "duration_ms": 1.4, "error_code": "NOT_FOUND"}
+[WebServer] {"ts": "2026-11-10T16:21:03.379+00:00", "level": "WARNING", "logger": "django.request", "msg": "Not Found: /api/v1/__e2e_unknown_route__", "request_id": "c2f56f5f-bdc6-4459-9811-4dabfd834b1a"}
+[WebServer] [10/Nov/2026 19:51:03] "GET /api/v1/__e2e_unknown_route__ HTTP/1.1" 404 225
+[WebServer] {"ts": "2026-11-10T16:21:03.457+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "327fdd59-7a4d-4791-965b-55153957c259", "event": "http_request", "method": "GET", "path": "/api/v1/__e2e_unknown_route__", "status": 404, "duration_ms": 0.5, "error_code": "NOT_FOUND"}
+[WebServer] {"ts": "2026-11-10T16:21:03.458+00:00", "level": "WARNING", "logger": "django.request", "msg": "Not Found: /api/v1/__e2e_unknown_route__", "request_id": "327fdd59-7a4d-4791-965b-55153957c259"}
+[WebServer] [10/Nov/2026 19:51:03] "GET /api/v1/__e2e_unknown_route__ HTTP/1.1" 404 225
+[WebServer] {"ts": "2026-11-10T16:21:03.520+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "ff972afb-0618-41a3-ae68-0f3b460d75bb", "event": "http_request", "method": "GET", "path": "/api/v1/auth/session", "status": 401, "duration_ms": 0.6, "error_code": "AUTHENTICATION_REQUIRED"}
+[WebServer] {"ts": "2026-11-10T16:21:03.520+00:00", "level": "WARNING", "logger": "django.request", "msg": "Unauthorized: /api/v1/auth/session", "request_id": "ff972afb-0618-41a3-ae68-0f3b460d75bb"}
+[WebServer] [10/Nov/2026 19:51:03] "GET /api/v1/auth/session HTTP/1.1" 401 277
+[WebServer] {"ts": "2026-11-10T16:21:05.521+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "a610ac8e-6899-4bf3-9699-a9bb4f231716", "event": "http_request", "method": "GET", "path": "/api/v1/health/ready", "status": 200, "duration_ms": 56.4}
+[WebServer] [10/Nov/2026 19:51:05] "GET /api/v1/health/ready HTTP/1.1" 200 170
+  ok 20 [chromium] › e2e\system-status.spec.ts:175:3 › system status page - [simulated failure] states (network interception) › [simulated failure] readiness routed to a real backend 404 problem shows message_fa + request_id (4.0s)
+[WebServer] {"ts": "2026-11-10T16:21:06.451+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "e9398138-98e7-40d1-b634-50388f3156d9", "event": "http_request", "method": "GET", "path": "/api/v1/health/live", "status": 200, "duration_ms": 0.5}
+[WebServer] {"ts": "2026-11-10T16:21:06.499+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "b8050f79-81b3-49f6-95dd-ef799d77aa19", "event": "http_request", "method": "GET", "path": "/api/v1/version", "status": 200, "duration_ms": 0.6}
+[WebServer] {"ts": "2026-11-10T16:21:06.557+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "e252d291-273a-4fae-aef6-8ddfe481735d", "event": "http_request", "method": "GET", "path": "/api/v1/access-gate/check", "status": 401, "duration_ms": 0.6, "error_code": "AUTHENTICATION_REQUIRED"}
+[WebServer] {"ts": "2026-11-10T16:21:06.557+00:00", "level": "WARNING", "logger": "django.request", "msg": "Unauthorized: /api/v1/access-gate/check", "request_id": "e252d291-273a-4fae-aef6-8ddfe481735d"}
+[WebServer] {"ts": "2026-11-10T16:21:06.592+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "c6cf7a49-91d1-4f49-9f76-260a8a629a8d", "event": "http_request", "method": "GET", "path": "/api/v1/health/ready", "status": 200, "duration_ms": 150.2}
+[WebServer] {"ts": "2026-11-10T16:21:06.594+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "b210bd2d-94e3-4453-bdf4-46112dfa4eb7", "event": "http_request", "method": "GET", "path": "/api/v1/health/live", "status": 200, "duration_ms": 0.6}
+[WebServer] [10/Nov/2026 19:51:06] "GET /api/v1/health/live HTTP/1.1" 200 15
+[WebServer] {"ts": "2026-11-10T16:21:06.621+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "a5d41d17-2361-4dac-9d7a-0a34b9fad29f", "event": "http_request", "method": "GET", "path": "/api/v1/version", "status": 200, "duration_ms": 0.8}
+[WebServer] [10/Nov/2026 19:51:06] "GET /api/v1/version HTTP/1.1" 200 103
+[WebServer] {"ts": "2026-11-10T16:21:06.651+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "67d92e55-241b-451a-ab41-2561d73fc244", "event": "http_request", "method": "GET", "path": "/api/v1/health/ready", "status": 200, "duration_ms": 78.2}
+[WebServer] [10/Nov/2026 19:51:06] "GET /api/v1/health/ready HTTP/1.1" 200 170
+[WebServer] {"ts": "2026-11-10T16:21:06.666+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "f23dda4f-9126-4383-9051-8e36a5cd58a4", "event": "http_request", "method": "GET", "path": "/api/v1/access-gate/check", "status": 401, "duration_ms": 0.7, "error_code": "AUTHENTICATION_REQUIRED"}
+[WebServer] {"ts": "2026-11-10T16:21:06.667+00:00", "level": "WARNING", "logger": "django.request", "msg": "Unauthorized: /api/v1/access-gate/check", "request_id": "f23dda4f-9126-4383-9051-8e36a5cd58a4"}
+[WebServer] [10/Nov/2026 19:51:06] "GET /api/v1/access-gate/check?action=platform.status.view HTTP/1.1" 401 277
+[WebServer] {"ts": "2026-11-10T16:21:06.690+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "a281c08d-95d5-4686-9f4d-5e3b7a150dcd", "event": "http_request", "method": "GET", "path": "/api/v1/auth/session", "status": 401, "duration_ms": 12.9, "error_code": "AUTHENTICATION_REQUIRED"}
+[WebServer] {"ts": "2026-11-10T16:21:06.691+00:00", "level": "WARNING", "logger": "django.request", "msg": "Unauthorized: /api/v1/auth/session", "request_id": "a281c08d-95d5-4686-9f4d-5e3b7a150dcd"}
+[WebServer] [10/Nov/2026 19:51:06] "GET /api/v1/auth/session HTTP/1.1" 401 277
+[WebServer] {"ts": "2026-11-10T16:21:06.808+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "75294caa-4998-4c33-b845-c47430ba7deb", "event": "http_request", "method": "GET", "path": "/api/v1/health/live", "status": 200, "duration_ms": 0.5}
+[WebServer] [10/Nov/2026 19:51:06] "GET /api/v1/health/live HTTP/1.1" 200 15
+[WebServer] {"ts": "2026-11-10T16:21:06.835+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "588d5e21-b885-466f-ac0a-bf5bb9c44c5c", "event": "http_request", "method": "GET", "path": "/api/v1/version", "status": 200, "duration_ms": 5.4}
+[WebServer] [10/Nov/2026 19:51:06] "GET /api/v1/version HTTP/1.1" 200 103
+[WebServer] {"ts": "2026-11-10T16:21:06.894+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "108d7e4f-de23-4716-b3be-eba5b0c0b397", "event": "http_request", "method": "GET", "path": "/api/v1/access-gate/check", "status": 401, "duration_ms": 0.9, "error_code": "AUTHENTICATION_REQUIRED"}
+[WebServer] {"ts": "2026-11-10T16:21:06.895+00:00", "level": "WARNING", "logger": "django.request", "msg": "Unauthorized: /api/v1/access-gate/check", "request_id": "108d7e4f-de23-4716-b3be-eba5b0c0b397"}
+[WebServer] [10/Nov/2026 19:51:06] "GET /api/v1/access-gate/check?action=platform.status.view HTTP/1.1" 401 277
+  ok 21 [chromium] › e2e\system-status.spec.ts:207:3 › system status page - [simulated failure] states (network interception) › [simulated failure] refresh fails after real data: last data kept and flagged stale (1.5s)
+[WebServer] {"ts": "2026-11-10T16:21:08.119+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "22496d32-fd28-4286-aa8d-434d53ab8cd6", "event": "http_request", "method": "GET", "path": "/api/v1/health/live", "status": 200, "duration_ms": 11.5}
+[WebServer] {"ts": "2026-11-10T16:21:08.224+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "8a1f9801-739c-41d2-8daf-3cc90ffa8af3", "event": "http_request", "method": "GET", "path": "/api/v1/version", "status": 200, "duration_ms": 0.6}
+[WebServer] {"ts": "2026-11-10T16:21:08.276+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "26f0b641-92c3-469f-a30e-f6e03f736319", "event": "http_request", "method": "GET", "path": "/api/v1/health/ready", "status": 200, "duration_ms": 222.1}
+[WebServer] {"ts": "2026-11-10T16:21:08.308+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "72a3f762-c40a-4731-a24a-7a68278fcc5d", "event": "http_request", "method": "GET", "path": "/api/v1/access-gate/check", "status": 401, "duration_ms": 0.8, "error_code": "AUTHENTICATION_REQUIRED"}
+[WebServer] {"ts": "2026-11-10T16:21:08.308+00:00", "level": "WARNING", "logger": "django.request", "msg": "Unauthorized: /api/v1/access-gate/check", "request_id": "72a3f762-c40a-4731-a24a-7a68278fcc5d"}
+[WebServer] {"ts": "2026-11-10T16:21:08.407+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "12774b08-b27e-4c30-928c-30521248a468", "event": "http_request", "method": "GET", "path": "/api/v1/health/live", "status": 200, "duration_ms": 3.4}
+[WebServer] [10/Nov/2026 19:51:08] "GET /api/v1/health/live HTTP/1.1" 200 15
+[WebServer] {"ts": "2026-11-10T16:21:08.442+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "fe2b81ec-5d3e-4b39-ae46-78f3f83a7071", "event": "http_request", "method": "GET", "path": "/api/v1/version", "status": 200, "duration_ms": 0.9}
+[WebServer] [10/Nov/2026 19:51:08] "GET /api/v1/version HTTP/1.1" 200 103
+[WebServer] {"ts": "2026-11-10T16:21:08.514+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "f7fc4a26-bfc3-4cfe-8bc8-7305e5baa12f", "event": "http_request", "method": "GET", "path": "/api/v1/health/ready", "status": 200, "duration_ms": 157.2}
+[WebServer] [10/Nov/2026 19:51:08] "GET /api/v1/health/ready HTTP/1.1" 200 170
+[WebServer] {"ts": "2026-11-10T16:21:08.534+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "e78daab5-0577-4619-9295-2766dd3c2d65", "event": "http_request", "method": "GET", "path": "/api/v1/access-gate/check", "status": 401, "duration_ms": 2.1, "error_code": "AUTHENTICATION_REQUIRED"}
+[WebServer] {"ts": "2026-11-10T16:21:08.535+00:00", "level": "WARNING", "logger": "django.request", "msg": "Unauthorized: /api/v1/access-gate/check", "request_id": "e78daab5-0577-4619-9295-2766dd3c2d65"}
+[WebServer] [10/Nov/2026 19:51:08] "GET /api/v1/access-gate/check?action=platform.status.view HTTP/1.1" 401 277
+[WebServer] {"ts": "2026-11-10T16:21:08.618+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "e76e0e09-d0ce-437e-94fa-8211f45dc99f", "event": "http_request", "method": "GET", "path": "/api/v1/auth/session", "status": 401, "duration_ms": 0.8, "error_code": "AUTHENTICATION_REQUIRED"}
+[WebServer] {"ts": "2026-11-10T16:21:08.618+00:00", "level": "WARNING", "logger": "django.request", "msg": "Unauthorized: /api/v1/auth/session", "request_id": "e76e0e09-d0ce-437e-94fa-8211f45dc99f"}
+[WebServer] [10/Nov/2026 19:51:08] "GET /api/v1/auth/session HTTP/1.1" 401 277
+[WebServer] {"ts": "2026-11-10T16:21:08.701+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "b622e406-4b09-4fcb-8795-2e186e9af14e", "event": "http_request", "method": "GET", "path": "/api/v1/health/live", "status": 200, "duration_ms": 1.1}
+[WebServer] [10/Nov/2026 19:51:08] "GET /api/v1/health/live HTTP/1.1" 200 15
+  ok 22 [chromium] › e2e\system-status.spec.ts:227:3 › system status page - [simulated failure] states (network interception) › [simulated failure] no answer for longer than the freshness window: stale by age (1.7s)
+[WebServer] {"ts": "2026-11-10T16:21:08.885+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "a27bb3fe-0484-44d2-8f3a-96b162e94175", "event": "http_request", "method": "GET", "path": "/api/v1/health/ready", "status": 200, "duration_ms": 102.3}
+
+  22 passed (2.3m)
+== playwright: backend stopped (E2E_MODE=backend-down)
+
+Running 1 test using 1 worker
+
+[WebServer] 7:51:19 PM [vite] http proxy error: /api/v1/health/ready
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:8000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:2017:16)
+[WebServer] 7:51:19 PM [vite] http proxy error: /api/v1/health/live
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:8000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:2017:16)
+[WebServer] 7:51:19 PM [vite] http proxy error: /api/v1/version
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:8000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:2017:16)
+[WebServer] 7:51:19 PM [vite] http proxy error: /api/v1/access-gate/check?action=platform.status.view
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:8000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:2017:16)
+[WebServer] 7:51:19 PM [vite] http proxy error: /api/v1/health/ready
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:8000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:2017:16)
+[WebServer] 7:51:19 PM [vite] http proxy error: /api/v1/health/live
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:8000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:2017:16)
+[WebServer] 7:51:19 PM [vite] http proxy error: /api/v1/auth/session
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:8000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:2017:16)
+[WebServer] 7:51:19 PM [vite] http proxy error: /api/v1/access-gate/check?action=platform.status.view
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:8000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:2017:16)
+[WebServer] 7:51:19 PM [vite] http proxy error: /api/v1/version
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:8000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:2017:16)
+  ok 1 [chromium] › e2e\system-status.spec.ts:243:3 › system status page - backend stopped › real failure: Django is not running, the page shows the network error state @backend-down (2.9s)
+
+  1 passed (6.8s)
+== results: real-backend rc=0, backend-down rc=0
+== drop throw-away database test_aleekhan_e2e_017

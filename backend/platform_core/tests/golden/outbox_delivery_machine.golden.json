@@ -1,12 +1,13 @@
 {
-  "_note": "Golden snapshot of the outbox delivery state machine (docs/discovery/STATE_TRANSITIONS.md 1.1). Change only together with that document.",
+  "_note": "Golden snapshot of the outbox delivery state machine (docs/discovery/STATE_TRANSITIONS.md 1.1). Change only together with that document. 01.7 (REV-0129): DEAD_LETTER -> DISCARDED (terminal, owner only, console, audited).",
   "name": "platform.outbox.delivery",
   "transitions": {
     "ACKED": [],
-    "DEAD_LETTER": ["PENDING"],
+    "DEAD_LETTER": ["DISCARDED", "PENDING"],
+    "DISCARDED": [],
     "DISPATCHED": ["ACKED", "FAILED"],
     "FAILED": ["DEAD_LETTER", "PENDING"],
     "PENDING": ["DISPATCHED", "FAILED"]
   },
-  "terminal_states": ["ACKED"]
+  "terminal_states": ["ACKED", "DISCARDED"]
 }

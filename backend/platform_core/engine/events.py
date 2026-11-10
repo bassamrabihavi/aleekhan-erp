@@ -43,7 +43,7 @@ from .errors import EngineContractError
 SOURCE_SYSTEM: Final = "aleekhan-erp"
 # Newest platform_core migration this code was written for (provenance of every outbox row). Pinned to the
 # leaf of the migration graph by test_integration_events.py::test_schema_migration_head_is_the_graph_leaf.
-SCHEMA_MIGRATION_HEAD: Final = "platform_core.0016_outbox_provenance_and_order"
+SCHEMA_MIGRATION_HEAD: Final = "platform_core.0018_outbox_discard_and_orphan_job"
 SYNTHETIC_TEST_PREFIX: Final = "platform.synthetic."
 
 _UUID_RE = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")

@@ -205,7 +205,7 @@ def force_kill(caller: Caller, run_id: uuid.UUID, *, reason: str) -> None:
 
 # --------------------------------------------------------------------------------------- housekeeping
 def _housekeeping() -> dict[str, Callable[[], int]]:
-    from platform_core.documents.service import purge_rejected, scan_pending
+    from platform_core.documents.service import purge_orphans, purge_rejected, scan_pending
     from platform_core.identity.roles import expire_due_assignments
     from platform_core.identity.sessions import expire_due_sessions
     from platform_core.workflow.approvals import expire_due
@@ -220,6 +220,7 @@ def _housekeeping() -> dict[str, Callable[[], int]]:
         "document_rejected_purge": purge_rejected,
         "login_event_retention_purge": purge_login_events,
         "audit_integrity_check": run_audit_integrity,
+        "document_orphan_cleanup": purge_orphans,  # 01.7 (migration 0018)
     }
 
 
@@ -231,6 +232,7 @@ HOUSEKEEPING_TYPES: Final = (
     "document_rejected_purge",
     "login_event_retention_purge",
     "audit_integrity_check",
+    "document_orphan_cleanup",
 )
 
 

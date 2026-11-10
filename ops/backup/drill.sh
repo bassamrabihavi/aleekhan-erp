@@ -28,7 +28,7 @@ PG_DUMP="${PG_BIN:+$PG_BIN/}pg_dump"
 PG_RESTORE="${PG_BIN:+$PG_BIN/}pg_restore"
 PREFIX="${DRILL_PREFIX:-aleekhan_drill}"
 ROWS="${DRILL_ROWS:-500}"
-case "$PREFIX" in aleekhan_drill*) ;; *) echo "DRILL_PREFIX must start with aleekhan_drill" >&2; exit 2 ;; esac
+case "$PREFIX" in aleekhan_drill*|test_aleekhan_drill*) ;; *) echo "DRILL_PREFIX must start with aleekhan_drill or test_aleekhan_drill" >&2; exit 2 ;; esac
 case "$PREFIX$ROWS" in *[!a-z0-9_]*) echo "DRILL_PREFIX/DRILL_ROWS: [a-z0-9_] only" >&2; exit 2 ;; esac
 SRC="${PREFIX}_src"
 DST="${PREFIX}_restored"
@@ -144,6 +144,13 @@ if printf '%s' "$err" | grep -q "append-only"; then check "audit append-only tri
 labelled="$(admin -d "$DST" -c "SELECT count(*) FROM platform_outbox_event WHERE payload->>'label' = 'synthetic_drill'")"
 if [ "$labelled" = "$ROWS" ]; then check "synthetic labelled outbox rows restored ($labelled)" PASS; else check "synthetic labelled outbox rows restored" FAIL "found $labelled"; fi
 if manage "$DST" outbox_status --json > "$WORK/outbox.json" 2>/dev/null; then check "application reads restored DB (outbox_status)" PASS; else check "application reads restored DB (outbox_status)" FAIL; fi
+# PHASE_01 / 01.7: the PHASE_01 tables, migrations 0011-0018 and the audit hash chain survive dump + restore
+p01="$(admin -d "$DST" -c "SELECT (SELECT count(*) FROM platform_user WHERE username LIKE 'syn.drill.%') * (SELECT count(*) FROM platform_org_unit WHERE code LIKE 'syn_drill_%') * (SELECT count(*) FROM platform_role_assignment WHERE reason = 'synthetic_drill') * (SELECT count(*) FROM platform_work_task) * (SELECT count(*) FROM platform_approval_request) * (SELECT count(*) FROM platform_document_revision) * (SELECT count(*) FROM platform_job_run WHERE state = 'SUCCEEDED') * (SELECT count(*) FROM platform_outbox_event WHERE delivery_status = 'DISCARDED')")"
+if [ -n "$p01" ] && [ "$p01" -gt 0 ]; then check "PHASE_01 rows restored (user, org unit, role assignment, task, approval, document revision, job runs, DISCARDED event)" PASS; else check "PHASE_01 rows restored" FAIL "product=$p01"; fi
+m01="$(admin -d "$DST" -c "SELECT count(*) FROM django_migrations WHERE app = 'platform_core' AND name ~ '^001[1-8]_'")"
+if [ "$m01" = "8" ]; then check "migrations 0011-0018 recorded in the restored DB" PASS; else check "migrations 0011-0018 recorded in the restored DB" FAIL "found $m01"; fi
+if manage "$DST" shell -c "import sys; from platform_core.engine import audit_chain as ac; r = ac.check_chain(); sys.exit(0 if r.first_broken is None and r.checked > 0 else 1)" >/dev/null 2>&1; then check "audit hash chain verifies after restore" PASS; else check "audit hash chain verifies after restore" FAIL; fi
+if manage "$DST" job_status --json > "$WORK/jobs.json" 2>/dev/null; then check "application reads restored DB (job_status)" PASS; else check "application reads restored DB (job_status)" FAIL; fi
 T5="$(ms)"
 
 [ "$FAILS" -eq 0 ] && STATUS="PASS"

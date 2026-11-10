@@ -1,0 +1,94 @@
+{
+ "phase": "PHASE_01",
+ "step": "01.7",
+ "commit_sha": "PENDING",
+ "status": "COMPLETE",
+ "scope": [
+  "Secret scan (tracked + untracked + full git history: findings=0) and dependency scan (pip-audit runtime lock: no known vulnerabilities; npm audit --omit=dev: 0 vulnerabilities; informational dev-venv pip-audit NOT performed - network unavailable after retries, stated as such)",
+  "Privacy / permission tests driven by the approved matrix v1.3 and the OpenAPI contract (tests/test_phase01_step7_privacy.py): 11 roles x 86 PHASE_01 operations with a permission -> 403 where the matrix grants nothing; every MFA-flagged operation x every holder role -> 401 MFA_REQUIRED without a fresh step-up; document sensitivity caps (EMP S1, MGR/MGT S2) -> 404 above the cap on every document read/download operation and absent from lists; no never-exposed field name or value in any GET response; no plaintext password / one-time password / TOTP secret / OTP / recovery code / session token in any row of any platform_* table or any log record after a full ceremony",
+  "Perf evidence (pytest -m perf, real PostgreSQL 17.9, machine work-windows; TECHNICAL DEFAULT budgets): inboxes at the 1000-row per-record check limit, audit chain lock throughput with 1/4/8 concurrent writers (chain contiguous + verified), outbox dispatch of 2000 events over 50 aggregates with 1/4 dispatchers. Finding fixed: grants and scope facts were reloaded per row; authz.policy.request_cache (per list request) cut the 1000-row inbox p95 from 7.5 s / 9.0 s to 2.6 s / 2.2 s",
+  "Backup / restore drill now covers the PHASE_01 tables, migrations 0011-0018 and the audit hash chain (test_aleekhan_drill_* databases); rollback rehearsal to 0010 with data (ops/backup/rollback_rehearsal.sh): scenario A down to 0010 and forward, schema diffs empty; scenario B shows the 0011 reverse refuses by design while housekeeping job runs exist and leaves a consistent state",
+  "Job monitoring: ops.monitoring.housekeeping_health (overdue = no success in 26 h TECHNICAL DEFAULT, failing = newest finished run FAILED), manage.py job_status [--json] [--fail-on warn], manage.py run_housekeeping <type>|--all, GET /admin/health jobs.housekeeping + jobs.housekeeping_alerts (contract 0.6.3-draft, additive), page 36 block",
+  "Orphan upload cleanup job document_orphan_cleanup (migration 0018): bytes without a stored-object row and stale .part files older than 24 h, only storage-module names, row re-checked in the unit of work, audited per file, delete after commit, idempotent",
+  "REV-0124: UploadSizeLimitMiddleware answers 413 PAYLOAD_TOO_LARGE from Content-Length before any byte of a multipart body is parsed (the session CSRF check would otherwise parse and spool it); proxy limits documented in docs/ops/DEPLOYMENT_LIMITS.md",
+  "Security checklist docs/security/PHASE_01_SECURITY_CHECKLIST.md (status + evidence per item; signature rows left empty); item 2.3 (.env.example) closed: the file was readable and the test passes without a skip",
+  "Carried: DEC-056 extension 2 (matrix v1.3, migration 0017): owner_admin holds platform.document.read and platform.document.download (SCOPE, no cap); not business-approval permissions, so the DB guard exception is unchanged; matrix doc v1.3, permission golden (2 cells), service + HTTP tests, E2E (owner opens the document detail and downloads the clean file before deciding), UAT 3.11",
+  "Carried REV-0129: terminal outbox state DISCARDED (migration 0018) - owner only, server console (manage.py outbox_dead_letter list|replay|discard), reason required, audited; a discarded event is settled and releases later events of its aggregate; replay from the console is owner-only too",
+  "Carried REV-0130: integration.blocked_aggregates counts only aggregates with events waiting behind a dead letter (= the OpenAPI description)",
+  "Carried REV-0131: page 36 says «رویداد شکست‌خورده نهایی» instead of 'dead letter' (technical term only in a tooltip); vitest + E2E text assertions",
+  "Parameters page: the publish button is hidden for a caller who holds publish only through owner_admin on a TECHNICAL value (server already 403); AuthState.rolesFor from GET /me/permissions via_role"
+ ],
+ "changes": [
+  "backend/platform_core/migrations/0017_dec056_matrix_v13.py (new)",
+  "backend/platform_core/migrations/0018_outbox_discard_and_orphan_job.py (new)",
+  "backend/platform_core/models.py (DeliveryStatus.DISCARDED, discarded_at, CHECK ck_outbox_event_discarded_has_ts, ordering index without settled rows)",
+  "backend/platform_core/engine/outbox.py (DEAD_LETTER -> DISCARDED, SETTLED, discard_dead_letter)",
+  "backend/platform_core/engine/events.py (SCHEMA_MIGRATION_HEAD 0018)",
+  "backend/platform_core/ops/dead_letters.py (new), backend/platform_core/ops/monitoring.py (REV-0130, housekeeping_health)",
+  "backend/platform_core/management/commands/outbox_dead_letter.py, job_status.py, run_housekeeping.py (new)",
+  "backend/platform_core/documents/storage.py (scan_files, delete_file), backend/platform_core/documents/service.py (purge_orphans), backend/platform_core/jobs/service.py (document_orphan_cleanup)",
+  "backend/platform_core/api/upload_limit.py (new), backend/aleekhan/settings.py (middleware)",
+  "backend/platform_core/authz/policy.py (request_cache), backend/platform_core/api/phase01/common.py (paginate_filtered uses it), backend/platform_core/api/phase01/ops_views.py (jobs.housekeeping), backend/platform_core/api/views.py (CONTRACT_VERSION 0.6.3-draft), backend/platform_core/identity/roles.py (matrix v1.3)",
+  "backend/platform_core/tests/: new test_phase01_step7_privacy.py, test_phase01_step7_ops.py, test_phase01_step7_dec056_v13.py, test_perf_phase01.py; updated engine_fixtures.py, golden/permission_decisions.golden.json, golden/outbox_delivery_machine.golden.json, golden/event_catalogue.golden.json (migration head), test_phase01_schema.py, test_phase01_step5_backend.py",
+  "ops/backup/drill.sh, ops/backup/drill_seed.py (PHASE_01 rows, test_ prefix), ops/backup/rollback_rehearsal.sh (new)",
+  "frontend/src/pages/OpsPage.tsx, frontend/src/pages/ParametersPage.tsx, frontend/src/auth/AuthContext.tsx, frontend/src/auth/context.ts, frontend/src/api/phase01.ts, frontend/src/phase01.test.tsx, frontend/e2e/phase01.spec.ts",
+  "docs/api/openapi-draft.yaml (0.6.3-draft), docs/api/API_RUNTIME.md (section 12), docs/security/PERMISSION_MATRIX_DRAFT.md (v1.3), docs/security/PHASE_01_SECURITY_CHECKLIST.md (new), docs/ops/JOB_MONITORING.md, docs/ops/ROLLBACK.md (3a), docs/ops/BACKUP_RESTORE.md (6), docs/ops/DEPLOYMENT_LIMITS.md (new), docs/integration/README.md, docs/integration/EVENT_CATALOGUE.md, docs/discovery/STATE_TRANSITIONS.md, CHANGELOG.md",
+  "reports/phase-01/step-5/UAT_HOWTO_FA.md (3.10 wording, new 3.11, 3.12)"
+ ],
+ "migrations": [
+  "platform_core.0017_dec056_matrix_v13 (RunPython only, reversible; guard functions untouched - test_v13_migration_does_not_replace_the_guard_functions)",
+  "platform_core.0018_outbox_discard_and_orphan_job (schema + seed, reversible: DISCARDED -> DEAD_LETTER, orphan job runs/definition removed by plain SQL)",
+  "Evidence: reports/phase-01/step-7/logs/db_roundtrip.log (up -> zero -> up, partial 0006, schema diff EMPTY 6073 lines), reports/phase-01/step-7/logs/rollback_rehearsal.log + rollback/rehearsal_report.json (down to 0010 with data and forward; 17 checks PASS)"
+ ],
+ "test_evidence": [
+  {"command": "ruff check . && ruff format --check .", "outcome": "PASS", "log_path": "reports/phase-01/step-7/logs/ruff.log"},
+  {"command": "cd backend && mypy . (strict, 191 files)", "outcome": "PASS", "log_path": "reports/phase-01/step-7/logs/mypy.log"},
+  {"command": "DJANGO_SETTINGS_MODULE=aleekhan.settings_test manage.py makemigrations --check --dry-run", "outcome": "PASS", "log_path": "reports/phase-01/step-7/logs/makemigrations_check.log"},
+  {"command": "pytest -m 'not perf' (full backend): 1939 passed, 1 skipped (real ClamAV contract test, clamd not configured), 7 deselected", "outcome": "PASS", "log_path": "reports/phase-01/step-7/logs/pytest.log"},
+  {"command": "pytest -m 'not perf' -k 'concurrent or race' x3: 27 passed each run", "outcome": "PASS", "log_path": "reports/phase-01/step-7/logs/concurrency_x3.log"},
+  {"command": "ALEEKHAN_PERF_OUT=... pytest -m perf tests/test_perf_phase01.py: 6 passed (numbers in perf.json); test_perf_smoke.py: 1 passed", "outcome": "PASS", "log_path": "reports/phase-01/step-7/logs/perf.log"},
+  {"command": "ROUNDTRIP_DB=test_aleekhan_roundtrip_017 backend/scripts/db_roundtrip.sh", "outcome": "PASS", "log_path": "reports/phase-01/step-7/logs/db_roundtrip.log"},
+  {"command": "ROLES_DB=test_aleekhan_roles_017 ops/db/roles_check.sh: passed=50 failed=0", "outcome": "PASS", "log_path": "reports/phase-01/step-7/logs/roles_check.log"},
+  {"command": "DRILL_PREFIX=test_aleekhan_drill DRILL_ROWS=200 ops/backup/drill.sh: 14 checks PASS", "outcome": "PASS", "log_path": "reports/phase-01/step-7/logs/backup_drill.log"},
+  {"command": "ops/backup/rollback_rehearsal.sh (test_aleekhan_drill_rb_*): 17 checks PASS", "outcome": "PASS", "log_path": "reports/phase-01/step-7/logs/rollback_rehearsal.log"},
+  {"command": "tools/ci_local.sh <dir> security tools (secret scan --history findings=0; pip-audit runtime lock clean; npm audit 0; tools unittest 42 OK)", "outcome": "PASS", "log_path": "reports/phase-01/step-7/logs/ci/11_security.log"},
+  {"command": "pip-audit of the whole dev/QA venv (informational, not a gate)", "outcome": "SKIPPED", "log_path": "reports/phase-01/step-7/logs/ci/11_security.log"},
+  {"command": "OpenAPI 0.6.3-draft validation (openapi-spec-validator): 88 paths, 107 operations", "outcome": "PASS", "log_path": "reports/phase-01/step-7/logs/openapi_validate.log"},
+  {"command": "tools/verify_handoff.py: failures=0", "outcome": "PASS", "log_path": "reports/phase-01/step-7/logs/verify_handoff.log"},
+  {"command": "frontend npm run lint", "outcome": "PASS", "log_path": "reports/phase-01/step-7/logs/eslint.log"},
+  {"command": "frontend npm run typecheck", "outcome": "PASS", "log_path": "reports/phase-01/step-7/logs/typecheck.log"},
+  {"command": "frontend vitest run: 4 files, 44 passed", "outcome": "PASS", "log_path": "reports/phase-01/step-7/logs/vitest.log"},
+  {"command": "frontend npm run build", "outcome": "PASS", "log_path": "reports/phase-01/step-7/logs/build.log"},
+  {"command": "frontend/scripts/e2e.sh (E2E_BROWSER_CHANNEL=msedge, E2E_DB=test_aleekhan_e2e_017, real Django + PostgreSQL): 22 passed + 1 passed (backend-down run)", "outcome": "PASS", "log_path": "reports/phase-01/step-7/logs/e2e.log"}
+ ],
+ "security_evidence": [
+  "docs/security/PHASE_01_SECURITY_CHECKLIST.md (signature rows open)",
+  "Secret scan findings=0 incl. history: reports/phase-01/step-7/logs/ci/11_security.log, ci/secret_scan.json",
+  "pip-audit runtime lock: no known vulnerabilities (ci/pip_audit_runtime.json); npm audit --omit=dev: 0",
+  "Matrix-driven deny/MFA/scope/redaction tests and the plaintext-secret grep over all platform_* rows and logs: backend/platform_core/tests/test_phase01_step7_privacy.py",
+  "Upload limit before parsing: backend/platform_core/api/upload_limit.py, docs/ops/DEPLOYMENT_LIMITS.md",
+  "Owner-only, audited dead-letter discard: backend/platform_core/ops/dead_letters.py",
+  "Logs redacted with tools/redact_paths.py --in-place; grep for account name and host name = 0"
+ ],
+ "decisions": [
+  "DEC-056 extension 2 (employer 2026-11-10, matrix v1.3) implemented as decided; no new decision opened",
+  "TECHNICAL DEFAULTS introduced (documented, not business rules): HOUSEKEEPING_MAX_AGE 26 h, ORPHAN_GRACE 24 h, MULTIPART_OVERHEAD_BYTES 64 KiB, perf budgets (inbox p95 < 5 s, audit > 20 rows/s, dispatch > 50 events/s), proxy limits in DEPLOYMENT_LIMITS.md",
+  "Interpretation: console replay of a dead letter is now owner-only as well (same role as discard)"
+ ],
+ "risks": [
+  "A full 1000-row inbox scan still takes about 2-2.6 s per page on this machine (approvals: per-row decider/maker checks; tasks: per-row unit/holder lookups); acceptable as evidence, a SQL pre-filter is proposed for a later step",
+  "Rollback below 0011 on a running system is refused while housekeeping job runs exist (by design); the documented path is restore from backup",
+  "Deployment items remain OPEN until the staging server: TLS/HSTS at the proxy, CSP, proxy body limit, encrypted backups, artifact signing, scheduler/timers, RPO/RTO measurement",
+  "Real ClamAV contract test skipped locally (no clamd)"
+ ],
+ "evidence_paths": [
+  "reports/phase-01/step-7/logs/",
+  "reports/phase-01/step-7/logs/perf.json",
+  "reports/phase-01/step-7/logs/perf_before_request_cache.json",
+  "reports/phase-01/step-7/logs/drill/drill_report.json",
+  "reports/phase-01/step-7/logs/rollback/rehearsal_report.json",
+  "docs/security/PHASE_01_SECURITY_CHECKLIST.md"
+ ],
+ "rollback": "DB: manage.py migrate platform_core 0016 (reverses 0018 and 0017; DISCARDED events become DEAD_LETTER again, owner_admin back to matrix 1.2). Code: git revert <commit>. Proxy: no change deployed yet.",
+ "review_request": "PASS"
+}

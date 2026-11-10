@@ -1,5 +1,5 @@
 // Unit tests of the PHASE_01 shell and pages (01.5). fetch is stubbed here only (MOCK_UI_BINDING §2 rule 1);
-// bodies follow docs/api/openapi-draft.yaml 0.6.2-draft with synthetic values. The E2E suite runs the same
+// bodies follow docs/api/openapi-draft.yaml 0.6.3-draft with synthetic values. The E2E suite runs the same
 // flows against the real Django backend.
 import { QueryClientProvider } from "@tanstack/react-query";
 import { act, render, screen, waitFor, within } from "@testing-library/react";
@@ -82,13 +82,13 @@ const USER = {
   created_by: null,
   row_version: 3,
 };
-const VERSION = { api_version: "v1", contract_version: "0.6.2-draft", build_commit: "abcdef1234567", environment: "dev" };
+const VERSION = { api_version: "v1", contract_version: "0.6.3-draft", build_commit: "abcdef1234567", environment: "dev" };
 
-function grants(actions: string[]) {
+function grants(actions: string[], viaRole = "owner_admin") {
   return {
     user_id: ME_ID,
     computed_at: NOW,
-    grants: actions.map((a) => ({ action: a, scope: { kind: "GLOBAL" }, via_role: "owner_admin" })),
+    grants: actions.map((a) => ({ action: a, scope: { kind: "GLOBAL" }, via_role: viaRole })),
   };
 }
 
@@ -287,7 +287,7 @@ describe("page 36: event delivery freshness (01.6)", () => {
     );
     renderAt("#/ops");
     const block = await screen.findByTestId("integration-health");
-    expect(within(block).getByTestId("integration-stale")).toHaveTextContent("رویداد متوقف");
+    expect(within(block).getByTestId("integration-stale")).toHaveTextContent("جریان متوقف");
     expect(within(block).getByTestId("integration-stale")).toHaveAttribute("data-tone", "danger");
     expect(block).toHaveTextContent("۲۱ دقیقه");
     expect(within(block).getByTestId("c-int-blocked")).toHaveTextContent("۱");
@@ -307,6 +307,95 @@ describe("page 36: event delivery freshness (01.6)", () => {
     renderAt("#/ops");
     expect(await screen.findByTestId("c-outbox-dead")).toHaveTextContent("۱");
     expect(screen.queryByTestId("integration-health")).not.toBeInTheDocument();
+  });
+});
+
+describe("page 36: Farsi wording and housekeeping jobs (01.7, REV-0131)", () => {
+  const HEALTH = {
+    checked_at: NOW,
+    components: [{ name: "database", status: "up" }],
+    outbox: { pending: 0, failed: 0, dead_letter: 1, oldest_pending_at: null },
+    jobs: {
+      running: 0,
+      queued: 0,
+      failed_24h: 1,
+      housekeeping_alerts: 2,
+      housekeeping: [
+        { job_type: "audit_integrity_check", last_state: "SUCCEEDED", last_succeeded_at: NOW, last_failed_at: null, last_error_code: null, max_age_seconds: 93600, overdue: false, failing: false },
+        { job_type: "session_expiry_sweep", last_state: "FAILED", last_succeeded_at: null, last_failed_at: NOW, last_error_code: "JOB_FAILED", max_age_seconds: 93600, overdue: true, failing: true },
+        { job_type: "document_orphan_cleanup", last_state: null, last_succeeded_at: null, last_failed_at: null, last_error_code: null, max_age_seconds: 93600, overdue: true, failing: false },
+      ],
+    },
+    integration: { lag_seconds: 1260, stale: true, stale_after_seconds: 900, blocked_aggregates: 1, held_events: 3, open_conflicts: 0, compensation_open: 0, last_acked_at: null },
+  };
+  it("never shows the English 'dead letter' as text (only as a tooltip)", async () => {
+    stub(signedIn(["platform.ops.health.read"], { "GET /admin/health": () => ok(HEALTH) }));
+    renderAt("#/ops");
+    const panel = await screen.findByTestId("health-panel");
+    await within(panel).findByTestId("integration-health");
+    expect(panel.textContent).not.toMatch(/dead letter/i);
+    expect(within(panel).getByTestId("c-outbox-dead")).toHaveTextContent("رویداد شکست‌خورده نهایی");
+    expect(within(panel).getByTestId("c-outbox-dead")).toHaveAttribute("title", "اصطلاح فنی: dead letter");
+    expect(within(panel).getByTestId("integration-stale")).toHaveTextContent("جریان متوقف پشت رویداد شکست‌خورده نهایی");
+  });
+  it("lists every housekeeping job with on time / failed / never run from the server flags", async () => {
+    stub(signedIn(["platform.ops.health.read"], { "GET /admin/health": () => ok(HEALTH) }));
+    renderAt("#/ops");
+    const block = await screen.findByTestId("housekeeping-health");
+    expect(within(block).getByTestId("housekeeping-alerts")).toHaveTextContent("۲ مورد نیازمند بررسی");
+    expect(within(block).getByTestId("hk-audit_integrity_check")).toHaveTextContent("به‌موقع");
+    expect(within(block).getByTestId("hk-session_expiry_sweep")).toHaveTextContent("ناموفق");
+    expect(within(block).getByTestId("hk-session_expiry_sweep")).toHaveTextContent("JOB_FAILED");
+    expect(within(block).getByTestId("hk-document_orphan_cleanup")).toHaveTextContent("هنوز اجرا نشده");
+    expect(block).toHaveTextContent("۲۶ ساعت");
+  });
+  it("an older server without the housekeeping list shows no invented job health", async () => {
+    stub(signedIn(["platform.ops.health.read"], { "GET /admin/health": () => ok({ ...HEALTH, jobs: { running: 0, queued: 0, failed_24h: 0 } }) }));
+    renderAt("#/ops");
+    await screen.findByTestId("health-panel");
+    await screen.findByTestId("c-jobs-failed");
+    expect(screen.queryByTestId("housekeeping-health")).not.toBeInTheDocument();
+  });
+});
+
+describe("page 42: publish button follows the server rule (DEC-056 v1.2)", () => {
+  const PENDING = { value_revision_id: "eeeeeeee-0000-4000-8000-000000000001", value: { datatype: "INTEGER", value: "7" }, status: "PENDING_APPROVAL", effective_from: NOW, proposed_by: "aaaaaaaa-0000-4000-8000-000000000009", proposed_at: NOW, row_version: 1 };
+  function param(classification: string) {
+    return { parameter_key: "syn_param", label_fa: "پارامتر ساختگی", datatype: "INTEGER", owner_module: "ops", classification, decision_id: classification === "BUSINESS_RULE" ? "DEC-016" : null, active_value: null, row_version: 1 };
+  }
+  function routes(classification: string, viaRole: string): Record<string, Route> {
+    const actions = ["platform.config.parameter.read", "platform.config.parameter.publish"];
+    return {
+      ...signedIn(actions, {
+        "GET /admin/parameters": () => ok({ items: [param(classification)], page: { page_size: 100, next_cursor: null } }),
+        "GET /admin/parameters/syn_param": () => ok(param(classification), 200, 1),
+        "GET /admin/parameters/syn_param/values": () => ok({ items: [PENDING], page: { page_size: 50, next_cursor: null } }),
+      }),
+      "GET /me/permissions": () => ok(grants(actions, viaRole)),
+    };
+  }
+  async function open(): Promise<HTMLElement> {
+    renderAt("#/parameters");
+    await userEvent.click(await screen.findByTestId("param-open-syn_param"));
+    const dlg = await screen.findByTestId("parameter-detail");
+    await within(dlg).findByTestId("param-values");
+    await within(dlg).findByTestId("param-class-hint");
+    return dlg;
+  }
+  it("the owner sees no publish button on a TECHNICAL value (the server answers 403)", async () => {
+    stub(routes("TECHNICAL", "owner_admin"));
+    const dlg = await open();
+    expect(within(dlg).queryByTestId("param-publish")).not.toBeInTheDocument();
+  });
+  it("the owner keeps the publish button on a BUSINESS_RULE value", async () => {
+    stub(routes("BUSINESS_RULE", "owner_admin"));
+    const dlg = await open();
+    expect(await within(dlg).findByTestId("param-publish")).toBeInTheDocument();
+  });
+  it("a config approver sees the publish button on a TECHNICAL value", async () => {
+    stub(routes("TECHNICAL", "config_approver"));
+    const dlg = await open();
+    expect(await within(dlg).findByTestId("param-publish")).toBeInTheDocument();
   });
 });
 

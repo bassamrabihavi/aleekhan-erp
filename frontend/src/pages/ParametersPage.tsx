@@ -88,8 +88,14 @@ export function ParametersPage() {
   );
 }
 
+// DEC-056 v1.2 (server: params.service): the owner's publish grant counts for BUSINESS_RULE values only. For a
+// TECHNICAL value the button is shown only if publish is held through another role (e.g. config_approver).
+const OWNER_ROLE = "owner_admin";
+
 function ParameterDetail({ paramKey, onClose }: { paramKey: string; onClose: () => void }) {
-  const { can } = useAuth();
+  const { can, rolesFor } = useAuth();
+  const canPublish = (classification: Parameter["classification"]): boolean =>
+    classification === "TECHNICAL" ? [...rolesFor(C.publish)].some((r) => r !== OWNER_ROLE) : can(C.publish);
   const action = useAction();
   const [proposing, setProposing] = useState(false);
   const [publish, setPublish] = useState<ParameterValue | null>(null);
@@ -126,7 +132,7 @@ function ParameterDetail({ paramKey, onClose }: { paramKey: string; onClose: () 
                 <li key={v.value_revision_id}>
                   <StatusChip tone={st.tone} label={st.label} /> <bdi dir="ltr">{show(v.value)}</bdi> · از {formatJalaliDateTime(v.effective_from)}
                   {v.published_at ? ` · انتشار ${formatJalaliDateTime(v.published_at)}` : ""}
-                  {v.status === "PENDING_APPROVAL" && can(C.publish) ? (
+                  {v.status === "PENDING_APPROVAL" && param.data !== undefined && canPublish(param.data.classification) ? (
                     <button type="button" className="btn btn--secondary btn--small" onClick={() => { action.reset(); setPublish(v); }} data-testid="param-publish">انتشار</button>
                   ) : null}
                 </li>

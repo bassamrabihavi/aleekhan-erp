@@ -1,6 +1,6 @@
 {
- "_note": "Golden permission decisions at action level (PHASE_01 / 01.3), derived cell by cell from docs/security/PERMISSION_MATRIX_DRAFT.md section 3 (APPROVED v1.2, DEC-049 + DEC-056: owner_admin approval.read and approval.decide (v1.1); document.approve and config.parameter.publish (v1.2, BUSINESS_RULE values only - enforced by params.service, not visible at action level)): true = the role holds the action (any cell other than '—'). Record scope (●/○/own unit, sensitivity) is tested separately. Regenerate only with a new approved matrix version.",
- "matrix_version": "1.2",
+ "_note": "Golden permission decisions at action level (PHASE_01 / 01.3), derived cell by cell from docs/security/PERMISSION_MATRIX_DRAFT.md section 3 (APPROVED v1.3, DEC-049 + DEC-056: owner_admin approval.read and approval.decide (v1.1); document.approve and config.parameter.publish (v1.2, BUSINESS_RULE values only - enforced by params.service, not visible at action level); document.read and document.download (v1.3, all documents; download CLEAN only, audited)): true = the role holds the action (any cell other than '—'). Record scope (●/○/own unit, sensitivity) is tested separately. Regenerate only with a new approved matrix version.",
+ "matrix_version": "1.3",
  "roles": [
   "owner_admin",
   "it_ops",
@@ -419,7 +419,7 @@
    "operator_terminal": false
   },
   "platform.document.read": {
-   "owner_admin": false,
+   "owner_admin": true,
    "it_ops": false,
    "security_auditor": false,
    "management_viewer": true,
@@ -432,7 +432,7 @@
    "operator_terminal": true
   },
   "platform.document.download": {
-   "owner_admin": false,
+   "owner_admin": true,
    "it_ops": false,
    "security_auditor": false,
    "management_viewer": true,

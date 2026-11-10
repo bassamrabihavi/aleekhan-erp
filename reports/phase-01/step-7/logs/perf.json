@@ -1,0 +1,94 @@
+{
+  "inboxes": {
+    "machine": "work-windows",
+    "python": "3.12.10",
+    "postgres_server_version": 170009,
+    "budget_basis": "TECHNICAL_DEFAULT (gross-regression guard, in-process, synthetic data, not an SLA)",
+    "rows": 1000,
+    "p95_budget_ms": 5000.0,
+    "results": {
+      "approvals_to_decide_1000_scanned": {
+        "n": 15.0,
+        "p50_ms": 1985.8,
+        "p95_ms": 2570.0,
+        "max_ms": 2646.5
+      },
+      "tasks_mine_1000_scanned": {
+        "n": 15.0,
+        "p50_ms": 1495.6,
+        "p95_ms": 2166.2,
+        "max_ms": 2169.3
+      }
+    }
+  },
+  "audit_chain_writers_1": {
+    "machine": "work-windows",
+    "python": "3.12.10",
+    "postgres_server_version": 170009,
+    "budget_basis": "TECHNICAL_DEFAULT (gross-regression guard, in-process, synthetic data, not an SLA)",
+    "writers": 1,
+    "units_of_work": 50,
+    "elapsed_s": 0.182,
+    "rows_per_s": 274.1,
+    "min_rows_per_s_budget": 20.0,
+    "chain_contiguous": true
+  },
+  "audit_chain_writers_4": {
+    "machine": "work-windows",
+    "python": "3.12.10",
+    "postgres_server_version": 170009,
+    "budget_basis": "TECHNICAL_DEFAULT (gross-regression guard, in-process, synthetic data, not an SLA)",
+    "writers": 4,
+    "units_of_work": 200,
+    "elapsed_s": 0.767,
+    "rows_per_s": 260.6,
+    "min_rows_per_s_budget": 20.0,
+    "chain_contiguous": true
+  },
+  "audit_chain_writers_8": {
+    "machine": "work-windows",
+    "python": "3.12.10",
+    "postgres_server_version": 170009,
+    "budget_basis": "TECHNICAL_DEFAULT (gross-regression guard, in-process, synthetic data, not an SLA)",
+    "writers": 8,
+    "units_of_work": 400,
+    "elapsed_s": 1.522,
+    "rows_per_s": 262.8,
+    "min_rows_per_s_budget": 20.0,
+    "chain_contiguous": true
+  },
+  "outbox_dispatch_1": {
+    "machine": "work-windows",
+    "python": "3.12.10",
+    "postgres_server_version": 170009,
+    "budget_basis": "TECHNICAL_DEFAULT (gross-regression guard, in-process, synthetic data, not an SLA)",
+    "events": 2000,
+    "aggregates": 50,
+    "dispatchers": 1,
+    "batch_size": 100,
+    "elapsed_s": 4.047,
+    "events_per_s": 494.2,
+    "lag_p50_s": 2.649,
+    "lag_p95_s": 3.997,
+    "lag_max_s": 4.177,
+    "min_events_per_s_budget": 50.0,
+    "note": "lag includes the backlog wait: every event was enqueued before dispatch started"
+  },
+  "outbox_dispatch_4": {
+    "machine": "work-windows",
+    "python": "3.12.10",
+    "postgres_server_version": 170009,
+    "budget_basis": "TECHNICAL_DEFAULT (gross-regression guard, in-process, synthetic data, not an SLA)",
+    "events": 2000,
+    "aggregates": 50,
+    "dispatchers": 4,
+    "batch_size": 100,
+    "elapsed_s": 4.327,
+    "events_per_s": 462.2,
+    "lag_p50_s": 2.736,
+    "lag_p95_s": 4.252,
+    "lag_max_s": 4.414,
+    "min_events_per_s_budget": 50.0,
+    "note": "lag includes the backlog wait: every event was enqueued before dispatch started"
+  }
+}

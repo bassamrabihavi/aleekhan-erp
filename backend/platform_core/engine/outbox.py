@@ -6,6 +6,8 @@ State machine (docs/discovery/STATE_TRANSITIONS.md 1.1)::
     PENDING | DISPATCHED -> FAILED (attempt counted, next_attempt_at = now + backoff) -> PENDING
     FAILED -> DEAD_LETTER (attempts >= max_attempts; visible to Admin)
     DEAD_LETTER -> PENDING (authorised admin replay only, audited)
+    DEAD_LETTER -> DISCARDED (terminal; the owner only, from the server console, reason required, audited -
+                              PHASE_01 / 01.7, REV-0129: a poison head no longer blocks its aggregate forever)
 
 Composite moves are validated step by step against the machine and written in one UPDATE: a retry claim
 is ``FAILED -> PENDING -> DISPATCHED``; a final failure is ``DISPATCHED -> FAILED -> DEAD_LETTER``.
@@ -53,8 +55,9 @@ OUTBOX_DELIVERY_MACHINE = StateMachine(
         S.PENDING: frozenset({S.DISPATCHED, S.FAILED}),
         S.DISPATCHED: frozenset({S.ACKED, S.FAILED}),
         S.FAILED: frozenset({S.PENDING, S.DEAD_LETTER}),
-        S.DEAD_LETTER: frozenset({S.PENDING}),
+        S.DEAD_LETTER: frozenset({S.PENDING, S.DISCARDED}),
         S.ACKED: frozenset(),
+        S.DISCARDED: frozenset(),
     },
 )
 
@@ -247,14 +250,18 @@ def _envelope(row: OutboxEvent, attempt: int) -> EventEnvelope:
     )
 
 
+SETTLED = (S.ACKED, S.DISCARDED)
+"""States that no longer hold later events of the same aggregate back (01.7: DISCARDED counts as settled)."""
+
+
 def _earlier_open_event() -> Exists:
-    """An earlier (lower ``id``) not yet ACKED event of the same aggregate exists."""
+    """An earlier (lower ``id``) not yet settled (ACKED / DISCARDED) event of the same aggregate exists."""
     return Exists(
         OutboxEvent.objects.filter(
             aggregate_type=OuterRef("aggregate_type"),
             aggregate_id=OuterRef("aggregate_id"),
             id__lt=OuterRef("id"),
-        ).exclude(delivery_status=S.ACKED)
+        ).exclude(delivery_status__in=SETTLED)
     )
 
 
@@ -271,8 +278,8 @@ def claim_batch(
     one aggregate are delivered one after the other in ``id`` order (= commit order: every unit of work holds
     the audit chain lock from its start to its commit, so outbox ids are allocated in commit order); a failing
     event holds back the later events of *its* aggregate only, and a DEAD_LETTER head blocks its aggregate
-    until it is replayed (visible as ``blocked_aggregates`` in the health snapshot). Other aggregates are not
-    affected.
+    until it is replayed or discarded by the owner (:func:`discard_dead_letter`, 01.7) - visible as
+    ``blocked_aggregates`` in the health snapshot. Other aggregates are not affected.
     """
     with transaction.atomic(using=using):
         now = now if now is not None else db_now(using)
@@ -473,4 +480,42 @@ def replay_dead_letter(
             before={"delivery_status": row.delivery_status, "attempts": row.attempts},
             after={"delivery_status": S.PENDING, "attempts": 0},
             reason=reason,
+        )
+
+
+def discard_dead_letter(
+    ctx: RequestContext, event_id: uuid.UUID, *, reason: str, using: str = "default"
+) -> None:
+    """DEAD_LETTER -> DISCARDED (terminal), audited with the reason (PHASE_01 / 01.7, REV-0129).
+
+    The event is never delivered; later events of the same aggregate are released (``SETTLED``). Who may do
+    this (the owner only, from the server console) is enforced by the caller layer in the same transaction
+    (``platform_core.ops.dead_letters``); there is no HTTP operation for it in the contract. A compensation
+    record of the dead letter (if any) is left as it is: a human still owns the business consequence.
+    """
+    if ctx.actor.actor_type != ActorType.USER:
+        raise EngineContractError("dead-letter discard must be performed by an identified user")
+    text = reason.strip()
+    if len(text) < 3:
+        raise EngineContractError("dead-letter discard requires a reason")
+    with unit_of_work(ctx, require_event=False, using=using) as uow:
+        row = OutboxEvent.objects.using(using).select_for_update().filter(event_id=event_id).first()
+        if row is None:
+            raise NotFound()
+        if row.delivery_status != S.DEAD_LETTER:
+            raise StateTransitionNotAllowed(f"discard needs DEAD_LETTER, row is {row.delivery_status}")
+        OUTBOX_DELIVERY_MACHINE.assert_transition(row.delivery_status, S.DISCARDED)
+        OutboxEvent.objects.using(using).filter(pk=row.pk).update(
+            delivery_status=S.DISCARDED, discarded_at=db_now(using)
+        )
+        uow.audit(
+            action="platform.outbox.discard",
+            resource_type="platform.outbox_event",
+            resource_id=str(row.event_id),
+            resource_version=row.row_version + 1,
+            outcome=AuditOutcome.SUCCESS,
+            before={"delivery_status": row.delivery_status, "attempts": row.attempts},
+            after={"delivery_status": S.DISCARDED},
+            scope={"event_type": row.event_type, "aggregate_type": row.aggregate_type},
+            reason=text[:500],
         )

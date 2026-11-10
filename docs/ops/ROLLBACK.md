@@ -1,4 +1,4 @@
-# Rollback (PHASE_00 / 00.7)
+# Rollback (PHASE_00 / 00.7, PHASE_01 / 01.7)
 
 Rule (REPOSITORY_AND_RELEASE_CONTRACT_FA): migration ID, model revision and API version are reviewed together;
 no destructive migration without backup/copy/verification and a rollback path. Release tags only after an
@@ -34,6 +34,22 @@ Notes:
   database do not roll back past 0002 - restore from backup instead.
 - The migration role is the OWNER role (docs/ops/DB_ROLES.md); the app role cannot run DDL by design.
 - Outbox events created by the newer release remain in the table; their consumers are idempotent.
+
+## 3a. PHASE_01 migrations 0007-0018 (01.7 rehearsal)
+
+| Migration | Reverse | Data note |
+|---|---|---|
+| 0018 outbox DISCARDED + `document_orphan_cleanup` job | yes | DISCARDED events go back to DEAD_LETTER (the old code knows that state; the owner's discard stays in the audit trail); runs of the orphan job and its definition are removed |
+| 0017 matrix v1.3 | yes | owner_admin loses document read/download, `matrix_version` 1.2; downloads already made stay audited |
+| 0016 outbox provenance / ordering index | yes | provenance columns dropped |
+| 0015 / 0014 matrix v1.2 / v1.1 | yes | owner grants and guard bodies of 0014 / 0008-0013 restored |
+| 0011 engine (housekeeping job types) | **refused while job runs exist** (PROTECT FK, by design) | job runs and append-only audit integrity runs are evidence; a rollback below 0011 on a running system = restore from backup instead (section 3 step 4) |
+
+Rehearsal: `ops/backup/rollback_rehearsal.sh <out-dir>` (throw-away `test_aleekhan_drill_rb_*` databases with
+synthetic data). Scenario A (data, no job runs): `migrate platform_core 0010` succeeds, schema identical to a
+fresh 0010, business rows kept, then forward to head with an empty schema diff. Scenario B (data + job runs):
+the reverse stops at 0011 with `ProtectedError` and leaves a consistent state (schema identical to a fresh 0011,
+rows kept); forward to head works. Evidence: `reports/phase-01/step-7/logs/rollback_rehearsal*`.
 
 ## 4. Frontend rollback
 

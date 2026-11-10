@@ -1,9 +1,19 @@
-# Permission matrix — PHASE_01 platform actions (APPROVED v1.2)
+# Permission matrix — PHASE_01 platform actions (APPROVED v1.3)
 
-**Status: APPROVED v1.2 — DEC-049 (v1.0, employer بسام ربیهاوی, 2026-11-04) + DEC-056 (v1.1, 2026-11-06) + DEC-056
-extension (v1.2, 2026-11-10). v1.0 in force from PHASE_01 / 01.2; v1.1 from PHASE_01 / 01.5 (migration
+**Status: APPROVED v1.3 — DEC-049 (v1.0, employer بسام ربیهاوی, 2026-11-04) + DEC-056 (v1.1, 2026-11-06) + DEC-056
+extensions (v1.2 and v1.3, 2026-11-10). v1.0 in force from PHASE_01 / 01.2; v1.1 from PHASE_01 / 01.5 (migration
 `platform_core.0014_dec056_owner_approval_rights`); v1.2 from PHASE_01 / 01.6 (migration
-`platform_core.0015_dec056_matrix_v12`).**
+`platform_core.0015_dec056_matrix_v12`); v1.3 from PHASE_01 / 01.7 (migration
+`platform_core.0017_dec056_matrix_v13`).**
+
+**Change note v1.3 (DEC-056 extension 2, employer 2026-11-10, answer to the 01.6 question).** Two more cells of
+the `owner_admin` (OA) column change from `—` to `●`: `platform.document.read` (the owner sees every document and
+revision, no sensitivity cap: documents carry no unit and his assignment is GLOBAL) and
+`platform.document.download` (CLEAN revisions only, DEC-053; every download is audited as
+`platform.document.download`). Neither permission is a business-approval permission, so the explicit exception of
+principle 2 is **unchanged** (still exactly three pairs) and the DB guard `ck_role_technical_no_business_approval`
+is not touched. The owner can now open the file of a revision before he approves or rejects it. `owner_admin`
+carries `matrix_version = 1.3`; the other ten roles keep `1.0`.
 
 **Change note v1.2 (DEC-056 extension, employer 2026-11-10, REV-0125).** Two more cells of the `owner_admin` (OA)
 column change from `—` to `●`: `platform.document.approve` (the owner approves / rejects document revisions
@@ -14,9 +24,9 @@ now covers exactly three pairs (`owner_admin` + `platform.workflow.approval.deci
 `platform.config.parameter.publish`), in the engine (`authz.policy.OWNER_BA_ACTIONS`) and in the DB guard
 `ck_role_technical_no_business_approval`. Unchanged: maker ≠ checker — the owner never decides his own request,
 his own upload or his own proposal (also no rejection of his own BUSINESS_RULE proposal), except the one-time
-DEC-055 bootstrap approval; `it_ops` and `security_auditor` hold no business approval; the owner gets **no**
-`platform.document.read` / `download` (not part of the decision: he decides from the approval request; see the
-01.6 report, open question). `owner_admin` carries `matrix_version = 1.2`; the other ten roles keep `1.0`.
+DEC-055 bootstrap approval; `it_ops` and `security_auditor` hold no business approval; the owner got **no**
+`platform.document.read` / `download` in v1.2 (granted by v1.3 above). `owner_admin` carried
+`matrix_version = 1.2`; the other ten roles keep `1.0`.
 
 **Change note v1.1 (DEC-056, APPROVED 2026-11-06).** Two cells of the `owner_admin` (OA) column change from `—` to
 `●`: `platform.workflow.approval.read` (the owner reads every approval request; his assignment is GLOBAL) and
@@ -121,8 +131,8 @@ APPROVED since 2026-11-04, so no row is blocked in v1.0.)
 | platform.ops.health.read | getHealthDetail | | ● | ● | — | ● | — | — | — | — | — | — | — |
 | platform.ops.job.read | listJobDefinitions, listJobs, getJob | | ● | ● | — | — | — | — | — | — | — | — | — |
 | platform.ops.job.cancel | requestJobCancel (safe cancel only) | MFA | ● | ● | — | — | — | — | — | — | — | — | — |
-| platform.document.read | listDocuments, getDocument, list/get revisions | | — | — | — | ● (S1–S2) | ● (S1) | ● (S1–S2) | ● | ● | — | — | ○ (approved, linked to own tasks) |
-| platform.document.download | downloadDocumentRevision (CLEAN only) | | — | — | — | ● (S1–S2) | ● (S1) | ● (S1–S2) | ● | ● | — | — | ○ |
+| platform.document.read | listDocuments, getDocument, list/get revisions | | ● | — | — | ● (S1–S2) | ● (S1) | ● (S1–S2) | ● | ● | — | — | ○ (approved, linked to own tasks) |
+| platform.document.download | downloadDocumentRevision (CLEAN only) | | ● | — | — | ● (S1–S2) | ● (S1) | ● (S1–S2) | ● | ● | — | — | ○ |
 | platform.document.create | createDocument | | — | — | — | — | — | — | ● | — | — | — | — |
 | platform.document.update | updateDocument, submitDocumentRevision | | — | — | — | — | — | — | ● | — | — | — | — |
 | platform.document.upload | uploadDocumentRevision | quarantine (DEC-053) | — | — | — | — | — | — | ● | — | — | — | — |
@@ -165,6 +175,8 @@ audit events for anyone (append-only, DB triggers since 00.2).
 - v1.1 (DEC-056, 2026-11-06): owner_admin `approval.read` ● and `approval.decide` ● (change note at the top).
 - v1.2 (DEC-056 extension, 2026-11-10): owner_admin `document.approve` ● and `config.parameter.publish` ●
   (BUSINESS_RULE values only) (change note at the top).
+- v1.3 (DEC-056 extension 2, 2026-11-10): owner_admin `document.read` ● and `document.download` ● (all documents;
+  download CLEAN only, audited) (change note at the top).
 
 A change to this matrix = new matrix version + reviewed commit + DEC entry; roles keep `matrix_version`. Seeds
 for dev/test use synthetic users only (`محیط آزمایشی — داده ساختگی`).

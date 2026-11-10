@@ -52,3 +52,56 @@ event), `held_events` (undelivered events behind such a head - per-aggregate ord
 |---|---|---|
 | warn | `DELIVERY_STALE` | consumers are behind by more than 15 min (dispatcher stopped or a consumer keeps failing) |
 | critical (with `DEAD_LETTER_PRESENT`) | `ORDERING_BLOCKED` | later events of an aggregate wait behind a dead letter: replay it after the cause is fixed |
+
+## 01.7 additions (housekeeping jobs, dead letters, orphan files)
+
+### Housekeeping job monitoring
+`ops.monitoring.housekeeping_health` - one entry per housekeeping job type (`jobs.service.HOUSEKEEPING_TYPES`,
+seeded by migrations 0011 and 0018): newest run state, last success / failure, `overdue` (no SUCCEEDED run
+within `HOUSEKEEPING_MAX_AGE` = 26 h, TECHNICAL DEFAULT for a daily schedule; a type that never ran is
+overdue - PHASE_01 has no scheduler, so this is the honest answer) and `failing` (newest finished run FAILED,
+machine `error_code` only). Shown on page 36 («کارهای نگهداری دوره‌ای») and in `GET /admin/health`
+(`jobs.housekeeping`, `jobs.housekeeping_alerts`, contract 0.6.3-draft, additive).
+
+```bash
+python manage.py job_status                  # one line per job type + verdict ok|warn
+python manage.py job_status --json           # one JSON object for a scraper
+python manage.py job_status --fail-on warn   # exit 1 on warn (cron / systemd timer -> alert)
+python manage.py run_housekeeping --all      # run every housekeeping job once (job-run lifecycle, audited)
+python manage.py run_housekeeping audit_integrity_check
+```
+
+| Verdict | Reason code | Meaning / action |
+|---|---|---|
+| warn | `HOUSEKEEPING_FAILING` | the newest run of a job type FAILED: read the job run on page 36 (code only), fix, run again |
+| warn | `HOUSEKEEPING_OVERDUE` | a job type had no success in 26 h: the timer is not running or the job keeps failing |
+
+TECHNICAL DEFAULT schedule until the Celery worker (ADR-001) is wired: a systemd timer once a day at night on
+the app host runs `manage.py run_housekeeping --all` (each job is idempotent, batched, safely cancellable at
+its checkpoints); a second timer every 15 min runs `manage.py job_status --json --fail-on warn` and
+`manage.py outbox_status --json --fail-on warn` and alerts IT on a non-zero exit.
+
+### Orphan upload cleanup (`document_orphan_cleanup`, migration 0018)
+An upload writes the encrypted bytes first and then the rows; when that transaction fails, the bytes are
+deleted again (`upload_revision`), but a crash between the two can leave bytes with no
+`platform_stored_object` row (01.4 report section 7). `documents.service.purge_orphans` removes such files:
+only names the storage module writes (`<key[:2]>/<43-char key>` and `<key>.part`), only files older than
+`ORPHAN_GRACE` = 24 h (TECHNICAL DEFAULT, far longer than any request), the row is re-checked inside the unit
+of work, the file is deleted only after the audit row (`platform.document.object.orphan_purge`: key, size,
+kind - never content) is committed. Idempotent; storage not configured = nothing to do. Other files in the
+storage folder are never touched.
+
+### Dead letters (REV-0129) - owner only, server console
+```bash
+python manage.py outbox_dead_letter list [--json]   # event id, type, aggregate type, time, attempts, held_behind
+python manage.py outbox_dead_letter replay  --owner <username> --event-id <uuid> --reason "<why>"
+python manage.py outbox_dead_letter discard --owner <username> --event-id <uuid> --reason "<why>"
+```
+`replay`: DEAD_LETTER -> PENDING (after the cause is fixed). `discard`: DEAD_LETTER -> DISCARDED (terminal, new in
+0018): the event is never delivered and later events of the same aggregate are released, so a poison event
+(e.g. SCHEMA_VERSION_UNSUPPORTED) no longer blocks its aggregate forever. Both need an ACTIVE `owner_admin` and a
+reason, and are audited as that user (`platform.outbox.replay` / `platform.outbox.discard`). A compensation
+record of the dead letter stays open for the consuming module. No HTTP operation (contract item).
+
+`blocked_aggregates` (REV-0130) now counts only aggregates with events really waiting behind a dead letter (=
+the OpenAPI description); a dead letter with nothing behind it shows in `dead_letters` / `DEAD_LETTER_PRESENT`.

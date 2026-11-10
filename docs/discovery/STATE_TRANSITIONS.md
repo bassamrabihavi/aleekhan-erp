@@ -7,7 +7,7 @@ General rules (all machines): server-side only; each transition = one DB transac
 ## 1. Platform machines (PHASE_00/01, proposed by this step)
 
 ### 1.1 OutboxEvent delivery (PHASE_00 skeleton)
-`PENDING → DISPATCHED → ACKED`; `PENDING|DISPATCHED → FAILED` (attempt++, backoff) `→ PENDING`; `FAILED → DEAD_LETTER` after max attempts (visible to Admin); `DEAD_LETTER → PENDING` only by authorised admin replay (audited). Consumers dedupe by `event_id`.
+`PENDING → DISPATCHED → ACKED`; `PENDING|DISPATCHED → FAILED` (attempt++, backoff) `→ PENDING`; `FAILED → DEAD_LETTER` after max attempts (visible to Admin); `DEAD_LETTER → PENDING` only by authorised admin replay (audited); `DEAD_LETTER → DISCARDED` (terminal, PHASE_01 / 01.7, REV-0129) only by the owner (`owner_admin`) from the server console with a reason (audited `platform.outbox.discard`) — a discarded event is never delivered and no longer holds later events of its aggregate back. Since 01.7 replay is also owner-only (`manage.py outbox_dead_letter`). Consumers dedupe by `event_id`.
 Implemented in 00.3 (`platform_core/engine/outbox.py`, golden `tests/golden/outbox_delivery_machine.golden.json`). Composite moves are validated edge by edge and written in one UPDATE: a due retry is claimed as `FAILED → PENDING → DISPATCHED`; a final failure is `DISPATCHED → FAILED → DEAD_LETTER`. Attempts are counted at claim time; a `DISPATCHED` row older than the lease is recovered as a failed attempt. See `docs/engine/README.md` §5.
 
 ### 1.2 IdempotencyRecord (PHASE_00 skeleton)

@@ -27,7 +27,7 @@ from platform_core.identity.models import LoginAttempt, User
 from platform_core.jobs import service as jobs
 from platform_core.jobs.models import AuditIntegrityRun, JobDefinition, JobRun
 from platform_core.models import AuditEvent, OutboxEvent
-from platform_core.ops.monitoring import integration_health
+from platform_core.ops.monitoring import housekeeping_health, integration_health
 
 from .. import views as probes
 from . import serializers as S
@@ -91,6 +91,7 @@ class HealthDetailView(Phase01View):
         jobs_counts = dict(
             JobRun.objects.values_list("state").annotate(n=Count("id")).values_list("state", "n")
         )
+        housekeeping = housekeeping_health(now=now)  # 01.7 (contract 0.6.3-draft, additive)
         body = {
             "checked_at": utc_req(now.replace(microsecond=0)),
             "components": components,
@@ -106,6 +107,8 @@ class HealthDetailView(Phase01View):
                 "failed_24h": JobRun.objects.filter(
                     state="FAILED", finished_at__gte=now - timedelta(hours=24)
                 ).count(),
+                "housekeeping_alerts": sum(1 for j in housekeeping if j.overdue or j.failing),
+                "housekeeping": [_housekeeping(j) for j in housekeeping],
             },
             # 01.6: event delivery freshness / ordering / compensation (counts only, no payloads or ids)
             "integration": _integration(now),
@@ -117,6 +120,19 @@ class HealthDetailView(Phase01View):
             },
         }
         return Response(body, headers=NO_STORE)
+
+
+def _housekeeping(j: Any) -> dict[str, Any]:
+    return {
+        "job_type": j.job_type,
+        "last_state": j.last_state,
+        "last_succeeded_at": utc(j.last_succeeded_at),
+        "last_failed_at": utc(j.last_failed_at),
+        "last_error_code": j.last_error_code,
+        "max_age_seconds": j.max_age_seconds,
+        "overdue": j.overdue,
+        "failing": j.failing,
+    }
 
 
 def _integration(now: Any) -> dict[str, Any]:

@@ -182,12 +182,12 @@
         },
         "01.7": {
           "name": "Security & Ops",
-          "state": "TODO",
+          "state": "IN_PROGRESS",
           "commit": null,
           "report": null,
           "review": null,
           "rework_cycles": 0,
-          "started_at": null,
+          "started_at": "2026-11-10T15:06:48+00:00",
           "done_at": null
         },
         "01.8": {
@@ -3079,7 +3079,16 @@
       "state": "PASS",
       "note": null,
       "commit": null
+    },
+    {
+      "at": "2026-11-10T15:06:48+00:00",
+      "kind": "step",
+      "phase": "PHASE_01",
+      "step": "01.7",
+      "state": "IN_PROGRESS",
+      "note": null,
+      "commit": null
     }
   ],
-  "updated_at": "2026-11-10T15:06:35+00:00"
+  "updated_at": "2026-11-10T15:06:48+00:00"
 }

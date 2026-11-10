@@ -10,7 +10,10 @@ Files are never executed or rendered by the server; downloads are attachments on
 from __future__ import annotations
 
 import os
+import re
 import secrets
+from collections.abc import Iterator
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Final
 
@@ -20,6 +23,8 @@ from platform_core.engine.errors import DependencyUnavailable, EngineContractErr
 from platform_core.identity import crypto
 
 KEY_BYTES: Final = 32  # token_urlsafe(32) -> 43 characters, matches STORAGE_KEY_PATTERN
+PARTIAL_SUFFIX: Final = ".part"
+_KEY_RE: Final = re.compile(r"[A-Za-z0-9_-]{43}")
 
 
 def _root() -> Path:
@@ -78,6 +83,53 @@ def delete(storage_key: str) -> bool:
     """Remove the bytes (purge). Returns False if they were already gone."""
     try:
         _path(storage_key).unlink()
+    except FileNotFoundError:
+        return False
+    return True
+
+
+def is_configured() -> bool:
+    return bool(str(getattr(settings, "ALEEKHAN_DOCUMENT_STORAGE_ROOT", "") or ""))
+
+
+@dataclass(frozen=True)
+class StoredFile:
+    """One file found below the storage root (orphan cleanup, 01.7). ``partial`` = a ``.part`` left-over."""
+
+    storage_key: str
+    partial: bool
+    mtime: float
+    size: int
+
+
+def scan_files() -> Iterator[StoredFile]:
+    """Every object file of the two-level layout (``<root>/<key[:2]>/<key>`` or ``<key>.part``).
+
+    Files with any other name or place are never reported (so never deleted): the cleanup only ever touches
+    names this module could have written. Symlinks are skipped.
+    """
+    root = _root()
+    for sub in sorted(root.iterdir()):
+        if not sub.is_dir() or sub.is_symlink() or len(sub.name) != 2:
+            continue
+        for f in sorted(sub.iterdir()):
+            if f.is_symlink() or not f.is_file():
+                continue
+            name, partial = f.name, f.name.endswith(PARTIAL_SUFFIX)
+            key = name[: -len(PARTIAL_SUFFIX)] if partial else name
+            if not _KEY_RE.fullmatch(key) or key[:2] != sub.name:
+                continue
+            st = f.stat()
+            yield StoredFile(storage_key=key, partial=partial, mtime=st.st_mtime, size=st.st_size)
+
+
+def delete_file(item: StoredFile) -> bool:
+    """Remove one file reported by :func:`scan_files` (idempotent: False if it is already gone)."""
+    target = _path(item.storage_key)
+    if item.partial:
+        target = target.with_suffix(PARTIAL_SUFFIX)
+    try:
+        target.unlink()
     except FileNotFoundError:
         return False
     return True

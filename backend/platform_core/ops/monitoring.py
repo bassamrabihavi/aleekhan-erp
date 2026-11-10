@@ -6,14 +6,15 @@ codes are operational information; an authenticated ops page arrives with PHASE_
 
 Verdict thresholds are TECHNICAL DEFAULTS (not business rules; ops to confirm on staging):
 
-* ``critical`` - at least one DEAD_LETTER event (needs a human: replay or compensate);
+* ``critical`` - at least one DEAD_LETTER event (needs a human: replay, discard (owner, 01.7) or compensate);
 * ``warn``     - a DISPATCHED event older than the lease (dispatcher crashed; ``recover_stale`` needed), or
   the oldest due PENDING/FAILED event has waited longer than :data:`DUE_BACKLOG_WARN`;
 * ``ok``       - otherwise.
 
 01.6 (integration freshness, page 36): :func:`integration_health` - delivery lag (age of the oldest event not
-yet delivered and not dead), a ``stale`` flag (lag > :data:`DELIVERY_STALE_AFTER`), aggregates blocked by a
-dead-letter head (per-aggregate ordering, ``outbox.claim_batch``) and the events held behind them, open
+yet delivered and not dead), a ``stale`` flag (lag > :data:`DELIVERY_STALE_AFTER`), aggregates whose events
+wait behind a dead-letter head (per-aggregate ordering, ``outbox.claim_batch``; REV-0130: an aggregate with a
+dead letter and nothing behind it is not counted) and the events held behind them, open
 conflicts and compensation records that still need a human (``MANUAL_REQUIRED`` / ``HOOK_FAILED``).
 Exposed in ``GET /admin/health`` (``integration``) and in ``outbox_snapshot`` (reasons ``DELIVERY_STALE`` /
 ``ORDERING_BLOCKED``).
@@ -70,22 +71,20 @@ def integration_health(*, using: str = "default", now: datetime | None = None) -
     qs = OutboxEvent.objects.using(using)
     oldest = qs.filter(delivery_status__in=UNDELIVERED).aggregate(o=Min("created_at"))["o"]
     lag = _age(now, oldest)
-    dead = qs.filter(delivery_status=DeliveryStatus.DEAD_LETTER)
-    blocked = dead.values("aggregate_type", "aggregate_id").distinct().count()
-    held = (
-        qs.filter(delivery_status__in=UNDELIVERED)
-        .filter(
-            Exists(
-                OutboxEvent.objects.using(using).filter(
-                    aggregate_type=OuterRef("aggregate_type"),
-                    aggregate_id=OuterRef("aggregate_id"),
-                    id__lt=OuterRef("id"),
-                    delivery_status=DeliveryStatus.DEAD_LETTER,
-                )
+    held_qs = qs.filter(delivery_status__in=UNDELIVERED).filter(
+        Exists(
+            OutboxEvent.objects.using(using).filter(
+                aggregate_type=OuterRef("aggregate_type"),
+                aggregate_id=OuterRef("aggregate_id"),
+                id__lt=OuterRef("id"),
+                delivery_status=DeliveryStatus.DEAD_LETTER,
             )
         )
-        .count()
     )
+    held = held_qs.count()
+    # REV-0130: only aggregates that really have events waiting behind a dead letter (= the OpenAPI text); a
+    # dead letter with nothing behind it is counted in ``dead_letters`` / DEAD_LETTER_PRESENT, not here.
+    blocked = held_qs.values("aggregate_type", "aggregate_id").distinct().count() if held else 0
     return IntegrationHealth(
         lag_seconds=lag,
         stale=lag is not None and lag > DELIVERY_STALE_AFTER.total_seconds(),
@@ -98,6 +97,94 @@ def integration_health(*, using: str = "default", now: datetime | None = None) -
         .count(),
         last_acked_at=qs.aggregate(a=Max("acked_at"))["a"],
     )
+
+
+# ------------------------------------------------------------------------------- housekeeping jobs (01.7)
+# TECHNICAL DEFAULT (01.7): a housekeeping job type without a SUCCEEDED run in this window is "overdue". The
+# intended schedule is daily (docs/ops/JOB_MONITORING.md); 26 h leaves 2 h slack. Ops confirm on staging.
+HOUSEKEEPING_MAX_AGE: Final = timedelta(hours=26)
+
+
+@dataclass(frozen=True)
+class HousekeepingJob:
+    job_type: str
+    last_state: str | None
+    last_succeeded_at: datetime | None
+    last_failed_at: datetime | None
+    last_error_code: str | None
+    max_age_seconds: int
+    overdue: bool
+    failing: bool
+
+    def as_dict(self) -> dict[str, Any]:
+        def ts(v: datetime | None) -> str | None:
+            return v.isoformat() if v is not None else None
+
+        return {
+            "job_type": self.job_type,
+            "last_state": self.last_state,
+            "last_succeeded_at": ts(self.last_succeeded_at),
+            "last_failed_at": ts(self.last_failed_at),
+            "last_error_code": self.last_error_code,
+            "max_age_seconds": self.max_age_seconds,
+            "overdue": self.overdue,
+            "failing": self.failing,
+        }
+
+
+def housekeeping_health(*, using: str = "default", now: datetime | None = None) -> list[HousekeepingJob]:
+    """Per housekeeping job type (``jobs.service.HOUSEKEEPING_TYPES`` that have a seeded definition): newest
+    run state, last success / failure, ``overdue`` (no success within :data:`HOUSEKEEPING_MAX_AGE` - also when
+    it never ran: PHASE_01 has no scheduler, the honest answer is "overdue") and ``failing`` (newest finished
+    run FAILED). Plain SELECTs; machine error codes only."""
+    from platform_core.jobs.models import JobDefinition, JobRun, JobState
+    from platform_core.jobs.service import HOUSEKEEPING_TYPES
+
+    now = now if now is not None else db_now(using)
+    seeded = set(
+        JobDefinition.objects.using(using)
+        .filter(job_type__in=HOUSEKEEPING_TYPES)
+        .values_list("job_type", flat=True)
+    )
+    runs = JobRun.objects.using(using)
+    out: list[HousekeepingJob] = []
+    for job_type in HOUSEKEEPING_TYPES:
+        if job_type not in seeded:
+            continue
+        mine = runs.filter(job_type_id=job_type)
+        newest = mine.order_by("-queued_at", "-id").values_list("state", flat=True).first()
+        ok_at = mine.filter(state=JobState.SUCCEEDED).aggregate(t=Max("finished_at"))["t"]
+        last_finished = (
+            mine.filter(finished_at__isnull=False)
+            .order_by("-finished_at")
+            .values("state", "error_code")
+            .first()
+        )
+        failed_at = mine.filter(state=JobState.FAILED).aggregate(t=Max("finished_at"))["t"]
+        failing = bool(last_finished and last_finished["state"] == JobState.FAILED)
+        out.append(
+            HousekeepingJob(
+                job_type=job_type,
+                last_state=newest,
+                last_succeeded_at=ok_at,
+                last_failed_at=failed_at,
+                last_error_code=(last_finished["error_code"] or None) if failing and last_finished else None,
+                max_age_seconds=int(HOUSEKEEPING_MAX_AGE.total_seconds()),
+                overdue=ok_at is None or now - ok_at > HOUSEKEEPING_MAX_AGE,
+                failing=failing,
+            )
+        )
+    return out
+
+
+def housekeeping_verdict(jobs: list[HousekeepingJob]) -> tuple[str, list[str]]:
+    """``warn`` with reasons ``HOUSEKEEPING_FAILING`` / ``HOUSEKEEPING_OVERDUE``, else ``ok``."""
+    reasons: list[str] = []
+    if any(j.failing for j in jobs):
+        reasons.append("HOUSEKEEPING_FAILING")
+    if any(j.overdue for j in jobs):
+        reasons.append("HOUSEKEEPING_OVERDUE")
+    return ("warn" if reasons else "ok"), reasons
 
 
 @dataclass(frozen=True)

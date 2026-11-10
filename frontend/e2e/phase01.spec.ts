@@ -288,6 +288,10 @@ test("page 36: health counters, audit integrity, protected job not cancellable, 
   // 01.6: delivery freshness from the server (no worker runs in E2E, so events wait - never shown as "up to date")
   await expect(owner.getByTestId("integration-health")).toBeVisible();
   await expect(owner.getByTestId("integration-stale")).not.toHaveText("همه رویدادها تحویل شده");
+  // 01.7: housekeeping job health from the server (one row per seeded job type); REV-0131 Farsi wording
+  await expect(owner.getByTestId("housekeeping-health")).toBeVisible();
+  await expect(owner.getByTestId("hk-document_orphan_cleanup")).toBeVisible();
+  await expect(owner.getByTestId("health-panel")).not.toContainText("dead letter");
   await expect(owner.getByTestId("integrity-status")).toHaveText("سالم");
   await expect(owner.getByTestId("job-db_backup").getByTestId("job-not-cancellable")).toContainText("محافظت‌شده");
   await expectNoAxeViolations(owner);
@@ -375,7 +379,7 @@ test("document controller: first login, role-sensitive nav, server-side 403, upl
   await ctx.close();
 });
 
-test("page 39 + 40: the owner decides a document revision submitted by another person (DEC-056 v1.2, REV-0128)", async ({ browser }) => {
+test("page 39 + 40: the owner opens, downloads and decides a document revision submitted by another person (DEC-056 v1.2/v1.3, REV-0128)", async ({ browser }) => {
   manage(["shell", "-c", SCAN_WITH_TEST_DOUBLE]); // TEST DOUBLE scanner (no ClamAV in the local E2E run)
   const [ctx, page] = await newPage(browser);
   await go(page, "/", "login");
@@ -391,6 +395,20 @@ test("page 39 + 40: the owner decides a document revision submitted by another p
   await page.getByTestId("reason-input").fill("ارسال ساختگی برای بازبینی");
   await page.getByTestId("reason-submit").click();
   await expect(rev).toContainText("در بازبینی");
+
+  // DEC-056 v1.3 (01.7): the owner opens the document detail and may download the clean file before deciding
+  const docHash = new URL(page.url()).hash.slice(1);
+  expect(docHash).toMatch(/^\/documents\/[0-9a-f-]{36}$/);
+  await go(owner, docHash, "document-detail");
+  const ownerRev = owner.getByTestId("revision-1");
+  await expect(ownerRev).toContainText("در بازبینی");
+  const dl = ownerRev.getByTestId("download");
+  await expect(dl).toBeVisible();
+  const href = await dl.getAttribute("href");
+  expect(href).toMatch(/\/content$/);
+  const file = await owner.request.get(href ?? "");
+  expect(file.status()).toBe(200);
+  expect((await file.body()).subarray(0, 5).toString()).toBe("%PDF-");
 
   // the owner sees it in "to decide" (requested by someone else) and decides it directly
   await go(owner, "/work", "page-work");

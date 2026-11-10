@@ -2,7 +2,7 @@ openapi: 3.1.0
 jsonSchemaDialect: https://spec.openapis.org/oas/3.1/dialect/base
 info:
   title: Aleekhan Factory Platform API
-  version: 0.6.2-draft
+  version: 0.6.3-draft
   summary: PHASE_00 + PHASE_01 platform contract (implemented in 00.4 / 01.4). Platform only, NO business writes.
   description: |
     Status: DRAFT (PHASE_00 / 00.1 Discovery & Contract, implemented in 00.4). Not approved. This hand-written
@@ -66,6 +66,16 @@ info:
     docs/integration/README.md section 9). Matrix v1.2 (DEC-056 extension, 2026-11-10): owner_admin also holds
     platform.document.approve and platform.config.parameter.publish (BUSINESS_RULE values only); maker != checker
     unchanged. Every outbox event follows the event catalogue (docs/integration/EVENT_CATALOGUE.md).
+
+    0.6.3-draft (PHASE_01 / 01.7 Security & Ops): optional `HealthDetail.jobs.housekeeping` (per housekeeping job
+    type: last run state, last success / failure time, `overdue` = no success within `max_age_seconds`
+    (TECHNICAL DEFAULT), `failing` = the newest finished run FAILED) and `HealthDetail.jobs.housekeeping_alerts`
+    (number of overdue or failing types) for page 36. `HealthDetail.integration.blocked_aggregates` now counts
+    only aggregates with events really waiting behind a dead letter (REV-0130; description unchanged). The outbox
+    gets the terminal delivery state DISCARDED (owner, server console, audited; REV-0129) - not exposed by any
+    operation. Additive; no path, operation or existing field changed. Matrix v1.3 (DEC-056 extension 2,
+    2026-11-10): owner_admin also holds platform.document.read and platform.document.download (CLEAN only,
+    audited); not business-approval permissions.
 
     Stack: Django 5.2 LTS + DRF (DEC-001). Base path is versioned: every endpoint lives under `/api/v1`.
     A breaking change requires `/api/v2` (or an explicitly approved deprecation window); additive changes only
@@ -7234,6 +7244,20 @@ components:
             failed_24h:
               type: integer
               minimum: 0
+            housekeeping_alerts:
+              description: 0.6.3-draft (01.7). Number of housekeeping job types that are overdue or failing.
+              type: integer
+              minimum: 0
+            housekeeping:
+              description: |
+                0.6.3-draft (01.7). One entry per housekeeping job type (seeded job definitions). `overdue` = no
+                SUCCEEDED run finished within `max_age_seconds` (TECHNICAL DEFAULT; there is no scheduler in
+                PHASE_01, so a never-run job is overdue); `failing` = the newest finished run is FAILED. Machine
+                error codes only, never exception text.
+              type: array
+              maxItems: 32
+              items:
+                $ref: '#/components/schemas/HousekeepingJobHealth'
         integration:
           description: |
             0.6.2-draft (01.6). Event delivery freshness: `lag_seconds` = age of the oldest event not yet delivered
@@ -7292,6 +7316,53 @@ components:
             locked_users:
               type: integer
               minimum: 0
+    HousekeepingJobHealth:
+      type: object
+      additionalProperties: false
+      required:
+      - job_type
+      - last_state
+      - last_succeeded_at
+      - last_failed_at
+      - last_error_code
+      - max_age_seconds
+      - overdue
+      - failing
+      properties:
+        job_type:
+          type: string
+          pattern: ^[a-z][a-z0-9_]{2,63}$
+        last_state:
+          oneOf:
+          - type: string
+            enum:
+            - QUEUED
+            - RUNNING
+            - CANCEL_REQUESTED
+            - CANCELLED
+            - SUCCEEDED
+            - FAILED
+          - type: 'null'
+        last_succeeded_at:
+          oneOf:
+          - $ref: '#/components/schemas/UtcTimestamp'
+          - type: 'null'
+        last_failed_at:
+          oneOf:
+          - $ref: '#/components/schemas/UtcTimestamp'
+          - type: 'null'
+        last_error_code:
+          oneOf:
+          - type: string
+            pattern: ^[A-Z][A-Z0-9_]{2,63}$
+          - type: 'null'
+        max_age_seconds:
+          type: integer
+          minimum: 1
+        overdue:
+          type: boolean
+        failing:
+          type: boolean
     Document:
       type: object
       additionalProperties: false

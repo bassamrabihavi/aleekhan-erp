@@ -2,10 +2,12 @@
 // counters from GET /admin/health, audit integrity, job definitions (protected / cancellable flags), job runs
 // with safe cancel (reason + MFA step-up). Force cancel is not offered (C-31); no invented "overall health %".
 // 01.6: event delivery freshness (lag, stale flag, aggregates blocked by a dead letter, open compensations).
+// 01.7: housekeeping job monitoring (overdue / failing per job type); REV-0131: Farsi wording instead of
+// "dead letter" (the technical term only as a tooltip).
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
-import { opsGuards, read, write, type HealthDetail, type Job, type JobDefinition } from "../api/phase01";
+import { opsGuards, read, write, type HealthDetail, type HousekeepingJobHealth, type Job, type JobDefinition } from "../api/phase01";
 import { useAuth } from "../auth/context";
 import { ActionError } from "../components/ActionError";
 import { DataView } from "../components/DataView";
@@ -54,9 +56,13 @@ export function OpsPage() {
   );
 }
 
-function Counter({ label, value, testId }: { label: string; value: number; testId: string }) {
+// REV-0131: the UI says «رویداد شکست‌خورده نهایی»; the technical term stays in the tooltip for IT.
+const DEAD = "رویداد شکست‌خورده نهایی";
+const DEAD_TIP = "اصطلاح فنی: dead letter";
+
+function Counter({ label, value, testId, title }: { label: string; value: number; testId: string; title?: string }) {
   return (
-    <div className="counter" data-testid={testId}>
+    <div className="counter" data-testid={testId} title={title}>
       <span className="counter__value">{toFaDigits(value)}</span>
       <span className="counter__label">{label}</span>
     </div>
@@ -89,7 +95,7 @@ function HealthPanel() {
             <div className="counters">
               <Counter label="رویداد خروجی در انتظار" value={h.outbox.pending} testId="c-outbox-pending" />
               <Counter label="رویداد خروجی ناموفق" value={h.outbox.failed} testId="c-outbox-failed" />
-              <Counter label="رویداد ماندگار (dead letter)" value={h.outbox.dead_letter} testId="c-outbox-dead" />
+              <Counter label={DEAD} title={DEAD_TIP} value={h.outbox.dead_letter} testId="c-outbox-dead" />
               <Counter label="Job در حال اجرا" value={h.jobs.running} testId="c-jobs-running" />
               <Counter label="Job در صف" value={h.jobs.queued} testId="c-jobs-queued" />
               <Counter label="Job ناموفق (۲۴ ساعت)" value={h.jobs.failed_24h} testId="c-jobs-failed" />
@@ -102,6 +108,7 @@ function HealthPanel() {
             </div>
             {h.outbox.oldest_pending_at ? <p className="panel__meta">قدیمی‌ترین رویداد در انتظار: {formatJalaliDateTime(h.outbox.oldest_pending_at)}</p> : null}
             {h.integration ? <IntegrationBlock i={h.integration} /> : null}
+            {h.jobs.housekeeping ? <HousekeepingBlock jobs={h.jobs.housekeeping} alerts={h.jobs.housekeeping_alerts ?? 0} /> : null}
           </>
         )}
       </DataView>
@@ -121,7 +128,7 @@ function IntegrationBlock({ i }: { i: NonNullable<HealthDetail["integration"]> }
   // never "up to date" while events are still waiting: no lag -> all delivered; lag under the threshold -> in progress
   const [tone, label] =
     i.blocked_aggregates > 0
-      ? (["danger", "رویداد متوقف پشت dead letter"] as const)
+      ? (["danger", `جریان متوقف پشت ${DEAD}`] as const)
       : i.stale
         ? (["warning", "تأخیر در تحویل"] as const)
         : i.lag_seconds === null
@@ -135,12 +142,49 @@ function IntegrationBlock({ i }: { i: NonNullable<HealthDetail["integration"]> }
         {" "}(آستانه {toFaDigits(Math.round(i.stale_after_seconds / 60))} دقیقه، پیش‌فرض فنی)
       </p>
       <div className="counters">
-        <Counter label="جریان متوقف پشت dead letter" value={i.blocked_aggregates} testId="c-int-blocked" />
+        <Counter label={`جریان متوقف پشت ${DEAD}`} title={DEAD_TIP} value={i.blocked_aggregates} testId="c-int-blocked" />
         <Counter label="رویداد منتظر پشت آن" value={i.held_events} testId="c-int-held" />
         <Counter label="تعارض باز" value={i.open_conflicts} testId="c-int-conflicts" />
         <Counter label="جبران دستی لازم" value={i.compensation_open} testId="c-int-compensation" />
       </div>
       {i.last_acked_at ? <p className="panel__meta">آخرین تحویل موفق: {formatJalaliDateTime(i.last_acked_at)}</p> : null}
+    </div>
+  );
+}
+
+// 01.7: one row per housekeeping job type. There is no scheduler in PHASE_01, so a job that never ran is shown as
+// «عقب‌افتاده» (overdue) - honest, not an error of this page.
+function HousekeepingBlock({ jobs, alerts }: { jobs: HousekeepingJobHealth[]; alerts: number }) {
+  const { can } = useAuth();
+  const defs = useQuery({
+    queryKey: [...QK.ops, "job-definitions"],
+    enabled: can(O.jobRead),
+    queryFn: async ({ signal }) => (await read("/admin/job-definitions", opsGuards.defPage, { page_size: 100 }, signal)).data,
+  });
+  const name = new Map((defs.data?.items ?? []).map((d) => [d.job_type, d.name_fa]));
+  return (
+    <div className="detail" data-testid="housekeeping-health">
+      <h3>کارهای نگهداری دوره‌ای</h3>
+      <p className="panel__meta">
+        هشدار: <StatusChip tone={alerts > 0 ? "warning" : "success"} label={alerts > 0 ? `${toFaDigits(alerts)} مورد نیازمند بررسی` : "همه به‌موقع"} testId="housekeeping-alerts" />
+        {" "}(به‌موقع یعنی اجرای موفق در {toFaDigits(Math.round((jobs[0]?.max_age_seconds ?? 0) / 3600))} ساعت گذشته، پیش‌فرض فنی)
+      </p>
+      <ul className="list" aria-label="کارهای نگهداری">
+        {jobs.map((j) => {
+          const [tone, label] = j.failing
+            ? (["danger", "ناموفق"] as const)
+            : j.overdue
+              ? (["warning", j.last_succeeded_at ? "عقب‌افتاده" : "هنوز اجرا نشده"] as const)
+              : (["success", "به‌موقع"] as const);
+          return (
+            <li key={j.job_type} data-testid={`hk-${j.job_type}`}>
+              {name.get(j.job_type) ?? <span dir="ltr">{j.job_type}</span>}: <StatusChip tone={tone} label={label} />
+              {j.last_succeeded_at ? <span className="field__hint"> آخرین اجرای موفق: {formatJalaliDateTime(j.last_succeeded_at)}</span> : null}
+              {j.failing && j.last_error_code ? <span className="field__hint" dir="ltr"> {j.last_error_code}</span> : null}
+            </li>
+          );
+        })}
+      </ul>
     </div>
   );
 }
