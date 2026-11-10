@@ -162,13 +162,13 @@
         },
         "01.5": {
           "name": "UI",
-          "state": "IN_REVIEW",
+          "state": "PASS",
           "commit": "ef4902a",
           "report": "reports/phase-01/step-5/REPORT.md",
-          "review": null,
+          "review": "reports/phase-01/step-5/REVIEW.md",
           "rework_cycles": 0,
           "started_at": "2026-11-06T01:15:53+00:00",
-          "done_at": null
+          "done_at": "2026-11-10T03:59:29+00:00"
         },
         "01.6": {
           "name": "Integration",
@@ -2364,6 +2364,15 @@
       "since": "2026-11-04T05:11:57+00:00",
       "result": "PASS",
       "note": "Employer UAT on work-windows 2026-11-04: Aleekhan logo + logo-green palette OK"
+    },
+    {
+      "id": "T-003",
+      "phase": "PHASE_01",
+      "what": "صفحه‌های فاز ۱: ورود و تأیید دومرحله‌ای، امنیت و کاربران (۴۶)، درخت سازمانی، کارها و تأییدها (۳۹)، اسناد (۴۰)، پارامترها (۴۲)، سلامت سامانه (۳۶)",
+      "how": "راهنمای قدم‌به‌قدم: reports/phase-01/step-5/UAT_HOWTO_FA.md — نشانی http://127.0.0.1:5173/ ؛ سرورها را ارکستراتور برای شما روشن می‌کند؛ داده‌ها ساختگی‌اند",
+      "since": "2026-11-10T03:59:29+00:00",
+      "result": null,
+      "note": null
     }
   ],
   "events": [
@@ -3028,7 +3037,22 @@
       "state": "IN_REVIEW",
       "note": null,
       "commit": "ef4902a"
+    },
+    {
+      "at": "2026-11-10T03:59:29+00:00",
+      "kind": "step",
+      "phase": "PHASE_01",
+      "step": "01.5",
+      "state": "PASS",
+      "note": null,
+      "commit": null
+    },
+    {
+      "at": "2026-11-10T03:59:29+00:00",
+      "kind": "test_ready",
+      "id": "T-003",
+      "phase": "PHASE_01"
     }
   ],
-  "updated_at": "2026-11-09T18:28:57+00:00"
+  "updated_at": "2026-11-10T03:59:29+00:00"
 }
