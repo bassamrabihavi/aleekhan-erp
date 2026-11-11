@@ -1,8 +1,11 @@
 """Rules for the PHASE_01 operations in docs/api/openapi-draft.yaml (planned in 0.5.0-draft / 01.1,
 IMPLEMENTED in 0.6.0-draft / 01.4).
 
-Since 01.4 no path item is planned any more (``x-aleekhan-status`` removed, route parity covers every path);
-the rules pinned in 01.1 keep applying to the PHASE_01 operations (tags ``auth``, ``me``, ``admin-identity``,
+Since 01.4 no PHASE_01 path item is planned any more (``x-aleekhan-status`` removed, route parity covers every
+implemented path). 0.7.0-draft (02.1) adds PLANNED PHASE_02 paths; their rules are pinned in
+``test_api_contract_planned_phase02``.
+
+The rules pinned in 01.1 keep applying to the PHASE_01 operations (tags ``auth``, ``me``, ``admin-identity``,
 ``org``, ``workflow``, ``audit``, ``jobs``, ``documents``, ``parameters``), so the implementation cannot
 weaken them silently:
 
@@ -54,13 +57,14 @@ def phase01_operations() -> list[tuple[str, str, dict[str, Any]]]:
 
 
 def test_no_planned_path_remains_and_phase01_operations_exist() -> None:
-    """01.4 implemented every planned operation: no planned marker is left; any future planned path must name
-    its step."""
+    """01.4 implemented every PHASE_01 planned operation: no PHASE_01 planned marker is left; any planned path
+    (0.7.0-draft: PHASE_02) must name its step."""
     assert len(phase01_operations()) >= 99  # 97 planned in 01.1 + stepUpMfa + bootstrapSelfApproveRequest
     for path in oc.planned_paths():
         step = oc.spec()["paths"][path].get("x-aleekhan-step")
         assert isinstance(step, str) and STEP.match(step), path
-    assert oc.planned_paths() == set()
+    planned_phase01 = {p for p, _m, _op in phase01_operations() if oc.is_planned(p)}
+    assert planned_phase01 == set()
 
 
 def test_operation_ids_are_unique() -> None:

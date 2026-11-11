@@ -1,0 +1,32 @@
+# command (repo root): python -I <scratch>/validate_contract.py <git show HEAD:docs/api/openapi-draft.yaml>  (openapi-spec-validator + additive check against HEAD 4b490d2)
+openapi-spec-validator 0.9.0: VALID (OpenAPI 3.1.0)
+info.version = 0.7.0-draft (previous: 0.6.3-draft)
+additive check: all 88 previous paths, all previous components and conventions unchanged
+implemented paths = 88 (unchanged)
+planned paths = 48 planned operations = 63
+planned steps = ['02.4']
+planned operations by tag = {'identity': 41, 'commercial': 22}
+planned operations by method = {'get': 28, 'post': 30, 'patch': 5}
+blocked planned operations = 14
+   activateCodeRuleRevision ['DEC-005', 'DEC-057']
+   allocateSerial ['DEC-006', 'DEC-057']
+   applyChangeRequest ['DEC-057', 'DEC-059']
+   approveCodeRuleRevision ['DEC-005', 'DEC-057']
+   confirmCustomerOrder ['DEC-006', 'DEC-057']
+   createChangeRequest ['DEC-059']
+   createCodeRuleRevision ['DEC-005']
+   decideChangeRequest ['DEC-057', 'DEC-059']
+   issueProductCode ['DEC-005', 'DEC-057']
+   previewProductCode ['DEC-005']
+   rejectCodeRuleRevision ['DEC-005', 'DEC-057']
+   releaseCustomerOrderToPlan ['DEC-057']
+   submitChangeRequest ['DEC-059']
+   submitCodeRuleRevision ['DEC-005']
+blocking decisions = ['DEC-005', 'DEC-006', 'DEC-057', 'DEC-059']
+mfa step-up planned operations = 6
+proposed permissions = 22 ['commercial.change.apply', 'commercial.change.decide', 'commercial.change.read', 'commercial.change.request', 'commercial.order.confirm', 'commercial.order.manage', 'commercial.order.read', 'commercial.order.release', 'identity.code_rule.approve', 'identity.code_rule.manage', 'identity.code_rule.read', 'identity.customer.manage', 'identity.customer.read', 'identity.external_ref.manage', 'identity.external_ref.read', 'identity.historical.read', 'identity.product.manage', 'identity.product.read', 'identity.product_code.issue', 'identity.product_code.read', 'identity.serial.allocate', 'identity.serial.read']
+public planned operations = []
+side_effect_free_operations = ['validateProductCode', 'previewProductCode']
+planned_error_codes = {'SERIAL_ALREADY_ALLOCATED': 409, 'PRODUCT_CODE_TAKEN': 409, 'POSSIBLE_DUPLICATE': 409, 'ORDER_VERSION_STALE': 409}
+SerialNumber pattern present = False
+# exit code: 0

@@ -187,3 +187,93 @@ needs it). No business entity of later phases; no real people or org data in see
   session 12 h), Q-0105 (last 5 passwords refused), Q-0103 (OWNER_POLICY values: owner_admin alone, reason,
   MFA, audit), Q-0104 (25 MB = 26 214 400 bytes), Q-0106 (position `primary_capacity`, default 1, heads 1).
   Rework (REV-0105/0107): role lifecycle enforced in the DB; org changes never back-dated (60 s tolerance).
+
+# PHASE_02 / 02.1 additions — Order & Product Identity (logical model for 02.2)
+
+Status: DRAFT logical model (2026-11-11). Nothing here is a migration. Physical DDL is decided in 02.2.
+Sources: `PHASE_02.md` (Customer, Product/Style, CodeRuleRevision, PO Header/Line, Serial, Historical Snapshot,
+External Ref), `DOMAIN_ENTITY_CATALOG.md` (Identity, Commercial), `ARCHITECTURE_OVERVIEW_FA.md`,
+`SOURCE_MAPPING_AND_IMPORT.md`, catalog `29_36…/DATA_MODEL.md` and `05_06…/DATA_MODEL.md` (DRAFT), and the conflicts
+C-47…C-76. The rows of the PHASE_00 table above ("Identity / Product Registry — PHASE_02", "Commercial — PHASE_02")
+are superseded by this section.
+
+## 1. Conventions specific to PHASE_02 (in addition to the conventions at the top of this file)
+- **Module ownership.** `identity_*` tables belong to the Identity module; `commercial_*` tables to the Commercial
+  module. Neither module writes the other's tables. Cross-module effects travel as outbox events
+  (ARCHITECTURE_OVERVIEW "never mutate other modules' authoritative data via direct table writes").
+- **14-digit codes.** `varchar(14)` + `CHECK (code ~ '^[0-9]{14}$')` (the existing `Code14Field`,
+  `platform_core/code14.py`), always with a `code_namespace` column, `CHECK (code_namespace IN ('product_code','die_code'))`.
+  Never `numeric`, `bigint` or `char(14)` with padding. No Persian/Arabic-Indic digit normalisation inside the DB
+  (normalisation is an import transform with the raw value kept). The **segments** of a product code are not
+  modelled as columns: their number, order and width are DEC-005.
+- **Serial number.** Its own namespace; `varchar`. Width, pattern and allocation are BLOCKED (DEC-006). 02.2 creates
+  the column as `varchar(32)` with `CHECK (serial_number <> '' AND serial_number = btrim(serial_number))` and **no
+  pattern**. The pattern CHECK is added by the migration that implements the approved DEC-006 rule.
+- **Business dates** (`order_date`, `requested_due_date`): `date`. Event times: `timestamptz` UTC. Jalali only in the UI.
+- **Quantities**: `integer > 0` with `uom` ∈ {PIECE, PAIR} in PHASE_02 (C-67). No float, no conversion.
+- **Every owned table**: `id uuid` PK, `created_at/created_by`, `updated_at/updated_by`, `row_version bigint >= 1`
+  (ETag), audit + outbox in the same transaction (UnitOfWork, 00.3). Ledger-like and versioned tables are
+  append-only (DB trigger, like `platform_audit_event`).
+- **Sensitivity**: customer identity, product codes, styles and order quantities are S2. Prices are absent from
+  PHASE_02 (PHASE_10). Customer contact persons are not stored (DEC-028; C-54).
+
+### 1.1 Source provenance block (columns on every table that can hold imported or legacy-derived data)
+| Column | Type / constraint | Meaning |
+|---|---|---|
+| `provenance_kind` | `varchar(8)`, CHECK in (`SYS`, `IMP`, `LEG`, `EXT`) | SYS = created in the platform; IMP = applied from an import batch; LEG = read-only legacy evidence (historical); EXT = reference only |
+| `import_batch_id` | uuid FK → `platform_import_batch(id)` ON DELETE PROTECT, nullable | the batch the value came from |
+| `staging_row_id` | bigint FK → `platform_import_staging_row(id)` ON DELETE PROTECT, nullable | the raw row (workbook, sheet, row, payload hash) |
+| `source_sheet` | `varchar(100)`, default '' | sheet name as in the source (e.g. `NOrder`) |
+| `source_cell_ref` | `varchar(32)`, default '' | A1 reference of the cell that produced the value |
+| `source_raw_value` | `text`, nullable | raw cell text exactly as read (never trimmed or normalised) |
+| `source_formula` | `text`, nullable | formula text if the cell had one (formula ≠ evaluated truth, SOURCE_MAPPING §4) |
+| `transform_rule_version` | `varchar(64)`, default '' | version id of the transform that normalised the raw value |
+| CHECK | `provenance_kind IN ('IMP','LEG') ⇒ import_batch_id IS NOT NULL AND staging_row_id IS NOT NULL` | an imported value always points to its raw row |
+| CHECK | `provenance_kind = 'SYS' ⇒ import_batch_id IS NULL` | no fake provenance |
+
+The workbook hash is reached through `import_batch.file_sha256`. It is not copied, so one hash is the single truth.
+
+## 2. Identity module
+| Entity (table) | Key fields | Keys and constraints | Provenance | Sensitivity | Blocked parts |
+|---|---|---|---|---|---|
+| Customer (`identity_customer`) | id, `customer_no` (internal, system-generated text), `display_name_fa`, `legal_name_fa` (nullable), `status` (ACTIVE / INACTIVE), `default_required_quality_ref` (text, C-68) | UNIQUE(`customer_no`); UNIQUE(lower(normalised `display_name_fa`)) **as a warning index only** (non-unique index + engine duplicate check; never an auto-merge); CHECK status; no contact columns | block 1.1 | S2 | none |
+| CustomerBrand (`identity_customer_brand`) | id, customer_id FK, `brand_name_fa`, `status` | UNIQUE(customer_id, normalised `brand_name_fa`); FK ON DELETE PROTECT | block 1.1 | S2 | whether brands exist as a separate level: DEC-058 q.1 (the table is harmless if unused) |
+| ProductClass (`identity_product_class`) | id, `parent_id` (self FK, nullable), `level_key` (SystemKey of the classification level), `label_fa`, `segment_value` (`varchar(8)`, **nullable**), `rule_revision_id` FK (nullable), `status` (DRAFT / ACTIVE / RETIRED) | acyclic (engine + trigger); UNIQUE(parent_id, label_fa); UNIQUE(rule_revision_id, level_key, segment_value) WHERE segment_value IS NOT NULL; CHECK `segment_value ~ '^[0-9]+$'` | block 1.1 (IMP from `Sorce` after DEC-005) | S1 | the levels (type/category/…), their order and `segment_value` widths: DEC-005 E-1…E-3. Nothing is seeded (C-58). |
+| Product (`identity_product`) | id, `product_class_id` FK, `product_no` (`varchar(8)`, digits, nullable), `name_fa`, `uom` (PIECE / PAIR), `status` (DRAFT / ACTIVE / RETIRED) | CHECK `product_no ~ '^[0-9]+$'`; uniqueness scope of `product_no`: DEC-005 E-4 (02.2 adds only a non-unique index); FK PROTECT | block 1.1 | S2 | product number width and scope: DEC-005 |
+| Style (`identity_style`) | id, product_id FK, `style_no` (`varchar(8)`, digits, nullable), `name_fa`, `current_revision_id` FK (nullable), `status` | UNIQUE(product_id, style_no) WHERE style_no IS NOT NULL (C-57); CHECK digits | block 1.1 | S2 | style number width: DEC-005 |
+| StyleRevision (`identity_style_revision`) | id, style_id FK, `revision_no` (int ≥ 1), `attributes` (jsonb: colour, main material **as text references**, hardware colour, notes), `status` (DRAFT / ACTIVE / SUPERSEDED), `technical_package_revision_id` (uuid, nullable, PHASE_03/04, C-59) | UNIQUE(style_id, revision_no); one ACTIVE per style (partial unique index); ACTIVE and SUPERSEDED rows immutable (trigger) | block 1.1 | S2 | material/colour master lists are PHASE_04/06; text only here |
+| CodeRuleRevision (`identity_code_rule_revision`) | id, `code_namespace` (= product_code), `revision_no`, `scope` (jsonb: which classes the rule covers), `rule_spec` (jsonb, schema-validated, **content defined only after DEC-005**), `source_workbook_sha256`, `evidence_ref` (document id of the extraction report, PHASE_01 documents), `golden_case_count`, `status` (DRAFT / IN_REVIEW / APPROVED / ACTIVE / RETIRED / REJECTED), `decision_id` (`^DEC-[0-9]{3}$`), `approved_by`, `approved_at` | UNIQUE(code_namespace, revision_no); CHECK `source_workbook_sha256 ~ '^[0-9a-f]{64}$'`; ACTIVE ⇒ approved_by ≠ created_by (maker-checker, DEC-032 pattern) and `golden_case_count >= 20` (Gate text) and `decision_id` APPROVED; ACTIVE/RETIRED immutable | SYS (rule) + evidence hash | S2 | **entire activation BLOCKED by DEC-005**; the `rule_spec` JSON schema is written after the extraction |
+| CodeRuleGoldenCase (`identity_code_rule_golden_case`) | id, rule_revision_id FK, `inputs` (jsonb), `expected_code` (Code14), `source_sheet`, `source_cell_ref`, `source_workbook_sha256`, `verified_by`, `verified_at` | UNIQUE(rule_revision_id, source_sheet, source_cell_ref); expected_code CHECK regex | LEG (server DB only) | S2 | real cases live **only** in the server DB and in the private directory, never in Git (DEC-028, DEC-046; R-38). Repository tests use synthetic cases. |
+| ProductCode (`identity_product_code`) — registry | id, `code` (Code14), `code_namespace` (product_code), `style_id` FK (nullable until matched), `rule_revision_id` FK (nullable: imported legacy codes have none), `status` (RESERVED / ACTIVE / RETIRED / DISPUTED), `erp_status` (ERP_PENDING / ERP_MATCHED / ERP_MISSING), `erp_seen_batch_id` FK import batch (nullable), `issued_by`, `issued_at` | **UNIQUE(code_namespace, code)**; CHECK regex; ACTIVE ⇒ `erp_status = ERP_MATCHED` (C-75); `style_id` unique WHERE status IN (RESERVED, ACTIVE) only if DEC-005 confirms one code per style (open: E-6) | block 1.1 (IMP from the Rahkaran item list or LEG from Planning; SYS only through an APPROVED rule) | S2 | issuing (SYS rows) BLOCKED by DEC-005; ERP matching uses the Rahkaran import of PHASE_06 (`erp_status` stays ERP_PENDING until then) |
+| SerialNamespace (`identity_serial_namespace`) | id, `namespace_key` (SystemKey), `pattern` (text regex, nullable), `next_value` (bigint), `reserved_below` (bigint, legacy collision guard), `decision_id`, `status` (DRAFT / ACTIVE) | UNIQUE(namespace_key); ACTIVE ⇒ pattern NOT NULL and decision APPROVED; `next_value` only moved by the allocation function under `SELECT … FOR UPDATE` (or a DB sequence per namespace, chosen in 02.2) | SYS | S1 | **BLOCKED by DEC-006** (no ACTIVE row can exist) |
+| Serial (`identity_serial`) | id, `serial_namespace_id` FK, `serial_number` (varchar 32), `order_line_id` FK → `commercial_customer_order_line`, `customer_id`, `style_id`, `style_revision_id`, `product_code_id` (nullable), `status` (STATE_TRANSITIONS §5.4), `allocation_idempotency_key` (uuid), `allocated_by`, `allocated_at` | **UNIQUE(serial_namespace_id, serial_number)**; **UNIQUE(order_line_id)** (ID-03, C-47); UNIQUE(allocation_idempotency_key) (ID-04); number never re-used, even after CANCELLED (no delete; trigger); FK PROTECT | SYS (LEG serials live in HistoricalOrderRecord, not here) | S2 | allocation BLOCKED by DEC-006 |
+| SerialSnapshot (`identity_serial_snapshot`) | id, serial_id FK, `version` (int ≥ 1), `snapshot` (jsonb: customer, brand, PO no, line no, product code, style + revision attributes, quantity + uom, dates, required quality reference), `reason` (ALLOCATED / CHANGE_APPLIED / TECH_PACKAGE_LINKED), `change_request_id` (nullable), `created_at`, `created_by` | UNIQUE(serial_id, version); append-only (trigger); version 1 written in the allocation transaction (ID-02, C-64) | SYS | S2 | none (needs a serial, so in practice after DEC-006) |
+| ExternalRef (`identity_external_ref`) | id, `target_type` (customer / product / style / customer_order / order_line / serial), `target_id`, `system` (RAHKARAN / CUSTOMER / LEGACY_PLANNING / OTHER), `namespace` (SystemKey, e.g. `rahkaran_project_code`, `customer_style_code`, `customer_serial`, `contract_no`), `value` (`varchar(64)`, raw text kept exactly), `valid_from`, `valid_to` | UNIQUE(system, namespace, value, target_type, target_id); index (system, namespace, value); **no** global uniqueness of `value` (C-56); values never parsed into numbers | block 1.1 | S2 | the namespace list: DEC-058 q.4 (rows can be created with SystemKeys; new namespaces by data steward) |
+| HistoricalOrderRecord (`identity_historical_order_record`) | id, `import_batch_id`, `staging_row_id`, `legacy_order_ref` (text), `legacy_serial_ref` (text), `legacy_product_code_raw` (text, **not** Code14-checked), `normalised_product_code` (Code14, nullable), `payload` (jsonb: the mapped legacy columns, raw), `match_status` (UNMATCHED / SUGGESTED / CONFIRMED / REJECTED), `matched_serial_id` (nullable), `matched_by` | UNIQUE(staging_row_id); never updated except `match_*` columns (trigger); never an official order | LEG | S2 | bulk import BLOCKED by DEC-025/035 (PHASE_12); PHASE_02 uses it for the golden extraction only |
+
+## 3. Commercial module
+| Entity (table) | Key fields | Keys and constraints | Provenance | Sensitivity | Blocked parts |
+|---|---|---|---|---|---|
+| CustomerOrder (`commercial_customer_order`) — PO header | id, `order_no` (internal, system-generated text), `customer_id` FK, `brand_id` FK (nullable), `external_po_number` (`varchar(64)`, raw), `order_type` (SystemKey, list DEC-058 q.6), `program_ref` (text, nullable; PHASE_05 owns programs), `order_date` (date), `requested_due_date` (date, nullable), `status` (STATE_TRANSITIONS §5.1), `hold_reason` (nullable), `current_version` (int), `cancel_reason` (nullable) | UNIQUE(order_no); index (customer_id, external_po_number) **non-unique** (C-55); CHECK status; CHECK `requested_due_date >= order_date`; CHECK `status IN (ON_HOLD, PAUSED) ⇔ hold_reason IS NOT NULL`; FK PROTECT | block 1.1 | S2 | confirmation authority DEC-057; cancellation after CONFIRMED DEC-059 |
+| CustomerOrderLine (`commercial_customer_order_line`) | id, order_id FK, `line_no` (int ≥ 1), `style_id` FK, `style_revision_id` FK, `product_code_id` FK (nullable until known), `quantity` (int > 0), `uom`, `requested_due_date` (nullable), `status` (STATE_TRANSITIONS §5.2), `serial_id` (nullable, mirrors `identity_serial.order_line_id`), `cancel_reason` | UNIQUE(order_id, line_no); line_no never re-used inside an order; one Product/Style per line (single `style_id`, README_FA); CHECK quantity > 0; CHECK uom; CONFIRMED lines immutable except via change request (trigger checks `current_version`) | block 1.1 | S2 | whether a line may be CONFIRMED without a serial: DEC-006 q.2 |
+| CustomerOrderVersion (`commercial_customer_order_version`) | id, order_id FK, `version` (int ≥ 1), `image` (jsonb: header + all lines), `reason` (CONFIRMED / CHANGE_APPLIED / CANCELLED), `change_request_id` (nullable), `created_at`, `created_by` | UNIQUE(order_id, version); append-only (trigger); `commercial_customer_order.current_version` = max(version) (engine + check in the same transaction) | SYS | S2 | none |
+| OrderChangeRequest (`commercial_order_change_request`) | id, `request_no`, order_id FK, `base_order_version` (int), `kind` (QTY_CHANGE / DUE_DATE_CHANGE / ADD_LINE / CANCEL_LINE / CANCEL_ORDER / HOLD / RESUME), `items` (jsonb, schema per kind: line id, old value, new value), `reason` (≥ 3 chars), `status` (STATE_TRANSITIONS §5.5), `impact` (jsonb, PHASE_02 part only: affected lines/serials/snapshots), `approval_id` FK → `platform_approval_request` (nullable), `requested_by`, `decided_by`, `applied_version` (nullable) | UNIQUE(request_no); CHECK status; at most one SUBMITTED/APPROVED request per order at a time (partial unique index) so two changes never race on one version; APPLIED ⇒ `applied_version = base_order_version + 1`; decided_by ≠ requested_by (DEC-032 pattern) | SYS | S2 | allowed kinds per state and the approver: **DEC-059 / DEC-057** |
+
+## 4. Platform tables reused (no new platform table in PHASE_02)
+`platform_import_batch` / `platform_import_staging_row` (provenance), `platform_approval_request` (maker-checker of
+CodeRuleRevision and change requests), `platform_audit_event`, `platform_outbox_event`, `platform_idempotency_record`
+(ID-04), `platform_document` (extraction reports as evidence), `platform_conflict_item` (import conflicts, e.g. a
+Rahkaran code that differs from the Planning code).
+
+## 5. Invariants that 02.2/02.3 must prove with tests
+| ID | Invariant | Evidence planned |
+|---|---|---|
+| INV-02-01 | A 14-digit code is stored and returned as the same 14-character string (leading zeros kept); integers and Persian digits are refused | ID-01; DB CHECK + API schema `Code14` + property test |
+| INV-02-02 | No two serials share (namespace, number); a line has at most one serial | ID-02, ID-03; UNIQUE constraints + 100 concurrent allocations (Gate) |
+| INV-02-03 | The same Idempotency-Key + body gives one serial and the same response | ID-04; `platform_idempotency_record` + UNIQUE(`allocation_idempotency_key`) |
+| INV-02-04 | Exactly one SerialSnapshot v1 per committed line, written in the allocation transaction | ID-02; rollback test (failure after snapshot ⇒ no serial, no snapshot, no outbox) |
+| INV-02-05 | A serial number is never re-used, and a serial row is never deleted | trigger test |
+| INV-02-06 | CONFIRMED order data changes only through an APPLIED change request, which writes a new CustomerOrderVersion | trigger + engine test |
+| INV-02-07 | A code is issued only under an ACTIVE CodeRuleRevision; otherwise 409 RULE_NOT_APPROVED (DEC-005) | engine test (runs today: blocked path) |
+| INV-02-08 | Similarity never merges two styles/customers | API contract: no merge operation |
+| INV-02-09 | Imported values keep raw + normalised + provenance; IMP/LEG rows always point to a staging row | DB CHECK (block 1.1) |

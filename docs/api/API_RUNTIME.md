@@ -222,3 +222,19 @@ All 99 PHASE_01 operations are served (`backend/platform_core/api/phase01/`, rou
   `FILE_NOT_RELEASED`; every download audited). Not business-approval permissions.
 - Outbox delivery state `DISCARDED` (migration `0018`, REV-0129) - console only (`manage.py outbox_dead_letter`),
   not exposed by any operation.
+
+## 13. PHASE_02 planned operations (contract 0.7.0-draft, step 02.1)
+
+- 63 operations on 48 paths under `/identity/...` (customers, brands, product classes, products, styles and
+  revisions, product codes, code rule revisions, serials, external references, historical order records) and
+  `/commercial/...` (customer orders, lines, versions, change requests). All `x-aleekhan-status: planned`,
+  `x-aleekhan-step: '02.4'`; none is routed (route parity covers implemented paths only).
+- Permissions `identity.*` / `commercial.*` are proposals; no role holds them before DEC-057, so the deny-by-default
+  policy answers 403 once 02.4 routes them.
+- Blocked (409 `RULE_NOT_APPROVED` + `decision_id`): code preview/issue and code rule revisions (DEC-005), serial
+  allocation and order confirmation (DEC-006), change requests (DEC-059), approvals (DEC-057).
+- `validateProductCode` and `previewProductCode` are side-effect free POSTs without Idempotency-Key
+  (`x-aleekhan-conventions.side_effect_free_operations`); the 14-digit code stays out of URLs and access logs.
+- Planned error codes (join `ErrorCode` in 02.3): `SERIAL_ALREADY_ALLOCATED`, `PRODUCT_CODE_TAKEN`,
+  `POSSIBLE_DUPLICATE`, `ORDER_VERSION_STALE` (all 409).
+- `/version` reports `contract_version` 0.7.0-draft; runtime behaviour of the implemented operations is unchanged.

@@ -1,0 +1,10 @@
+# golden extractions pending private-source access (step 02.1)
+# machine: work-windows; ALEEKHAN_PRIVATE_DIR is NOT set -> no private file was looked for, read or hashed.
+SKIPPED: private source not available
+pending (run on a machine with ALEEKHAN_PRIVATE_DIR, read-only, no macro execution, results kept private):
+- DEC-005 E-1..E-11: Planning--.xlsm v2 (DEC-037) NOrder!FZ formula variants, Sorce E/O, NOrder A/C/D/FY, Codding,
+  cached FZ lengths, code-style relation, >= 20 real cases per family, VBA text audit, prefix "02",
+  Rahkaran item-list comparison, planning_coding_audit_v01.md availability
+- DEC-006 q.5: largest legacy serial numbers (Planning + Rahkaran projects) for the start value / namespace choice
+- C-22 / C-74: v2 workbook hashes into the repo-side source intake file (hashes only)
+# exit code: 0

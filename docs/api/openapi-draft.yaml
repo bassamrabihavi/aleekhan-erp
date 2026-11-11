@@ -2,8 +2,8 @@ openapi: 3.1.0
 jsonSchemaDialect: https://spec.openapis.org/oas/3.1/dialect/base
 info:
   title: Aleekhan Factory Platform API
-  version: 0.6.3-draft
-  summary: PHASE_00 + PHASE_01 platform contract (implemented in 00.4 / 01.4). Platform only, NO business writes.
+  version: 0.7.0-draft
+  summary: PHASE_00 + PHASE_01 platform contract (implemented) + PHASE_02 identity/commercial operations (PLANNED, 02.1).
   description: |
     Status: DRAFT (PHASE_00 / 00.1 Discovery & Contract, implemented in 00.4). Not approved. This hand-written
     document is the contract (contract-first): the backend is tested against it (route parity, security
@@ -77,6 +77,20 @@ info:
     2026-11-10): owner_admin also holds platform.document.read and platform.document.download (CLEAN only,
     audited); not business-approval permissions.
 
+    0.7.0-draft (PHASE_02 / 02.1 Discovery & Contract): adds PLANNED operations for the Identity module
+    (customers, brands, product classes, products, styles and style revisions, product-code validation and
+    registry, code rule revisions, serials and snapshots, external references, historical order records) and
+    the Commercial module (customer orders and lines, order versions, change requests): 63 operations on
+    48 paths, all `x-aleekhan-status: planned` with `x-aleekhan-step: '02.4'`; none is routed.
+    14 operations are blocked by open decisions (`x-aleekhan-blocked-by`: DEC-005 code rules,
+    DEC-006 serial format/line relation, DEC-057 PHASE_02 permission matrix, DEC-059 order changes) and answer
+    409 RULE_NOT_APPROVED. Permission ids (`identity.*`, `commercial.*`) are proposals: no role holds them
+    before DEC-057. 14-digit codes stay `Code14` strings with a namespace; `SerialNumber` has NO pattern until
+    DEC-006. Two side-effect free POSTs (`side_effect_free_operations`) carry no Idempotency-Key. Planned error
+    codes are listed in `planned_error_codes`. Existing PHASE_00/PHASE_01 paths, operations and components are
+    unchanged (additive change only). Sources: docs/discovery/CONFLICTS.md C-47..C-76, DATA_TABLE.md and
+    STATE_TRANSITIONS.md section 5 (PHASE_02).
+
     Stack: Django 5.2 LTS + DRF (DEC-001). Base path is versioned: every endpoint lives under `/api/v1`.
     A breaking change requires `/api/v2` (or an explicitly approved deprecation window); additive changes only
     within v1. Security is declared top-level (`sessionCookie`, deny by default); only the platform probes
@@ -146,6 +160,11 @@ tags:
     description: 'PHASE_01: document registry, revisions, quarantined upload (SEC-03), download of CLEAN files only.'
   - name: parameters
     description: 'PHASE_01: typed versioned parameters, dynamic field drafts (page 42; layout publishing PHASE_11).'
+  - name: identity
+    description: 'PHASE_02 (PLANNED): customers, products, styles, product codes, code rules, serials, external references (Identity
+      module).'
+  - name: commercial
+    description: 'PHASE_02 (PLANNED): customer orders, lines, versions and change requests (Commercial module).'
 paths:
   /health/live:
     get:
@@ -4646,6 +4665,3217 @@ paths:
           $ref: '#/components/responses/PreconditionRequired'
         '429':
           $ref: '#/components/responses/RateLimited'
+  /identity/customers:
+    x-aleekhan-status: planned
+    x-aleekhan-step: '02.4'
+    get:
+      tags:
+      - identity
+      operationId: listCustomers
+      summary: List customers
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.customer.read` (deny by default;
+        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+
+        '
+      x-aleekhan-permission: identity.customer.read
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      - $ref: '#/components/parameters/Cursor'
+      - $ref: '#/components/parameters/PageSize'
+      - $ref: '#/components/parameters/SearchText'
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - ACTIVE
+          - INACTIVE
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerPage'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+    post:
+      tags:
+      - identity
+      operationId: createCustomer
+      summary: Create a customer (duplicate check, no auto-merge)
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.customer.manage` (deny by
+        default; record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before
+        DEC-057.
+
+        A possible duplicate answers 409 POSSIBLE_DUPLICATE (planned code) unless acknowledged.
+
+        '
+      x-aleekhan-permission: identity.customer.manage
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerCreateRequest'
+      responses:
+        '201':
+          description: Created
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/IdempotencyKeyReused'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /identity/customers/{customer_id}:
+    x-aleekhan-status: planned
+    x-aleekhan-step: '02.4'
+    parameters:
+    - $ref: '#/components/parameters/CustomerId'
+    get:
+      tags:
+      - identity
+      operationId: getCustomer
+      summary: Get a customer
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.customer.read` (deny by default;
+        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+
+        '
+      x-aleekhan-permission: identity.customer.read
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+    patch:
+      tags:
+      - identity
+      operationId: updateCustomer
+      summary: Update a customer
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.customer.manage` (deny by
+        default; record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before
+        DEC-057.
+
+        '
+      x-aleekhan-permission: identity.customer.manage
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerUpdateRequest'
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '412':
+          $ref: '#/components/responses/VersionConflict'
+        '422':
+          $ref: '#/components/responses/IdempotencyKeyReused'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /identity/customers/{customer_id}/brands:
+    x-aleekhan-status: planned
+    x-aleekhan-step: '02.4'
+    parameters:
+    - $ref: '#/components/parameters/CustomerId'
+    get:
+      tags:
+      - identity
+      operationId: listCustomerBrands
+      summary: List the brands of a customer
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.customer.read` (deny by default;
+        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+
+        '
+      x-aleekhan-permission: identity.customer.read
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      - $ref: '#/components/parameters/Cursor'
+      - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerBrandPage'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+    post:
+      tags:
+      - identity
+      operationId: createCustomerBrand
+      summary: Add a brand to a customer
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.customer.manage` (deny by
+        default; record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before
+        DEC-057.
+
+        '
+      x-aleekhan-permission: identity.customer.manage
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerBrandCreateRequest'
+      responses:
+        '201':
+          description: Created
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerBrand'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/IdempotencyKeyReused'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /identity/product-classes:
+    x-aleekhan-status: planned
+    x-aleekhan-step: '02.4'
+    get:
+      tags:
+      - identity
+      operationId: listProductClasses
+      summary: List product classes (family/type/category)
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.product.read` (deny by default;
+        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+
+        Empty until the class list is confirmed (DEC-005 E-2; C-58).
+
+        '
+      x-aleekhan-permission: identity.product.read
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      - $ref: '#/components/parameters/Cursor'
+      - $ref: '#/components/parameters/PageSize'
+      - name: parent_class_id
+        in: query
+        required: false
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductClassPage'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /identity/products:
+    x-aleekhan-status: planned
+    x-aleekhan-step: '02.4'
+    get:
+      tags:
+      - identity
+      operationId: listProducts
+      summary: List products
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.product.read` (deny by default;
+        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+
+        '
+      x-aleekhan-permission: identity.product.read
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      - $ref: '#/components/parameters/Cursor'
+      - $ref: '#/components/parameters/PageSize'
+      - $ref: '#/components/parameters/SearchText'
+      - name: product_class_id
+        in: query
+        required: false
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductPage'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+    post:
+      tags:
+      - identity
+      operationId: createProduct
+      summary: Create a product
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.product.manage` (deny by default;
+        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+
+        '
+      x-aleekhan-permission: identity.product.manage
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductCreateRequest'
+      responses:
+        '201':
+          description: Created
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/IdempotencyKeyReused'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /identity/products/{product_id}:
+    x-aleekhan-status: planned
+    x-aleekhan-step: '02.4'
+    parameters:
+    - $ref: '#/components/parameters/ProductId'
+    get:
+      tags:
+      - identity
+      operationId: getProduct
+      summary: Get a product
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.product.read` (deny by default;
+        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+
+        '
+      x-aleekhan-permission: identity.product.read
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+    patch:
+      tags:
+      - identity
+      operationId: updateProduct
+      summary: Update a product
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.product.manage` (deny by default;
+        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+
+        '
+      x-aleekhan-permission: identity.product.manage
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductUpdateRequest'
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '412':
+          $ref: '#/components/responses/VersionConflict'
+        '422':
+          $ref: '#/components/responses/IdempotencyKeyReused'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /identity/products/{product_id}/styles:
+    x-aleekhan-status: planned
+    x-aleekhan-step: '02.4'
+    parameters:
+    - $ref: '#/components/parameters/ProductId'
+    get:
+      tags:
+      - identity
+      operationId: listProductStyles
+      summary: List the styles of a product
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.product.read` (deny by default;
+        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+
+        '
+      x-aleekhan-permission: identity.product.read
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      - $ref: '#/components/parameters/Cursor'
+      - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StylePage'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+    post:
+      tags:
+      - identity
+      operationId: createStyle
+      summary: Create a style (with revision 1)
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.product.manage` (deny by default;
+        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+
+        '
+      x-aleekhan-permission: identity.product.manage
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StyleCreateRequest'
+      responses:
+        '201':
+          description: Created
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Style'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/IdempotencyKeyReused'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /identity/styles/{style_id}:
+    x-aleekhan-status: planned
+    x-aleekhan-step: '02.4'
+    parameters:
+    - $ref: '#/components/parameters/StyleId'
+    get:
+      tags:
+      - identity
+      operationId: getStyle
+      summary: Get a style
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.product.read` (deny by default;
+        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+
+        '
+      x-aleekhan-permission: identity.product.read
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Style'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+    patch:
+      tags:
+      - identity
+      operationId: updateStyle
+      summary: Update a style (name/status)
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.product.manage` (deny by default;
+        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+
+        '
+      x-aleekhan-permission: identity.product.manage
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StyleUpdateRequest'
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Style'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '412':
+          $ref: '#/components/responses/VersionConflict'
+        '422':
+          $ref: '#/components/responses/IdempotencyKeyReused'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /identity/styles/{style_id}/revisions:
+    x-aleekhan-status: planned
+    x-aleekhan-step: '02.4'
+    parameters:
+    - $ref: '#/components/parameters/StyleId'
+    get:
+      tags:
+      - identity
+      operationId: listStyleRevisions
+      summary: List style revisions
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.product.read` (deny by default;
+        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+
+        '
+      x-aleekhan-permission: identity.product.read
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      - $ref: '#/components/parameters/Cursor'
+      - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StyleRevisionPage'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+    post:
+      tags:
+      - identity
+      operationId: createStyleRevision
+      summary: Create a DRAFT style revision
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.product.manage` (deny by default;
+        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+
+        '
+      x-aleekhan-permission: identity.product.manage
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StyleRevisionCreateRequest'
+      responses:
+        '201':
+          description: Created
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StyleRevision'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/IdempotencyKeyReused'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /identity/styles/{style_id}/revisions/{style_revision_id}/activate:
+    x-aleekhan-status: planned
+    x-aleekhan-step: '02.4'
+    parameters:
+    - $ref: '#/components/parameters/StyleId'
+    - $ref: '#/components/parameters/StyleRevisionId'
+    post:
+      tags:
+      - identity
+      operationId: activateStyleRevision
+      summary: Activate a style revision (the previous one is superseded)
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.product.manage` (deny by default;
+        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+
+        '
+      x-aleekhan-permission: identity.product.manage
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReasonRequest'
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StyleRevision'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '412':
+          $ref: '#/components/responses/VersionConflict'
+        '422':
+          $ref: '#/components/responses/IdempotencyKeyReused'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /identity/styles/{style_id}/tracking:
+    x-aleekhan-status: planned
+    x-aleekhan-step: '02.4'
+    parameters:
+    - $ref: '#/components/parameters/StyleId'
+    get:
+      tags:
+      - identity
+      operationId: getStyleTracking
+      summary: Product/Style 360 (page 4)
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.product.read` (deny by default;
+        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+
+        '
+      x-aleekhan-permission: identity.product.read
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      - name: customer_id
+        in: query
+        required: false
+        schema:
+          type: string
+          format: uuid
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - ALLOCATED
+          - CANCELLED
+      - name: from
+        in: query
+        required: false
+        schema:
+          type:
+          - string
+          - 'null'
+          format: date
+      - name: to
+        in: query
+        required: false
+        schema:
+          type:
+          - string
+          - 'null'
+          format: date
+      - $ref: '#/components/parameters/Cursor'
+      - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StyleTracking'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /identity/style-suggestions:
+    x-aleekhan-status: planned
+    x-aleekhan-step: '02.4'
+    get:
+      tags:
+      - identity
+      operationId: findSimilarStyles
+      summary: Suggest similar existing styles (never merges)
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.product.read` (deny by default;
+        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+
+        '
+      x-aleekhan-permission: identity.product.read
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      - name: q
+        in: query
+        required: true
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 100
+        description: Server-side search text (normalised for ی/ي, ک/ك and half-space; never a merge).
+      - name: product_id
+        in: query
+        required: false
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StyleSuggestionList'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /identity/product-codes/validate:
+    x-aleekhan-status: planned
+    x-aleekhan-step: '02.4'
+    post:
+      tags:
+      - identity
+      operationId: validateProductCode
+      summary: 'Check a 14-digit code: format, namespace, registry'
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.product_code.read` (deny by
+        default; record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before
+        DEC-057.
+
+        Side-effect free computation (no write, no audit of business data, no outbox): no Idempotency-Key (`x-aleekhan-conventions.side_effect_free_operations`).
+        POST only so the code is not placed in URLs/logs.
+
+        '
+      x-aleekhan-permission: identity.product_code.read
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductCodeValidateRequest'
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductCodeValidation'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /identity/product-codes/preview:
+    x-aleekhan-status: planned
+    x-aleekhan-step: '02.4'
+    post:
+      tags:
+      - identity
+      operationId: previewProductCode
+      summary: Preview the code an ACTIVE rule would give (nothing reserved)
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.product_code.read` (deny by
+        default; record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before
+        DEC-057.
+
+        BLOCKED: answers 409 RULE_NOT_APPROVED with the blocking decision_id until DEC-005 = product code rules (NOrder/Sorce/Codding
+        golden extraction) is APPROVED.
+
+        Side-effect free computation (no write, no audit of business data, no outbox): no Idempotency-Key (`x-aleekhan-conventions.side_effect_free_operations`).
+        POST only so the code is not placed in URLs/logs.
+
+        '
+      x-aleekhan-permission: identity.product_code.read
+      x-aleekhan-blocked-by:
+      - DEC-005
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductCodePreviewRequest'
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductCodePreview'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /identity/product-codes:
+    x-aleekhan-status: planned
+    x-aleekhan-step: '02.4'
+    get:
+      tags:
+      - identity
+      operationId: listProductCodes
+      summary: List registry codes (product_code namespace)
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.product_code.read` (deny by
+        default; record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before
+        DEC-057.
+
+        '
+      x-aleekhan-permission: identity.product_code.read
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      - $ref: '#/components/parameters/Cursor'
+      - $ref: '#/components/parameters/PageSize'
+      - name: style_id
+        in: query
+        required: false
+        schema:
+          type: string
+          format: uuid
+      - name: product_id
+        in: query
+        required: false
+        schema:
+          type: string
+          format: uuid
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - RESERVED
+          - ACTIVE
+          - RETIRED
+          - DISPUTED
+      - name: erp_status
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - ERP_PENDING
+          - ERP_MATCHED
+          - ERP_MISSING
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductCodePage'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+    post:
+      tags:
+      - identity
+      operationId: issueProductCode
+      summary: Reserve a new product code under an ACTIVE rule (ERP_PENDING until Rahkaran matches)
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.product_code.issue` (deny
+        by default; record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before
+        DEC-057.
+
+        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (DEC-051:
+        15 min; also inside the factory network, DEC-049).
+
+        BLOCKED: answers 409 RULE_NOT_APPROVED with the blocking decision_id until DEC-005 = product code rules (NOrder/Sorce/Codding
+        golden extraction); DEC-057 = PHASE_02 permission matrix (who confirms/approves) is APPROVED.
+
+        Race: UNIQUE(code_namespace, code); the loser gets 409 PRODUCT_CODE_TAKEN (planned code). Nothing is written to Rahkaran
+        (ADR-001; C-75).
+
+        '
+      x-aleekhan-permission: identity.product_code.issue
+      x-aleekhan-mfa-step-up: true
+      x-aleekhan-blocked-by:
+      - DEC-005
+      - DEC-057
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductCodeIssueRequest'
+      responses:
+        '201':
+          description: Created
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductCode'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/IdempotencyKeyReused'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /identity/product-codes/{product_code_id}:
+    x-aleekhan-status: planned
+    x-aleekhan-step: '02.4'
+    parameters:
+    - $ref: '#/components/parameters/ProductCodeId'
+    get:
+      tags:
+      - identity
+      operationId: getProductCode
+      summary: Get a registry code
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.product_code.read` (deny by
+        default; record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before
+        DEC-057.
+
+        '
+      x-aleekhan-permission: identity.product_code.read
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductCode'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /identity/code-rule-revisions:
+    x-aleekhan-status: planned
+    x-aleekhan-step: '02.4'
+    get:
+      tags:
+      - identity
+      operationId: listCodeRuleRevisions
+      summary: List code rule revisions
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.code_rule.read` (deny by default;
+        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+
+        '
+      x-aleekhan-permission: identity.code_rule.read
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      - $ref: '#/components/parameters/Cursor'
+      - $ref: '#/components/parameters/PageSize'
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - DRAFT
+          - IN_REVIEW
+          - APPROVED
+          - ACTIVE
+          - RETIRED
+          - REJECTED
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodeRuleRevisionPage'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+    post:
+      tags:
+      - identity
+      operationId: createCodeRuleRevision
+      summary: Create a DRAFT code rule revision
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.code_rule.manage` (deny by
+        default; record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before
+        DEC-057.
+
+        BLOCKED: answers 409 RULE_NOT_APPROVED with the blocking decision_id until DEC-005 = product code rules (NOrder/Sorce/Codding
+        golden extraction) is APPROVED.
+
+        '
+      x-aleekhan-permission: identity.code_rule.manage
+      x-aleekhan-blocked-by:
+      - DEC-005
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CodeRuleRevisionCreateRequest'
+      responses:
+        '201':
+          description: Created
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodeRuleRevision'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/IdempotencyKeyReused'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /identity/code-rule-revisions/{rule_revision_id}:
+    x-aleekhan-status: planned
+    x-aleekhan-step: '02.4'
+    parameters:
+    - $ref: '#/components/parameters/RuleRevisionId'
+    get:
+      tags:
+      - identity
+      operationId: getCodeRuleRevision
+      summary: Get a code rule revision
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.code_rule.read` (deny by default;
+        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+
+        '
+      x-aleekhan-permission: identity.code_rule.read
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodeRuleRevision'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /identity/code-rule-revisions/{rule_revision_id}/submit-review:
+    x-aleekhan-status: planned
+    x-aleekhan-step: '02.4'
+    parameters:
+    - $ref: '#/components/parameters/RuleRevisionId'
+    post:
+      tags:
+      - identity
+      operationId: submitCodeRuleRevision
+      summary: Submit for review (>= 20 golden cases per covered family)
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.code_rule.manage` (deny by
+        default; record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before
+        DEC-057.
+
+        BLOCKED: answers 409 RULE_NOT_APPROVED with the blocking decision_id until DEC-005 = product code rules (NOrder/Sorce/Codding
+        golden extraction) is APPROVED.
+
+        '
+      x-aleekhan-permission: identity.code_rule.manage
+      x-aleekhan-blocked-by:
+      - DEC-005
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReasonRequest'
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodeRuleRevision'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '412':
+          $ref: '#/components/responses/VersionConflict'
+        '422':
+          $ref: '#/components/responses/IdempotencyKeyReused'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /identity/code-rule-revisions/{rule_revision_id}/approve:
+    x-aleekhan-status: planned
+    x-aleekhan-step: '02.4'
+    parameters:
+    - $ref: '#/components/parameters/RuleRevisionId'
+    post:
+      tags:
+      - identity
+      operationId: approveCodeRuleRevision
+      summary: Approve (maker != checker)
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.code_rule.approve` (deny by
+        default; record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before
+        DEC-057.
+
+        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (DEC-051:
+        15 min; also inside the factory network, DEC-049).
+
+        BLOCKED: answers 409 RULE_NOT_APPROVED with the blocking decision_id until DEC-005 = product code rules (NOrder/Sorce/Codding
+        golden extraction); DEC-057 = PHASE_02 permission matrix (who confirms/approves) is APPROVED.
+
+        '
+      x-aleekhan-permission: identity.code_rule.approve
+      x-aleekhan-mfa-step-up: true
+      x-aleekhan-blocked-by:
+      - DEC-005
+      - DEC-057
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApprovalDecisionRequest'
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodeRuleRevision'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '412':
+          $ref: '#/components/responses/VersionConflict'
+        '422':
+          $ref: '#/components/responses/IdempotencyKeyReused'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /identity/code-rule-revisions/{rule_revision_id}/reject:
+    x-aleekhan-status: planned
+    x-aleekhan-step: '02.4'
+    parameters:
+    - $ref: '#/components/parameters/RuleRevisionId'
+    post:
+      tags:
+      - identity
+      operationId: rejectCodeRuleRevision
+      summary: Reject (a correction is a new revision)
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.code_rule.approve` (deny by
+        default; record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before
+        DEC-057.
+
+        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (DEC-051:
+        15 min; also inside the factory network, DEC-049).
+
+        BLOCKED: answers 409 RULE_NOT_APPROVED with the blocking decision_id until DEC-005 = product code rules (NOrder/Sorce/Codding
+        golden extraction); DEC-057 = PHASE_02 permission matrix (who confirms/approves) is APPROVED.
+
+        '
+      x-aleekhan-permission: identity.code_rule.approve
+      x-aleekhan-mfa-step-up: true
+      x-aleekhan-blocked-by:
+      - DEC-005
+      - DEC-057
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReasonRequest'
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodeRuleRevision'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '412':
+          $ref: '#/components/responses/VersionConflict'
+        '422':
+          $ref: '#/components/responses/IdempotencyKeyReused'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /identity/code-rule-revisions/{rule_revision_id}/activate:
+    x-aleekhan-status: planned
+    x-aleekhan-step: '02.4'
+    parameters:
+    - $ref: '#/components/parameters/RuleRevisionId'
+    post:
+      tags:
+      - identity
+      operationId: activateCodeRuleRevision
+      summary: Activate an APPROVED revision (the previous one retires)
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.code_rule.approve` (deny by
+        default; record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before
+        DEC-057.
+
+        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (DEC-051:
+        15 min; also inside the factory network, DEC-049).
+
+        BLOCKED: answers 409 RULE_NOT_APPROVED with the blocking decision_id until DEC-005 = product code rules (NOrder/Sorce/Codding
+        golden extraction); DEC-057 = PHASE_02 permission matrix (who confirms/approves) is APPROVED.
+
+        '
+      x-aleekhan-permission: identity.code_rule.approve
+      x-aleekhan-mfa-step-up: true
+      x-aleekhan-blocked-by:
+      - DEC-005
+      - DEC-057
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReasonRequest'
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodeRuleRevision'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '412':
+          $ref: '#/components/responses/VersionConflict'
+        '422':
+          $ref: '#/components/responses/IdempotencyKeyReused'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /identity/serials:
+    x-aleekhan-status: planned
+    x-aleekhan-step: '02.4'
+    get:
+      tags:
+      - identity
+      operationId: listSerials
+      summary: List serials
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.serial.read` (deny by default;
+        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+
+        '
+      x-aleekhan-permission: identity.serial.read
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      - $ref: '#/components/parameters/Cursor'
+      - $ref: '#/components/parameters/PageSize'
+      - $ref: '#/components/parameters/SearchText'
+      - name: customer_id
+        in: query
+        required: false
+        schema:
+          type: string
+          format: uuid
+      - name: order_id
+        in: query
+        required: false
+        schema:
+          type: string
+          format: uuid
+      - name: style_id
+        in: query
+        required: false
+        schema:
+          type: string
+          format: uuid
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - ALLOCATED
+          - CANCELLED
+          - IN_PRODUCTION
+          - PARTIALLY_DELIVERED
+          - DELIVERED
+          - CLOSED
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SerialPage'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+    post:
+      tags:
+      - identity
+      operationId: allocateSerial
+      summary: Allocate the serial of a CONFIRMED order line (atomic, idempotent, snapshot v1)
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.serial.allocate` (deny by
+        default; record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before
+        DEC-057.
+
+        BLOCKED: answers 409 RULE_NOT_APPROVED with the blocking decision_id until DEC-006 = serial namespace/format and its
+        relation to the order line; DEC-057 = PHASE_02 permission matrix (who confirms/approves) is APPROVED.
+
+        One transaction: serial + SerialSnapshot v1 + audit + outbox `SerialAllocated` (ID-02/03/04). Number from the namespace
+        under a row lock or a DB sequence, never MAX()+1 (R-13).
+
+        '
+      x-aleekhan-permission: identity.serial.allocate
+      x-aleekhan-blocked-by:
+      - DEC-006
+      - DEC-057
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SerialAllocateRequest'
+      responses:
+        '201':
+          description: Created
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Serial'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/IdempotencyKeyReused'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /identity/serials/{serial_id}:
+    x-aleekhan-status: planned
+    x-aleekhan-step: '02.4'
+    parameters:
+    - $ref: '#/components/parameters/SerialId'
+    get:
+      tags:
+      - identity
+      operationId: getSerial
+      summary: Get a serial (page 1 header)
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.serial.read` (deny by default;
+        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+
+        '
+      x-aleekhan-permission: identity.serial.read
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Serial'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /identity/serials/{serial_id}/snapshots:
+    x-aleekhan-status: planned
+    x-aleekhan-step: '02.4'
+    parameters:
+    - $ref: '#/components/parameters/SerialId'
+    get:
+      tags:
+      - identity
+      operationId: listSerialSnapshots
+      summary: List the snapshots of a serial
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.serial.read` (deny by default;
+        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+
+        '
+      x-aleekhan-permission: identity.serial.read
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      - $ref: '#/components/parameters/Cursor'
+      - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SerialSnapshotPage'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /identity/serials/{serial_id}/tracking:
+    x-aleekhan-status: planned
+    x-aleekhan-step: '02.4'
+    parameters:
+    - $ref: '#/components/parameters/SerialId'
+    get:
+      tags:
+      - identity
+      operationId: getSerialTracking
+      summary: 'Serial 360: order versions and events (pages 1/2)'
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.serial.read` (deny by default;
+        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+
+        '
+      x-aleekhan-permission: identity.serial.read
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SerialTracking'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /identity/external-refs:
+    x-aleekhan-status: planned
+    x-aleekhan-step: '02.4'
+    get:
+      tags:
+      - identity
+      operationId: listExternalRefs
+      summary: List external references of a target
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.external_ref.read` (deny by
+        default; record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before
+        DEC-057.
+
+        '
+      x-aleekhan-permission: identity.external_ref.read
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      - $ref: '#/components/parameters/Cursor'
+      - $ref: '#/components/parameters/PageSize'
+      - name: target_type
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - customer
+          - product
+          - style
+          - customer_order
+          - order_line
+          - serial
+      - name: target_id
+        in: query
+        required: false
+        schema:
+          type: string
+          format: uuid
+      - name: system
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - RAHKARAN
+          - CUSTOMER
+          - LEGACY_PLANNING
+          - OTHER
+      - name: namespace
+        in: query
+        required: false
+        schema:
+          $ref: '#/components/schemas/SystemKey'
+      - name: value
+        in: query
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 64
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExternalRefPage'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+    post:
+      tags:
+      - identity
+      operationId: createExternalRef
+      summary: Add an external reference
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.external_ref.manage` (deny
+        by default; record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before
+        DEC-057.
+
+        '
+      x-aleekhan-permission: identity.external_ref.manage
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExternalRefCreateRequest'
+      responses:
+        '201':
+          description: Created
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExternalRef'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/IdempotencyKeyReused'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /identity/external-refs/{external_ref_id}/end:
+    x-aleekhan-status: planned
+    x-aleekhan-step: '02.4'
+    parameters:
+    - $ref: '#/components/parameters/ExternalRefId'
+    post:
+      tags:
+      - identity
+      operationId: endExternalRef
+      summary: End the validity of an external reference (never deleted)
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.external_ref.manage` (deny
+        by default; record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before
+        DEC-057.
+
+        '
+      x-aleekhan-permission: identity.external_ref.manage
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReasonRequest'
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExternalRef'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '412':
+          $ref: '#/components/responses/VersionConflict'
+        '422':
+          $ref: '#/components/responses/IdempotencyKeyReused'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /identity/historical-order-records:
+    x-aleekhan-status: planned
+    x-aleekhan-step: '02.4'
+    get:
+      tags:
+      - identity
+      operationId: listHistoricalOrderRecords
+      summary: List read-only legacy order evidence
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.historical.read` (deny by
+        default; record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before
+        DEC-057.
+
+        Read-only. Bulk import of legacy orders stays BLOCKED (DEC-025/DEC-035, PHASE_12; C-65).
+
+        '
+      x-aleekhan-permission: identity.historical.read
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      - $ref: '#/components/parameters/Cursor'
+      - $ref: '#/components/parameters/PageSize'
+      - name: import_batch_id
+        in: query
+        required: false
+        schema:
+          type: string
+          format: uuid
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - UNMATCHED
+          - SUGGESTED
+          - CONFIRMED
+          - REJECTED
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HistoricalOrderRecordPage'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /commercial/customer-orders:
+    x-aleekhan-status: planned
+    x-aleekhan-step: '02.4'
+    get:
+      tags:
+      - commercial
+      operationId: listCustomerOrders
+      summary: List customer orders
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `commercial.order.read` (deny by default;
+        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+
+        '
+      x-aleekhan-permission: commercial.order.read
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      - $ref: '#/components/parameters/Cursor'
+      - $ref: '#/components/parameters/PageSize'
+      - name: customer_id
+        in: query
+        required: false
+        schema:
+          type: string
+          format: uuid
+      - name: external_po_number
+        in: query
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 64
+      - name: status
+        in: query
+        required: false
+        schema:
+          $ref: '#/components/schemas/CustomerOrderStatus'
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerOrderPage'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+    post:
+      tags:
+      - commercial
+      operationId: createCustomerOrder
+      summary: Create a DRAFT order (PO header)
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `commercial.order.manage` (deny by default;
+        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+
+        A PO number already used by the same customer answers 409 POSSIBLE_DUPLICATE (planned code) unless acknowledged (C-55).
+
+        '
+      x-aleekhan-permission: commercial.order.manage
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerOrderCreateRequest'
+      responses:
+        '201':
+          description: Created
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerOrder'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/IdempotencyKeyReused'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /commercial/customer-orders/{order_id}:
+    x-aleekhan-status: planned
+    x-aleekhan-step: '02.4'
+    parameters:
+    - $ref: '#/components/parameters/OrderId'
+    get:
+      tags:
+      - commercial
+      operationId: getCustomerOrder
+      summary: Get an order with its lines
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `commercial.order.read` (deny by default;
+        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+
+        '
+      x-aleekhan-permission: commercial.order.read
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerOrder'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+    patch:
+      tags:
+      - commercial
+      operationId: updateCustomerOrder
+      summary: Update a DRAFT order header
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `commercial.order.manage` (deny by default;
+        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+
+        '
+      x-aleekhan-permission: commercial.order.manage
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerOrderUpdateRequest'
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerOrder'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '412':
+          $ref: '#/components/responses/VersionConflict'
+        '422':
+          $ref: '#/components/responses/IdempotencyKeyReused'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /commercial/customer-orders/{order_id}/lines:
+    x-aleekhan-status: planned
+    x-aleekhan-step: '02.4'
+    parameters:
+    - $ref: '#/components/parameters/OrderId'
+    post:
+      tags:
+      - commercial
+      operationId: addCustomerOrderLine
+      summary: Add a line to a DRAFT order
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `commercial.order.manage` (deny by default;
+        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+
+        '
+      x-aleekhan-permission: commercial.order.manage
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerOrderLineCreateRequest'
+      responses:
+        '201':
+          description: Created
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerOrder'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '412':
+          $ref: '#/components/responses/VersionConflict'
+        '422':
+          $ref: '#/components/responses/IdempotencyKeyReused'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /commercial/customer-orders/{order_id}/lines/{line_id}:
+    x-aleekhan-status: planned
+    x-aleekhan-step: '02.4'
+    parameters:
+    - $ref: '#/components/parameters/OrderId'
+    - $ref: '#/components/parameters/LineId'
+    patch:
+      tags:
+      - commercial
+      operationId: updateCustomerOrderLine
+      summary: Update a line of a DRAFT order
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `commercial.order.manage` (deny by default;
+        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+
+        '
+      x-aleekhan-permission: commercial.order.manage
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerOrderLineUpdateRequest'
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerOrder'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '412':
+          $ref: '#/components/responses/VersionConflict'
+        '422':
+          $ref: '#/components/responses/IdempotencyKeyReused'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /commercial/customer-orders/{order_id}/lines/{line_id}/remove:
+    x-aleekhan-status: planned
+    x-aleekhan-step: '02.4'
+    parameters:
+    - $ref: '#/components/parameters/OrderId'
+    - $ref: '#/components/parameters/LineId'
+    post:
+      tags:
+      - commercial
+      operationId: removeCustomerOrderLine
+      summary: Remove a line of a DRAFT order (the line number is not re-used)
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `commercial.order.manage` (deny by default;
+        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+
+        '
+      x-aleekhan-permission: commercial.order.manage
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReasonRequest'
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerOrder'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '412':
+          $ref: '#/components/responses/VersionConflict'
+        '422':
+          $ref: '#/components/responses/IdempotencyKeyReused'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /commercial/customer-orders/{order_id}/validate:
+    x-aleekhan-status: planned
+    x-aleekhan-step: '02.4'
+    parameters:
+    - $ref: '#/components/parameters/OrderId'
+    post:
+      tags:
+      - commercial
+      operationId: validateCustomerOrder
+      summary: DRAFT -> VALIDATED (server-side checks)
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `commercial.order.manage` (deny by default;
+        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+
+        Failed checks answer 400 VALIDATION_FAILED with `errors[]`.
+
+        '
+      x-aleekhan-permission: commercial.order.manage
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OptionalNoteRequest'
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerOrder'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '412':
+          $ref: '#/components/responses/VersionConflict'
+        '422':
+          $ref: '#/components/responses/IdempotencyKeyReused'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /commercial/customer-orders/{order_id}/reopen:
+    x-aleekhan-status: planned
+    x-aleekhan-step: '02.4'
+    parameters:
+    - $ref: '#/components/parameters/OrderId'
+    post:
+      tags:
+      - commercial
+      operationId: reopenCustomerOrder
+      summary: VALIDATED -> DRAFT
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `commercial.order.manage` (deny by default;
+        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+
+        '
+      x-aleekhan-permission: commercial.order.manage
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReasonRequest'
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerOrder'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '412':
+          $ref: '#/components/responses/VersionConflict'
+        '422':
+          $ref: '#/components/responses/IdempotencyKeyReused'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /commercial/customer-orders/{order_id}/cancel:
+    x-aleekhan-status: planned
+    x-aleekhan-step: '02.4'
+    parameters:
+    - $ref: '#/components/parameters/OrderId'
+    post:
+      tags:
+      - commercial
+      operationId: cancelCustomerOrder
+      summary: Cancel a DRAFT/VALIDATED order (after confirmation only by change request, DEC-059)
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `commercial.order.manage` (deny by default;
+        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+
+        '
+      x-aleekhan-permission: commercial.order.manage
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReasonRequest'
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerOrder'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '412':
+          $ref: '#/components/responses/VersionConflict'
+        '422':
+          $ref: '#/components/responses/IdempotencyKeyReused'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /commercial/customer-orders/{order_id}/confirm:
+    x-aleekhan-status: planned
+    x-aleekhan-step: '02.4'
+    parameters:
+    - $ref: '#/components/parameters/OrderId'
+    post:
+      tags:
+      - commercial
+      operationId: confirmCustomerOrder
+      summary: VALIDATED -> CONFIRMED (writes order version 1)
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `commercial.order.confirm` (deny by
+        default; record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before
+        DEC-057.
+
+        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (DEC-051:
+        15 min; also inside the factory network, DEC-049).
+
+        BLOCKED: answers 409 RULE_NOT_APPROVED with the blocking decision_id until DEC-006 = serial namespace/format and its
+        relation to the order line; DEC-057 = PHASE_02 permission matrix (who confirms/approves) is APPROVED.
+
+        Whether the serials of all lines are allocated in this same transaction is DEC-006 question 2.
+
+        '
+      x-aleekhan-permission: commercial.order.confirm
+      x-aleekhan-mfa-step-up: true
+      x-aleekhan-blocked-by:
+      - DEC-006
+      - DEC-057
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OptionalNoteRequest'
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerOrder'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '412':
+          $ref: '#/components/responses/VersionConflict'
+        '422':
+          $ref: '#/components/responses/IdempotencyKeyReused'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /commercial/customer-orders/{order_id}/release-to-plan:
+    x-aleekhan-status: planned
+    x-aleekhan-step: '02.4'
+    parameters:
+    - $ref: '#/components/parameters/OrderId'
+    post:
+      tags:
+      - commercial
+      operationId: releaseCustomerOrderToPlan
+      summary: 'CONFIRMED -> RELEASED_TO_PLAN (consumer: PHASE_05)'
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `commercial.order.release` (deny by
+        default; record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before
+        DEC-057.
+
+        BLOCKED: answers 409 RULE_NOT_APPROVED with the blocking decision_id until DEC-057 = PHASE_02 permission matrix (who
+        confirms/approves) is APPROVED.
+
+        '
+      x-aleekhan-permission: commercial.order.release
+      x-aleekhan-blocked-by:
+      - DEC-057
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OptionalNoteRequest'
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerOrder'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '412':
+          $ref: '#/components/responses/VersionConflict'
+        '422':
+          $ref: '#/components/responses/IdempotencyKeyReused'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /commercial/customer-orders/{order_id}/versions:
+    x-aleekhan-status: planned
+    x-aleekhan-step: '02.4'
+    parameters:
+    - $ref: '#/components/parameters/OrderId'
+    get:
+      tags:
+      - commercial
+      operationId: listCustomerOrderVersions
+      summary: List the immutable versions of an order
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `commercial.order.read` (deny by default;
+        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+
+        '
+      x-aleekhan-permission: commercial.order.read
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      - $ref: '#/components/parameters/Cursor'
+      - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerOrderVersionPage'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /commercial/customer-orders/{order_id}/versions/{order_version}:
+    x-aleekhan-status: planned
+    x-aleekhan-step: '02.4'
+    parameters:
+    - $ref: '#/components/parameters/OrderId'
+    - $ref: '#/components/parameters/OrderVersion'
+    get:
+      tags:
+      - commercial
+      operationId: getCustomerOrderVersion
+      summary: Get one immutable order version
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `commercial.order.read` (deny by default;
+        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+
+        '
+      x-aleekhan-permission: commercial.order.read
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerOrderVersion'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /commercial/change-requests:
+    x-aleekhan-status: planned
+    x-aleekhan-step: '02.4'
+    get:
+      tags:
+      - commercial
+      operationId: listChangeRequests
+      summary: List order change requests
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `commercial.change.read` (deny by default;
+        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+
+        '
+      x-aleekhan-permission: commercial.change.read
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      - $ref: '#/components/parameters/Cursor'
+      - $ref: '#/components/parameters/PageSize'
+      - name: order_id
+        in: query
+        required: false
+        schema:
+          type: string
+          format: uuid
+      - name: serial_id
+        in: query
+        required: false
+        schema:
+          type: string
+          format: uuid
+      - name: kind
+        in: query
+        required: false
+        schema:
+          $ref: '#/components/schemas/ChangeRequestKind'
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - DRAFT
+          - SUBMITTED
+          - APPROVED
+          - REJECTED
+          - APPLIED
+          - WITHDRAWN
+          - EXPIRED
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeRequestPage'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+    post:
+      tags:
+      - commercial
+      operationId: createChangeRequest
+      summary: Create a DRAFT change request
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `commercial.change.request` (deny by
+        default; record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before
+        DEC-057.
+
+        BLOCKED: answers 409 RULE_NOT_APPROVED with the blocking decision_id until DEC-059 = order changes after confirmation
+        is APPROVED.
+
+        '
+      x-aleekhan-permission: commercial.change.request
+      x-aleekhan-blocked-by:
+      - DEC-059
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeRequestCreateRequest'
+      responses:
+        '201':
+          description: Created
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeRequest'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/IdempotencyKeyReused'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /commercial/change-requests/{change_request_id}:
+    x-aleekhan-status: planned
+    x-aleekhan-step: '02.4'
+    parameters:
+    - $ref: '#/components/parameters/ChangeRequestId'
+    get:
+      tags:
+      - commercial
+      operationId: getChangeRequest
+      summary: Get a change request
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `commercial.change.read` (deny by default;
+        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+
+        '
+      x-aleekhan-permission: commercial.change.read
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeRequest'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /commercial/change-requests/{change_request_id}/impact:
+    x-aleekhan-status: planned
+    x-aleekhan-step: '02.4'
+    parameters:
+    - $ref: '#/components/parameters/ChangeRequestId'
+    get:
+      tags:
+      - commercial
+      operationId: getChangeRequestImpact
+      summary: 'Impact of a change request (PHASE_02 part: lines, serials, snapshots)'
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `commercial.change.read` (deny by default;
+        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+
+        '
+      x-aleekhan-permission: commercial.change.read
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeRequestImpact'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /commercial/change-requests/{change_request_id}/submit:
+    x-aleekhan-status: planned
+    x-aleekhan-step: '02.4'
+    parameters:
+    - $ref: '#/components/parameters/ChangeRequestId'
+    post:
+      tags:
+      - commercial
+      operationId: submitChangeRequest
+      summary: DRAFT -> SUBMITTED (one open request per order)
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `commercial.change.request` (deny by
+        default; record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before
+        DEC-057.
+
+        BLOCKED: answers 409 RULE_NOT_APPROVED with the blocking decision_id until DEC-059 = order changes after confirmation
+        is APPROVED.
+
+        '
+      x-aleekhan-permission: commercial.change.request
+      x-aleekhan-blocked-by:
+      - DEC-059
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OptionalNoteRequest'
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeRequest'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '412':
+          $ref: '#/components/responses/VersionConflict'
+        '422':
+          $ref: '#/components/responses/IdempotencyKeyReused'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /commercial/change-requests/{change_request_id}/withdraw:
+    x-aleekhan-status: planned
+    x-aleekhan-step: '02.4'
+    parameters:
+    - $ref: '#/components/parameters/ChangeRequestId'
+    post:
+      tags:
+      - commercial
+      operationId: withdrawChangeRequest
+      summary: Withdraw a DRAFT/SUBMITTED request (requester only)
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `commercial.change.request` (deny by
+        default; record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before
+        DEC-057.
+
+        '
+      x-aleekhan-permission: commercial.change.request
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReasonRequest'
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeRequest'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '412':
+          $ref: '#/components/responses/VersionConflict'
+        '422':
+          $ref: '#/components/responses/IdempotencyKeyReused'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /commercial/change-requests/{change_request_id}/decide:
+    x-aleekhan-status: planned
+    x-aleekhan-step: '02.4'
+    parameters:
+    - $ref: '#/components/parameters/ChangeRequestId'
+    post:
+      tags:
+      - commercial
+      operationId: decideChangeRequest
+      summary: Approve or reject (decider != requester)
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `commercial.change.decide` (deny by
+        default; record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before
+        DEC-057.
+
+        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (DEC-051:
+        15 min; also inside the factory network, DEC-049).
+
+        BLOCKED: answers 409 RULE_NOT_APPROVED with the blocking decision_id until DEC-057 = PHASE_02 permission matrix (who
+        confirms/approves); DEC-059 = order changes after confirmation is APPROVED.
+
+        '
+      x-aleekhan-permission: commercial.change.decide
+      x-aleekhan-mfa-step-up: true
+      x-aleekhan-blocked-by:
+      - DEC-057
+      - DEC-059
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeRequestDecisionRequest'
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeRequest'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '412':
+          $ref: '#/components/responses/VersionConflict'
+        '422':
+          $ref: '#/components/responses/IdempotencyKeyReused'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /commercial/change-requests/{change_request_id}/apply:
+    x-aleekhan-status: planned
+    x-aleekhan-step: '02.4'
+    parameters:
+    - $ref: '#/components/parameters/ChangeRequestId'
+    post:
+      tags:
+      - commercial
+      operationId: applyChangeRequest
+      summary: 'Apply an APPROVED request: new order version + new serial snapshots'
+      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `commercial.change.apply` (deny by default;
+        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+
+        BLOCKED: answers 409 RULE_NOT_APPROVED with the blocking decision_id until DEC-057 = PHASE_02 permission matrix (who
+        confirms/approves); DEC-059 = order changes after confirmation is APPROVED.
+
+        A stale base order version answers 409 ORDER_VERSION_STALE (planned code).
+
+        '
+      x-aleekhan-permission: commercial.change.apply
+      x-aleekhan-blocked-by:
+      - DEC-057
+      - DEC-059
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OptionalNoteRequest'
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeRequest'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '412':
+          $ref: '#/components/responses/VersionConflict'
+        '422':
+          $ref: '#/components/responses/IdempotencyKeyReused'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+        '429':
+          $ref: '#/components/responses/RateLimited'
 components:
   securitySchemes:
     sessionCookie:
@@ -5037,6 +8267,99 @@ components:
         type: string
         minLength: 1
         maxLength: 64
+    CustomerId:
+      name: customer_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    ProductId:
+      name: product_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    StyleId:
+      name: style_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    StyleRevisionId:
+      name: style_revision_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    ProductCodeId:
+      name: product_code_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    RuleRevisionId:
+      name: rule_revision_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    SerialId:
+      name: serial_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    ExternalRefId:
+      name: external_ref_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    OrderId:
+      name: order_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    LineId:
+      name: line_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    OrderVersion:
+      name: order_version
+      in: path
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+    ChangeRequestId:
+      name: change_request_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    SearchText:
+      name: q
+      in: query
+      required: false
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 100
+      description: Server-side search text (normalised for ی/ي, ک/ك and half-space; never a merge).
   headers:
     X-Request-ID:
       description: Correlation id of this request (echoed or generated).
@@ -7923,6 +11246,2257 @@ components:
           - string
           - 'null'
           maxLength: 500
+    Provenance:
+      type: object
+      additionalProperties: false
+      description: Source provenance (PHASE_02). IMP/LEG values always point to an import batch and staging row.
+      required:
+      - provenance_kind
+      properties:
+        provenance_kind:
+          type: string
+          enum:
+          - SYS
+          - IMP
+          - LEG
+          - EXT
+          description: SYS created in the platform; IMP applied from an import batch; LEG read-only legacy evidence; EXT reference
+            only (docs/discovery/DATA_TABLE.md PHASE_02 1.1).
+        import_batch_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        source_sheet:
+          type: string
+          maxLength: 100
+        source_cell_ref:
+          type: string
+          maxLength: 32
+        source_raw_value:
+          type:
+          - string
+          - 'null'
+          maxLength: 4000
+        transform_rule_version:
+          type: string
+          maxLength: 64
+      readOnly: true
+    UnitOfMeasure:
+      type: string
+      enum:
+      - PIECE
+      - PAIR
+      description: PHASE_02 order units (C-67); no conversion before DEC-017.
+    DuplicateWarning:
+      type: object
+      additionalProperties: false
+      description: A possible duplicate. Never merged automatically (C-71); the caller acknowledges it explicitly.
+      required:
+      - code
+      - message_fa
+      - candidates
+      properties:
+        code:
+          type: string
+          enum:
+          - POSSIBLE_DUPLICATE_CUSTOMER
+          - POSSIBLE_DUPLICATE_PRODUCT
+          - POSSIBLE_DUPLICATE_STYLE
+          - POSSIBLE_DUPLICATE_PO_NUMBER
+        message_fa:
+          type: string
+          minLength: 1
+          maxLength: 300
+        candidates:
+          type: array
+          maxItems: 20
+          items:
+            type: string
+            format: uuid
+    Customer:
+      type: object
+      additionalProperties: false
+      description: Customer master (S2). No contact person or contact data (DEC-028; C-54).
+      required:
+      - customer_id
+      - customer_no
+      - display_name_fa
+      - legal_name_fa
+      - status
+      - default_required_quality_ref
+      - provenance
+      - row_version
+      - created_at
+      - updated_at
+      properties:
+        customer_id:
+          type: string
+          format: uuid
+        customer_no:
+          type: string
+          minLength: 1
+          maxLength: 32
+          description: Internal, system-generated text; not a Rahkaran code.
+        display_name_fa:
+          type: string
+          minLength: 1
+          maxLength: 200
+        legal_name_fa:
+          type:
+          - string
+          - 'null'
+          maxLength: 300
+        status:
+          type: string
+          enum:
+          - ACTIVE
+          - INACTIVE
+        default_required_quality_ref:
+          type:
+          - string
+          - 'null'
+          maxLength: 64
+          description: Text reference only until DEC-019 (C-68).
+        provenance:
+          $ref: '#/components/schemas/Provenance'
+        row_version:
+          type: integer
+          minimum: 1
+        created_at:
+          $ref: '#/components/schemas/UtcTimestamp'
+        updated_at:
+          $ref: '#/components/schemas/UtcTimestamp'
+    CustomerPage:
+      type: object
+      additionalProperties: false
+      required:
+      - items
+      - page
+      properties:
+        items:
+          type: array
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/Customer'
+        page:
+          $ref: '#/components/schemas/PageMeta'
+    CustomerCreateRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - display_name_fa
+      properties:
+        display_name_fa:
+          type: string
+          minLength: 1
+          maxLength: 200
+        legal_name_fa:
+          type:
+          - string
+          - 'null'
+          maxLength: 300
+        default_required_quality_ref:
+          type:
+          - string
+          - 'null'
+          maxLength: 64
+        acknowledge_possible_duplicate:
+          type: boolean
+          default: false
+    CustomerUpdateRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - reason
+      properties:
+        display_name_fa:
+          type: string
+          minLength: 1
+          maxLength: 200
+        legal_name_fa:
+          type:
+          - string
+          - 'null'
+          maxLength: 300
+        status:
+          type: string
+          enum:
+          - ACTIVE
+          - INACTIVE
+        default_required_quality_ref:
+          type:
+          - string
+          - 'null'
+          maxLength: 64
+        reason:
+          type: string
+          minLength: 3
+          maxLength: 500
+          description: Mandatory justification, stored in the audit trail; no personal data.
+      minProperties: 2
+    CustomerBrand:
+      type: object
+      additionalProperties: false
+      description: Optional brand level under a customer (DEC-058 question 1).
+      required:
+      - brand_id
+      - customer_id
+      - brand_name_fa
+      - status
+      - row_version
+      properties:
+        brand_id:
+          type: string
+          format: uuid
+        customer_id:
+          type: string
+          format: uuid
+        brand_name_fa:
+          type: string
+          minLength: 1
+          maxLength: 200
+        status:
+          type: string
+          enum:
+          - ACTIVE
+          - INACTIVE
+        row_version:
+          type: integer
+          minimum: 1
+    CustomerBrandPage:
+      type: object
+      additionalProperties: false
+      required:
+      - items
+      - page
+      properties:
+        items:
+          type: array
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/CustomerBrand'
+        page:
+          $ref: '#/components/schemas/PageMeta'
+    CustomerBrandCreateRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - brand_name_fa
+      properties:
+        brand_name_fa:
+          type: string
+          minLength: 1
+          maxLength: 200
+    ProductClass:
+      type: object
+      additionalProperties: false
+      description: Product family/type/category node. The levels and the list come from the Planning `Sorce` sheet after DEC-005
+        (E-2); nothing is seeded before (C-58).
+      required:
+      - product_class_id
+      - parent_class_id
+      - level_key
+      - label_fa
+      - segment_value
+      - rule_revision_id
+      - status
+      properties:
+        product_class_id:
+          type: string
+          format: uuid
+        parent_class_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        level_key:
+          $ref: '#/components/schemas/SystemKey'
+        label_fa:
+          type: string
+          minLength: 1
+          maxLength: 200
+        segment_value:
+          type:
+          - string
+          - 'null'
+          pattern: ^[0-9]{1,8}$
+          description: 'BLOCKED (DEC-005): width and uniqueness scope are not approved; null until an APPROVED CodeRuleRevision.'
+        rule_revision_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        status:
+          type: string
+          enum:
+          - DRAFT
+          - ACTIVE
+          - RETIRED
+    ProductClassPage:
+      type: object
+      additionalProperties: false
+      required:
+      - items
+      - page
+      properties:
+        items:
+          type: array
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/ProductClass'
+        page:
+          $ref: '#/components/schemas/PageMeta'
+    Product:
+      type: object
+      additionalProperties: false
+      required:
+      - product_id
+      - product_class_id
+      - product_no
+      - name_fa
+      - uom
+      - status
+      - provenance
+      - row_version
+      - created_at
+      - updated_at
+      properties:
+        product_id:
+          type: string
+          format: uuid
+        product_class_id:
+          type: string
+          format: uuid
+        product_no:
+          type:
+          - string
+          - 'null'
+          pattern: ^[0-9]{1,8}$
+          description: 'BLOCKED (DEC-005): width and uniqueness scope are not approved; null until an APPROVED CodeRuleRevision.'
+        name_fa:
+          type: string
+          minLength: 1
+          maxLength: 200
+        uom:
+          $ref: '#/components/schemas/UnitOfMeasure'
+        status:
+          type: string
+          enum:
+          - DRAFT
+          - ACTIVE
+          - RETIRED
+        provenance:
+          $ref: '#/components/schemas/Provenance'
+        row_version:
+          type: integer
+          minimum: 1
+        created_at:
+          $ref: '#/components/schemas/UtcTimestamp'
+        updated_at:
+          $ref: '#/components/schemas/UtcTimestamp'
+    ProductPage:
+      type: object
+      additionalProperties: false
+      required:
+      - items
+      - page
+      properties:
+        items:
+          type: array
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/Product'
+        page:
+          $ref: '#/components/schemas/PageMeta'
+    ProductCreateRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - product_class_id
+      - name_fa
+      - uom
+      properties:
+        product_class_id:
+          type: string
+          format: uuid
+        product_no:
+          type:
+          - string
+          - 'null'
+          pattern: ^[0-9]{1,8}$
+          description: Existing legacy number only; issuing a new number is BLOCKED (DEC-005).
+        name_fa:
+          type: string
+          minLength: 1
+          maxLength: 200
+        uom:
+          $ref: '#/components/schemas/UnitOfMeasure'
+        acknowledge_possible_duplicate:
+          type: boolean
+          default: false
+    ProductUpdateRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - reason
+      properties:
+        name_fa:
+          type: string
+          minLength: 1
+          maxLength: 200
+        status:
+          type: string
+          enum:
+          - DRAFT
+          - ACTIVE
+          - RETIRED
+        reason:
+          type: string
+          minLength: 3
+          maxLength: 500
+          description: Mandatory justification, stored in the audit trail; no personal data.
+      minProperties: 2
+    StyleAttributes:
+      type: object
+      additionalProperties: false
+      description: Identity attributes as text references only; material/colour master lists are PHASE_04/06.
+      required: []
+      properties:
+        colour_fa:
+          type: string
+          minLength: 1
+          maxLength: 200
+        main_material_fa:
+          type: string
+          minLength: 1
+          maxLength: 200
+        lining_fa:
+          type: string
+          minLength: 1
+          maxLength: 200
+        hardware_colour_fa:
+          type: string
+          minLength: 1
+          maxLength: 200
+        notes_fa:
+          type: string
+          minLength: 1
+          maxLength: 500
+    Style:
+      type: object
+      additionalProperties: false
+      required:
+      - style_id
+      - product_id
+      - style_no
+      - name_fa
+      - current_revision_id
+      - status
+      - provenance
+      - row_version
+      - created_at
+      - updated_at
+      properties:
+        style_id:
+          type: string
+          format: uuid
+        product_id:
+          type: string
+          format: uuid
+        style_no:
+          type:
+          - string
+          - 'null'
+          pattern: ^[0-9]{1,8}$
+          description: 'BLOCKED (DEC-005): width and uniqueness scope are not approved; null until an APPROVED CodeRuleRevision.
+            Unique per product (C-57).'
+        name_fa:
+          type: string
+          minLength: 1
+          maxLength: 200
+        current_revision_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        status:
+          type: string
+          enum:
+          - DRAFT
+          - ACTIVE
+          - RETIRED
+        provenance:
+          $ref: '#/components/schemas/Provenance'
+        row_version:
+          type: integer
+          minimum: 1
+        created_at:
+          $ref: '#/components/schemas/UtcTimestamp'
+        updated_at:
+          $ref: '#/components/schemas/UtcTimestamp'
+    StylePage:
+      type: object
+      additionalProperties: false
+      required:
+      - items
+      - page
+      properties:
+        items:
+          type: array
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/Style'
+        page:
+          $ref: '#/components/schemas/PageMeta'
+    StyleCreateRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - name_fa
+      - initial_attributes
+      properties:
+        name_fa:
+          type: string
+          minLength: 1
+          maxLength: 200
+        style_no:
+          type:
+          - string
+          - 'null'
+          pattern: ^[0-9]{1,8}$
+          description: Existing legacy number only; issuing a new number is BLOCKED (DEC-005).
+        initial_attributes:
+          $ref: '#/components/schemas/StyleAttributes'
+        acknowledge_possible_duplicate:
+          type: boolean
+          default: false
+    StyleUpdateRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - reason
+      properties:
+        name_fa:
+          type: string
+          minLength: 1
+          maxLength: 200
+        status:
+          type: string
+          enum:
+          - DRAFT
+          - ACTIVE
+          - RETIRED
+        reason:
+          type: string
+          minLength: 3
+          maxLength: 500
+          description: Mandatory justification, stored in the audit trail; no personal data.
+      minProperties: 2
+    StyleRevision:
+      type: object
+      additionalProperties: false
+      description: ACTIVE and SUPERSEDED revisions are immutable.
+      required:
+      - style_revision_id
+      - style_id
+      - revision_no
+      - attributes
+      - status
+      - technical_package_revision_id
+      - created_at
+      - row_version
+      properties:
+        style_revision_id:
+          type: string
+          format: uuid
+        style_id:
+          type: string
+          format: uuid
+        revision_no:
+          type: integer
+          minimum: 1
+        attributes:
+          $ref: '#/components/schemas/StyleAttributes'
+        status:
+          type: string
+          enum:
+          - DRAFT
+          - ACTIVE
+          - SUPERSEDED
+        technical_package_revision_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+          description: Filled from PHASE_03/04 only by a new revision (C-59).
+        created_at:
+          $ref: '#/components/schemas/UtcTimestamp'
+        row_version:
+          type: integer
+          minimum: 1
+    StyleRevisionPage:
+      type: object
+      additionalProperties: false
+      required:
+      - items
+      - page
+      properties:
+        items:
+          type: array
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/StyleRevision'
+        page:
+          $ref: '#/components/schemas/PageMeta'
+    StyleRevisionCreateRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - attributes
+      - reason
+      properties:
+        attributes:
+          $ref: '#/components/schemas/StyleAttributes'
+        reason:
+          type: string
+          minLength: 3
+          maxLength: 500
+          description: Mandatory justification, stored in the audit trail; no personal data.
+    StyleSuggestion:
+      type: object
+      additionalProperties: false
+      required:
+      - style_id
+      - product_id
+      - name_fa
+      - score
+      - reasons
+      properties:
+        style_id:
+          type: string
+          format: uuid
+        product_id:
+          type: string
+          format: uuid
+        name_fa:
+          type: string
+          minLength: 1
+          maxLength: 200
+        score:
+          type: number
+          minimum: 0
+          maximum: 1
+        reasons:
+          type: array
+          maxItems: 4
+          items:
+            type: string
+            enum:
+            - SAME_PRODUCT
+            - NAME_SIMILAR
+            - ATTRIBUTES_SIMILAR
+            - SAME_CODE
+    StyleSuggestionList:
+      type: object
+      additionalProperties: false
+      description: Ranked suggestions only; there is no merge operation (C-71).
+      required:
+      - items
+      properties:
+        items:
+          type: array
+          maxItems: 20
+          items:
+            $ref: '#/components/schemas/StyleSuggestion'
+    SerialStatus:
+      type: string
+      enum:
+      - ALLOCATED
+      - CANCELLED
+      - IN_PRODUCTION
+      - PARTIALLY_DELIVERED
+      - DELIVERED
+      - CLOSED
+      description: PHASE_02 writes ALLOCATED/CANCELLED only; the other values are reserved for PHASE_07/09 (STATE_TRANSITIONS
+        5.4; close rule DEC-020).
+    SerialNumber:
+      type: string
+      minLength: 1
+      maxLength: 32
+      description: 'Serial number as text. NO pattern: the format is BLOCKED (DEC-006); a pattern is added only with the approved
+        rule. Independent of product and die codes; never re-used.'
+    SerialSummary:
+      type: object
+      additionalProperties: false
+      required:
+      - serial_id
+      - serial_number
+      - status
+      - customer_id
+      - order_id
+      - line_no
+      - quantity
+      - uom
+      - attributes
+      - allocated_at
+      properties:
+        serial_id:
+          type: string
+          format: uuid
+        serial_number:
+          $ref: '#/components/schemas/SerialNumber'
+        status:
+          $ref: '#/components/schemas/SerialStatus'
+        customer_id:
+          type: string
+          format: uuid
+        order_id:
+          type: string
+          format: uuid
+        line_no:
+          type: integer
+          minimum: 1
+        quantity:
+          type: integer
+          minimum: 1
+        uom:
+          $ref: '#/components/schemas/UnitOfMeasure'
+        attributes:
+          $ref: '#/components/schemas/StyleAttributes'
+          description: From the serial's own snapshot, not the current style.
+        allocated_at:
+          $ref: '#/components/schemas/UtcTimestamp'
+    UnavailableSections:
+      type: array
+      maxItems: 10
+      description: Sections owned by later phases; the UI shows them as not connected, never with numbers.
+      items:
+        type: object
+        additionalProperties: false
+        required:
+        - section
+        - phase
+        properties:
+          section:
+            type: string
+            enum:
+            - materials
+            - wip
+            - production
+            - quality
+            - dispatch
+            - capacity
+            - cost
+          phase:
+            type: string
+            pattern: ^PHASE_[0-9]{2}$
+    StyleTracking:
+      type: object
+      additionalProperties: false
+      description: Page 4 (Product/Style 360), PHASE_02 part.
+      required:
+      - style
+      - counts
+      - serials
+      - unavailable_sections
+      - page
+      properties:
+        style:
+          $ref: '#/components/schemas/Style'
+        counts:
+          type: object
+          additionalProperties: false
+          description: Computed by the server from the same commit (no sample numbers).
+          required:
+          - serials_total
+          - serials_active
+          - orders_total
+          properties:
+            serials_total:
+              type: integer
+              minimum: 0
+            serials_active:
+              type: integer
+              minimum: 0
+            orders_total:
+              type: integer
+              minimum: 0
+        serials:
+          type: array
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/SerialSummary'
+        unavailable_sections:
+          $ref: '#/components/schemas/UnavailableSections'
+        page:
+          $ref: '#/components/schemas/PageMeta'
+    ProductCode:
+      type: object
+      additionalProperties: false
+      description: Registry entry; UNIQUE(code_namespace, code). Many serials may reference one code (C-76).
+      required:
+      - product_code_id
+      - code
+      - code_namespace
+      - style_id
+      - rule_revision_id
+      - status
+      - erp_status
+      - provenance
+      - issued_at
+      - row_version
+      properties:
+        product_code_id:
+          type: string
+          format: uuid
+        code:
+          $ref: '#/components/schemas/Code14'
+        code_namespace:
+          type: string
+          const: product_code
+        style_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        rule_revision_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        status:
+          type: string
+          enum:
+          - RESERVED
+          - ACTIVE
+          - RETIRED
+          - DISPUTED
+        erp_status:
+          type: string
+          enum:
+          - ERP_PENDING
+          - ERP_MATCHED
+          - ERP_MISSING
+          description: ACTIVE requires ERP_MATCHED (Rahkaran is the item master, read-only; C-75).
+        provenance:
+          $ref: '#/components/schemas/Provenance'
+        issued_at:
+          oneOf:
+          - $ref: '#/components/schemas/UtcTimestamp'
+          - type: 'null'
+        row_version:
+          type: integer
+          minimum: 1
+    ProductCodePage:
+      type: object
+      additionalProperties: false
+      required:
+      - items
+      - page
+      properties:
+        items:
+          type: array
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/ProductCode'
+        page:
+          $ref: '#/components/schemas/PageMeta'
+    ProductCodeValidateRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - code
+      - code_namespace
+      properties:
+        code:
+          type: string
+          maxLength: 64
+          description: Raw input as typed; checked, never normalised (no Persian-digit conversion).
+        code_namespace:
+          $ref: '#/components/schemas/CodeNamespace'
+    ProductCodeValidation:
+      type: object
+      additionalProperties: false
+      description: 'Side-effect free check: format + namespace + registry lookup. Segment checks are BLOCKED (DEC-005).'
+      required:
+      - input
+      - format_valid
+      - code_namespace
+      - registry_entry
+      - segments_checked
+      - segments_decision_id
+      - reasons
+      properties:
+        input:
+          type: string
+          maxLength: 64
+        format_valid:
+          type: boolean
+          description: 14 ASCII digits as a string (ID-01).
+        code_namespace:
+          $ref: '#/components/schemas/CodeNamespace'
+        registry_entry:
+          oneOf:
+          - $ref: '#/components/schemas/ProductCode'
+          - type: 'null'
+        segments_checked:
+          type: boolean
+          description: false until an ACTIVE CodeRuleRevision exists (DEC-005).
+        segments_decision_id:
+          type:
+          - string
+          - 'null'
+          pattern: ^DEC-[0-9]{3}$
+        reasons:
+          type: array
+          maxItems: 10
+          items:
+            type: string
+            enum:
+            - LENGTH_NOT_14
+            - NON_ASCII_DIGIT
+            - NON_DIGIT_CHARACTER
+            - SURROUNDING_WHITESPACE
+            - NOT_IN_REGISTRY
+            - DISPUTED_IN_REGISTRY
+            - WRONG_NAMESPACE
+    ProductCodePreviewRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - product_class_id
+      - product_id
+      - style_id
+      properties:
+        product_class_id:
+          type: string
+          format: uuid
+        product_id:
+          type: string
+          format: uuid
+        style_id:
+          type: string
+          format: uuid
+    ProductCodePreview:
+      type: object
+      additionalProperties: false
+      description: Computed from an ACTIVE CodeRuleRevision; nothing is reserved. BLOCKED (DEC-005).
+      required:
+      - code
+      - rule_revision_id
+      - segments
+      properties:
+        code:
+          $ref: '#/components/schemas/Code14'
+        rule_revision_id:
+          type: string
+          format: uuid
+        segments:
+          type: array
+          maxItems: 10
+          items:
+            type: object
+            additionalProperties: false
+            required:
+            - level_key
+            - value
+            properties:
+              level_key:
+                $ref: '#/components/schemas/SystemKey'
+              value:
+                type: string
+                pattern: ^[0-9]{1,8}$
+    ProductCodeIssueRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - style_id
+      - rule_revision_id
+      - reason
+      properties:
+        style_id:
+          type: string
+          format: uuid
+        rule_revision_id:
+          type: string
+          format: uuid
+        reason:
+          type: string
+          minLength: 3
+          maxLength: 500
+          description: Mandatory justification, stored in the audit trail; no personal data.
+    CodeRuleRevision:
+      type: object
+      additionalProperties: false
+      required:
+      - rule_revision_id
+      - code_namespace
+      - revision_no
+      - scope
+      - rule_spec
+      - source_workbook_sha256
+      - evidence_document_id
+      - golden_case_count
+      - status
+      - decision_id
+      - created_by
+      - approved_by
+      - approved_at
+      - row_version
+      properties:
+        rule_revision_id:
+          type: string
+          format: uuid
+        code_namespace:
+          type: string
+          const: product_code
+        revision_no:
+          type: integer
+          minimum: 1
+        scope:
+          type: object
+          description: Classes covered. JSON schema written after the DEC-005 extraction.
+        rule_spec:
+          type: object
+          description: Rule definition. JSON schema written after the DEC-005 extraction; no segment model exists before (C-50).
+        source_workbook_sha256:
+          type: string
+          pattern: ^[0-9a-f]{64}$
+          description: Hash of the v2 Planning workbook (DEC-037).
+        evidence_document_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        golden_case_count:
+          type: integer
+          minimum: 0
+          description: Real cases are stored on the server only, never in Git (DEC-028).
+        status:
+          type: string
+          enum:
+          - DRAFT
+          - IN_REVIEW
+          - APPROVED
+          - ACTIVE
+          - RETIRED
+          - REJECTED
+        decision_id:
+          type: string
+          pattern: ^DEC-[0-9]{3}$
+        created_by:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        approved_by:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        approved_at:
+          oneOf:
+          - $ref: '#/components/schemas/UtcTimestamp'
+          - type: 'null'
+        row_version:
+          type: integer
+          minimum: 1
+    CodeRuleRevisionPage:
+      type: object
+      additionalProperties: false
+      required:
+      - items
+      - page
+      properties:
+        items:
+          type: array
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/CodeRuleRevision'
+        page:
+          $ref: '#/components/schemas/PageMeta'
+    CodeRuleRevisionCreateRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - scope
+      - rule_spec
+      - source_workbook_sha256
+      - reason
+      properties:
+        scope:
+          type: object
+        rule_spec:
+          type: object
+        source_workbook_sha256:
+          type: string
+          pattern: ^[0-9a-f]{64}$
+        evidence_document_id:
+          type: string
+          format: uuid
+        reason:
+          type: string
+          minLength: 3
+          maxLength: 500
+          description: Mandatory justification, stored in the audit trail; no personal data.
+    Serial:
+      type: object
+      additionalProperties: false
+      description: UNIQUE(serial_namespace, serial_number) and UNIQUE(order_line_id) (ID-02/ID-03).
+      required:
+      - serial_id
+      - serial_number
+      - serial_namespace
+      - order_id
+      - order_line_id
+      - line_no
+      - customer_id
+      - style_id
+      - style_revision_id
+      - product_code
+      - status
+      - current_snapshot_version
+      - allocated_at
+      - row_version
+      properties:
+        serial_id:
+          type: string
+          format: uuid
+        serial_number:
+          $ref: '#/components/schemas/SerialNumber'
+        serial_namespace:
+          $ref: '#/components/schemas/SystemKey'
+        order_id:
+          type: string
+          format: uuid
+        order_line_id:
+          type: string
+          format: uuid
+        line_no:
+          type: integer
+          minimum: 1
+        customer_id:
+          type: string
+          format: uuid
+        style_id:
+          type: string
+          format: uuid
+        style_revision_id:
+          type: string
+          format: uuid
+        product_code:
+          oneOf:
+          - $ref: '#/components/schemas/Code14'
+          - type: 'null'
+        status:
+          $ref: '#/components/schemas/SerialStatus'
+        current_snapshot_version:
+          type: integer
+          minimum: 1
+        allocated_at:
+          $ref: '#/components/schemas/UtcTimestamp'
+        row_version:
+          type: integer
+          minimum: 1
+    SerialPage:
+      type: object
+      additionalProperties: false
+      required:
+      - items
+      - page
+      properties:
+        items:
+          type: array
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/Serial'
+        page:
+          $ref: '#/components/schemas/PageMeta'
+    SerialAllocateRequest:
+      type: object
+      additionalProperties: false
+      description: Same Idempotency-Key + body => the same serial and response (ID-04). A second allocation for a line that already
+        has a serial (other key) => 409 SERIAL_ALREADY_ALLOCATED (planned code).
+      required:
+      - order_line_id
+      - order_line_row_version
+      properties:
+        order_line_id:
+          type: string
+          format: uuid
+        order_line_row_version:
+          type: integer
+          minimum: 1
+    SerialSnapshotImage:
+      type: object
+      additionalProperties: false
+      required:
+      - customer_id
+      - customer_display_name_fa
+      - brand_name_fa
+      - external_po_number
+      - order_no
+      - line_no
+      - product_code
+      - style_id
+      - style_revision_no
+      - attributes
+      - quantity
+      - uom
+      - order_date
+      - requested_due_date
+      - required_quality_requirement
+      properties:
+        customer_id:
+          type: string
+          format: uuid
+        customer_display_name_fa:
+          type: string
+          minLength: 1
+          maxLength: 200
+        brand_name_fa:
+          type:
+          - string
+          - 'null'
+          maxLength: 200
+        external_po_number:
+          type:
+          - string
+          - 'null'
+          maxLength: 64
+        order_no:
+          type: string
+          minLength: 1
+          maxLength: 32
+        line_no:
+          type: integer
+          minimum: 1
+        product_code:
+          oneOf:
+          - $ref: '#/components/schemas/Code14'
+          - type: 'null'
+        style_id:
+          type: string
+          format: uuid
+        style_revision_no:
+          type: integer
+          minimum: 1
+        attributes:
+          $ref: '#/components/schemas/StyleAttributes'
+        quantity:
+          type: integer
+          minimum: 1
+        uom:
+          $ref: '#/components/schemas/UnitOfMeasure'
+        order_date:
+          type: string
+          format: date
+          description: ISO 8601 calendar date (Gregorian); Jalali only in the UI.
+        requested_due_date:
+          type:
+          - string
+          - 'null'
+          format: date
+        required_quality_requirement:
+          type:
+          - string
+          - 'null'
+          maxLength: 64
+    SerialSnapshot:
+      type: object
+      additionalProperties: false
+      description: Append-only; version 1 is written in the allocation transaction (exactly one per committed line, ID-02).
+      required:
+      - serial_id
+      - version
+      - reason
+      - change_request_id
+      - created_at
+      - snapshot
+      properties:
+        serial_id:
+          type: string
+          format: uuid
+        version:
+          type: integer
+          minimum: 1
+        reason:
+          type: string
+          enum:
+          - ALLOCATED
+          - CHANGE_APPLIED
+          - TECH_PACKAGE_LINKED
+        change_request_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        created_at:
+          $ref: '#/components/schemas/UtcTimestamp'
+        snapshot:
+          $ref: '#/components/schemas/SerialSnapshotImage'
+    SerialSnapshotPage:
+      type: object
+      additionalProperties: false
+      required:
+      - items
+      - page
+      properties:
+        items:
+          type: array
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/SerialSnapshot'
+        page:
+          $ref: '#/components/schemas/PageMeta'
+    TrackingEvent:
+      type: object
+      additionalProperties: false
+      required:
+      - occurred_at
+      - kind
+      - ref
+      - audit_event_id
+      properties:
+        occurred_at:
+          $ref: '#/components/schemas/UtcTimestamp'
+        kind:
+          type: string
+          enum:
+          - ORDER_DRAFTED
+          - ORDER_VALIDATED
+          - ORDER_CONFIRMED
+          - SERIAL_ALLOCATED
+          - ORDER_RELEASED_TO_PLAN
+          - CHANGE_REQUESTED
+          - CHANGE_DECIDED
+          - CHANGE_APPLIED
+          - ORDER_CANCELLED
+          - LINE_CANCELLED
+          - SERIAL_CANCELLED
+        ref:
+          $ref: '#/components/schemas/EntityRef'
+        actor_display_name_fa:
+          type:
+          - string
+          - 'null'
+          maxLength: 200
+        audit_event_id:
+          type: string
+          format: uuid
+    SerialTracking:
+      type: object
+      additionalProperties: false
+      description: Pages 1/2 (serial 360), PHASE_02 part.
+      required:
+      - serial
+      - order_versions
+      - events
+      - unavailable_sections
+      properties:
+        serial:
+          $ref: '#/components/schemas/Serial'
+        order_versions:
+          type: array
+          maxItems: 200
+          items:
+            $ref: '#/components/schemas/CustomerOrderVersionSummary'
+        events:
+          type: array
+          maxItems: 200
+          items:
+            $ref: '#/components/schemas/TrackingEvent'
+        unavailable_sections:
+          $ref: '#/components/schemas/UnavailableSections'
+    ExternalRef:
+      type: object
+      additionalProperties: false
+      description: 'Unique only per (system, namespace, value, target); never globally unique (C-56). Namespace list: DEC-058.'
+      required:
+      - external_ref_id
+      - target_type
+      - target_id
+      - system
+      - namespace
+      - value
+      - valid_from
+      - valid_to
+      - provenance
+      - row_version
+      properties:
+        external_ref_id:
+          type: string
+          format: uuid
+        target_type:
+          type: string
+          enum:
+          - customer
+          - product
+          - style
+          - customer_order
+          - order_line
+          - serial
+        target_id:
+          type: string
+          format: uuid
+        system:
+          type: string
+          enum:
+          - RAHKARAN
+          - CUSTOMER
+          - LEGACY_PLANNING
+          - OTHER
+        namespace:
+          $ref: '#/components/schemas/SystemKey'
+        value:
+          type: string
+          minLength: 1
+          maxLength: 64
+          description: Raw text, never parsed as a number.
+        valid_from:
+          $ref: '#/components/schemas/UtcTimestamp'
+        valid_to:
+          oneOf:
+          - $ref: '#/components/schemas/UtcTimestamp'
+          - type: 'null'
+        provenance:
+          $ref: '#/components/schemas/Provenance'
+        row_version:
+          type: integer
+          minimum: 1
+    ExternalRefPage:
+      type: object
+      additionalProperties: false
+      required:
+      - items
+      - page
+      properties:
+        items:
+          type: array
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/ExternalRef'
+        page:
+          $ref: '#/components/schemas/PageMeta'
+    ExternalRefCreateRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - target_type
+      - target_id
+      - system
+      - namespace
+      - value
+      - reason
+      properties:
+        target_type:
+          type: string
+          enum:
+          - customer
+          - product
+          - style
+          - customer_order
+          - order_line
+          - serial
+        target_id:
+          type: string
+          format: uuid
+        system:
+          type: string
+          enum:
+          - RAHKARAN
+          - CUSTOMER
+          - LEGACY_PLANNING
+          - OTHER
+        namespace:
+          $ref: '#/components/schemas/SystemKey'
+        value:
+          type: string
+          minLength: 1
+          maxLength: 64
+        reason:
+          type: string
+          minLength: 3
+          maxLength: 500
+          description: Mandatory justification, stored in the audit trail; no personal data.
+    HistoricalOrderRecord:
+      type: object
+      additionalProperties: false
+      description: Read-only legacy evidence (C-65); never an official order. Bulk import BLOCKED (DEC-025/DEC-035).
+      required:
+      - record_id
+      - import_batch_id
+      - legacy_order_ref
+      - legacy_serial_ref
+      - legacy_product_code_raw
+      - normalised_product_code
+      - match_status
+      - matched_serial_id
+      - provenance
+      properties:
+        record_id:
+          type: string
+          format: uuid
+        import_batch_id:
+          type: string
+          format: uuid
+        legacy_order_ref:
+          type:
+          - string
+          - 'null'
+          maxLength: 64
+        legacy_serial_ref:
+          type:
+          - string
+          - 'null'
+          maxLength: 64
+        legacy_product_code_raw:
+          type:
+          - string
+          - 'null'
+          maxLength: 64
+          description: Raw legacy text; not Code14-checked (C-51).
+        normalised_product_code:
+          oneOf:
+          - $ref: '#/components/schemas/Code14'
+          - type: 'null'
+        match_status:
+          type: string
+          enum:
+          - UNMATCHED
+          - SUGGESTED
+          - CONFIRMED
+          - REJECTED
+        matched_serial_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        provenance:
+          $ref: '#/components/schemas/Provenance'
+    HistoricalOrderRecordPage:
+      type: object
+      additionalProperties: false
+      required:
+      - items
+      - page
+      properties:
+        items:
+          type: array
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/HistoricalOrderRecord'
+        page:
+          $ref: '#/components/schemas/PageMeta'
+    CustomerOrderStatus:
+      type: string
+      enum:
+      - DRAFT
+      - VALIDATED
+      - CONFIRMED
+      - RELEASED_TO_PLAN
+      - ON_HOLD
+      - PAUSED
+      - CANCELLED
+      - PARTIAL_FULFILLED
+      - FULFILLED
+      - CLOSED
+      description: STATE_TRANSITIONS 5.1. PARTIAL_FULFILLED/FULFILLED/CLOSED are written only by later phases (DEC-020).
+    CustomerOrderLine:
+      type: object
+      additionalProperties: false
+      description: One Product/Style per line (README_FA).
+      required:
+      - line_id
+      - line_no
+      - style_id
+      - style_revision_id
+      - product_code_id
+      - product_code
+      - quantity
+      - uom
+      - requested_due_date
+      - status
+      - serial_id
+      - serial_number
+      - row_version
+      properties:
+        line_id:
+          type: string
+          format: uuid
+        line_no:
+          type: integer
+          minimum: 1
+          description: Never re-used inside an order.
+        style_id:
+          type: string
+          format: uuid
+        style_revision_id:
+          type: string
+          format: uuid
+        product_code_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        product_code:
+          oneOf:
+          - $ref: '#/components/schemas/Code14'
+          - type: 'null'
+        quantity:
+          type: integer
+          minimum: 1
+        uom:
+          $ref: '#/components/schemas/UnitOfMeasure'
+        requested_due_date:
+          type:
+          - string
+          - 'null'
+          format: date
+        status:
+          type: string
+          enum:
+          - OPEN
+          - CONFIRMED
+          - SERIAL_ALLOCATED
+          - REMOVED
+          - CANCELLED
+        serial_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+          description: At most one serial per line (C-47; DEC-006 decides when).
+        serial_number:
+          oneOf:
+          - $ref: '#/components/schemas/SerialNumber'
+          - type: 'null'
+        row_version:
+          type: integer
+          minimum: 1
+    CustomerOrder:
+      type: object
+      additionalProperties: false
+      description: PO header with many lines (ID-03).
+      required:
+      - order_id
+      - order_no
+      - customer_id
+      - brand_id
+      - external_po_number
+      - order_type
+      - program_ref
+      - order_date
+      - requested_due_date
+      - required_quality_requirement
+      - status
+      - hold_reason
+      - cancel_reason
+      - current_version
+      - lines
+      - warnings
+      - provenance
+      - row_version
+      - created_at
+      - updated_at
+      properties:
+        order_id:
+          type: string
+          format: uuid
+        order_no:
+          type: string
+          minLength: 1
+          maxLength: 32
+          description: Internal, system-generated text; not the serial and not the customer PO number.
+        customer_id:
+          type: string
+          format: uuid
+        brand_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        external_po_number:
+          type:
+          - string
+          - 'null'
+          maxLength: 64
+          description: Customer PO number; not unique (C-55).
+        order_type:
+          oneOf:
+          - $ref: '#/components/schemas/SystemKey'
+          - type: 'null'
+          description: 'List: DEC-058 question 6.'
+        program_ref:
+          type:
+          - string
+          - 'null'
+          maxLength: 64
+          description: Text reference; programmes are owned by PHASE_05.
+        order_date:
+          type: string
+          format: date
+          description: ISO 8601 calendar date (Gregorian); Jalali only in the UI.
+        requested_due_date:
+          type:
+          - string
+          - 'null'
+          format: date
+        required_quality_requirement:
+          type:
+          - string
+          - 'null'
+          maxLength: 64
+          description: Text only until DEC-019 (C-68).
+        status:
+          $ref: '#/components/schemas/CustomerOrderStatus'
+        hold_reason:
+          type:
+          - string
+          - 'null'
+          maxLength: 500
+        cancel_reason:
+          type:
+          - string
+          - 'null'
+          maxLength: 500
+        current_version:
+          type: integer
+          minimum: 0
+          description: 0 before the first confirmation.
+        lines:
+          type: array
+          maxItems: 200
+          items:
+            $ref: '#/components/schemas/CustomerOrderLine'
+        warnings:
+          type: array
+          maxItems: 10
+          items:
+            $ref: '#/components/schemas/DuplicateWarning'
+        provenance:
+          $ref: '#/components/schemas/Provenance'
+        row_version:
+          type: integer
+          minimum: 1
+        created_at:
+          $ref: '#/components/schemas/UtcTimestamp'
+        updated_at:
+          $ref: '#/components/schemas/UtcTimestamp'
+    CustomerOrderSummary:
+      type: object
+      additionalProperties: false
+      required:
+      - order_id
+      - order_no
+      - customer_id
+      - external_po_number
+      - status
+      - order_date
+      - line_count
+      - row_version
+      properties:
+        order_id:
+          type: string
+          format: uuid
+        order_no:
+          type: string
+          minLength: 1
+          maxLength: 32
+        customer_id:
+          type: string
+          format: uuid
+        external_po_number:
+          type:
+          - string
+          - 'null'
+          maxLength: 64
+        status:
+          $ref: '#/components/schemas/CustomerOrderStatus'
+        order_date:
+          type: string
+          format: date
+          description: ISO 8601 calendar date (Gregorian); Jalali only in the UI.
+        line_count:
+          type: integer
+          minimum: 0
+        row_version:
+          type: integer
+          minimum: 1
+    CustomerOrderPage:
+      type: object
+      additionalProperties: false
+      required:
+      - items
+      - page
+      properties:
+        items:
+          type: array
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/CustomerOrderSummary'
+        page:
+          $ref: '#/components/schemas/PageMeta'
+    CustomerOrderCreateRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - customer_id
+      - order_date
+      properties:
+        customer_id:
+          type: string
+          format: uuid
+        brand_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        external_po_number:
+          type:
+          - string
+          - 'null'
+          maxLength: 64
+        order_type:
+          oneOf:
+          - $ref: '#/components/schemas/SystemKey'
+          - type: 'null'
+        program_ref:
+          type:
+          - string
+          - 'null'
+          maxLength: 64
+        order_date:
+          type: string
+          format: date
+          description: ISO 8601 calendar date (Gregorian); Jalali only in the UI.
+        requested_due_date:
+          type:
+          - string
+          - 'null'
+          format: date
+        required_quality_requirement:
+          type:
+          - string
+          - 'null'
+          maxLength: 64
+        acknowledge_possible_duplicate:
+          type: boolean
+          default: false
+    CustomerOrderUpdateRequest:
+      type: object
+      additionalProperties: false
+      description: DRAFT orders only.
+      required: []
+      properties:
+        customer_id:
+          type: string
+          format: uuid
+        brand_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        external_po_number:
+          type:
+          - string
+          - 'null'
+          maxLength: 64
+        order_type:
+          oneOf:
+          - $ref: '#/components/schemas/SystemKey'
+          - type: 'null'
+        program_ref:
+          type:
+          - string
+          - 'null'
+          maxLength: 64
+        order_date:
+          type: string
+          format: date
+          description: ISO 8601 calendar date (Gregorian); Jalali only in the UI.
+        requested_due_date:
+          type:
+          - string
+          - 'null'
+          format: date
+        required_quality_requirement:
+          type:
+          - string
+          - 'null'
+          maxLength: 64
+        acknowledge_possible_duplicate:
+          type: boolean
+          default: false
+      minProperties: 1
+    CustomerOrderLineCreateRequest:
+      type: object
+      additionalProperties: false
+      description: The unit comes from the product (C-67).
+      required:
+      - style_id
+      - quantity
+      properties:
+        style_id:
+          type: string
+          format: uuid
+        style_revision_id:
+          type: string
+          format: uuid
+          description: 'Default: the ACTIVE revision of the style.'
+        product_code_id:
+          type: string
+          format: uuid
+        quantity:
+          type: integer
+          minimum: 1
+        requested_due_date:
+          type:
+          - string
+          - 'null'
+          format: date
+    CustomerOrderLineUpdateRequest:
+      type: object
+      additionalProperties: false
+      description: DRAFT orders only; CONFIRMED lines change only through change requests (INV-02-06).
+      required: []
+      properties:
+        style_revision_id:
+          type: string
+          format: uuid
+        product_code_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        quantity:
+          type: integer
+          minimum: 1
+        requested_due_date:
+          type:
+          - string
+          - 'null'
+          format: date
+      minProperties: 1
+    CustomerOrderVersionSummary:
+      type: object
+      additionalProperties: false
+      required:
+      - order_id
+      - version
+      - reason
+      - change_request_id
+      - created_at
+      properties:
+        order_id:
+          type: string
+          format: uuid
+        version:
+          type: integer
+          minimum: 1
+        reason:
+          type: string
+          enum:
+          - CONFIRMED
+          - CHANGE_APPLIED
+          - CANCELLED
+        change_request_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        created_at:
+          $ref: '#/components/schemas/UtcTimestamp'
+    CustomerOrderVersionPage:
+      type: object
+      additionalProperties: false
+      required:
+      - items
+      - page
+      properties:
+        items:
+          type: array
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/CustomerOrderVersionSummary'
+        page:
+          $ref: '#/components/schemas/PageMeta'
+    CustomerOrderVersion:
+      type: object
+      additionalProperties: false
+      description: Immutable image of header and lines (C-64).
+      required:
+      - order_id
+      - version
+      - reason
+      - change_request_id
+      - created_at
+      - created_by
+      - image
+      properties:
+        order_id:
+          type: string
+          format: uuid
+        version:
+          type: integer
+          minimum: 1
+        reason:
+          type: string
+          enum:
+          - CONFIRMED
+          - CHANGE_APPLIED
+          - CANCELLED
+        change_request_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        created_at:
+          $ref: '#/components/schemas/UtcTimestamp'
+        created_by:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        image:
+          type: object
+          additionalProperties: false
+          required:
+          - header
+          - lines
+          properties:
+            header:
+              $ref: '#/components/schemas/CustomerOrderSummary'
+            lines:
+              type: array
+              maxItems: 200
+              items:
+                $ref: '#/components/schemas/CustomerOrderLine'
+    ChangeRequestKind:
+      type: string
+      enum:
+      - QTY_CHANGE
+      - DUE_DATE_CHANGE
+      - ADD_LINE
+      - CANCEL_LINE
+      - CANCEL_ORDER
+      - HOLD
+      - RESUME
+      description: 'PHASE_02 kinds (C-61); which kinds are allowed in which state: DEC-059.'
+    ChangeRequestItem:
+      type: object
+      additionalProperties: false
+      required:
+      - field
+      properties:
+        line_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        field:
+          type: string
+          enum:
+          - quantity
+          - requested_due_date
+          - line
+          - order
+          - hold
+        old_value:
+          type:
+          - string
+          - integer
+          - 'null'
+          maxLength: 200
+        new_value:
+          type:
+          - string
+          - integer
+          - 'null'
+          maxLength: 200
+        new_line:
+          $ref: '#/components/schemas/CustomerOrderLineCreateRequest'
+    ChangeRequest:
+      type: object
+      additionalProperties: false
+      description: STATE_TRANSITIONS 5.5. decided_by != requested_by.
+      required:
+      - change_request_id
+      - request_no
+      - order_id
+      - base_order_version
+      - kind
+      - items
+      - reason
+      - status
+      - approval_id
+      - requested_by
+      - decided_by
+      - decided_at
+      - applied_version
+      - row_version
+      - created_at
+      properties:
+        change_request_id:
+          type: string
+          format: uuid
+        request_no:
+          type: string
+          minLength: 1
+          maxLength: 32
+        order_id:
+          type: string
+          format: uuid
+        base_order_version:
+          type: integer
+          minimum: 1
+        kind:
+          $ref: '#/components/schemas/ChangeRequestKind'
+        items:
+          type: array
+          maxItems: 50
+          items:
+            $ref: '#/components/schemas/ChangeRequestItem'
+        reason:
+          type: string
+          minLength: 3
+          maxLength: 500
+          description: Mandatory justification, stored in the audit trail; no personal data.
+        status:
+          type: string
+          enum:
+          - DRAFT
+          - SUBMITTED
+          - APPROVED
+          - REJECTED
+          - APPLIED
+          - WITHDRAWN
+          - EXPIRED
+        approval_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        requested_by:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        decided_by:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        decided_at:
+          oneOf:
+          - $ref: '#/components/schemas/UtcTimestamp'
+          - type: 'null'
+        applied_version:
+          type:
+          - integer
+          - 'null'
+          minimum: 2
+        row_version:
+          type: integer
+          minimum: 1
+        created_at:
+          $ref: '#/components/schemas/UtcTimestamp'
+    ChangeRequestPage:
+      type: object
+      additionalProperties: false
+      required:
+      - items
+      - page
+      properties:
+        items:
+          type: array
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/ChangeRequest'
+        page:
+          $ref: '#/components/schemas/PageMeta'
+    ChangeRequestCreateRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - order_id
+      - kind
+      - items
+      - reason
+      properties:
+        order_id:
+          type: string
+          format: uuid
+        kind:
+          $ref: '#/components/schemas/ChangeRequestKind'
+        items:
+          type: array
+          minItems: 1
+          maxItems: 50
+          items:
+            $ref: '#/components/schemas/ChangeRequestItem'
+        reason:
+          type: string
+          minLength: 3
+          maxLength: 500
+          description: Mandatory justification, stored in the audit trail; no personal data.
+    ChangeRequestImpact:
+      type: object
+      additionalProperties: false
+      description: 'PHASE_02 part only (identity/order). Material, WIP, capacity and cost impact: later phases (C-61).'
+      required:
+      - change_request_id
+      - base_order_version
+      - lines_affected
+      - serials_affected
+      - snapshots_to_write
+      - unavailable_sections
+      properties:
+        change_request_id:
+          type: string
+          format: uuid
+        base_order_version:
+          type: integer
+          minimum: 1
+        lines_affected:
+          type: array
+          maxItems: 200
+          items:
+            type: string
+            format: uuid
+        serials_affected:
+          type: array
+          maxItems: 200
+          items:
+            type: string
+            format: uuid
+        snapshots_to_write:
+          type: integer
+          minimum: 0
+        unavailable_sections:
+          $ref: '#/components/schemas/UnavailableSections'
+    ChangeRequestDecisionRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - decision
+      - resource_revision
+      - note
+      properties:
+        decision:
+          type: string
+          enum:
+          - APPROVE
+          - REJECT
+        resource_revision:
+          type: integer
+          minimum: 1
+          description: Must equal the base order version of the request.
+        note:
+          type: string
+          minLength: 1
+          maxLength: 500
 x-aleekhan-conventions:
   status: DRAFT
   error_codes:
@@ -7971,13 +13545,43 @@ x-aleekhan-conventions:
       credentials whose hash must not be persisted. Duplicate submission is harmless (a second login simply
       rotates the session again). Protection instead: CSRF, rate limits, lockout (DEC-051), audit of every attempt.
       (CONFLICTS C-27.)
-  planned_error_codes: {}
+  planned_error_codes:
+    SERIAL_ALREADY_ALLOCATED: 409
+    PRODUCT_CODE_TAKEN: 409
+    POSSIBLE_DUPLICATE: 409
+    ORDER_VERSION_STALE: 409
   planned_error_codes_note: |
     Codes proposed by a step but not yet in `ErrorCode` (the engine catalogue, golden file and this enum change
     together in one reviewed commit, docs/engine/ERROR_CODES.md rule 5). Empty since 0.5.2-draft: the PHASE_01
     codes were implemented by the 01.3 domain engine.
+    0.7.0-draft (02.1): the four PHASE_02 codes above join `ErrorCode` with the 02.3 domain engine.
   mfa_step_up_rule: |
     Operations with `x-aleekhan-mfa-step-up: true` require an MFA verification younger than the step-up window
     (DEC-051: 15 minutes) for every caller, inside or outside the factory network (DEC-049); this is in addition to the login-time MFA
     rules (DEC-003 role list, DEC-042 outside logins).
   out_of_scope_phase_01: [customers, products, styles, serials, orders, engineering, warehouse, production, quality, dispatch, hr, ai, force-kill (DEC-024), layout publishing (PHASE_11), break-glass account use (DEC-054: console command only, no API)]
+  side_effect_free_operations:
+    operations:
+    - validateProductCode
+    - previewProductCode
+    reason: 'Pure computations over a request body (no write, no outbox, no business audit): replaying them is harmless, so
+      no Idempotency-Key. POST keeps 14-digit codes out of URLs and access logs (S2 data).'
+  planned_phase02:
+    step: '02.4'
+    tags:
+    - identity
+    - commercial
+    permission_prefixes:
+    - identity.
+    - commercial.
+    permissions_decided_by: 'DEC-057 (OPEN): until approved no role holds any PHASE_02 permission (DEC-047).'
+    serial_number_pattern: none until DEC-006 is APPROVED
+    code_segments: none until DEC-005 is APPROVED (only the Code14 format is checked)
+  out_of_scope_phase_02:
+  - prices/costing (PHASE_10)
+  - engineering ECR/ECO (PHASE_03/04)
+  - material/WIP/capacity/cost impact (PHASE_05+)
+  - serial close (DEC-020, PHASE_09)
+  - bulk legacy order import (DEC-025/DEC-035, PHASE_12)
+  - any write to Rahkaran (ADR-001)
+  - customer contact persons (DEC-028)

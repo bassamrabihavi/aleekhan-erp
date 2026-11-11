@@ -1,0 +1,4 @@
+# command (cwd backend): python -m mypy --version; python -m mypy .
+mypy 2.3.1 (compiled: yes)
+Success: no issues found in 193 source files
+# exit code: 0

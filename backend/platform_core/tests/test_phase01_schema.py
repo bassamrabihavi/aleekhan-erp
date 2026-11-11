@@ -172,8 +172,10 @@ def test_state_checks_equal_contract_enums(table: str, column: str, schema: str,
 
 # ------------------------------------------------------------------------------------------ seed
 def _contract_permissions() -> dict[str, set[bool]]:
+    """Permissions of the IMPLEMENTED operations. 0.7.0-draft (02.1): planned PHASE_02 operations carry
+    proposed permission ids (DEC-057 OPEN) that are seeded only by the reviewed migration of 02.2."""
     flags: dict[str, set[bool]] = defaultdict(set)
-    for _path, _method, op in oc.operations():
+    for _path, _method, op in oc.operations(planned=False):
         perm = op.get("x-aleekhan-permission")
         if perm:
             flags[perm].add(bool(op.get("x-aleekhan-mfa-step-up", False)))

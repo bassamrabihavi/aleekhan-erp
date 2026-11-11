@@ -1,0 +1,3 @@
+# command (repo root): python -c "jsonschema.validate(REPORT.json, handoff/04_AGENT_WORKFLOW/REPORT_SCHEMA.json)"
+REPORT.json valid against REPORT_SCHEMA.json (draft 2020-12); test_evidence = 10
+# exit code: 0

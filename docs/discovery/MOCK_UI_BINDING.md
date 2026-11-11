@@ -177,3 +177,113 @@ Catalog: `45_52_ai_security_pilot/index.html?page=46`.
 | 46 ListUsers / GetEffectivePermissions / GetSecurityEvents | listUsers / getUserEffectivePermissions / listAuditEvents |
 | 46 RequestRoleChange / ExpireTemporaryAccess / RequestBreakGlass | createRoleAssignment (direct, C-28) / `RoleAssignment.valid_to` / DEC-054 |
 | 36 admin/jobs, request-cancel, request-force-cancel, admin/health | listJobs, requestJobCancel, — (C-31), getHealthDetail |
+
+## 7. PHASE_02 binding sheets (02.1, DRAFT — reviewed with the page owner before 02.5)
+
+Contract: `docs/api/openapi-draft.yaml` **0.7.0-draft**. Every PHASE_02 operation is `x-aleekhan-status: planned`
+and `x-aleekhan-step: '02.4'`, and none is routed yet. Permissions are proposals (`identity.*`, `commercial.*`)
+waiting for **DEC-057**. Until then no role holds them, so every page answers 403 for everyone except where a
+PHASE_01 role is explicitly extended by DEC-057. Catalog pages are DRAFT, `approved=False`; prototypes were read as
+text and images only.
+
+Legend as in §6: **BOUND**, **BLOCKED (DEC)**, **REJECTED**, plus **LATER (PHASE_xx)** = a widget whose data belongs
+to a later phase. A LATER widget is not rendered, or shows the placeholder `در دست ساخت — به داده واقعی متصل نیست`
+with no number (rule 2). Every page has the states loading / empty / error (Persian message + retry) /
+stale (if `as_of`) / forbidden (403/404) / offline, is RTL, has screenshots at 1440/1180/768/390, an allow/deny
+Playwright test per role, and the environment banner outside production. Codes and serials are always shown LTR
+inside RTL text (`dir="ltr"`, monospace), never with Persian digits, never re-formatted.
+
+### 7.0 Shared elements (all PHASE_02 pages)
+| Element | Binding |
+|---|---|
+| Code display | `Code14` string as returned; copy button copies the exact 14 characters; no thousands separator, no digit conversion |
+| Serial display | `serial_number` string as returned; the customer's own serial is shown only as an ExternalRef with its namespace label |
+| "Rule not approved" banner | any 409 `RULE_NOT_APPROVED` → `این قاعده هنوز تصویب نشده است (DEC-005)` / `(DEC-006)` / `(DEC-057)` / `(DEC-059)`; the action stays disabled |
+| Search box (serial / style / product / PO no.) | `listSerials?q=`, `listProducts?q=`, `listCustomerOrders?external_po_number=` (server-side search, cursor pagination) |
+| Dates | ISO date from the API → Jalali display (Asia/Tehran); input in Jalali, sent as ISO |
+
+### 7.1 Page 1 — مرکز کنترل سریال، نمای خلاصه (owner: برنامه‌ریزی; DEC-027 for layout)
+Catalog reference: no HTML (`prototype_path: null`); concept image `01_02_concepts/داشبورد_کنترل_سریال_*.png` (layout only).
+| Element (concept) | Binding | Status |
+|---|---|---|
+| Serial header: number, product name, product code, customer/brand, required grade label, quantity, program/week | `getSerial` → `serial_number`, `style`, `product_code`, `customer`, `brand`, `quantity`, `uom`; `required_quality_requirement` (text label only, C-68); program = `program_ref` text | BOUND (after DEC-006 serials exist) |
+| Status chip ("در تولید") | `Serial.status` (PHASE_02 values ALLOCATED / CANCELLED only) | BOUND; production states LATER (PHASE_07) |
+| "Fast Track" tag | — | LATER (PHASE_05, DEC-014) |
+| Product photo | — | REJECTED for PHASE_02 (no approved image source; documents module could hold it later) |
+| Stage tracker (مواد و انبار → مهندسی → تأمین → برش → دوخت → کنترل کیفیت → آماده محصول) with WIP/Hold counts | — | LATER (PHASE_03/06/07/08/09); rendered as the placeholder; never with sample numbers |
+| Active problems (material shortage, machine failure) | — | LATER (PHASE_06/07) |
+| Decisions and tasks | `listTasks` / `listApprovals` filtered by `resource = serial` (PHASE_01 operations) + `listChangeRequests?serial_id=` | BOUND (change requests); tasks/approvals BOUND |
+| Overall progress %, produced/remaining/FG/shipped counts | — | LATER (PHASE_07/09; Quantity Ledger, not a text state) |
+| Material readiness %, complete/shortage/hold/awaiting counts | — | LATER (PHASE_06) |
+| Current location (line, station counts, last record) | — | LATER (PHASE_07) |
+| Quality standard and grade split | — | LATER (PHASE_08, DEC-019) |
+| Bottom navigation (خانه، برنامه‌ریزی، ثبت، گزارش‌ها، بیشتر) | shared shell navigation of PHASE_01; "ثبت" opens page 29 if `commercial.order.manage` is held | BOUND (shell) |
+| Notifications badge | PHASE_01 notifications are not implemented (01.2 note) | REJECTED until a notification endpoint exists |
+
+### 7.2 Page 2 — مرکز کنترل سریال، تب سفارش (owner: بازرگانی + برنامه‌ریزی; DEC-027)
+Catalog reference: no HTML; concept image `01_02_concepts/داشبورد_مدیریت_تولید_سریال_*.png` (layout only).
+| Element | Binding | Status |
+|---|---|---|
+| Order header (order no., customer PO no., customer, brand, order type, order date, requested due date, status, current version) | `getCustomerOrder` | BOUND |
+| Lines table (line no., style, style revision, product code, quantity + uom, due date, line status, serial) | `getCustomerOrder.lines[]` | BOUND |
+| Serial snapshot of this line (what was committed) | `listSerialSnapshots` (latest + history) | BOUND (after DEC-006) |
+| Order version history (v1 at confirm, one per applied change) | `listCustomerOrderVersions`, `getCustomerOrderVersion` (diff rendered client-side between two images) | BOUND |
+| External references (Rahkaran project code, contract no., customer style/serial) | `listExternalRefs?target_type=customer_order&target_id=` and per line/serial | BOUND (namespaces: DEC-058) |
+| Timeline (created, validated, confirmed, allocated, changes) | `getSerialTracking.events[]` (audit-backed, ids + times only) | BOUND |
+| Actions: validate, reopen, confirm, release to plan, cancel (DRAFT/VALIDATED), allocate serial, request change | `validateCustomerOrder`, `reopenCustomerOrder`, `confirmCustomerOrder` (BLOCKED DEC-057/DEC-006), `releaseCustomerOrderToPlan` (BLOCKED DEC-057), `cancelCustomerOrder`, `allocateSerial` (BLOCKED DEC-006/DEC-057), `createChangeRequest` (BLOCKED DEC-059) | BOUND / BLOCKED as listed |
+| Price, margin, invoice | — | LATER (PHASE_10); never in PHASE_02 |
+
+### 7.3 Page 4 — ردیابی محصولات و استایل‌ها / Product 360 (owner: مهندسی + برنامه‌ریزی)
+Catalog reference: `04_product_style/product_style_360.html` + `README_FA.md` (DRAFT).
+| Element (catalog) | Binding | Status |
+|---|---|---|
+| Product profile (class path, product no., name, unit, status, product codes) | `getProduct`, `listProductCodes?product_id=` | BOUND (class levels and segment values BLOCKED DEC-005: shown as labels only) |
+| Style list in the side column | `listProductStyles` | BOUND |
+| Style revisions (colour, material text, hardware) | `listStyleRevisions` | BOUND |
+| Serial table/cards "رنگ و جنس واقعی هر سریال" | `getStyleTracking.serials[]` (each with its own snapshot attributes, not the current style attributes) | BOUND (after DEC-006) |
+| KPIs: related serials, active serials, number of orders | `getStyleTracking.counts` (`serials_total`, `serials_active`, `orders_total`: counts computed by the server from the same commit) | BOUND |
+| KPIs: WIP, risk | — | LATER (PHASE_07 Quantity Ledger; PHASE_05 risk) |
+| Filters: customer, material, colour, period, status, search | server filters of `getStyleTracking` (`customer_id`, `status`, `from`/`to`); material/colour = text match on snapshot attributes | BOUND (material/colour masters LATER PHASE_04/06) |
+| Distribution chart and event history | history = `getSerialTracking` per serial; distribution chart only over the counts above | BOUND (no WIP distribution) |
+| Buttons "خروجی Excel", "تنظیم ستون‌ها", "ایجاد محصول" | "ایجاد محصول" → `createProduct` (if permitted); Excel export and column settings | BOUND (create) / REJECTED in PHASE_02 (export: no approved export policy; CSV formula injection rule SECURITY_BASELINE) |
+| Similar styles | `findSimilarStyles` (suggestion with reasons; never a merge, C-71) | BOUND |
+
+### 7.4 Page 29 — ثبت سفارش و کدگذاری (owner: بازرگانی / Core; serial with planning approval)
+Catalog reference: `29_36_commercial_planning_admin/index.html?page=29` (+ `app.js`, read as text).
+| Element (catalog) | Binding | Status |
+|---|---|---|
+| Wizard step 1: customer/brand, order type, customer program, customer PO no., customer representative, required grade | `listCustomers`, `listCustomerBrands`, `createCustomerOrder` (`order_type`, `program_ref`, `external_po_number`, `required_quality_requirement`); duplicate-PO warning from the create/validate response | BOUND; **representative name REJECTED** (customer contact, DEC-028; C-54); grade list BLOCKED (DEC-019, text only) |
+| Wizard step 2: nature, product type, sub-group, product no., style no., 14-digit preview | `listProductClasses` (labels), `listProducts`, `listProductStyles`; `validateProductCode` for an entered code; `previewProductCode` | BOUND for choosing an existing product/style/code; **preview BLOCKED (DEC-005)**: the catalog's fixed segment string and `padStart` logic are REJECTED (C-50/C-51) |
+| Wizard step 3: quantity, order date, requested due date, colour, main material, hardware colour | `addCustomerOrderLine` (`quantity`, `uom`, `requested_due_date`); colour/material/hardware = attributes of the chosen style revision (`createStyleRevision` if new, engineering approval) | BOUND |
+| Wizard step 4: checklist before sending to planning | `validateCustomerOrder` (server-side checks; the response lists failed checks) then `confirmCustomerOrder` | BOUND / confirm BLOCKED (DEC-057, DEC-006) |
+| KPI "کد ۱۴رقمی نمونه" | — | REJECTED (a sample code shown as data; rule 1) |
+| KPI "آمادگی فرم ۸۲٪", "مرحله ۲ از ۴" | wizard step counter is client state; readiness % REJECTED (no formula) | step counter BOUND (client) / % REJECTED |
+| "بررسی استایل‌های موجود" table with verdicts | `findSimilarStyles` | BOUND (suggestions only) |
+| Main action "بررسی و ارسال به برنامه‌ریزی" | `validateCustomerOrder` → `confirmCustomerOrder` → (planning) `allocateSerial` | BLOCKED (DEC-057, DEC-006) |
+| Double-click protection | one `Idempotency-Key` per wizard submission, kept across retries (ID-04) | BOUND |
+
+### 7.5 Page 33 — تغییرات سفارش و مهندسی (PHASE_02 part per C-61; PHASE_05 adds impact)
+Catalog reference: `29_36_commercial_planning_admin/index.html?page=33`.
+| Element (catalog) | Binding | Status |
+|---|---|---|
+| Request list (id, kind, serial, reason, state) | `listChangeRequests` (`kind`, `status`, `order_id`, `serial_id` filters) | BOUND |
+| Before/after comparison | `getChangeRequest.items[]` (`old_value`, `new_value`) | BOUND |
+| "تحلیل اثر موردنیاز" | `getChangeRequestImpact`: PHASE_02 part = affected lines, serials, snapshots, order version; sections `materials`, `wip`, `capacity`, `cost` answer `available: false` | BOUND (identity/order) / LATER (PHASE_05/06/07/10) |
+| Approval gates (engineering, warehouse/supply, planning and QA) | PHASE_02 = one approval per request (`decideChangeRequest`); multi-gate routing per module later (DEC-048 "each module approves its route in its phase") | BLOCKED (DEC-057 approver, DEC-059 kinds); extra gates LATER |
+| ECR/ECO cases (pattern change R4 → R5) | — | LATER (PHASE_03/04) |
+| Cancellation with WIP disposition | `createChangeRequest(kind=CANCEL_ORDER / CANCEL_LINE)`; disposition | BLOCKED (DEC-059); disposition LATER (PHASE_05/07) |
+| KPIs (open requests 14, needing impact 5, applied 23, cancellations 2) | counts from `listChangeRequests` with `status` filter (`page.total` is not in the contract; counts only if 02.4 adds a `counts` endpoint) | REJECTED as shown (sample numbers); BOUND later only from a server count |
+| "پیشنهاد تصمیم" / "ثبت تصمیم روی درخواست" | `decideChangeRequest`, then `applyChangeRequest` | BLOCKED (DEC-057, DEC-059) |
+
+### 7.6 Catalog API names → 0.7.0 operations (traceability)
+| Catalog (DRAFT) | 0.7.0 operation |
+|---|---|
+| `POST /commercial/order-drafts` | `createCustomerOrder` (+ `addCustomerOrderLine`) |
+| `POST /core/serials/allocate` | `allocateSerial` (`POST /identity/serials`) |
+| `POST /core/product-codes/preview` | `previewProductCode` (BLOCKED DEC-005) |
+| `GET /core/styles/similar` | `findSimilarStyles` (`GET /identity/style-suggestions`) |
+| `POST /change/requests` | `createChangeRequest` |
+| `GET /change/requests/{id}/impact` | `getChangeRequestImpact` |
+| `POST /change/requests/{id}/decision` | `decideChangeRequest` (+ `applyChangeRequest`) |
+| handoff `/product-codes/validate` | `validateProductCode` |
+| handoff `/revisions` | `listCustomerOrderVersions`, `listStyleRevisions`, `listSerialSnapshots`, `listCodeRuleRevisions` |

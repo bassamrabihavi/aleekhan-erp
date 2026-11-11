@@ -1,0 +1,5 @@
+# command (repo root): python -m ruff --version; python -m ruff check .; python -m ruff format --check .
+ruff 0.17.1
+All checks passed!
+305 files already formatted
+# exit code: 0

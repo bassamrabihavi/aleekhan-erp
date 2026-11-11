@@ -271,3 +271,20 @@ Review verdicts are in `reports/phase-00/step-N/REVIEW.md`. No version number is
   suite too; the ops stage runs the rollback rehearsal; `makemigrations --check` uses `aleekhan.settings_test`;
   E2E artefact folders can be redirected (`CI_E2E_*`). `docs/ops/CI.md` updated.
 - `docs/db/ERD.md`: migration rows 0014-0018.
+
+## PHASE_02 - Order & Product Identity (started by the employer 2026-11-11)
+
+### 02.1 Discovery & Contract (commit SHA added by the orchestrator when committed)
+- Discovery: `docs/discovery/CONFLICTS.md` C-47..C-76; `DATA_TABLE.md` PHASE_02 logical model (identity +
+  commercial tables, source provenance block, invariants INV-02-01..09); `STATE_TRANSITIONS.md` section 5 (order,
+  line, code rule revision, serial, change request, product code registry; blocked guards name their decision);
+  `MOCK_UI_BINDING.md` section 7 (pages 1, 2, 4, 29, 33); `RISKS.md` R-36..R-47.
+- Decision packets (Persian, for the orchestrator to move to `control/decisions/`): DEC-005, DEC-006, DEC-027 and
+  new DEC-057 (PHASE_02 permission matrix, P0), DEC-058 (customer/order master data, P1), DEC-059 (order changes
+  after confirmation, P0), DEC-060 (real-looking customer names in `handoff/`, P1) in `control/decisions/`.
+- Contract `docs/api/openapi-draft.yaml` 0.7.0-draft: 63 PLANNED operations on 48 paths (`/identity/...`,
+  `/commercial/...`, step 02.4, not routed), 14 blocked by DEC-005/006/057/059; four planned error codes;
+  `side_effect_free_operations`; additive (all previous paths/components unchanged). `CONTRACT_VERSION` follows.
+- Tests: new `test_api_contract_planned_phase02.py`; `test_api_contract_planned.py` allows planned PHASE_02 paths
+  only; the permission-seed test compares implemented operations only.
+- No migration, no business code, no real data; no private source read (not available on this machine).

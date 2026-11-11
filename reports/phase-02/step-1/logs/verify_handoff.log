@@ -1,0 +1,4 @@
+# command (repo root): python tools/verify_handoff.py
+KNOWN_DEFECT    PACKAGE_MANIFEST.json (REV-00.1-A / docs/discovery/CONFLICTS.md C-14 / DEC-044; expected e3b9ef1b0d915f036943fdfb0a98a001f3fa381ea1736533f227befebf8479a6, actual e20b196610e02275bef2decfbf954218b543ce3586265c11fbdc0cb1d4432eaa)
+summary: EXCLUDED=46, KNOWN_DEFECT=1, OK=300 | failures=0
+# exit code: 0

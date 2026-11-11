@@ -1,0 +1,124 @@
+{
+  "phase": "PHASE_02",
+  "step": "02.1",
+  "commit_sha": "PENDING",
+  "status": "COMPLETE",
+  "scope": [
+    "conflicts C-47..C-76 (Customer, Product/Style, CodeRuleRevision, PO Header/Line, Serial, Historical Snapshot, External Ref)",
+    "PHASE_02 data table: fields, keys, constraints, source provenance block, invariants INV-02-01..09",
+    "state transitions: order header, order line, code rule revision, serial, change request, product code registry",
+    "OpenAPI 0.7.0-draft: 63 planned operations on 48 paths (step 02.4, not routed)",
+    "mock/UI binding pages 1, 2, 4, 29, 33",
+    "risks R-36..R-47",
+    "decision packets DEC-005, DEC-006, DEC-027, DEC-057 (new), DEC-058 (new), DEC-059 (new), DEC-060 (new)"
+  ],
+  "changes": [
+    "docs/discovery/CONFLICTS.md",
+    "docs/discovery/DATA_TABLE.md",
+    "docs/discovery/STATE_TRANSITIONS.md",
+    "docs/discovery/MOCK_UI_BINDING.md",
+    "docs/discovery/RISKS.md",
+    "control/decisions/DEC-005_PACKET.md",
+    "control/decisions/DEC-006_PACKET.md",
+    "control/decisions/DEC-027_PACKET.md",
+    "control/decisions/DEC-057_PACKET.md",
+    "control/decisions/DEC-058_PACKET.md",
+    "control/decisions/DEC-059_PACKET.md",
+    "control/decisions/DEC-060_PACKET.md",
+    "docs/api/openapi-draft.yaml",
+    "docs/api/API_RUNTIME.md",
+    "backend/platform_core/api/views.py",
+    "backend/platform_core/tests/test_api_contract_planned.py",
+    "backend/platform_core/tests/test_api_contract_planned_phase02.py",
+    "backend/platform_core/tests/test_phase01_schema.py",
+    "CHANGELOG.md",
+    "reports/phase-02/step-1/REPORT.json",
+    "reports/phase-02/step-1/logs/"
+  ],
+  "migrations": [],
+  "test_evidence": [
+    {
+      "command": "python -m ruff check . && python -m ruff format --check . (repo root)",
+      "outcome": "PASS",
+      "log_path": "reports/phase-02/step-1/logs/ruff.log"
+    },
+    {
+      "command": "cd backend && python -m mypy .",
+      "outcome": "PASS",
+      "log_path": "reports/phase-02/step-1/logs/mypy.log"
+    },
+    {
+      "command": "cd backend && python -m pytest -m \"not perf\" -q -p no:cacheprovider --junitxml=../reports/phase-02/step-1/logs/pytest.xml (PostgreSQL test DB 127.0.0.1:5433)",
+      "outcome": "PASS",
+      "log_path": "reports/phase-02/step-1/logs/pytest_full_not_perf.log"
+    },
+    {
+      "command": "openapi-spec-validator on docs/api/openapi-draft.yaml + additive check against HEAD 4b490d2",
+      "outcome": "PASS",
+      "log_path": "reports/phase-02/step-1/logs/openapi_validate.log"
+    },
+    {
+      "command": "python -m unittest discover -s tools/tests -p \"test_*.py\" -v",
+      "outcome": "PASS",
+      "log_path": "reports/phase-02/step-1/logs/tools_unittest.log"
+    },
+    {
+      "command": "python tools/verify_handoff.py",
+      "outcome": "PASS",
+      "log_path": "reports/phase-02/step-1/logs/verify_handoff.log"
+    },
+    {
+      "command": "python tools/secret_scan.py",
+      "outcome": "PASS",
+      "log_path": "reports/phase-02/step-1/logs/secret_scan.log"
+    },
+    {
+      "command": "python tools/secret_scan.py --history",
+      "outcome": "PASS",
+      "log_path": "reports/phase-02/step-1/logs/secret_scan_history.log"
+    },
+    {
+      "command": "jsonschema validate reports/phase-02/step-1/REPORT.json against handoff/04_AGENT_WORKFLOW/REPORT_SCHEMA.json",
+      "outcome": "PASS",
+      "log_path": "reports/phase-02/step-1/logs/report_schema.log"
+    },
+    {
+      "command": "golden extraction of Planning--.xlsm code rules (DEC-005 E-1..E-11) and legacy serials (DEC-006 q.5)",
+      "outcome": "SKIPPED",
+      "log_path": "reports/phase-02/step-1/logs/golden_pending.log"
+    }
+  ],
+  "security_evidence": [
+    "no private source read: ALEEKHAN_PRIVATE_DIR not set on this machine; no legacy XLSM/VBA/PY executed",
+    "no real code, serial, customer name or contact person copied into new docs, tests or contract (grep of the diff for the handoff sample values: 0 hits); C-72 / DEC-060 raised for real-looking names already inside handoff/",
+    "all 63 planned operations require the session cookie and a proposed identity.*/commercial.* permission; no new public operation (test pinned)",
+    "no PHASE_02 permission seeded before DEC-057 (test); deny by default unchanged",
+    "14 operations blocked by DEC-005/006/057/059 with 409 RULE_NOT_APPROVED; SerialNumber has no pattern while DEC-006 is open (test)",
+    "14-digit codes are Code14 strings in every PHASE_02 schema; no code/serial property typed as number (test)",
+    "secret scan tree and history: 0 findings"
+  ],
+  "decisions": [
+    "DEC-005 packet (P0, OPEN): extraction list E-1..E-11 + who confirms + code authority Q-B (Rahkaran item master)",
+    "DEC-006 packet (P0, PROPOSED in register): serial namespace S-A/B/C, line relation L-A/B/C, gaps, legacy continuity",
+    "DEC-027 packet (P1, OPEN): pages 1/2 scope and layout",
+    "DEC-057 packet (P0, new): PHASE_02 permission matrix (5 proposed roles, 22 permissions)",
+    "DEC-058 packet (P1, new): customer/brand, PO number uniqueness, external ref namespaces, unit per family, order types",
+    "DEC-059 packet (P0, new): order changes after confirmation, cancellation, hold/resume",
+    "DEC-060 packet (P1, new): real-looking customer names and paths inside handoff/ in the public repository"
+  ],
+  "risks": [
+    "R-36 golden extraction not possible on this machine",
+    "R-37 guessed code rule issuing wrong codes into Rahkaran",
+    "R-38 real codes/names leaking into the public repository",
+    "R-39 new serials colliding with legacy serials",
+    "R-43 PHASE_02 permission matrix not approved in time"
+  ],
+  "evidence_paths": [
+    "reports/phase-02/step-1/logs/",
+    "docs/discovery/",
+    "control/decisions/",
+    "docs/api/openapi-draft.yaml"
+  ],
+  "rollback": "git revert <commit>: restores contract 0.6.3-draft, CONTRACT_VERSION and the contract tests together; documents only otherwise; no data or schema involved",
+  "review_request": "PASS"
+}
