@@ -2371,8 +2371,8 @@
       "what": "صفحه‌های فاز ۱: ورود و تأیید دومرحله‌ای، امنیت و کاربران (۴۶)، درخت سازمانی، کارها و تأییدها (۳۹)، اسناد (۴۰)، پارامترها (۴۲)، سلامت سامانه (۳۶)",
       "how": "راهنمای قدم‌به‌قدم: reports/phase-01/step-5/UAT_HOWTO_FA.md — نشانی http://127.0.0.1:5173/ ؛ سرورها را ارکستراتور برای شما روشن می‌کند؛ داده‌ها ساختگی‌اند",
       "since": "2026-11-10T03:59:29+00:00",
-      "result": null,
-      "note": null
+      "result": "PASS",
+      "note": "Employer ran login/MFA, org tree, users/roles, approvals (DEC-055), parameters in browser (2026-11-11); remaining items verified by orchestrator on the UAT DB (audit chain OK 54/54, housekeeping 8/8 OK) + E2E 22 passed (step-8 09_e2e.log). Visual remarks UIP-001/002 in control/UI_POLISH_BACKLOG.md."
     }
   ],
   "events": [
@@ -3138,7 +3138,13 @@
       "state": "PASS",
       "note": null,
       "commit": null
+    },
+    {
+      "at": "2026-11-11T14:35:31+00:00",
+      "kind": "test_result",
+      "id": "T-003",
+      "result": "PASS"
     }
   ],
-  "updated_at": "2026-11-10T18:43:56+00:00"
+  "updated_at": "2026-11-11T14:35:31+00:00"
 }
