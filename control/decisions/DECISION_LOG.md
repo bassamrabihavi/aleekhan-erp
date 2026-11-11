@@ -69,3 +69,15 @@
 - **2026-11-10 (DEC-056 extension, REV-0125; matrix v1.2):** the owner (`owner_admin`) also decides document revisions (approve/reject) and BUSINESS_RULE parameter publish requests directly. Maker ≠ checker unchanged: never his own request/proposal (except DEC-055). Decided by بسام ربیهاوی (کارفرما).
 - **2026-11-10 (DEC-056 extension 2; matrix v1.3, scheduled in 01.7):** the owner (`owner_admin`) also reads all documents and downloads them (download only CLEAN files, audited), so he can open a file before deciding. Decided by بسام ربیهاوی (کارفرما), answer to the 01.6 question.
 - **2026-11-10 (failed-event handling, REV-0133):** IT (`it_ops`) may also **replay** a dead-lettered event; **discard** stays owner-only (`owner_admin`, reason required). Both audited. Decided by بسام ربیهاوی (کارفرما), answer to the 01.7 question.
+
+## 2026-11-11 — PHASE_01 Gate items (employer, Claude Code session)
+- **UAT T-003 PASS:** the employer ran steps 1–5 in the browser. The orchestrator verified the rest on the UAT DB, and E2E passed 22.
+- **Security checklist PHASE_01:** accept with conditions. Items 1.10, 2.6, 2.7, 3.4, 3.11 and 4.8 close before the production server and the pilot.
+- **Technical defaults confirmed:**
+  - login rate limit 20/min per IP and 10/min per username;
+  - upload limit 25 MB;
+  - housekeeping overdue alert after 26 h;
+  - orphan-file grace 24 h;
+  - notification retention 180 days.
+
+  They stay changeable later. Decided by بسام ربیهاوی (کارفرما).
