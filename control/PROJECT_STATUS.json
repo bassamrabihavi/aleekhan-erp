@@ -225,9 +225,9 @@
       "steps": {
         "02.1": {
           "name": "Discovery & Contract",
-          "state": "IN_PROGRESS",
-          "commit": null,
-          "report": null,
+          "state": "IN_REVIEW",
+          "commit": "1c69e99",
+          "report": "reports/phase-02/step-1/REPORT.md",
           "review": null,
           "rework_cycles": 0,
           "started_at": "2026-11-11T15:04:54+00:00",
@@ -3247,7 +3247,16 @@
       "kind": "decision_added",
       "id": "DEC-060",
       "status": "OPEN"
+    },
+    {
+      "at": "2026-11-11T15:43:05+00:00",
+      "kind": "step",
+      "phase": "PHASE_02",
+      "step": "02.1",
+      "state": "IN_REVIEW",
+      "note": null,
+      "commit": "1c69e99"
     }
   ],
-  "updated_at": "2026-11-11T15:42:27+00:00"
+  "updated_at": "2026-11-11T15:43:05+00:00"
 }
