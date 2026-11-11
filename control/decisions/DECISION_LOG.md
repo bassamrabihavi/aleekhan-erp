@@ -102,3 +102,11 @@
   - Rule R-38 stays in force: no new document, test, fixture or image may repeat these values.
 
   The X-B redaction is withdrawn. Decided by بسام ربیهاوی (کارفرما).
+
+## 2026-11-11 — DEC-006 (serial), answers 1/2/4/5 — format still open
+- **Namespace:** S-A, one counter for the whole factory.
+- **Timing:** L-A. Every line gets its serial when the order is confirmed, in the same transaction. No confirmed line is ever without a serial.
+- **Gaps:** **G-B, gapless.** The employer chose this over the recommended G-A. Allocation takes a row lock on the counter inside the confirm transaction, so a failed confirm does not consume a number. This trades throughput under high concurrency for no gaps. The ID-02 race test must prove both: no duplicates and no gaps.
+- **Legacy:** P-A. Numbering continues after the largest legacy serial (Planning, paper, Rahkaran), plus a safety margin. The largest value comes from the Planning extraction.
+- **Still open:** question 3, the format (prefix, length, leading zeros, check digit). It is to be read from the Planning workbook, with synthetic examples only. DEC-006 stays open until then.
+- **Decided by:** بسام ربیهاوی (کارفرما).
