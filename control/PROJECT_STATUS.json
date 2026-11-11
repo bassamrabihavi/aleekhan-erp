@@ -217,8 +217,8 @@
         "PHASE_01"
       ],
       "est_weeks": 3,
-      "state": "NOT_STARTED",
-      "started_at": null,
+      "state": "ACTIVE",
+      "started_at": "2026-11-11T14:39:40+00:00",
       "gate_pending_at": null,
       "accepted_at": null,
       "accepted_by": null,
@@ -3152,7 +3152,13 @@
       "verdict": "ACCEPTED",
       "by": "بسام ربیهاوی",
       "note": "همه بندهای Gate بسته شد: T-003 قبول، چک‌لیست امنیتی پذیرش با شرط، پیش‌فرض‌های فنی، مرز محدوده و مرز برگشت تأیید (2026-11-11)"
+    },
+    {
+      "at": "2026-11-11T14:39:40+00:00",
+      "kind": "phase_started",
+      "phase": "PHASE_02",
+      "by": "بسام ربیهاوی"
     }
   ],
-  "updated_at": "2026-11-11T14:38:44+00:00"
+  "updated_at": "2026-11-11T14:39:40+00:00"
 }
