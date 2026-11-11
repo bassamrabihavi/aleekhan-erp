@@ -81,3 +81,10 @@
   - notification retention 180 days.
 
   They stay changeable later. Decided by بسام ربیهاوی (کارفرما).
+- **Scope splits confirmed:** as proposed in 01.1 and built:
+  - C-33: page 42 has parameters and DRAFT dynamic fields; the rest is in PHASE_11.
+  - C-34: page 36 has health, jobs and event delivery; the monitoring dashboards are in PHASE_11.
+  - C-46: document check-out is in PHASE_12.
+
+  Decided by بسام ربیهاوی (کارفرما).
+- **Rollback boundary acknowledged:** once job runs exist, reversing 0011 is refused by design, and the way back is restore from backup (`docs/ops/ROLLBACK.md` §3a; drill PASS). Acknowledged by بسام ربیهاوی (کارفرما).
