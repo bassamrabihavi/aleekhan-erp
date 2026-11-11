@@ -114,11 +114,11 @@
         "PHASE_00"
       ],
       "est_weeks": 3,
-      "state": "GATE_PENDING",
+      "state": "ACCEPTED",
       "started_at": "2026-11-04T14:42:30+00:00",
       "gate_pending_at": "2026-11-10T18:43:56+00:00",
-      "accepted_at": null,
-      "accepted_by": null,
+      "accepted_at": "2026-11-11T14:38:44+00:00",
+      "accepted_by": "بسام ربیهاوی",
       "steps": {
         "01.1": {
           "name": "Discovery & Contract",
@@ -3144,7 +3144,15 @@
       "kind": "test_result",
       "id": "T-003",
       "result": "PASS"
+    },
+    {
+      "at": "2026-11-11T14:38:44+00:00",
+      "kind": "gate",
+      "phase": "PHASE_01",
+      "verdict": "ACCEPTED",
+      "by": "بسام ربیهاوی",
+      "note": "همه بندهای Gate بسته شد: T-003 قبول، چک‌لیست امنیتی پذیرش با شرط، پیش‌فرض‌های فنی، مرز محدوده و مرز برگشت تأیید (2026-11-11)"
     }
   ],
-  "updated_at": "2026-11-11T14:35:31+00:00"
+  "updated_at": "2026-11-11T14:38:44+00:00"
 }
