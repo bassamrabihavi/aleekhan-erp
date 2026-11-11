@@ -91,6 +91,6 @@ staging - all need the staging server or a go-live decision.
 
 | Role | Name | Decision (accept / reject / accept with conditions) | Date | Signature |
 |---|---|---|---|---|
-| Employer (کارفرما) | | | | |
+| Employer (کارفرما) | بسام ربیهاوی | accept with conditions (پذیرش با شرط): all OPEN and PARTIAL items (1.10, 2.6, 2.7, 3.4, 3.11, 4.8; 3.13 N/A until containers) are closed before deployment on the production server and before the Pilot | 2026-11-11 | given by the employer in the Claude Code session (answer to Gate packet item 4-b); recorded by the orchestrator |
 | Security reviewer / auditor | | | | |
 | IT (operations) | | | | |
