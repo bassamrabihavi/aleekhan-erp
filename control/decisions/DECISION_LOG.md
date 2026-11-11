@@ -88,3 +88,11 @@
 
   Decided by بسام ربیهاوی (کارفرما).
 - **Rollback boundary acknowledged:** once job runs exist, reversing 0011 is refused by design, and the way back is restore from backup (`docs/ops/ROLLBACK.md` §3a; drill PASS). Acknowledged by بسام ربیهاوی (کارفرما).
+
+## 2026-11-11 — DEC-060 APPROVED: real customer data in handoff/ (public repo)
+- **Facts:** the names in the handoff catalogue files are **real**. They are customer and brand names, a customer representative's name, a Rahkaran project code and an internal network path.
+- **Decision:** option X-B + X-D.
+  - The repo `bassamrabihavi/aleekhan-erp` becomes **private**. This amends DEC-046.
+  - A one-time exception allows editing `handoff/`, like DEC-044. The values are replaced with a "redacted" label, and the changed hashes are recorded as a registered exception in `verify_handoff`.
+  - Git history is **not** rewritten (no X-C).
+- **Decided by:** بسام ربیهاوی (کارفرما).
