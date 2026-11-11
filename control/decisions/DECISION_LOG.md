@@ -96,3 +96,9 @@
   - A one-time exception allows editing `handoff/`, like DEC-044. The values are replaced with a "redacted" label, and the changed hashes are recorded as a registered exception in `verify_handoff`.
   - Git history is **not** rewritten (no X-C).
 - **Decided by:** بسام ربیهاوی (کارفرما).
+- **2026-11-11 (DEC-060 amended, X-D only):** the permission system blocked the edit to `handoff/`. A read-only dry run then showed a much wider scope: 108 text values in 10 files, the concept images, about 140 preview images, a file name, and other brand names. So the employer chose **X-D only**:
+  - The repo is made private.
+  - `handoff/` stays untouched, so no exception is opened.
+  - Rule R-38 stays in force: no new document, test, fixture or image may repeat these values.
+
+  The X-B redaction is withdrawn. Decided by بسام ربیهاوی (کارفرما).
