@@ -1637,13 +1637,13 @@
       "gate": "Phase-2",
       "domain": "Identity",
       "issue": "قاعده دقیق namespace/فرمت Serial و رابطه order line",
-      "status": "PROPOSED",
+      "status": "APPROVED",
       "owner": "برنامه‌ریزی",
       "phase": "PHASE_02",
       "source": "user process + audit",
-      "resolution": null,
-      "decided_by": null,
-      "decided_at": null
+      "resolution": "S-A one factory counter + L-A allocate at order confirm (same tx) + G-B gapless (counter row lock) + P-A start 63001 (legacy max <63000 in Planning intake 113f5400…) + format: plain integer, no prefix, no leading zeros; legacy variants (S-prefix, -digit/-P/-N suffix, BG) import as text history only, never generated. Who allocates -> DEC-057.",
+      "decided_by": "بسام ربیهاوی",
+      "decided_at": "2026-11-12T05:25:15+00:00"
     },
     {
       "id": "DEC-007",
@@ -3281,7 +3281,15 @@
       "status": "APPROVED",
       "by": "بسام ربیهاوی",
       "note": "واقعی‌اند؛ فقط X-D: مخزن خصوصی؛ handoff دست نمی‌خورد (X-B پس گرفته شد پس از مسدودشدن ویرایش و دامنه وسیع)"
+    },
+    {
+      "at": "2026-11-12T05:25:15+00:00",
+      "kind": "decision",
+      "id": "DEC-006",
+      "status": "APPROVED",
+      "by": "بسام ربیهاوی",
+      "note": "S-A one factory counter + L-A allocate at order confirm (same tx) + G-B gapless (counter row lock) + P-A start 63001 (legacy max <63000 in Planning intake 113f5400…) + format: plain integer, no prefix, no leading zeros; legacy variants (S-prefix, -digit/-P/-N suffix, BG) import as text history only, never generated. Who allocates -> DEC-057."
     }
   ],
-  "updated_at": "2026-11-11T18:28:32+00:00"
+  "updated_at": "2026-11-12T05:25:15+00:00"
 }

@@ -110,3 +110,15 @@
 - **Legacy:** P-A. Numbering continues after the largest legacy serial (Planning, paper, Rahkaran), plus a safety margin. The largest value comes from the Planning extraction.
 - **Still open:** question 3, the format (prefix, length, leading zeros, check digit). It is to be read from the Planning workbook, with synthetic examples only. DEC-006 stays open until then.
 - **Decided by:** بسام ربیهاوی (کارفرما).
+
+## 2026-11-12 — DEC-006 APPROVED (serial format closed)
+- **Evidence:** read-only, in-memory profile of `NOrder!B` in the Planning workbook (intake sha `113f5400…`, see `control/SOURCE_INTAKE.csv`). Only aggregates were taken. No serial value is stored in the repo.
+  - 3,779 of the 3,920 entries are plain integers. They have no prefix and no leading zeros.
+  - The recent entries are consecutive 5-digit numbers, and the largest legacy serial is below 63000. The column holds values entered by hand, with no formulas.
+  - 141 legacy entries have other shapes: an `S` prefix (40), a `-digit` suffix (85), a `-P` suffix (13), a `-N` suffix (2) and a `BG` prefix (1). In addition, 2 values are duplicated.
+- **Format (Q3):** a plain integer, with no prefix, no fixed length, no leading zeros and no check digit. It is stored as text (`varchar(32)`) so that legacy variants can be imported.
+- **Start (P-A):** the first serial issued by the system is **63001**. The gap above the legacy maximum is the safety margin. The condition is that no paper or Rahkaran serial is 63000 or above; the import must verify this.
+- **Legacy variants:** they are imported as **history only** and kept as text, exactly as they are. The new system never generates them. If a special kind is needed later, it gets its own decision. The 2 legacy duplicates are flagged at import and are not merged silently.
+- **Combined with the 2026-11-11 answers:** S-A + L-A + G-B (gapless, counter row lock) + P-A.
+- **Q6 (who allocates):** decided in DEC-057.
+- **Decided by:** بسام ربیهاوی (کارفرما).
