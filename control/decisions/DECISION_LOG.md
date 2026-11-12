@@ -122,3 +122,10 @@
 - **Combined with the 2026-11-11 answers:** S-A + L-A + G-B (gapless, counter row lock) + P-A.
 - **Q6 (who allocates):** decided in DEC-057.
 - **Decided by:** بسام ربیهاوی (کارفرما).
+
+## 2026-11-12 — DEC-037 amendment (Planning baseline)
+- **Decision:** the Planning workbook in `ALEEKHAN_PRIVATE_DIR` is the golden baseline. It has intake sha `113f5400…` and file mtime 2026-11-11.
+- **Supersedes:** the 2026-11-03 copy, which is now history.
+- **Scope:** golden tests and the DEC-005 extraction are locked to this hash.
+- **Resolves:** C-22 / C-74 for Planning (hash recorded in `control/SOURCE_INTAKE.csv`).
+- **Decided by:** بسام ربیهاوی (کارفرما).
