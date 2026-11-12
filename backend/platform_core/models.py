@@ -440,11 +440,14 @@ class CompensationRecord(models.Model):
 
 # Integration tables (00.6, platform_core.integration.models) and the PHASE_01 / 01.2 platform tables (one
 # module per area: identity, org, workflow, documents, params, jobs; same app, same migration history) are
-# registered here so Django's app loading sees them.
+# registered here so Django's app loading sees them. PHASE_02 / 02.2 adds the Identity (product registry,
+# serials) and Commercial (orders) modules the same way.
+from platform_core.commercial import models as _commercial_models  # noqa: E402,F401
 from platform_core.documents import models as _documents_models  # noqa: E402,F401
 from platform_core.identity import models as _identity_models  # noqa: E402,F401
 from platform_core.integration import models as _integration_models  # noqa: E402,F401
 from platform_core.jobs import models as _jobs_models  # noqa: E402,F401
 from platform_core.org import models as _org_models  # noqa: E402,F401
 from platform_core.params import models as _params_models  # noqa: E402,F401
+from platform_core.product_identity import models as _product_identity_models  # noqa: E402,F401
 from platform_core.workflow import models as _workflow_models  # noqa: E402,F401

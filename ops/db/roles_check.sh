@@ -170,6 +170,25 @@ expect_denied "app: TRUNCATE login attempts" "$APP" "TRUNCATE platform_login_att
 hist="$(admin -d "$DB" -c "SELECT count(*) FROM platform_org_unit_history h JOIN platform_org_unit u ON u.id = h.unit_id WHERE u.code = 'rc_unit'")"
 if [ "$hist" = "1" ]; then record "history row written by trigger for the app role's insert" PASS; else record "history row written by trigger for the app role's insert" FAIL "found $hist"; fi
 
+echo "== app role: PHASE_02 tables (02.2)"
+expect_ok "app: SELECT serial counter" "$APP" "SELECT next_value FROM identity_serial_counter"
+expect_ok "app: UPDATE serial counter (allocation step)" "$APP" "UPDATE identity_serial_counter SET next_value = next_value WHERE false"
+expect_ok "app: INSERT external reference type (steward-extensible, DEC-058)" "$APP" "INSERT INTO identity_external_ref_type (key, label_fa, status, decision_id, provenance) SELECT 'rc_probe_type', 'x', 'ACTIVE', '', 'SYS' WHERE false"
+expect_denied "app: INSERT serial counter (seed is migration-only)" "$APP" "INSERT INTO identity_serial_counter (id, namespace_key, start_value, next_value, legacy_max_exclusive, number_pattern, decision_id) SELECT gen_random_uuid(), 'factory_serial', 1, 1, 0, '^[1-9][0-9]*\$', 'DEC-006' WHERE false"
+expect_denied "app: DELETE serial counter" "$APP" "DELETE FROM identity_serial_counter"
+expect_denied "app: DELETE serial" "$APP" "DELETE FROM identity_serial"
+expect_denied "app: UPDATE serial snapshot" "$APP" "UPDATE identity_serial_snapshot SET snapshot = snapshot"
+expect_denied "app: DELETE serial snapshot" "$APP" "DELETE FROM identity_serial_snapshot"
+expect_denied "app: UPDATE order version" "$APP" "UPDATE commercial_customer_order_version SET image = image"
+expect_denied "app: DELETE order line" "$APP" "DELETE FROM commercial_customer_order_line"
+expect_denied "app: DELETE product code" "$APP" "DELETE FROM identity_product_code"
+expect_denied "app: INSERT unit of measure (catalogue)" "$APP" "INSERT INTO identity_unit_of_measure (code, label_fa, decision_id, provenance) SELECT 'RC', 'x', 'DEC-058', 'SYS' WHERE false"
+expect_denied "app: INSERT order type (catalogue)" "$APP" "INSERT INTO commercial_order_type (code, label_fa, sort_order, status, decision_id, provenance) SELECT 'rc_probe', 'x', 1, 'ACTIVE', 'DEC-058', 'SYS' WHERE false"
+expect_denied "app: DISABLE gapless counter trigger" "$APP" "ALTER TABLE identity_serial_counter DISABLE TRIGGER trg_identity_serial_counter_gapless"
+expect_denied "app: DISABLE serial guard trigger" "$APP" "ALTER TABLE identity_serial DISABLE TRIGGER trg_identity_serial_guard"
+seeded="$(admin -d "$DB" -c "SELECT start_value || '/' || next_value FROM identity_serial_counter WHERE namespace_key = 'factory_serial'")"
+if [ "$seeded" = "63001/63001" ]; then record "serial counter seeded at 63001 (DEC-006)" PASS; else record "serial counter seeded at 63001 (DEC-006)" FAIL "found $seeded"; fi
+
 echo "== readonly role"
 expect_ok "ro: SELECT audit" "$RO" "SELECT count(*) FROM platform_audit_event"
 expect_ok "ro: SELECT outbox" "$RO" "SELECT count(*) FROM platform_outbox_event"
@@ -180,7 +199,7 @@ expect_ok "ro: SELECT role grants" "$RO" "SELECT count(*) FROM platform_role_per
 expect_denied "ro: UPDATE user" "$RO" "UPDATE platform_user SET display_name = display_name"
 
 echo "== audit trigger still enabled and rows intact"
-disabled="$(admin -d "$DB" -c "SELECT count(*) FROM pg_trigger g JOIN pg_class c ON c.oid = g.tgrelid WHERE NOT g.tgisinternal AND c.relname LIKE 'platform\_%' AND g.tgenabled <> 'O'")"
+disabled="$(admin -d "$DB" -c "SELECT count(*) FROM pg_trigger g JOIN pg_class c ON c.oid = g.tgrelid WHERE NOT g.tgisinternal AND (c.relname LIKE 'platform\_%' OR c.relname LIKE 'identity\_%' OR c.relname LIKE 'commercial\_%') AND g.tgenabled <> 'O'")"
 if [ "$disabled" = "0" ]; then record "all platform triggers enabled" PASS; else record "all platform triggers enabled" FAIL "$disabled disabled"; fi
 state="$(admin -d "$DB" -c "SELECT string_agg(tgname || '=' || tgenabled::text, ',' ORDER BY tgname) FROM pg_trigger WHERE tgrelid = 'platform_audit_event'::regclass AND NOT tgisinternal")"
 if [ "$state" = "trg_audit_event_append_only=O,trg_audit_event_no_truncate=O" ]; then record "audit triggers enabled" PASS "$state"; else record "audit triggers enabled" FAIL "$state"; fi

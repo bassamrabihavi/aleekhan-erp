@@ -43,7 +43,7 @@ from .errors import EngineContractError
 SOURCE_SYSTEM: Final = "aleekhan-erp"
 # Newest platform_core migration this code was written for (provenance of every outbox row). Pinned to the
 # leaf of the migration graph by test_integration_events.py::test_schema_migration_head_is_the_graph_leaf.
-SCHEMA_MIGRATION_HEAD: Final = "platform_core.0018_outbox_discard_and_orphan_job"
+SCHEMA_MIGRATION_HEAD: Final = "platform_core.0022_dec057_matrix_v20"
 SYNTHETIC_TEST_PREFIX: Final = "platform.synthetic."
 
 _UUID_RE = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")
@@ -188,6 +188,7 @@ DOC: Final = "platform_core.documents"
 CFG: Final = "platform_core.params"
 OPS: Final = "platform_core.jobs"
 INT: Final = "platform_core.integration"
+PID: Final = "platform_core.product_identity"
 
 
 def _spec(
@@ -414,6 +415,17 @@ _SPECS: tuple[EventSpec, ...] = (
         "platform.compensation_record",
         "compensation recorded for a dead-lettered event",
         {"compensation_id": U, "event_id": U, "consumer": NAME, "outcome": CODE},
+    ),
+    # PHASE_02 / 02.2 Identity: serial allocation primitive (DEC-006; handoff catalogue name
+    # "SerialAllocated").
+    # Identifiers and versions only: no serial number, customer or code in the payload (consumers read the
+    # API).
+    _spec(
+        "identity.serial.allocated",
+        PID,
+        "identity.serial",
+        "serial allocated at order confirm with its snapshot v1 (gapless counter, DEC-006)",
+        {"id": U, "status": CODE, "snapshot_version": N},
     ),
 )
 

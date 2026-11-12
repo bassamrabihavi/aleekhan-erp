@@ -235,12 +235,12 @@
         },
         "02.2": {
           "name": "Database",
-          "state": "TODO",
+          "state": "IN_PROGRESS",
           "commit": null,
           "report": null,
           "review": null,
           "rework_cycles": 0,
-          "started_at": null,
+          "started_at": "2026-11-12T09:30:34+00:00",
           "done_at": null
         },
         "02.3": {
@@ -3329,7 +3329,16 @@
       "status": "APPROVED",
       "by": "بسام ربیهاوی",
       "note": "B-A brand table; customer rep NAME recorded (PII, no contact data, masked for viewers); PO no. not unique, warn; 4 external ref types; units shoe=pair others=piece; order types = 4 Planning types; grade text-only default"
+    },
+    {
+      "at": "2026-11-12T09:30:34+00:00",
+      "kind": "step",
+      "phase": "PHASE_02",
+      "step": "02.2",
+      "state": "IN_PROGRESS",
+      "note": null,
+      "commit": null
     }
   ],
-  "updated_at": "2026-11-12T09:30:08+00:00"
+  "updated_at": "2026-11-12T09:30:34+00:00"
 }

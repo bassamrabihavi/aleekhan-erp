@@ -1,0 +1,7 @@
+== git diff --stat HEAD -- docs/api (expect empty: contract unchanged)
+== CONTRACT_VERSION
+32:CONTRACT_VERSION: Final = "0.7.0-draft"
+5:  version: 0.7.0-draft
+== openapi_spec_validator
+docs/api/openapi-draft.yaml: OK
+exit=0

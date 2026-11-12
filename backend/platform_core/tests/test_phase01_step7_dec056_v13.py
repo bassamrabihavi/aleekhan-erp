@@ -57,8 +57,9 @@ def test_v13_owner_holds_document_read_and_download_without_a_cap() -> None:
         )
     )
     assert OWNER_V13 <= held
-    assert owner.matrix_version == "1.3"
-    # not business-approval permissions -> the DB guard exception is unchanged (still exactly three pairs)
+    assert owner.matrix_version == "2.0"  # v1.3 here, moved on by DEC-057 (matrix v2.0, 0022)
+    # not business-approval permissions -> 0017 did not touch the DB guard exception (0022 widened it to
+    # exactly the six pairs of authz.policy.OWNER_BA_ACTIONS, DEC-057)
     assert not Permission.objects.filter(
         action__in=[a for a, _m, _s in OWNER_V13], business_approval=True
     ).exists()
@@ -76,7 +77,8 @@ def test_v13_owner_holds_document_read_and_download_without_a_cap() -> None:
 
 @pytest.mark.django_db
 def test_v13_migration_does_not_replace_the_guard_functions() -> None:
-    """0017 adds grants only: the three guard bodies still carry the 0015 (v1.2) text."""
+    """0017 adds grants only; the guard bodies are the 0015 text widened by 0022 (DEC-057) - never the
+    document read/download grants of v1.3."""
     with connection.cursor() as cur:
         cur.execute(
             "SELECT p.proname, pg_get_functiondef(p.oid) FROM pg_proc p WHERE p.proname IN "

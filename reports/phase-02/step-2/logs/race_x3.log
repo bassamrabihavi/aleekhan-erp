@@ -1,0 +1,390 @@
+== run 1
+.............................                                            [100%]
+=================================== PASSES ====================================
+_____________ test_same_idempotency_key_in_parallel_executes_once _____________
+---------------------------- Captured stderr call -----------------------------
+{"ts": "2026-11-12T10:28:47.566+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "e570a54b-7313-4778-b6bd-694f0d9f4b56", "event": "http_request", "method": "POST", "path": "/api/v1/admin/users", "status": 409, "duration_ms": 226.1, "error_code": "IDEMPOTENCY_IN_PROGRESS"}
+{"ts": "2026-11-12T10:28:47.567+00:00", "level": "WARNING", "logger": "django.request", "msg": "Conflict: /api/v1/admin/users", "request_id": "e570a54b-7313-4778-b6bd-694f0d9f4b56"}
+{"ts": "2026-11-12T10:28:47.571+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "30ddedde-d800-42b8-8c87-161399a9e647", "event": "http_request", "method": "POST", "path": "/api/v1/admin/users", "status": 409, "duration_ms": 218.7, "error_code": "IDEMPOTENCY_IN_PROGRESS"}
+{"ts": "2026-11-12T10:28:47.571+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "6623a80a-303b-462f-a24d-51f38f9afa65", "event": "http_request", "method": "POST", "path": "/api/v1/admin/users", "status": 409, "duration_ms": 238.5, "error_code": "IDEMPOTENCY_IN_PROGRESS"}
+{"ts": "2026-11-12T10:28:47.571+00:00", "level": "WARNING", "logger": "django.request", "msg": "Conflict: /api/v1/admin/users", "request_id": "30ddedde-d800-42b8-8c87-161399a9e647"}
+{"ts": "2026-11-12T10:28:47.573+00:00", "level": "WARNING", "logger": "django.request", "msg": "Conflict: /api/v1/admin/users", "request_id": "6623a80a-303b-462f-a24d-51f38f9afa65"}
+{"ts": "2026-11-12T10:28:47.587+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "513e141c-df95-4d73-996a-814b0b3f4043", "event": "http_request", "method": "POST", "path": "/api/v1/admin/users", "status": 409, "duration_ms": 251.2, "error_code": "IDEMPOTENCY_IN_PROGRESS"}
+{"ts": "2026-11-12T10:28:47.588+00:00", "level": "WARNING", "logger": "django.request", "msg": "Conflict: /api/v1/admin/users", "request_id": "513e141c-df95-4d73-996a-814b0b3f4043"}
+{"ts": "2026-11-12T10:28:47.629+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "d0ea2c02-9b03-405a-b60e-67bc5baf301e", "event": "http_request", "method": "POST", "path": "/api/v1/admin/users", "status": 201, "duration_ms": 281.7}
+------------------------------ Captured log call ------------------------------
+INFO     aleekhan.access:request_id.py:63 request
+WARNING  django.request:log.py:253 Conflict: /api/v1/admin/users
+INFO     aleekhan.access:request_id.py:63 request
+INFO     aleekhan.access:request_id.py:63 request
+WARNING  django.request:log.py:253 Conflict: /api/v1/admin/users
+WARNING  django.request:log.py:253 Conflict: /api/v1/admin/users
+INFO     aleekhan.access:request_id.py:63 request
+WARNING  django.request:log.py:253 Conflict: /api/v1/admin/users
+INFO     aleekhan.access:request_id.py:63 request
+____________ test_parallel_updates_with_the_same_if_match_one_wins ____________
+---------------------------- Captured stderr call -----------------------------
+{"ts": "2026-11-12T10:28:49.462+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "434ff89a-2bcc-468f-989f-4bcc30feca69", "event": "http_request", "method": "PATCH", "path": "/api/v1/org/units/ebec92b6-ef00-42b0-b0a1-1d4085fd1a75", "status": 200, "duration_ms": 275.1}
+{"ts": "2026-11-12T10:28:49.488+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "478d7482-33f6-4d30-95e5-d4903576dd90", "event": "http_request", "method": "PATCH", "path": "/api/v1/org/units/ebec92b6-ef00-42b0-b0a1-1d4085fd1a75", "status": 412, "duration_ms": 284.5, "error_code": "VERSION_CONFLICT"}
+{"ts": "2026-11-12T10:28:49.489+00:00", "level": "WARNING", "logger": "django.request", "msg": "Precondition Failed: /api/v1/org/units/ebec92b6-ef00-42b0-b0a1-1d4085fd1a75", "request_id": "478d7482-33f6-4d30-95e5-d4903576dd90"}
+{"ts": "2026-11-12T10:28:49.525+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "6dabe902-34fd-4dc5-b9f2-8ed1a8aa64a6", "event": "http_request", "method": "PATCH", "path": "/api/v1/org/units/ebec92b6-ef00-42b0-b0a1-1d4085fd1a75", "status": 412, "duration_ms": 314.5, "error_code": "VERSION_CONFLICT"}
+{"ts": "2026-11-12T10:28:49.525+00:00", "level": "WARNING", "logger": "django.request", "msg": "Precondition Failed: /api/v1/org/units/ebec92b6-ef00-42b0-b0a1-1d4085fd1a75", "request_id": "6dabe902-34fd-4dc5-b9f2-8ed1a8aa64a6"}
+{"ts": "2026-11-12T10:28:49.547+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "64370e35-e628-42bc-97b0-9a1a9567adc8", "event": "http_request", "method": "PATCH", "path": "/api/v1/org/units/ebec92b6-ef00-42b0-b0a1-1d4085fd1a75", "status": 412, "duration_ms": 339.9, "error_code": "VERSION_CONFLICT"}
+{"ts": "2026-11-12T10:28:49.548+00:00", "level": "WARNING", "logger": "django.request", "msg": "Precondition Failed: /api/v1/org/units/ebec92b6-ef00-42b0-b0a1-1d4085fd1a75", "request_id": "64370e35-e628-42bc-97b0-9a1a9567adc8"}
+{"ts": "2026-11-12T10:28:49.572+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "ce224d9d-4b6a-4813-b1e5-c96d023be85b", "event": "http_request", "method": "PATCH", "path": "/api/v1/org/units/ebec92b6-ef00-42b0-b0a1-1d4085fd1a75", "status": 412, "duration_ms": 358.2, "error_code": "VERSION_CONFLICT"}
+{"ts": "2026-11-12T10:28:49.572+00:00", "level": "WARNING", "logger": "django.request", "msg": "Precondition Failed: /api/v1/org/units/ebec92b6-ef00-42b0-b0a1-1d4085fd1a75", "request_id": "ce224d9d-4b6a-4813-b1e5-c96d023be85b"}
+------------------------------ Captured log call ------------------------------
+INFO     aleekhan.access:request_id.py:63 request
+INFO     aleekhan.access:request_id.py:63 request
+WARNING  django.request:log.py:253 Precondition Failed: /api/v1/org/units/ebec92b6-ef00-42b0-b0a1-1d4085fd1a75
+INFO     aleekhan.access:request_id.py:63 request
+WARNING  django.request:log.py:253 Precondition Failed: /api/v1/org/units/ebec92b6-ef00-42b0-b0a1-1d4085fd1a75
+INFO     aleekhan.access:request_id.py:63 request
+WARNING  django.request:log.py:253 Precondition Failed: /api/v1/org/units/ebec92b6-ef00-42b0-b0a1-1d4085fd1a75
+INFO     aleekhan.access:request_id.py:63 request
+WARNING  django.request:log.py:253 Precondition Failed: /api/v1/org/units/ebec92b6-ef00-42b0-b0a1-1d4085fd1a75
+_____________ test_parallel_decisions_on_one_approval_exactly_one _____________
+---------------------------- Captured stderr call -----------------------------
+{"ts": "2026-11-12T10:28:51.801+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "bd06e033-5521-4699-97df-fd28699fb971", "event": "http_request", "method": "POST", "path": "/api/v1/workflow/approvals/ea867bed-6555-4141-b2cc-94d9bc42d29f/approve", "status": 200, "duration_ms": 272.3}
+{"ts": "2026-11-12T10:28:51.825+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "ab490cd3-3a14-4582-8d7a-aaa8893eb152", "event": "http_request", "method": "POST", "path": "/api/v1/workflow/approvals/ea867bed-6555-4141-b2cc-94d9bc42d29f/approve", "status": 412, "duration_ms": 291.7, "error_code": "VERSION_CONFLICT"}
+{"ts": "2026-11-12T10:28:51.825+00:00", "level": "WARNING", "logger": "django.request", "msg": "Precondition Failed: /api/v1/workflow/approvals/ea867bed-6555-4141-b2cc-94d9bc42d29f/approve", "request_id": "ab490cd3-3a14-4582-8d7a-aaa8893eb152"}
+{"ts": "2026-11-12T10:28:51.849+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "583f5809-41d9-4230-a3f9-312daa4ee165", "event": "http_request", "method": "POST", "path": "/api/v1/workflow/approvals/ea867bed-6555-4141-b2cc-94d9bc42d29f/reject", "status": 412, "duration_ms": 313.9, "error_code": "VERSION_CONFLICT"}
+{"ts": "2026-11-12T10:28:51.849+00:00", "level": "WARNING", "logger": "django.request", "msg": "Precondition Failed: /api/v1/workflow/approvals/ea867bed-6555-4141-b2cc-94d9bc42d29f/reject", "request_id": "583f5809-41d9-4230-a3f9-312daa4ee165"}
+{"ts": "2026-11-12T10:28:51.871+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "109649d1-d3e4-4e73-8ab4-59db3ae1a28b", "event": "http_request", "method": "POST", "path": "/api/v1/workflow/approvals/ea867bed-6555-4141-b2cc-94d9bc42d29f/approve", "status": 412, "duration_ms": 321.4, "error_code": "VERSION_CONFLICT"}
+{"ts": "2026-11-12T10:28:51.871+00:00", "level": "WARNING", "logger": "django.request", "msg": "Precondition Failed: /api/v1/workflow/approvals/ea867bed-6555-4141-b2cc-94d9bc42d29f/approve", "request_id": "109649d1-d3e4-4e73-8ab4-59db3ae1a28b"}
+{"ts": "2026-11-12T10:28:51.885+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "7efd63fc-9c31-4508-956b-963ccc929029", "event": "http_request", "method": "POST", "path": "/api/v1/workflow/approvals/ea867bed-6555-4141-b2cc-94d9bc42d29f/reject", "status": 412, "duration_ms": 341.9, "error_code": "VERSION_CONFLICT"}
+{"ts": "2026-11-12T10:28:51.885+00:00", "level": "WARNING", "logger": "django.request", "msg": "Precondition Failed: /api/v1/workflow/approvals/ea867bed-6555-4141-b2cc-94d9bc42d29f/reject", "request_id": "7efd63fc-9c31-4508-956b-963ccc929029"}
+------------------------------ Captured log call ------------------------------
+INFO     aleekhan.access:request_id.py:63 request
+INFO     aleekhan.access:request_id.py:63 request
+WARNING  django.request:log.py:253 Precondition Failed: /api/v1/workflow/approvals/ea867bed-6555-4141-b2cc-94d9bc42d29f/approve
+INFO     aleekhan.access:request_id.py:63 request
+WARNING  django.request:log.py:253 Precondition Failed: /api/v1/workflow/approvals/ea867bed-6555-4141-b2cc-94d9bc42d29f/reject
+INFO     aleekhan.access:request_id.py:63 request
+WARNING  django.request:log.py:253 Precondition Failed: /api/v1/workflow/approvals/ea867bed-6555-4141-b2cc-94d9bc42d29f/approve
+INFO     aleekhan.access:request_id.py:63 request
+WARNING  django.request:log.py:253 Precondition Failed: /api/v1/workflow/approvals/ea867bed-6555-4141-b2cc-94d9bc42d29f/reject
+______________ test_parallel_unit_creation_with_one_code_one_row ______________
+---------------------------- Captured stderr call -----------------------------
+{"ts": "2026-11-12T10:28:53.355+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "fe12cade-b438-4920-bd17-fb186d520a25", "event": "http_request", "method": "POST", "path": "/api/v1/org/units", "status": 201, "duration_ms": 177.0}
+{"ts": "2026-11-12T10:28:53.388+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "8284e160-9b1e-42b4-92c5-c341abf93837", "event": "http_request", "method": "POST", "path": "/api/v1/org/units", "status": 400, "duration_ms": 208.0, "error_code": "VALIDATION_FAILED"}
+{"ts": "2026-11-12T10:28:53.389+00:00", "level": "WARNING", "logger": "django.request", "msg": "Bad Request: /api/v1/org/units", "request_id": "8284e160-9b1e-42b4-92c5-c341abf93837"}
+{"ts": "2026-11-12T10:28:53.414+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "882c3539-9a03-4c10-95d0-746ef0caa39c", "event": "http_request", "method": "POST", "path": "/api/v1/org/units", "status": 400, "duration_ms": 240.0, "error_code": "VALIDATION_FAILED"}
+{"ts": "2026-11-12T10:28:53.414+00:00", "level": "WARNING", "logger": "django.request", "msg": "Bad Request: /api/v1/org/units", "request_id": "882c3539-9a03-4c10-95d0-746ef0caa39c"}
+{"ts": "2026-11-12T10:28:53.439+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "2b3b6a40-0770-45c7-a007-1e19a3eb1386", "event": "http_request", "method": "POST", "path": "/api/v1/org/units", "status": 400, "duration_ms": 253.3, "error_code": "VALIDATION_FAILED"}
+{"ts": "2026-11-12T10:28:53.439+00:00", "level": "WARNING", "logger": "django.request", "msg": "Bad Request: /api/v1/org/units", "request_id": "2b3b6a40-0770-45c7-a007-1e19a3eb1386"}
+{"ts": "2026-11-12T10:28:53.463+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "24ba780c-05e9-44dc-838d-84e793c02b9f", "event": "http_request", "method": "POST", "path": "/api/v1/org/units", "status": 400, "duration_ms": 279.9, "error_code": "VALIDATION_FAILED"}
+{"ts": "2026-11-12T10:28:53.463+00:00", "level": "WARNING", "logger": "django.request", "msg": "Bad Request: /api/v1/org/units", "request_id": "24ba780c-05e9-44dc-838d-84e793c02b9f"}
+------------------------------ Captured log call ------------------------------
+INFO     aleekhan.access:request_id.py:63 request
+INFO     aleekhan.access:request_id.py:63 request
+WARNING  django.request:log.py:253 Bad Request: /api/v1/org/units
+INFO     aleekhan.access:request_id.py:63 request
+WARNING  django.request:log.py:253 Bad Request: /api/v1/org/units
+INFO     aleekhan.access:request_id.py:63 request
+WARNING  django.request:log.py:253 Bad Request: /api/v1/org/units
+INFO     aleekhan.access:request_id.py:63 request
+WARNING  django.request:log.py:253 Bad Request: /api/v1/org/units
+_____ test_rev0120_concurrent_uploads_on_the_same_parent_one_202_one_409 ______
+---------------------------- Captured stderr call -----------------------------
+{"ts": "2026-11-12T10:29:20.839+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "e089049f-f141-4c96-856f-b16412d34459", "event": "http_request", "method": "POST", "path": "/api/v1/documents", "status": 201, "duration_ms": 36.0}
+{"ts": "2026-11-12T10:29:21.053+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "04c2f4ad-8728-453c-9ce4-fb1752c3b16f", "event": "http_request", "method": "POST", "path": "/api/v1/documents/16aececb-b8fa-444e-9888-119837ec5050/revisions", "status": 202, "duration_ms": 133.4}
+{"ts": "2026-11-12T10:29:21.371+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "02e122a4-c14d-4a03-ad13-db85c56cdbd1", "event": "http_request", "method": "POST", "path": "/api/v1/documents/16aececb-b8fa-444e-9888-119837ec5050/revisions", "status": 202, "duration_ms": 279.5}
+{"ts": "2026-11-12T10:29:21.443+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "90771db5-fdff-436f-a783-c6602120b77a", "event": "http_request", "method": "POST", "path": "/api/v1/documents/16aececb-b8fa-444e-9888-119837ec5050/revisions", "status": 409, "duration_ms": 347.2, "error_code": "STATE_TRANSITION_NOT_ALLOWED"}
+{"ts": "2026-11-12T10:29:21.443+00:00", "level": "WARNING", "logger": "django.request", "msg": "Conflict: /api/v1/documents/16aececb-b8fa-444e-9888-119837ec5050/revisions", "request_id": "90771db5-fdff-436f-a783-c6602120b77a"}
+------------------------------ Captured log call ------------------------------
+INFO     aleekhan.access:request_id.py:63 request
+INFO     aleekhan.access:request_id.py:63 request
+INFO     aleekhan.access:request_id.py:63 request
+INFO     aleekhan.access:request_id.py:63 request
+WARNING  django.request:log.py:253 Conflict: /api/v1/documents/16aececb-b8fa-444e-9888-119837ec5050/revisions
+=========================== short test summary info ===========================
+PASSED platform_core/tests/test_api_phase01_race.py::test_same_idempotency_key_in_parallel_executes_once
+PASSED platform_core/tests/test_api_phase01_race.py::test_parallel_updates_with_the_same_if_match_one_wins
+PASSED platform_core/tests/test_api_phase01_race.py::test_parallel_decisions_on_one_approval_exactly_one
+PASSED platform_core/tests/test_api_phase01_race.py::test_parallel_unit_creation_with_one_code_one_row
+PASSED platform_core/tests/test_engine_idempotency.py::test_concurrent_same_key_executes_handler_exactly_once
+PASSED platform_core/tests/test_engine_idempotency.py::test_concurrent_same_key_different_bodies_one_wins_rest_rejected
+PASSED platform_core/tests/test_engine_outbox.py::test_concurrent_dispatchers_publish_each_event_exactly_once
+PASSED platform_core/tests/test_engine_uow_concurrency.py::test_concurrent_updates_same_version_exactly_one_wins
+PASSED platform_core/tests/test_idempotency_record.py::test_concurrent_duplicate_insert_exactly_one_wins
+PASSED platform_core/tests/test_integration_consumers.py::test_concurrent_dispatchers_with_registry_process_each_event_once_per_consumer
+PASSED platform_core/tests/test_integration_consumers.py::test_concurrent_redelivery_of_one_event_runs_the_handler_once
+PASSED platform_core/tests/test_integration_events.py::test_concurrent_dispatchers_keep_per_aggregate_order_with_retries
+PASSED platform_core/tests/test_integration_freshness_conflicts.py::test_concurrent_raisers_converge_on_one_open_item
+PASSED platform_core/tests/test_integration_freshness_monotonic.py::test_concurrent_validations_keep_the_newest_snapshot
+PASSED platform_core/tests/test_integration_imports.py::test_concurrent_duplicate_imports_create_exactly_one_batch
+PASSED platform_core/tests/test_phase01_audit_chain.py::test_concurrent_writers_build_one_contiguous_chain
+PASSED platform_core/tests/test_phase01_auth_engine.py::test_concurrent_logins_never_exceed_the_session_cap
+PASSED platform_core/tests/test_phase01_auth_engine.py::test_concurrent_wrong_passwords_lock_exactly_once
+PASSED platform_core/tests/test_phase01_concurrency.py::test_concurrent_primary_position_assignment_only_one_wins
+PASSED platform_core/tests/test_phase01_concurrency.py::test_concurrent_cross_moves_never_build_a_cycle
+PASSED platform_core/tests/test_phase01_concurrency.py::test_concurrent_children_never_exceed_max_depth
+PASSED platform_core/tests/test_phase01_concurrency.py::test_concurrent_pending_approval_requests_only_one
+PASSED platform_core/tests/test_phase01_concurrency.py::test_concurrent_duplicate_role_grants_only_one
+PASSED platform_core/tests/test_phase01_concurrency.py::test_concurrent_holders_never_exceed_position_capacity
+PASSED platform_core/tests/test_phase01_dec055.py::test_concurrent_bootstrap_approvals_of_one_role_exactly_one_wins
+PASSED platform_core/tests/test_phase01_roles_approvals_engine.py::test_concurrent_decisions_on_one_request_give_exactly_one_decision
+PASSED platform_core/tests/test_phase01_step5_backend.py::test_rev0120_concurrent_uploads_on_the_same_parent_one_202_one_409
+PASSED platform_core/tests/test_phase02_serial_allocation.py::test_id02_100_concurrent_confirms_no_duplicate_no_gap_one_snapshot_per_line_race
+PASSED platform_core/tests/test_phase02_serial_allocation.py::test_id04_concurrent_duplicate_confirms_of_one_order_have_a_single_effect_race
+29 passed, 2008 deselected in 107.01s (0:01:47)
+exit=0
+== run 2
+.............................                                            [100%]
+=================================== PASSES ====================================
+_____________ test_same_idempotency_key_in_parallel_executes_once _____________
+---------------------------- Captured stderr call -----------------------------
+{"ts": "2026-11-12T10:30:38.841+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "e5abcda9-e2b7-4892-82ef-cbb71190c963", "event": "http_request", "method": "POST", "path": "/api/v1/admin/users", "status": 409, "duration_ms": 205.9, "error_code": "IDEMPOTENCY_IN_PROGRESS"}
+{"ts": "2026-11-12T10:30:38.843+00:00", "level": "WARNING", "logger": "django.request", "msg": "Conflict: /api/v1/admin/users", "request_id": "e5abcda9-e2b7-4892-82ef-cbb71190c963"}
+{"ts": "2026-11-12T10:30:38.845+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "b8e4f9c8-8309-4285-ad54-79aeab658cff", "event": "http_request", "method": "POST", "path": "/api/v1/admin/users", "status": 409, "duration_ms": 218.2, "error_code": "IDEMPOTENCY_IN_PROGRESS"}
+{"ts": "2026-11-12T10:30:38.845+00:00", "level": "WARNING", "logger": "django.request", "msg": "Conflict: /api/v1/admin/users", "request_id": "b8e4f9c8-8309-4285-ad54-79aeab658cff"}
+{"ts": "2026-11-12T10:30:38.890+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "6726209d-bf56-413d-b430-dc4c350a59da", "event": "http_request", "method": "POST", "path": "/api/v1/admin/users", "status": 409, "duration_ms": 252.0, "error_code": "IDEMPOTENCY_IN_PROGRESS"}
+{"ts": "2026-11-12T10:30:38.890+00:00", "level": "WARNING", "logger": "django.request", "msg": "Conflict: /api/v1/admin/users", "request_id": "6726209d-bf56-413d-b430-dc4c350a59da"}
+{"ts": "2026-11-12T10:30:38.914+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "cee6f66b-d5d3-4e8c-8d5b-d157f209b644", "event": "http_request", "method": "POST", "path": "/api/v1/admin/users", "status": 409, "duration_ms": 283.7, "error_code": "IDEMPOTENCY_IN_PROGRESS"}
+{"ts": "2026-11-12T10:30:38.914+00:00", "level": "WARNING", "logger": "django.request", "msg": "Conflict: /api/v1/admin/users", "request_id": "cee6f66b-d5d3-4e8c-8d5b-d157f209b644"}
+{"ts": "2026-11-12T10:30:38.926+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "335126db-9c5f-457c-922a-4338505ec122", "event": "http_request", "method": "POST", "path": "/api/v1/admin/users", "status": 201, "duration_ms": 293.6}
+------------------------------ Captured log call ------------------------------
+INFO     aleekhan.access:request_id.py:63 request
+WARNING  django.request:log.py:253 Conflict: /api/v1/admin/users
+INFO     aleekhan.access:request_id.py:63 request
+WARNING  django.request:log.py:253 Conflict: /api/v1/admin/users
+INFO     aleekhan.access:request_id.py:63 request
+WARNING  django.request:log.py:253 Conflict: /api/v1/admin/users
+INFO     aleekhan.access:request_id.py:63 request
+WARNING  django.request:log.py:253 Conflict: /api/v1/admin/users
+INFO     aleekhan.access:request_id.py:63 request
+____________ test_parallel_updates_with_the_same_if_match_one_wins ____________
+---------------------------- Captured stderr call -----------------------------
+{"ts": "2026-11-12T10:30:40.513+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "8ea6ba47-371f-4d2b-b8e1-f179d2dbfd67", "event": "http_request", "method": "PATCH", "path": "/api/v1/org/units/f0a9fa18-f180-40b3-b3f7-f14b8dfa27ad", "status": 200, "duration_ms": 387.7}
+{"ts": "2026-11-12T10:30:40.531+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "2d9d890f-97aa-4d3e-97bd-b6f01facda2e", "event": "http_request", "method": "PATCH", "path": "/api/v1/org/units/f0a9fa18-f180-40b3-b3f7-f14b8dfa27ad", "status": 412, "duration_ms": 394.5, "error_code": "VERSION_CONFLICT"}
+{"ts": "2026-11-12T10:30:40.531+00:00", "level": "WARNING", "logger": "django.request", "msg": "Precondition Failed: /api/v1/org/units/f0a9fa18-f180-40b3-b3f7-f14b8dfa27ad", "request_id": "2d9d890f-97aa-4d3e-97bd-b6f01facda2e"}
+{"ts": "2026-11-12T10:30:40.551+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "62bda573-6373-4771-9be9-6823ee76cb84", "event": "http_request", "method": "PATCH", "path": "/api/v1/org/units/f0a9fa18-f180-40b3-b3f7-f14b8dfa27ad", "status": 412, "duration_ms": 430.1, "error_code": "VERSION_CONFLICT"}
+{"ts": "2026-11-12T10:30:40.551+00:00", "level": "WARNING", "logger": "django.request", "msg": "Precondition Failed: /api/v1/org/units/f0a9fa18-f180-40b3-b3f7-f14b8dfa27ad", "request_id": "62bda573-6373-4771-9be9-6823ee76cb84"}
+{"ts": "2026-11-12T10:30:40.568+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "21471db3-ff9a-43ee-a677-a5d4f2d3744c", "event": "http_request", "method": "PATCH", "path": "/api/v1/org/units/f0a9fa18-f180-40b3-b3f7-f14b8dfa27ad", "status": 412, "duration_ms": 435.2, "error_code": "VERSION_CONFLICT"}
+{"ts": "2026-11-12T10:30:40.568+00:00", "level": "WARNING", "logger": "django.request", "msg": "Precondition Failed: /api/v1/org/units/f0a9fa18-f180-40b3-b3f7-f14b8dfa27ad", "request_id": "21471db3-ff9a-43ee-a677-a5d4f2d3744c"}
+{"ts": "2026-11-12T10:30:40.586+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "233519bb-e69b-4a6b-9cf9-939e60bd8a14", "event": "http_request", "method": "PATCH", "path": "/api/v1/org/units/f0a9fa18-f180-40b3-b3f7-f14b8dfa27ad", "status": 412, "duration_ms": 458.4, "error_code": "VERSION_CONFLICT"}
+{"ts": "2026-11-12T10:30:40.586+00:00", "level": "WARNING", "logger": "django.request", "msg": "Precondition Failed: /api/v1/org/units/f0a9fa18-f180-40b3-b3f7-f14b8dfa27ad", "request_id": "233519bb-e69b-4a6b-9cf9-939e60bd8a14"}
+------------------------------ Captured log call ------------------------------
+INFO     aleekhan.access:request_id.py:63 request
+INFO     aleekhan.access:request_id.py:63 request
+WARNING  django.request:log.py:253 Precondition Failed: /api/v1/org/units/f0a9fa18-f180-40b3-b3f7-f14b8dfa27ad
+INFO     aleekhan.access:request_id.py:63 request
+WARNING  django.request:log.py:253 Precondition Failed: /api/v1/org/units/f0a9fa18-f180-40b3-b3f7-f14b8dfa27ad
+INFO     aleekhan.access:request_id.py:63 request
+WARNING  django.request:log.py:253 Precondition Failed: /api/v1/org/units/f0a9fa18-f180-40b3-b3f7-f14b8dfa27ad
+INFO     aleekhan.access:request_id.py:63 request
+WARNING  django.request:log.py:253 Precondition Failed: /api/v1/org/units/f0a9fa18-f180-40b3-b3f7-f14b8dfa27ad
+_____________ test_parallel_decisions_on_one_approval_exactly_one _____________
+---------------------------- Captured stderr call -----------------------------
+{"ts": "2026-11-12T10:30:42.573+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "053ca02e-e892-431d-9761-e4ec72e21e86", "event": "http_request", "method": "POST", "path": "/api/v1/workflow/approvals/7442942d-3dd9-4b60-aed0-e99d083f76d1/approve", "status": 200, "duration_ms": 294.7}
+{"ts": "2026-11-12T10:30:42.599+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "8dc7b075-c034-496d-b82f-d7b7a43ba0de", "event": "http_request", "method": "POST", "path": "/api/v1/workflow/approvals/7442942d-3dd9-4b60-aed0-e99d083f76d1/approve", "status": 412, "duration_ms": 316.0, "error_code": "VERSION_CONFLICT"}
+{"ts": "2026-11-12T10:30:42.600+00:00", "level": "WARNING", "logger": "django.request", "msg": "Precondition Failed: /api/v1/workflow/approvals/7442942d-3dd9-4b60-aed0-e99d083f76d1/approve", "request_id": "8dc7b075-c034-496d-b82f-d7b7a43ba0de"}
+{"ts": "2026-11-12T10:30:42.622+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "371e16b5-cc17-472a-953b-ae002f526ce9", "event": "http_request", "method": "POST", "path": "/api/v1/workflow/approvals/7442942d-3dd9-4b60-aed0-e99d083f76d1/approve", "status": 412, "duration_ms": 336.4, "error_code": "VERSION_CONFLICT"}
+{"ts": "2026-11-12T10:30:42.623+00:00", "level": "WARNING", "logger": "django.request", "msg": "Precondition Failed: /api/v1/workflow/approvals/7442942d-3dd9-4b60-aed0-e99d083f76d1/approve", "request_id": "371e16b5-cc17-472a-953b-ae002f526ce9"}
+{"ts": "2026-11-12T10:30:42.655+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "37b971ea-2d16-442a-9eb0-ba4b39e6b31c", "event": "http_request", "method": "POST", "path": "/api/v1/workflow/approvals/7442942d-3dd9-4b60-aed0-e99d083f76d1/reject", "status": 412, "duration_ms": 362.4, "error_code": "VERSION_CONFLICT"}
+{"ts": "2026-11-12T10:30:42.655+00:00", "level": "WARNING", "logger": "django.request", "msg": "Precondition Failed: /api/v1/workflow/approvals/7442942d-3dd9-4b60-aed0-e99d083f76d1/reject", "request_id": "37b971ea-2d16-442a-9eb0-ba4b39e6b31c"}
+{"ts": "2026-11-12T10:30:42.663+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "144c3336-4a6b-4cf8-ad3e-fa44ef0e71ce", "event": "http_request", "method": "POST", "path": "/api/v1/workflow/approvals/7442942d-3dd9-4b60-aed0-e99d083f76d1/reject", "status": 412, "duration_ms": 374.3, "error_code": "VERSION_CONFLICT"}
+{"ts": "2026-11-12T10:30:42.663+00:00", "level": "WARNING", "logger": "django.request", "msg": "Precondition Failed: /api/v1/workflow/approvals/7442942d-3dd9-4b60-aed0-e99d083f76d1/reject", "request_id": "144c3336-4a6b-4cf8-ad3e-fa44ef0e71ce"}
+------------------------------ Captured log call ------------------------------
+INFO     aleekhan.access:request_id.py:63 request
+INFO     aleekhan.access:request_id.py:63 request
+WARNING  django.request:log.py:253 Precondition Failed: /api/v1/workflow/approvals/7442942d-3dd9-4b60-aed0-e99d083f76d1/approve
+INFO     aleekhan.access:request_id.py:63 request
+WARNING  django.request:log.py:253 Precondition Failed: /api/v1/workflow/approvals/7442942d-3dd9-4b60-aed0-e99d083f76d1/approve
+INFO     aleekhan.access:request_id.py:63 request
+WARNING  django.request:log.py:253 Precondition Failed: /api/v1/workflow/approvals/7442942d-3dd9-4b60-aed0-e99d083f76d1/reject
+INFO     aleekhan.access:request_id.py:63 request
+WARNING  django.request:log.py:253 Precondition Failed: /api/v1/workflow/approvals/7442942d-3dd9-4b60-aed0-e99d083f76d1/reject
+______________ test_parallel_unit_creation_with_one_code_one_row ______________
+---------------------------- Captured stderr call -----------------------------
+{"ts": "2026-11-12T10:30:44.514+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "f9d84789-cdaa-4556-b8eb-42ae571cb779", "event": "http_request", "method": "POST", "path": "/api/v1/org/units", "status": 201, "duration_ms": 254.1}
+{"ts": "2026-11-12T10:30:44.566+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "f3a67386-1a44-417c-af38-5c9288f159fb", "event": "http_request", "method": "POST", "path": "/api/v1/org/units", "status": 400, "duration_ms": 303.1, "error_code": "VALIDATION_FAILED"}
+{"ts": "2026-11-12T10:30:44.566+00:00", "level": "WARNING", "logger": "django.request", "msg": "Bad Request: /api/v1/org/units", "request_id": "f3a67386-1a44-417c-af38-5c9288f159fb"}
+{"ts": "2026-11-12T10:30:44.607+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "aa05477e-c6b1-41eb-88dd-b6bce7204e7a", "event": "http_request", "method": "POST", "path": "/api/v1/org/units", "status": 400, "duration_ms": 340.7, "error_code": "VALIDATION_FAILED"}
+{"ts": "2026-11-12T10:30:44.607+00:00", "level": "WARNING", "logger": "django.request", "msg": "Bad Request: /api/v1/org/units", "request_id": "aa05477e-c6b1-41eb-88dd-b6bce7204e7a"}
+{"ts": "2026-11-12T10:30:44.639+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "9928de3d-dd7d-483c-84d4-30d92d6f3d8f", "event": "http_request", "method": "POST", "path": "/api/v1/org/units", "status": 400, "duration_ms": 367.9, "error_code": "VALIDATION_FAILED"}
+{"ts": "2026-11-12T10:30:44.640+00:00", "level": "WARNING", "logger": "django.request", "msg": "Bad Request: /api/v1/org/units", "request_id": "9928de3d-dd7d-483c-84d4-30d92d6f3d8f"}
+{"ts": "2026-11-12T10:30:44.681+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "e74bc0fb-c365-4fcb-8d0f-edb1177faa6b", "event": "http_request", "method": "POST", "path": "/api/v1/org/units", "status": 400, "duration_ms": 411.3, "error_code": "VALIDATION_FAILED"}
+{"ts": "2026-11-12T10:30:44.681+00:00", "level": "WARNING", "logger": "django.request", "msg": "Bad Request: /api/v1/org/units", "request_id": "e74bc0fb-c365-4fcb-8d0f-edb1177faa6b"}
+------------------------------ Captured log call ------------------------------
+INFO     aleekhan.access:request_id.py:63 request
+INFO     aleekhan.access:request_id.py:63 request
+WARNING  django.request:log.py:253 Bad Request: /api/v1/org/units
+INFO     aleekhan.access:request_id.py:63 request
+WARNING  django.request:log.py:253 Bad Request: /api/v1/org/units
+INFO     aleekhan.access:request_id.py:63 request
+WARNING  django.request:log.py:253 Bad Request: /api/v1/org/units
+INFO     aleekhan.access:request_id.py:63 request
+WARNING  django.request:log.py:253 Bad Request: /api/v1/org/units
+_____ test_rev0120_concurrent_uploads_on_the_same_parent_one_202_one_409 ______
+---------------------------- Captured stderr call -----------------------------
+{"ts": "2026-11-12T10:31:15.368+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "c3a1a4dd-9541-4d80-a609-e9137a207758", "event": "http_request", "method": "POST", "path": "/api/v1/documents", "status": 201, "duration_ms": 40.4}
+{"ts": "2026-11-12T10:31:15.602+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "0731c1bb-703a-4f1e-b973-fd653bd0e886", "event": "http_request", "method": "POST", "path": "/api/v1/documents/579f7640-74f1-4475-abee-c04a4ac05c22/revisions", "status": 202, "duration_ms": 170.6}
+{"ts": "2026-11-12T10:31:15.798+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "a9dd2419-ca77-46c6-b7b2-fb1b46216f07", "event": "http_request", "method": "POST", "path": "/api/v1/documents/579f7640-74f1-4475-abee-c04a4ac05c22/revisions", "status": 202, "duration_ms": 178.9}
+{"ts": "2026-11-12T10:31:15.840+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "c98cff11-cd8a-4d85-bcca-3698a77f7b7c", "event": "http_request", "method": "POST", "path": "/api/v1/documents/579f7640-74f1-4475-abee-c04a4ac05c22/revisions", "status": 409, "duration_ms": 218.9, "error_code": "STATE_TRANSITION_NOT_ALLOWED"}
+{"ts": "2026-11-12T10:31:15.840+00:00", "level": "WARNING", "logger": "django.request", "msg": "Conflict: /api/v1/documents/579f7640-74f1-4475-abee-c04a4ac05c22/revisions", "request_id": "c98cff11-cd8a-4d85-bcca-3698a77f7b7c"}
+------------------------------ Captured log call ------------------------------
+INFO     aleekhan.access:request_id.py:63 request
+INFO     aleekhan.access:request_id.py:63 request
+INFO     aleekhan.access:request_id.py:63 request
+INFO     aleekhan.access:request_id.py:63 request
+WARNING  django.request:log.py:253 Conflict: /api/v1/documents/579f7640-74f1-4475-abee-c04a4ac05c22/revisions
+=========================== short test summary info ===========================
+PASSED platform_core/tests/test_api_phase01_race.py::test_same_idempotency_key_in_parallel_executes_once
+PASSED platform_core/tests/test_api_phase01_race.py::test_parallel_updates_with_the_same_if_match_one_wins
+PASSED platform_core/tests/test_api_phase01_race.py::test_parallel_decisions_on_one_approval_exactly_one
+PASSED platform_core/tests/test_api_phase01_race.py::test_parallel_unit_creation_with_one_code_one_row
+PASSED platform_core/tests/test_engine_idempotency.py::test_concurrent_same_key_executes_handler_exactly_once
+PASSED platform_core/tests/test_engine_idempotency.py::test_concurrent_same_key_different_bodies_one_wins_rest_rejected
+PASSED platform_core/tests/test_engine_outbox.py::test_concurrent_dispatchers_publish_each_event_exactly_once
+PASSED platform_core/tests/test_engine_uow_concurrency.py::test_concurrent_updates_same_version_exactly_one_wins
+PASSED platform_core/tests/test_idempotency_record.py::test_concurrent_duplicate_insert_exactly_one_wins
+PASSED platform_core/tests/test_integration_consumers.py::test_concurrent_dispatchers_with_registry_process_each_event_once_per_consumer
+PASSED platform_core/tests/test_integration_consumers.py::test_concurrent_redelivery_of_one_event_runs_the_handler_once
+PASSED platform_core/tests/test_integration_events.py::test_concurrent_dispatchers_keep_per_aggregate_order_with_retries
+PASSED platform_core/tests/test_integration_freshness_conflicts.py::test_concurrent_raisers_converge_on_one_open_item
+PASSED platform_core/tests/test_integration_freshness_monotonic.py::test_concurrent_validations_keep_the_newest_snapshot
+PASSED platform_core/tests/test_integration_imports.py::test_concurrent_duplicate_imports_create_exactly_one_batch
+PASSED platform_core/tests/test_phase01_audit_chain.py::test_concurrent_writers_build_one_contiguous_chain
+PASSED platform_core/tests/test_phase01_auth_engine.py::test_concurrent_logins_never_exceed_the_session_cap
+PASSED platform_core/tests/test_phase01_auth_engine.py::test_concurrent_wrong_passwords_lock_exactly_once
+PASSED platform_core/tests/test_phase01_concurrency.py::test_concurrent_primary_position_assignment_only_one_wins
+PASSED platform_core/tests/test_phase01_concurrency.py::test_concurrent_cross_moves_never_build_a_cycle
+PASSED platform_core/tests/test_phase01_concurrency.py::test_concurrent_children_never_exceed_max_depth
+PASSED platform_core/tests/test_phase01_concurrency.py::test_concurrent_pending_approval_requests_only_one
+PASSED platform_core/tests/test_phase01_concurrency.py::test_concurrent_duplicate_role_grants_only_one
+PASSED platform_core/tests/test_phase01_concurrency.py::test_concurrent_holders_never_exceed_position_capacity
+PASSED platform_core/tests/test_phase01_dec055.py::test_concurrent_bootstrap_approvals_of_one_role_exactly_one_wins
+PASSED platform_core/tests/test_phase01_roles_approvals_engine.py::test_concurrent_decisions_on_one_request_give_exactly_one_decision
+PASSED platform_core/tests/test_phase01_step5_backend.py::test_rev0120_concurrent_uploads_on_the_same_parent_one_202_one_409
+PASSED platform_core/tests/test_phase02_serial_allocation.py::test_id02_100_concurrent_confirms_no_duplicate_no_gap_one_snapshot_per_line_race
+PASSED platform_core/tests/test_phase02_serial_allocation.py::test_id04_concurrent_duplicate_confirms_of_one_order_have_a_single_effect_race
+29 passed, 2008 deselected in 111.72s (0:01:51)
+exit=0
+== run 3
+.............................                                            [100%]
+=================================== PASSES ====================================
+_____________ test_same_idempotency_key_in_parallel_executes_once _____________
+---------------------------- Captured stderr call -----------------------------
+{"ts": "2026-11-12T10:32:35.824+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "e2823151-700b-4f3f-a4b3-c6d1a482b131", "event": "http_request", "method": "POST", "path": "/api/v1/admin/users", "status": 409, "duration_ms": 146.8, "error_code": "IDEMPOTENCY_IN_PROGRESS"}
+{"ts": "2026-11-12T10:32:35.825+00:00", "level": "WARNING", "logger": "django.request", "msg": "Conflict: /api/v1/admin/users", "request_id": "e2823151-700b-4f3f-a4b3-c6d1a482b131"}
+{"ts": "2026-11-12T10:32:35.869+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "12726e4a-4b06-4fbc-891a-4027da49ab2d", "event": "http_request", "method": "POST", "path": "/api/v1/admin/users", "status": 201, "duration_ms": 197.9}
+{"ts": "2026-11-12T10:32:35.882+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "577b9d12-294d-4c67-862c-dc606b66eedb", "event": "http_request", "method": "POST", "path": "/api/v1/admin/users", "status": 201, "duration_ms": 201.6}
+{"ts": "2026-11-12T10:32:35.896+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "7dd429a9-1b90-4aee-a656-1e1b0e5e7533", "event": "http_request", "method": "POST", "path": "/api/v1/admin/users", "status": 201, "duration_ms": 213.9}
+{"ts": "2026-11-12T10:32:35.903+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "8884b3b2-3809-4b1d-ac1b-676fe47eeace", "event": "http_request", "method": "POST", "path": "/api/v1/admin/users", "status": 201, "duration_ms": 227.5}
+------------------------------ Captured log call ------------------------------
+INFO     aleekhan.access:request_id.py:63 request
+WARNING  django.request:log.py:253 Conflict: /api/v1/admin/users
+INFO     aleekhan.access:request_id.py:63 request
+INFO     aleekhan.access:request_id.py:63 request
+INFO     aleekhan.access:request_id.py:63 request
+INFO     aleekhan.access:request_id.py:63 request
+____________ test_parallel_updates_with_the_same_if_match_one_wins ____________
+---------------------------- Captured stderr call -----------------------------
+{"ts": "2026-11-12T10:32:37.816+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "f91a33ad-fe52-4e99-b02a-6d9c1e9ba5c8", "event": "http_request", "method": "PATCH", "path": "/api/v1/org/units/3df03a6b-9323-4cb6-942c-912f46f21c52", "status": 200, "duration_ms": 287.0}
+{"ts": "2026-11-12T10:32:37.842+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "76e09db4-28c4-4bdb-9f29-de92503a294f", "event": "http_request", "method": "PATCH", "path": "/api/v1/org/units/3df03a6b-9323-4cb6-942c-912f46f21c52", "status": 412, "duration_ms": 305.1, "error_code": "VERSION_CONFLICT"}
+{"ts": "2026-11-12T10:32:37.842+00:00", "level": "WARNING", "logger": "django.request", "msg": "Precondition Failed: /api/v1/org/units/3df03a6b-9323-4cb6-942c-912f46f21c52", "request_id": "76e09db4-28c4-4bdb-9f29-de92503a294f"}
+{"ts": "2026-11-12T10:32:37.872+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "32609ba5-9002-4b94-9ad6-101bdbf84138", "event": "http_request", "method": "PATCH", "path": "/api/v1/org/units/3df03a6b-9323-4cb6-942c-912f46f21c52", "status": 412, "duration_ms": 326.0, "error_code": "VERSION_CONFLICT"}
+{"ts": "2026-11-12T10:32:37.872+00:00", "level": "WARNING", "logger": "django.request", "msg": "Precondition Failed: /api/v1/org/units/3df03a6b-9323-4cb6-942c-912f46f21c52", "request_id": "32609ba5-9002-4b94-9ad6-101bdbf84138"}
+{"ts": "2026-11-12T10:32:37.892+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "859f6279-c41a-457e-a7da-1e92a7bce9aa", "event": "http_request", "method": "PATCH", "path": "/api/v1/org/units/3df03a6b-9323-4cb6-942c-912f46f21c52", "status": 412, "duration_ms": 349.2, "error_code": "VERSION_CONFLICT"}
+{"ts": "2026-11-12T10:32:37.892+00:00", "level": "WARNING", "logger": "django.request", "msg": "Precondition Failed: /api/v1/org/units/3df03a6b-9323-4cb6-942c-912f46f21c52", "request_id": "859f6279-c41a-457e-a7da-1e92a7bce9aa"}
+{"ts": "2026-11-12T10:32:37.921+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "7bcdf431-b631-4a73-80b8-ded02e401139", "event": "http_request", "method": "PATCH", "path": "/api/v1/org/units/3df03a6b-9323-4cb6-942c-912f46f21c52", "status": 412, "duration_ms": 382.0, "error_code": "VERSION_CONFLICT"}
+{"ts": "2026-11-12T10:32:37.922+00:00", "level": "WARNING", "logger": "django.request", "msg": "Precondition Failed: /api/v1/org/units/3df03a6b-9323-4cb6-942c-912f46f21c52", "request_id": "7bcdf431-b631-4a73-80b8-ded02e401139"}
+------------------------------ Captured log call ------------------------------
+INFO     aleekhan.access:request_id.py:63 request
+INFO     aleekhan.access:request_id.py:63 request
+WARNING  django.request:log.py:253 Precondition Failed: /api/v1/org/units/3df03a6b-9323-4cb6-942c-912f46f21c52
+INFO     aleekhan.access:request_id.py:63 request
+WARNING  django.request:log.py:253 Precondition Failed: /api/v1/org/units/3df03a6b-9323-4cb6-942c-912f46f21c52
+INFO     aleekhan.access:request_id.py:63 request
+WARNING  django.request:log.py:253 Precondition Failed: /api/v1/org/units/3df03a6b-9323-4cb6-942c-912f46f21c52
+INFO     aleekhan.access:request_id.py:63 request
+WARNING  django.request:log.py:253 Precondition Failed: /api/v1/org/units/3df03a6b-9323-4cb6-942c-912f46f21c52
+_____________ test_parallel_decisions_on_one_approval_exactly_one _____________
+---------------------------- Captured stderr call -----------------------------
+{"ts": "2026-11-12T10:32:40.447+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "d60a5dc8-60ce-40d8-8e33-1ae51f4eb603", "event": "http_request", "method": "POST", "path": "/api/v1/workflow/approvals/3664c1e2-b819-4fb9-9a30-6c3a76e7bc13/approve", "status": 200, "duration_ms": 292.3}
+{"ts": "2026-11-12T10:32:40.480+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "7afb36cf-8f19-4142-97bb-94865b7da749", "event": "http_request", "method": "POST", "path": "/api/v1/workflow/approvals/3664c1e2-b819-4fb9-9a30-6c3a76e7bc13/approve", "status": 412, "duration_ms": 302.8, "error_code": "VERSION_CONFLICT"}
+{"ts": "2026-11-12T10:32:40.480+00:00", "level": "WARNING", "logger": "django.request", "msg": "Precondition Failed: /api/v1/workflow/approvals/3664c1e2-b819-4fb9-9a30-6c3a76e7bc13/approve", "request_id": "7afb36cf-8f19-4142-97bb-94865b7da749"}
+{"ts": "2026-11-12T10:32:40.498+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "59c47825-2b2c-4870-b405-9677ceef68c5", "event": "http_request", "method": "POST", "path": "/api/v1/workflow/approvals/3664c1e2-b819-4fb9-9a30-6c3a76e7bc13/reject", "status": 412, "duration_ms": 317.8, "error_code": "VERSION_CONFLICT"}
+{"ts": "2026-11-12T10:32:40.499+00:00", "level": "WARNING", "logger": "django.request", "msg": "Precondition Failed: /api/v1/workflow/approvals/3664c1e2-b819-4fb9-9a30-6c3a76e7bc13/reject", "request_id": "59c47825-2b2c-4870-b405-9677ceef68c5"}
+{"ts": "2026-11-12T10:32:40.527+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "d8db87af-ebaa-4979-b202-5d144b8425f4", "event": "http_request", "method": "POST", "path": "/api/v1/workflow/approvals/3664c1e2-b819-4fb9-9a30-6c3a76e7bc13/reject", "status": 412, "duration_ms": 354.1, "error_code": "VERSION_CONFLICT"}
+{"ts": "2026-11-12T10:32:40.527+00:00", "level": "WARNING", "logger": "django.request", "msg": "Precondition Failed: /api/v1/workflow/approvals/3664c1e2-b819-4fb9-9a30-6c3a76e7bc13/reject", "request_id": "d8db87af-ebaa-4979-b202-5d144b8425f4"}
+{"ts": "2026-11-12T10:32:40.544+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "6935d5d5-4d69-4d60-b158-b366f0c4e64e", "event": "http_request", "method": "POST", "path": "/api/v1/workflow/approvals/3664c1e2-b819-4fb9-9a30-6c3a76e7bc13/approve", "status": 412, "duration_ms": 375.2, "error_code": "VERSION_CONFLICT"}
+{"ts": "2026-11-12T10:32:40.544+00:00", "level": "WARNING", "logger": "django.request", "msg": "Precondition Failed: /api/v1/workflow/approvals/3664c1e2-b819-4fb9-9a30-6c3a76e7bc13/approve", "request_id": "6935d5d5-4d69-4d60-b158-b366f0c4e64e"}
+------------------------------ Captured log call ------------------------------
+INFO     aleekhan.access:request_id.py:63 request
+INFO     aleekhan.access:request_id.py:63 request
+WARNING  django.request:log.py:253 Precondition Failed: /api/v1/workflow/approvals/3664c1e2-b819-4fb9-9a30-6c3a76e7bc13/approve
+INFO     aleekhan.access:request_id.py:63 request
+WARNING  django.request:log.py:253 Precondition Failed: /api/v1/workflow/approvals/3664c1e2-b819-4fb9-9a30-6c3a76e7bc13/reject
+INFO     aleekhan.access:request_id.py:63 request
+WARNING  django.request:log.py:253 Precondition Failed: /api/v1/workflow/approvals/3664c1e2-b819-4fb9-9a30-6c3a76e7bc13/reject
+INFO     aleekhan.access:request_id.py:63 request
+WARNING  django.request:log.py:253 Precondition Failed: /api/v1/workflow/approvals/3664c1e2-b819-4fb9-9a30-6c3a76e7bc13/approve
+______________ test_parallel_unit_creation_with_one_code_one_row ______________
+---------------------------- Captured stderr call -----------------------------
+{"ts": "2026-11-12T10:32:42.719+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "df978271-0ceb-4285-9859-6aaf19138ad3", "event": "http_request", "method": "POST", "path": "/api/v1/org/units", "status": 201, "duration_ms": 362.8}
+{"ts": "2026-11-12T10:32:42.795+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "3a8ae209-0820-463b-89d8-773b2125e9c6", "event": "http_request", "method": "POST", "path": "/api/v1/org/units", "status": 400, "duration_ms": 450.7, "error_code": "VALIDATION_FAILED"}
+{"ts": "2026-11-12T10:32:42.795+00:00", "level": "WARNING", "logger": "django.request", "msg": "Bad Request: /api/v1/org/units", "request_id": "3a8ae209-0820-463b-89d8-773b2125e9c6"}
+{"ts": "2026-11-12T10:32:42.831+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "cd67b6e5-0a7d-4688-b941-c61ca03014bf", "event": "http_request", "method": "POST", "path": "/api/v1/org/units", "status": 400, "duration_ms": 489.4, "error_code": "VALIDATION_FAILED"}
+{"ts": "2026-11-12T10:32:42.831+00:00", "level": "WARNING", "logger": "django.request", "msg": "Bad Request: /api/v1/org/units", "request_id": "cd67b6e5-0a7d-4688-b941-c61ca03014bf"}
+{"ts": "2026-11-12T10:32:42.860+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "557bccd5-d574-473d-9979-f275598f6b35", "event": "http_request", "method": "POST", "path": "/api/v1/org/units", "status": 400, "duration_ms": 521.7, "error_code": "VALIDATION_FAILED"}
+{"ts": "2026-11-12T10:32:42.860+00:00", "level": "WARNING", "logger": "django.request", "msg": "Bad Request: /api/v1/org/units", "request_id": "557bccd5-d574-473d-9979-f275598f6b35"}
+{"ts": "2026-11-12T10:32:42.887+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "1bc74323-4ff3-4d32-8bd4-df2441d565e1", "event": "http_request", "method": "POST", "path": "/api/v1/org/units", "status": 400, "duration_ms": 539.4, "error_code": "VALIDATION_FAILED"}
+{"ts": "2026-11-12T10:32:42.887+00:00", "level": "WARNING", "logger": "django.request", "msg": "Bad Request: /api/v1/org/units", "request_id": "1bc74323-4ff3-4d32-8bd4-df2441d565e1"}
+------------------------------ Captured log call ------------------------------
+INFO     aleekhan.access:request_id.py:63 request
+INFO     aleekhan.access:request_id.py:63 request
+WARNING  django.request:log.py:253 Bad Request: /api/v1/org/units
+INFO     aleekhan.access:request_id.py:63 request
+WARNING  django.request:log.py:253 Bad Request: /api/v1/org/units
+INFO     aleekhan.access:request_id.py:63 request
+WARNING  django.request:log.py:253 Bad Request: /api/v1/org/units
+INFO     aleekhan.access:request_id.py:63 request
+WARNING  django.request:log.py:253 Bad Request: /api/v1/org/units
+_____ test_rev0120_concurrent_uploads_on_the_same_parent_one_202_one_409 ______
+---------------------------- Captured stderr call -----------------------------
+{"ts": "2026-11-12T10:33:11.609+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "eb3242bd-b606-43d2-8e15-a6bc37a412b1", "event": "http_request", "method": "POST", "path": "/api/v1/documents", "status": 201, "duration_ms": 36.5}
+{"ts": "2026-11-12T10:33:11.776+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "53a6c3dc-f4a3-42da-9618-4c90d01e7e84", "event": "http_request", "method": "POST", "path": "/api/v1/documents/3f5e6649-e592-4214-986c-6635c3bb30de/revisions", "status": 202, "duration_ms": 108.4}
+{"ts": "2026-11-12T10:33:11.973+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "e1961c4e-e88b-44ce-932b-4f1fe16eb6b9", "event": "http_request", "method": "POST", "path": "/api/v1/documents/3f5e6649-e592-4214-986c-6635c3bb30de/revisions", "status": 202, "duration_ms": 176.1}
+{"ts": "2026-11-12T10:33:12.015+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "9a76a5a1-80a1-4bc5-b1e9-148c5f92d333", "event": "http_request", "method": "POST", "path": "/api/v1/documents/3f5e6649-e592-4214-986c-6635c3bb30de/revisions", "status": 409, "duration_ms": 220.3, "error_code": "STATE_TRANSITION_NOT_ALLOWED"}
+{"ts": "2026-11-12T10:33:12.015+00:00", "level": "WARNING", "logger": "django.request", "msg": "Conflict: /api/v1/documents/3f5e6649-e592-4214-986c-6635c3bb30de/revisions", "request_id": "9a76a5a1-80a1-4bc5-b1e9-148c5f92d333"}
+------------------------------ Captured log call ------------------------------
+INFO     aleekhan.access:request_id.py:63 request
+INFO     aleekhan.access:request_id.py:63 request
+INFO     aleekhan.access:request_id.py:63 request
+INFO     aleekhan.access:request_id.py:63 request
+WARNING  django.request:log.py:253 Conflict: /api/v1/documents/3f5e6649-e592-4214-986c-6635c3bb30de/revisions
+=========================== short test summary info ===========================
+PASSED platform_core/tests/test_api_phase01_race.py::test_same_idempotency_key_in_parallel_executes_once
+PASSED platform_core/tests/test_api_phase01_race.py::test_parallel_updates_with_the_same_if_match_one_wins
+PASSED platform_core/tests/test_api_phase01_race.py::test_parallel_decisions_on_one_approval_exactly_one
+PASSED platform_core/tests/test_api_phase01_race.py::test_parallel_unit_creation_with_one_code_one_row
+PASSED platform_core/tests/test_engine_idempotency.py::test_concurrent_same_key_executes_handler_exactly_once
+PASSED platform_core/tests/test_engine_idempotency.py::test_concurrent_same_key_different_bodies_one_wins_rest_rejected
+PASSED platform_core/tests/test_engine_outbox.py::test_concurrent_dispatchers_publish_each_event_exactly_once
+PASSED platform_core/tests/test_engine_uow_concurrency.py::test_concurrent_updates_same_version_exactly_one_wins
+PASSED platform_core/tests/test_idempotency_record.py::test_concurrent_duplicate_insert_exactly_one_wins
+PASSED platform_core/tests/test_integration_consumers.py::test_concurrent_dispatchers_with_registry_process_each_event_once_per_consumer
+PASSED platform_core/tests/test_integration_consumers.py::test_concurrent_redelivery_of_one_event_runs_the_handler_once
+PASSED platform_core/tests/test_integration_events.py::test_concurrent_dispatchers_keep_per_aggregate_order_with_retries
+PASSED platform_core/tests/test_integration_freshness_conflicts.py::test_concurrent_raisers_converge_on_one_open_item
+PASSED platform_core/tests/test_integration_freshness_monotonic.py::test_concurrent_validations_keep_the_newest_snapshot
+PASSED platform_core/tests/test_integration_imports.py::test_concurrent_duplicate_imports_create_exactly_one_batch
+PASSED platform_core/tests/test_phase01_audit_chain.py::test_concurrent_writers_build_one_contiguous_chain
+PASSED platform_core/tests/test_phase01_auth_engine.py::test_concurrent_logins_never_exceed_the_session_cap
+PASSED platform_core/tests/test_phase01_auth_engine.py::test_concurrent_wrong_passwords_lock_exactly_once
+PASSED platform_core/tests/test_phase01_concurrency.py::test_concurrent_primary_position_assignment_only_one_wins
+PASSED platform_core/tests/test_phase01_concurrency.py::test_concurrent_cross_moves_never_build_a_cycle
+PASSED platform_core/tests/test_phase01_concurrency.py::test_concurrent_children_never_exceed_max_depth
+PASSED platform_core/tests/test_phase01_concurrency.py::test_concurrent_pending_approval_requests_only_one
+PASSED platform_core/tests/test_phase01_concurrency.py::test_concurrent_duplicate_role_grants_only_one
+PASSED platform_core/tests/test_phase01_concurrency.py::test_concurrent_holders_never_exceed_position_capacity
+PASSED platform_core/tests/test_phase01_dec055.py::test_concurrent_bootstrap_approvals_of_one_role_exactly_one_wins
+PASSED platform_core/tests/test_phase01_roles_approvals_engine.py::test_concurrent_decisions_on_one_request_give_exactly_one_decision
+PASSED platform_core/tests/test_phase01_step5_backend.py::test_rev0120_concurrent_uploads_on_the_same_parent_one_202_one_409
+PASSED platform_core/tests/test_phase02_serial_allocation.py::test_id02_100_concurrent_confirms_no_duplicate_no_gap_one_snapshot_per_line_race
+PASSED platform_core/tests/test_phase02_serial_allocation.py::test_id04_concurrent_duplicate_confirms_of_one_order_have_a_single_effect_race
+29 passed, 2008 deselected in 110.05s (0:01:50)
+exit=0

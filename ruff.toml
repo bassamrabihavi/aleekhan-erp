@@ -21,6 +21,12 @@ ignore = ["RUF012", "S101"]
 # Persian labels of the PHASE_01 seed catalogue (role/permission/parameter names).
 "backend/platform_core/migrations/0010_seed_phase01_catalogue.py" = ["RUF001"]
 "backend/platform_core/migrations/0011_phase01_engine.py" = ["RUF001"]
+"backend/platform_core/migrations/0022_dec057_matrix_v20.py" = ["RUF001"]
+# PHASE_02 / 02.2: nullable text columns are deliberate - NULL = "not given" (OpenAPI type [string, null]) and is
+# distinct from '' in the CHECKs (e.g. a hold reason, a legacy raw value); DJ001's '' convention would hide that.
+"backend/platform_core/product_identity/models.py" = ["DJ001"]
+"backend/platform_core/commercial/models.py" = ["DJ001"]
+"backend/platform_core/schema_common.py" = ["DJ001"]
 # Persian sensitive-key deny-list and its tests (REV-0602): Persian letters are intended.
 "backend/platform_core/engine/redaction.py" = ["RUF001", "RUF002", "RUF003"]
 "backend/platform_core/tests/test_redaction_persian.py" = ["RUF001", "RUF002", "RUF003"]

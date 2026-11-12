@@ -44,6 +44,20 @@ GRANT EXECUTE ON FUNCTION platform_param_value(text), platform_param_int(text), 
 -- 01.3 rework (migration 0012, REV-0113): effective value at an instant (called by platform_param_value)
 GRANT EXECUTE ON FUNCTION platform_param_value_at(text, timestamptz) TO :"app";
 
+-- PHASE_02 / 02.2 (docs/db/ERD.md section 7). Defence in depth on top of the 0020 triggers.
+-- no hard delete of any Identity / Commercial row (status ends instead; numbers and lines are never re-used)
+REVOKE DELETE ON identity_customer, identity_customer_brand, identity_product_class, identity_product,
+    identity_style, identity_style_revision, identity_code_rule_revision, identity_code_rule_golden_case,
+    identity_product_code, identity_serial_counter, identity_serial, identity_external_ref_type,
+    identity_external_ref, identity_historical_order_record, commercial_customer_order,
+    commercial_customer_order_line, commercial_order_change_request FROM :"app";
+-- append-only history: serial snapshots and order versions are never updated or deleted
+REVOKE UPDATE, DELETE ON identity_serial_snapshot, commercial_customer_order_version FROM :"app";
+-- reviewed catalogues written only by migrations (DEC-058 units and order types; the DEC-006 counter row is seeded
+-- by 0021 and only moved (UPDATE) by the allocation at runtime)
+REVOKE INSERT, UPDATE, DELETE ON identity_unit_of_measure, commercial_order_type FROM :"app";
+REVOKE INSERT ON identity_serial_counter FROM :"app";
+
 -- migration bookkeeping and the schema contract are owned by the deploy step, never written at runtime
 REVOKE INSERT, UPDATE, DELETE ON django_migrations FROM :"app";
 REVOKE INSERT, UPDATE, DELETE ON platform_schema_meta FROM :"app";

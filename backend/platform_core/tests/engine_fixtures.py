@@ -129,7 +129,8 @@ def network(settings: Any) -> None:
 def ensure_catalogue() -> None:
     """After a transactional flush: parameters + permissions (``ensure_parameters``) + roles/grants and job
     types
-    with the frozen v1.0 / 0011 / v1.1 (0014) / v1.2 (0015) / v1.3 (0017) values (race tests)."""
+    with the frozen v1.0 / 0011 / v1.1 (0014) / v1.2 (0015) / v1.3 (0017) / v2.0 (0022) values and the
+    PHASE_02 seed of 0021 (race tests)."""
     from importlib import import_module
 
     from platform_core.jobs.models import JobDefinition
@@ -173,6 +174,10 @@ def ensure_catalogue() -> None:
         JobDefinition.objects.get_or_create(
             job_type=job_type, defaults={"name_fa": name_fa, "cancellable": True, "protected": False}
         )
+    # PHASE_02 / 02.2: seed 0021 + permission matrix v2.0 (0022), same frozen values
+    from .phase02_factories import ensure_phase02_catalogue
+
+    ensure_phase02_catalogue()
 
 
 def unit_code() -> str:

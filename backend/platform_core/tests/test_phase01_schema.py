@@ -37,6 +37,14 @@ ROLE_COLUMNS = {
     "APR": "workflow_approver",
     "OPT": "operator_terminal",
 }
+# matrix v2.0 (DEC-057, docs/security/PERMISSION_MATRIX_DRAFT.md section 7)
+PHASE02_ROLE_COLUMNS = {
+    "CO": "commercial_officer",
+    "CM": "commercial_manager",
+    "PO": "planning_officer",
+    "PDS": "product_data_steward",
+    "CRA": "code_rule_approver",
+}
 
 
 def _rows(sql: str, params: list[Any] | None = None) -> list[tuple[object, ...]]:
@@ -183,8 +191,11 @@ def _contract_permissions() -> dict[str, set[bool]]:
 
 
 def test_seeded_permissions_equal_contract_permissions_and_mfa_flags() -> None:
+    """Platform permissions (matrix v1.x) = the implemented operations; the PHASE_02 rows of matrix v2.0
+    (0022)
+    are compared with the planned operations in test_api_contract_planned_phase02.py."""
     contract = _contract_permissions()
-    seeded = {p.action: p.mfa_step_up for p in Permission.objects.all()}
+    seeded = {p.action: p.mfa_step_up for p in Permission.objects.filter(action__startswith="platform.")}
     assert len(seeded) == 43
     assert set(seeded) == set(contract)
     assert {a: {m} for a, m in seeded.items()} == dict(contract)
@@ -238,22 +249,28 @@ def test_seeded_grants_equal_the_approved_matrix_document() -> None:
         )
 
 
-def test_matrix_document_is_approved_v1_3() -> None:
-    head = MATRIX_DOC.read_text(encoding="utf-8")[:600]
-    assert "APPROVED v1.3" in head and "DEC-049" in head and "DEC-056" in head
-    assert "0017_dec056_matrix_v13" in MATRIX_DOC.read_text(encoding="utf-8")
+def test_matrix_document_is_approved_v2_0() -> None:
+    head = MATRIX_DOC.read_text(encoding="utf-8")[:700]
+    assert "APPROVED v2.0" in head and "DEC-049" in head and "DEC-056" in head and "DEC-057" in head
+    text = MATRIX_DOC.read_text(encoding="utf-8")
+    assert "0017_dec056_matrix_v13" in text and "0022_dec057_matrix_v20" in text
 
 
 def test_roles_seeded_active_v1_and_technical_roles_have_no_business_approval() -> None:
     roles = {r.code: r for r in Role.objects.all()}
-    assert set(roles) == set(ROLE_COLUMNS.values())
+    assert set(roles) == set(ROLE_COLUMNS.values()) | set(PHASE02_ROLE_COLUMNS.values())
     assert {r.status for r in roles.values()} == {"ACTIVE"}
-    # DEC-056 (+ extensions): only owner_admin moved (v1.1 -> v1.2 -> v1.3); the other ten roles keep v1.0
+    # DEC-056 (+ extensions): owner_admin moved v1.1 -> v1.2 -> v1.3; DEC-057 (matrix v2.0, 0022) moved
+    # owner_admin and management_viewer to 2.0 and added five BUSINESS roles at 2.0; the rest keep v1.0
     changed = {c: r.matrix_version for c, r in roles.items() if r.matrix_version != "1.0"}
-    assert changed == {"owner_admin": "1.3"}
+    assert changed == {
+        "owner_admin": "2.0",
+        "management_viewer": "2.0",
+        **{code: "2.0" for code in PHASE02_ROLE_COLUMNS.values()},
+    }
     technical = {c for c, r in roles.items() if r.kind == "TECHNICAL"}
     assert technical == {"owner_admin", "it_ops", "security_auditor"}
-    # the explicit exception of DEC-003 (DEC-056, matrix v1.2): owner_admin + exactly three BA permissions
+    # the explicit exception of DEC-003 (DEC-056 matrix v1.2 + DEC-057 matrix v2.0): owner_admin + exactly six
     ba_technical = set(
         RolePermission.objects.filter(role__kind="TECHNICAL", permission__business_approval=True).values_list(
             "role__code", "permission_id"
@@ -263,6 +280,9 @@ def test_roles_seeded_active_v1_and_technical_roles_have_no_business_approval() 
         ("owner_admin", "platform.workflow.approval.decide"),
         ("owner_admin", "platform.document.approve"),
         ("owner_admin", "platform.config.parameter.publish"),
+        ("owner_admin", "identity.code_rule.approve"),
+        ("owner_admin", "commercial.order.confirm"),
+        ("owner_admin", "commercial.change.decide"),
     }
 
 

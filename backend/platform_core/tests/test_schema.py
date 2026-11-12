@@ -102,11 +102,15 @@ def test_timestamps_are_timestamptz() -> None:
 
 @pytest.mark.django_db
 def test_only_platform_tables_no_business_or_django_auth_tables() -> None:
-    """PHASE_01 adds platform tables only: no business entity, no django.contrib.auth/session tables."""
+    """PHASE_01 adds platform tables only; PHASE_02 / 02.2 adds exactly the Identity and Commercial tables of
+    migration 0019 (``identity_*`` / ``commercial_*``). No django.contrib.auth/session tables."""
+    from importlib import import_module
+
+    phase02 = import_module("platform_core.migrations.0020_phase02_db_guards").PHASE02_TABLES
     with connection.cursor() as cur:
         cur.execute("SELECT tablename FROM pg_tables WHERE schemaname = 'public'")
         tables = {r[0] for r in cur.fetchall()}
-    assert tables == {*PLATFORM_TABLES, *PHASE01_TABLES, "django_migrations"}
+    assert tables == {*PLATFORM_TABLES, *PHASE01_TABLES, *phase02, "django_migrations"}
 
 
 @pytest.mark.django_db

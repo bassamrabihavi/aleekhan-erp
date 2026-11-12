@@ -1,8 +1,44 @@
 {
- "_note": "Golden event catalogue (PHASE_01 / 01.6). Generated from platform_core/engine/events.py and reviewed: every outbox event type of PHASE_00 + PHASE_01 with producer module, aggregate type, sensitivity (S1: ids, status codes, counts only), current and accepted schema versions and the JSON Schema of each payload version. A change of this file is a contract change (new version + reviewed commit). Human-readable copy: docs/integration/EVENT_CATALOGUE.md.",
+ "_note": "Golden event catalogue (PHASE_01 / 01.6). Generated from platform_core/engine/events.py and reviewed: every outbox event type of PHASE_00 + PHASE_01 (+ PHASE_02 / 02.2: identity.serial.allocated) with producer module, aggregate type, sensitivity (S1: ids, status codes, counts only), current and accepted schema versions and the JSON Schema of each payload version. A change of this file is a contract change (new version + reviewed commit). Human-readable copy: docs/integration/EVENT_CATALOGUE.md.",
  "source_system": "aleekhan-erp",
- "schema_migration_head": "platform_core.0018_outbox_discard_and_orphan_job",
+ "schema_migration_head": "platform_core.0022_dec057_matrix_v20",
  "catalogue": {
+  "identity.serial.allocated": {
+   "event_type": "identity.serial.allocated",
+   "producer": "platform_core.product_identity",
+   "aggregate_type": "identity.serial",
+   "description": "serial allocated at order confirm with its snapshot v1 (gapless counter, DEC-006)",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "snapshot_version",
+      "status"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "snapshot_version": {
+       "type": "integer",
+       "minimum": 0
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      }
+     }
+    }
+   }
+  },
   "platform.config.field.changed": {
    "event_type": "platform.config.field.changed",
    "producer": "platform_core.params",

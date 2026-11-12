@@ -288,3 +288,19 @@ Review verdicts are in `reports/phase-00/step-N/REVIEW.md`. No version number is
 - Tests: new `test_api_contract_planned_phase02.py`; `test_api_contract_planned.py` allows planned PHASE_02 paths
   only; the permission-seed test compares implemented operations only.
 - No migration, no business code, no real data; no private source read (not available on this machine).
+
+### 02.2 Database (commit SHA added by the orchestrator when committed)
+- Migrations `0019_phase02_identity_commercial_schema` (21 tables `identity_*` / `commercial_*`),
+  `0020_phase02_db_guards` (triggers, 6 deferred constraint triggers, FK/index names), `0021_phase02_seed_catalogue`
+  (units, order types, external reference types, serial counter at 63001), `0022_dec057_matrix_v20` (DEC-057 matrix
+  v2.0: 22 permissions, 5 BUSINESS roles, owner exception six pairs). All reversible; round trip + schema diff.
+- Engine primitive `platform_core/product_identity/serials.py` (gapless allocation under the counter row lock, snapshot
+  v1, audit, outbox `identity.serial.allocated`, idempotent by allocation key); event catalogue + golden updated;
+  `authz.policy.OWNER_BA_ACTIONS` = six pairs.
+- REV-0201: Identity owns serial + snapshot, the line holds the UNIQUE FK (ERD 7.1); REV-0202: blocked-by markers
+  must exist in the decision register; REV-0203: untagged change-request rules marked PROPOSED and not enforced.
+- Tests: `test_phase02_schema.py`, `test_phase02_serial_allocation.py` (ID-01/02/03/04 against PostgreSQL),
+  updated PHASE_01 matrix/table tests; `ops/db/grants.sql` + `roles_check.sh` PHASE_02 privileges;
+  `docs/security/PERMISSION_MATRIX_DRAFT.md` v2.0 (section 7); `docs/db/ERD.md` section 7.
+- No real type, category, code, customer or serial in the repository (synthetic test data only).
+

@@ -52,13 +52,22 @@ def test_dec056_owner_holds_approval_read_and_decide_in_the_db() -> None:
     assert {("platform.workflow.approval.read", "SCOPE"), (DECIDE, "SCOPE")} <= held
     # matrix v1.2 (DEC-056 extension, 0015): document.approve + parameter.publish as well
     assert {("platform.document.approve", "SCOPE"), ("platform.config.parameter.publish", "SCOPE")} <= held
-    assert owner.matrix_version == "1.3" and owner.kind == "TECHNICAL"
+    # matrix v2.0 (DEC-057, 0022) moved the owner on again (three PHASE_02 decisions, below)
+    assert owner.matrix_version == "2.0" and owner.kind == "TECHNICAL"
     # no other business-approval permission for the owner, and none at all for it_ops / security_auditor
     assert set(
         RolePermission.objects.filter(
             role__code="owner_admin", permission__business_approval=True
         ).values_list("permission_id", flat=True)
-    ) == {DECIDE, "platform.document.approve", "platform.config.parameter.publish"}
+    ) == {
+        DECIDE,
+        "platform.document.approve",
+        "platform.config.parameter.publish",
+        # DEC-057 (matrix v2.0): code-rule approval, order confirm, change-request decision
+        "identity.code_rule.approve",
+        "commercial.order.confirm",
+        "commercial.change.decide",
+    }
     assert not RolePermission.objects.filter(
         role__code__in=["it_ops", "security_auditor"], permission__business_approval=True
     ).exists()

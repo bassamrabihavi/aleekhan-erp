@@ -277,3 +277,23 @@ Rahkaran code that differs from the Planning code).
 | INV-02-07 | A code is issued only under an ACTIVE CodeRuleRevision; otherwise 409 RULE_NOT_APPROVED (DEC-005) | engine test (runs today: blocked path) |
 | INV-02-08 | Similarity never merges two styles/customers | API contract: no merge operation |
 | INV-02-09 | Imported values keep raw + normalised + provenance; IMP/LEG rows always point to a staging row | DB CHECK (block 1.1) |
+
+### 02.2 result (migrations 0019-0022, docs/db/ERD.md section 7)
+- Built to the decisions APPROVED on 2026-11-12 (DEC-005/006/057/058/059); where they differ from the 02.1 draft
+  above, the decision wins:
+  - Classification: one table `identity_product_class` with two levels (`product_type`, `category`), 2-digit
+    segments; `identity_product.product_no` and `identity_style.style_no` 4 digits (DEC-005). Units are a seeded
+    table `identity_unit_of_measure` (PIECE/PAIR, DEC-058) referenced by the product type and checked on every line.
+  - Serial: `identity_serial_counter` (single row `factory_serial`, start 63001, legacy < 63000) replaces the
+    planned `SerialNamespace`; pattern `^[1-9][0-9]*$` (DEC-006). Legacy serials are text on
+    `identity_historical_order_record` (`legacy_serial_text`, plain value, duplicate flag) - never in `identity_serial`.
+  - REV-0201: no mirror column; the line holds `serial_id` (UNIQUE FK); Identity owns serial + snapshot (ERD 7.1).
+  - Order states without `PAUSED` (DEC-059: single ON_HOLD with `status_before_hold`); line states without
+    `SERIAL_ALLOCATED` (DEC-006 L-A: a confirmed line always has its serial). The 0.7.0-draft contract enums still
+    list both; the 02.4 contract update removes them.
+  - The customer representative name is on the order only (`customer_representative_name`, PII, DEC-058); no
+    contact column exists anywhere.
+- Not created: `Inquiry/QuoteVersion` (PHASE_10), `CustomerArtworkApproval` (PHASE_03).
+- REV-0203 (untagged rules of the 02.1 draft): "one SUBMITTED/APPROVED change request per order" and "change request
+  expires after 30 days" are **not** enforced (OPEN, not decided; the base-version check already makes two changes
+  on one version impossible); "uom of the family" is now DEC-058 (enforced by trigger).

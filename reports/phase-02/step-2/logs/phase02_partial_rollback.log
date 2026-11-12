@@ -1,0 +1,18 @@
+== PHASE_02-only rollback: migrate platform_core 0018 then forward (scratch DB test_impl022_mig)
+Running migrations:
+  No migrations to apply.
+  Unapplying platform_core.0022_dec057_matrix_v20... OK
+  Unapplying platform_core.0021_phase02_seed_catalogue... OK
+  Unapplying platform_core.0020_phase02_db_guards... OK
+  Unapplying platform_core.0019_phase02_identity_commercial_schema... OK
+PHASE_02 tables left: 0
+PHASE_02 functions left: 0
+PHASE_02 permissions left: 0
+owner matrix_version after rollback: 1.3
+  Applying platform_core.0019_phase02_identity_commercial_schema... OK
+  Applying platform_core.0020_phase02_db_guards... OK
+  Applying platform_core.0021_phase02_seed_catalogue... OK
+  Applying platform_core.0022_dec057_matrix_v20... OK
+owner matrix_version after up: 2.0
+serial counter: factory_serial start=63001 next=63001 legacy<63000
+== full-rollback dump (roundtrip/schema_zero.sql): CREATE FUNCTION count = 0

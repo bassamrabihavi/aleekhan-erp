@@ -222,6 +222,10 @@ unit of work instead of a FK.
 | `0016_outbox_provenance_and_order` | schema | `platform_outbox_event.producer`, `build_commit`, `schema_migration` (format CHECKs; `''` = row older than 0016); partial index `ix_outbox_event_agg_open` (per-aggregate ordering) | drop index, CHECKs and columns (provenance values lost) |
 | `0017_dec056_matrix_v13` | `RunPython` | DEC-056 extension 2 matrix v1.3: `owner_admin` gets `platform.document.read` + `platform.document.download` (not business approval; guards unchanged) | remove the two grants, `matrix_version` 1.2 |
 | `0018_outbox_discard_and_orphan_job` | schema + seed | REV-0129: delivery state `DISCARDED` + `discarded_at` + CHECK `ck_outbox_event_discarded_has_ts`; `ix_outbox_event_agg_open` excludes settled rows; job type `document_orphan_cleanup` | DISCARDED rows back to DEAD_LETTER; orphan job runs/definition removed; old index restored |
+| `0019_phase02_identity_commercial_schema` | schema | PHASE_02 / 02.2: 21 tables `identity_*` / `commercial_*` (section 7); named CHECK / UNIQUE / partial UNIQUE / INDEX; every FK PROTECT and indexed | drop the tables (only while empty: PROTECT + 0020/0021 reverses refuse used rows) |
+| `0020_phase02_db_guards` | `RunSQL` + `RunPython` | touch / no-delete / append-only / terminal / immutable-column triggers; classification, code registry, serial, legacy, order, line, version and change-request guards; 6 deferred constraint triggers (gapless counter, serial snapshot v1 + one line, order version row + no OPEN line, applied change request has its version, line/serial cancel pairing); FK/index renaming as 0009 | drop triggers/functions; rename back from the catalog comment |
+| `0021_phase02_seed_catalogue` | seed | units PIECE/PAIR, 4 order types, 4 external reference types (DEC-058); the factory serial counter `factory_serial` start 63001, legacy < 63000 (DEC-006). No type/category/code/customer/serial | deletes exactly these rows (counter only while no serial exists) |
+| `0022_dec057_matrix_v20` | `RunSQL` + `RunPython` | DEC-057 matrix v2.0: 22 `identity.*`/`commercial.*` permissions, 5 BUSINESS roles, grants; `management_viewer` read rows; owner exception widened to exactly six pairs | removes them; owner 1.3 / viewer 1.0; restores the 0015 guard bodies byte-identically |
 
 No users, no org units, no network ranges, no secrets are seeded. Round trip (up -> zero -> up, partial rollback
 to 0006, empty schema diff, no extension left): `reports/phase-01/step-2/logs/migration/`; on the final PHASE_01
@@ -339,3 +343,61 @@ rows; no INSERT/UPDATE/DELETE on the reviewed catalogues (permissions, upload ty
 definitions); EXECUTE on the parameter functions, `platform_holds_owner_admin()` and
 `platform_position_peak_primary()`. As before, the app role owns nothing, so it cannot
 disable/drop triggers or constraints. Evidence: `reports/phase-01/step-2/logs/roles/roles_check.json`.
+
+## 7. PHASE_02 tables (migrations 0019-0022, step 02.2)
+
+Owning modules (DATA_TABLE.md PHASE_02 section 1): `identity_*` = Identity (`platform_core/product_identity`),
+`commercial_*` = Commercial (`platform_core/commercial`). Same Django app and migration history as the platform.
+
+```
+identity_product_class (type, parent NULL) 1-N identity_product_class (category)      [segments 2+2, DEC-005]
+identity_product_class (type) 1-N identity_product 1-N identity_style N-1 identity_product_class (category)
+identity_style 1-N identity_style_revision (one ACTIVE)          identity_style 1-N identity_product_code
+identity_code_rule_revision 1-N identity_code_rule_golden_case   identity_code_rule_revision 1-N identity_product_code
+identity_customer 1-N identity_customer_brand
+identity_serial_counter (single row, 63001) 1-N identity_serial 1-N identity_serial_snapshot (v1..n)
+commercial_customer_order N-1 identity_customer / identity_customer_brand / commercial_order_type
+commercial_customer_order 1-N commercial_customer_order_line --serial_id UNIQUE--> identity_serial   (REV-0201)
+commercial_customer_order 1-N commercial_customer_order_version   commercial_customer_order 1-N commercial_order_change_request
+identity_external_ref N-1 identity_external_ref_type (target = customer/product/style/order/line/serial, by id)
+identity_historical_order_record (LEG) -> platform_import_staging_row (UNIQUE), legacy serial/code as text
+```
+
+### 7.1 Ownership of the serial (REV-0201, decided in 02.2)
+Option (a)+(b) of the review: **Identity owns `identity_serial` and `identity_serial_snapshot`; the Commercial
+order line holds the only pairing column, `commercial_customer_order_line.serial_id` (UNIQUE FK, PROTECT)**. There is
+no mirror column on the Identity side. The confirm transaction is one unit of work in which each module writes
+only its own rows: Commercial locks its order and lines, calls Identity's `allocate_serial`
+(`product_identity/serials.py`: counter row lock, serial, snapshot v1, audit, outbox `identity.serial.allocated`)
+and then writes `serial_id` on its own line row. The database proves the pairing at COMMIT
+(`trg_identity_serial_committed`: exactly one line per serial; `trg_commercial_customer_order_committed`: no OPEN
+line once the order is versioned; `ck_commercial_line_serial_by_status`: a CONFIRMED line has its serial).
+
+### 7.2 Keys, checks and guards (selection; every name is in the models / migration 0020)
+| Table | Keys / CHECKs | Triggers |
+|---|---|---|
+| `identity_product_class` | partial UNIQUE type segment; UNIQUE (parent, segment) for categories; `^[0-9]{2}$`; type has unit + product-number scheme | category under a type; segments immutable |
+| `identity_product` | UNIQUE (type, product_no); `^[0-9]{4}$`; belt: product_no = buckle (2) + width (2) | of a type; belt scheme ⇔ buckle + width |
+| `identity_style` | UNIQUE (product, category, style_no); `^[0-9]{4}$`, not `0000` | category of the product's type; segments immutable |
+| `identity_style_revision` | UNIQUE (style, revision_no); one ACTIVE (partial UNIQUE) | ACTIVE immutable except -> SUPERSEDED (terminal) |
+| `identity_code_rule_revision` | UNIQUE (namespace, revision); one ACTIVE; approved_by ≠ created_by | lifecycle DRAFT -> IN_REVIEW -> APPROVED -> ACTIVE -> RETIRED / REJECTED; content frozen after DRAFT |
+| `identity_product_code` | UNIQUE (namespace, code); `varchar(14)` `^[0-9]{14}$`; ACTIVE ⇒ ERP_MATCHED; RESERVED ⇒ ERP_PENDING; SYS ⇒ rule + style + issuer + key + prefix `02` | SYS insert needs an ACTIVE rule (`RULE_NOT_APPROVED`); live code = `02` + style segments; style link set once |
+| `identity_serial_counter` | single namespace `factory_serial`; next ≥ start; legacy ceiling < start | +1 per step; fixed columns immutable; **deferred: gapless** |
+| `identity_serial` | UNIQUE (counter, number), (counter, value), allocation key; `^[1-9][0-9]*$`; number = value::text; CANCELLED ⇒ reason | drawn from the counter; ALLOCATED -> CANCELLED only; revision/code of the same style; no delete; **deferred: snapshot v1 + one line**; **deferred: cancel paired with the line** |
+| `identity_serial_snapshot` | UNIQUE (serial, version); v1 ⇔ ALLOCATED; CHANGE_APPLIED ⇒ change request id | contiguous versions; append-only |
+| `identity_historical_order_record` | LEG only; UNIQUE staging row; code flag OK / DISPUTED / ABSENT; plain legacy serial carries its value | legacy serial < counter ceiling (63000); only match columns + duplicate flag change |
+| `identity_external_ref` | UNIQUE (system, type, value, target); typed (FK to type) | key columns immutable |
+| `commercial_customer_order` | UNIQUE order_no; due ≥ order date; ON_HOLD ⇔ previous state + reason; confirmer ≠ creator; versioned ⇔ confirmed | status graph (DEC-059); header frozen after confirm (due date only with version +1); brand of the customer; **deferred: version row + no OPEN line** |
+| `commercial_customer_order_line` | UNIQUE (order, line_no); UNIQUE serial; qty > 0; OPEN/REMOVED ⇔ no serial; CONFIRMED/CANCELLED ⇒ serial | unit = the type's unit (DEC-058); insert only into DRAFT or by ADD_LINE; confirmed line changes only with the order version; after release only the due date |
+| `commercial_customer_order_version` | UNIQUE (order, version); v1 ⇔ CONFIRMED; later versions name their change request | contiguous; append-only |
+| `commercial_order_change_request` | UNIQUE request_no; decider ≠ requester; planning approver ≠ requester; APPLIED ⇒ version = base + 1; applied DUE_DATE_CHANGE ⇒ planning approval | only for confirmed orders; base = current; after release only DUE_DATE_CHANGE / HOLD / RESUME; content frozen; **deferred: applied ⇒ version row** |
+
+### 7.3 Privileges (`ops/db/grants.sql`, checked by `ops/db/roles_check.sh`)
+No DELETE on any PHASE_02 business table; no UPDATE/DELETE on snapshots and order versions; units and order types
+written by migrations only; the counter row is inserted by migration 0021 only and moved by UPDATE at runtime;
+external reference types are extensible at runtime (DEC-058).
+
+### 7.4 Not enforced in the database on purpose (not decided)
+"One open change request per order", a change-request expiry period, whether the planning approver of a due-date
+change may also be the deciding manager, and which permission records that planning approval (see
+`reports/phase-02/step-2/REPORT.md`, open items).

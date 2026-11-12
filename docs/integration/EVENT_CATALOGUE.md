@@ -1,4 +1,4 @@
-# Event catalogue — PHASE_00 + PHASE_01 platform events (PHASE_01 / 01.6)
+# Event catalogue — PHASE_00 + PHASE_01 platform events (PHASE_01 / 01.6) + PHASE_02 / 02.2 serial allocation
 
 Source of truth: `backend/platform_core/engine/events.py` (`CATALOGUE`); reviewed golden copy:
 `backend/platform_core/tests/golden/event_catalogue.golden.json` (JSON Schema per version). This table is
@@ -7,7 +7,7 @@ generated from the code and must be regenerated with it. Status: DRAFT (part of 
 Envelope (every event, `platform_outbox_event`): `event_id` (consumer dedupe key), `event_type`, `schema_version`,
 `aggregate_type`, `aggregate_id`, `aggregate_version`, `occurred_at` (UTC), `actor_type` / `actor_id`, `request_id`,
 `correlation_id`, `causation_id`, `payload`, and the provenance of the producing code (migration `0016`):
-`producer` (owning module), `build_commit` (`ALEEKHAN_BUILD_COMMIT`), `schema_migration` (`platform_core.0018_outbox_discard_and_orphan_job`
+`producer` (owning module), `build_commit` (`ALEEKHAN_BUILD_COMMIT`), `schema_migration` (`platform_core.0022_dec057_matrix_v20`
 in this build). Source system: `aleekhan-erp`. Rows written before migration 0016 carry `''` (unknown).
 
 Rules: producers emit only catalogued types, the matching aggregate type and the **current** version, with an exact
@@ -23,6 +23,7 @@ Field kinds: `uuid` (canonical lower-case), `ref` (id of another resource, `[A-Z
 
 | Event type | v | Producer | Aggregate | Payload | Meaning |
 |---|---|---|---|---|---|
+| `identity.serial.allocated` | 1 | `platform_core.product_identity` | `identity.serial` | `id`:uuid, `snapshot_version`:count, `status`:code | serial allocated at order confirm with its snapshot v1 (gapless counter, DEC-006) |
 | `platform.config.field.changed` | 1 | `platform_core.params` | `platform.dynamic_field` | `key`:key, `status`:code | dynamic field definition created/changed |
 | `platform.config.parameter.defined` | 1 | `platform_core.params` | `platform.parameter_definition` | `key`:key | parameter definition created |
 | `platform.config.parameter.proposed` | 1 | `platform_core.params` | `platform.parameter_value` | `id`:uuid, `parameter_key`:key, `status`:code | parameter value proposed |

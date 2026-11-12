@@ -92,6 +92,10 @@ def test_dec056_exception_counts_only_for_the_owner_ba_grants() -> None:
             "platform.workflow.approval.decide",
             "platform.document.approve",
             "platform.config.parameter.publish",
+            # DEC-057 (matrix v2.0, 0022): the owner decides these PHASE_02 approvals directly (never his own)
+            "identity.code_rule.approve",
+            "commercial.order.confirm",
+            "commercial.change.decide",
         }
     )
     for action in P.OWNER_BA_ACTIONS:

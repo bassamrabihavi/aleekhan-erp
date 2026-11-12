@@ -65,9 +65,18 @@ from platform_core.params.values import effective_bool, effective_minutes
 SENSITIVITY_RANK: Final = {"S0": 0, "S1": 1, "S2": 2, "S3": 3}
 DECIDE_GENERIC: Final = "platform.workflow.approval.decide"
 OWNER_ROLE: Final = "owner_admin"
-# DEC-056 (matrix v1.1 + v1.2 extension 2026-11-10): business-approval permissions the owner holds directly
+# DEC-056 (matrix v1.1 + v1.2 extension 2026-11-10) + DEC-057 (matrix v2.0, 2026-11-12): business-approval
+# permissions the owner holds directly (= the six pairs of the DB guard, migration 0022). Never his own
+# request.
 OWNER_BA_ACTIONS: Final = frozenset(
-    {DECIDE_GENERIC, "platform.document.approve", "platform.config.parameter.publish"}
+    {
+        DECIDE_GENERIC,
+        "platform.document.approve",
+        "platform.config.parameter.publish",
+        "identity.code_rule.approve",
+        "commercial.order.confirm",
+        "commercial.change.decide",
+    }
 )
 
 
