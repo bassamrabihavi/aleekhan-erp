@@ -186,3 +186,17 @@
   - A **due-date change** also needs **planning approval**: a second approval by `planning_officer`, in addition to `commercial_manager`. This replaces the recommended "notify planning".
   - The owner may decide directly, but never on his own request (DEC-057).
 - **Decided by:** بسام ربیهاوی (کارفرما).
+
+## 2026-11-12 — DEC-058 APPROVED (customer and order master data)
+- **Brand:** B-A. Brand is a separate table under the customer (one customer, many brands). The brand on an order is optional.
+- **Customer representative:** the employer chose to **record the name** (overriding the recommendation "do not record").
+  - **Name only.** No phone, email or other contact details are stored (DEC-028 is still in force for contact data).
+  - The field is classified as personal data (`PII`) and every read and change is audited.
+  - It is visible only with `identity.customer.read`; `management_viewer` sees it masked.
+  - It never appears in exports, logs, tests or fixtures; tests use synthetic names only.
+- **Customer PO number:** there is no uniqueness constraint. A duplicate within the same customer gives a warning, and the user must acknowledge it.
+- **External references:** Rahkaran project code, contract number, customer style code and customer serial. Each one has a system and a type, and none is ever used as our serial. `product_data_steward` may add new reference types.
+- **Units:** shoe = pair (جفت). Bag, belt, pocket item (جیبی), accessory and set = piece (عدد); a set counts as one piece. The six product types come from the Planning `Sorce` sheet.
+- **Order types:** the four Planning types: پیش تولید، سری تولید، نمونه‌سازی، تولید آزمایشی. The page 29 concept labels are not used.
+- **Q7 (required grade on the order):** not asked. The packet default applies, so the grade is free text only, with no comparison, until DEC-019 (PHASE_08). The employer can change this.
+- **Decided by:** بسام ربیهاوی (کارفرما).

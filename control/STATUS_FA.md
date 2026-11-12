@@ -18,9 +18,7 @@
 
 ## منتظر تصمیم شما (افق فعلی)
 
-| شناسه | اولویت | موضوع | مالک | وضعیت |
-|---|---|---|---|---|
-| DEC-058 | P1 | داده پایه مشتری و سفارش (برند، یکتایی شماره سفارش مشتری، مرجع خارجی، واحد، نوع سفارش) | بازرگانی + برنامه‌ریزی | OPEN |
+تصمیم بازی در افق فعلی نیست.
 
 ## گراف وابستگی فازها
 
@@ -112,6 +110,7 @@ flowchart LR
 
 ## آخرین رویدادها
 
+- `2026-11-12T09:30:08+00:00` decision id=DEC-058 status=APPROVED by=بسام ربیهاوی note=B-A brand table; customer rep NAME recorded (PII, no contact data, masked for viewers); PO no. not unique, warn; 4 external ref types; units shoe=pair others=piece; order types = 4 Planning types; grade text-only default
 - `2026-11-12T09:22:37+00:00` decision id=DEC-059 status=APPROVED by=بسام ربیهاوی note=CR-only changes, new version+snapshot; 7 change types, after release only due date + hold/resume; C-A cancel before release only, serial CANCELLED never reused; qty increase keeps serial; single ON_HOLD returns to previous; commercial_manager decides, planning applies; due-date change also needs planning approval
 - `2026-11-12T09:06:02+00:00` decision id=DEC-057 status=APPROVED by=بسام ربیهاوی note=M-A: 5 business roles per packet table; 4 fresh-MFA actions; order confirm = planning_officer (+serials same tx); scope all customers; owner may decide directly except own requests
 - `2026-11-12T06:30:36+00:00` decision id=DEC-005 status=APPROVED by=بسام ربیهاوی note=Code14 = 02+type(2)+category(2)+product(4)+style(4); product=max per type+1 (belt=buckle code+width); style seq per product+category from 0001; B1 system reserves, Rahkaran confirms; family=product type; non-14 legacy DISPUTED; confirmer: employer
@@ -126,4 +125,3 @@ flowchart LR
 - `2026-11-11T15:42:27+00:00` decision_added id=DEC-058 status=OPEN
 - `2026-11-11T15:42:27+00:00` decision_added id=DEC-057 status=OPEN
 - `2026-11-11T15:04:54+00:00` step phase=PHASE_02 step=02.1 state=IN_PROGRESS
-- `2026-11-11T14:39:40+00:00` phase_started phase=PHASE_02 by=بسام ربیهاوی

@@ -2365,13 +2365,13 @@
       "gate": "Phase-2",
       "domain": "Identity",
       "issue": "داده پایه مشتری و سفارش (برند، یکتایی شماره سفارش مشتری، مرجع خارجی، واحد، نوع سفارش)",
-      "status": "OPEN",
+      "status": "APPROVED",
       "owner": "بازرگانی + برنامه‌ریزی",
       "phase": "PHASE_02",
       "source": "گام 02.1 2026-11-11 (C-54..C-68)",
-      "resolution": null,
-      "decided_by": null,
-      "decided_at": null
+      "resolution": "B-A brand table; customer rep NAME recorded (PII, no contact data, masked for viewers); PO no. not unique, warn; 4 external ref types; units shoe=pair others=piece; order types = 4 Planning types; grade text-only default",
+      "decided_by": "بسام ربیهاوی",
+      "decided_at": "2026-11-12T09:30:08+00:00"
     },
     {
       "id": "DEC-059",
@@ -3321,7 +3321,15 @@
       "status": "APPROVED",
       "by": "بسام ربیهاوی",
       "note": "CR-only changes, new version+snapshot; 7 change types, after release only due date + hold/resume; C-A cancel before release only, serial CANCELLED never reused; qty increase keeps serial; single ON_HOLD returns to previous; commercial_manager decides, planning applies; due-date change also needs planning approval"
+    },
+    {
+      "at": "2026-11-12T09:30:08+00:00",
+      "kind": "decision",
+      "id": "DEC-058",
+      "status": "APPROVED",
+      "by": "بسام ربیهاوی",
+      "note": "B-A brand table; customer rep NAME recorded (PII, no contact data, masked for viewers); PO no. not unique, warn; 4 external ref types; units shoe=pair others=piece; order types = 4 Planning types; grade text-only default"
     }
   ],
-  "updated_at": "2026-11-12T09:22:37+00:00"
+  "updated_at": "2026-11-12T09:30:08+00:00"
 }
