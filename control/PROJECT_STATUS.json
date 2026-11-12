@@ -2351,13 +2351,13 @@
       "gate": "Phase-2",
       "domain": "Security",
       "issue": "ماتریس دسترسی فاز ۲ (نقش‌های بازرگانی/برنامه‌ریزی، تأییدکننده سفارش، دامنه رکورد، حق مالک)",
-      "status": "OPEN",
+      "status": "APPROVED",
       "owner": "کارفرما + بازرگانی + برنامه‌ریزی",
       "phase": "PHASE_02",
       "source": "گام 02.1 2026-11-11 (C-62)",
-      "resolution": null,
-      "decided_by": null,
-      "decided_at": null
+      "resolution": "M-A: 5 business roles per packet table; 4 fresh-MFA actions; order confirm = planning_officer (+serials same tx); scope all customers; owner may decide directly except own requests",
+      "decided_by": "بسام ربیهاوی",
+      "decided_at": "2026-11-12T09:06:02+00:00"
     },
     {
       "id": "DEC-058",
@@ -3305,7 +3305,15 @@
       "status": "APPROVED",
       "by": "بسام ربیهاوی",
       "note": "Code14 = 02+type(2)+category(2)+product(4)+style(4); product=max per type+1 (belt=buckle code+width); style seq per product+category from 0001; B1 system reserves, Rahkaran confirms; family=product type; non-14 legacy DISPUTED; confirmer: employer"
+    },
+    {
+      "at": "2026-11-12T09:06:02+00:00",
+      "kind": "decision",
+      "id": "DEC-057",
+      "status": "APPROVED",
+      "by": "بسام ربیهاوی",
+      "note": "M-A: 5 business roles per packet table; 4 fresh-MFA actions; order confirm = planning_officer (+serials same tx); scope all customers; owner may decide directly except own requests"
     }
   ],
-  "updated_at": "2026-11-12T06:30:36+00:00"
+  "updated_at": "2026-11-12T09:06:02+00:00"
 }

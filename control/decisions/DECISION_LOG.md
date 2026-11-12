@@ -151,3 +151,16 @@
 - **Q-A (confirmer):** the employer approves the rule and the golden cases **himself**. This replaces the recommended planning + commercial maker-checker for the rule.
 - **Technical note C-77:** the code preview in `Order form` and `NOrder!FY` look up the category code from different `Sorce` columns. Golden tests must assert that both give the same code.
 - **Decided by:** بسام ربیهاوی (کارفرما).
+
+## 2026-11-12 — DEC-057 APPROVED (PHASE_02 permission matrix, M-A)
+- **Roles:** five new BUSINESS roles, `commercial_officer`, `commercial_manager`, `planning_officer`, `product_data_steward` and `code_rule_approver`, with the permission table of `DEC-057_PACKET.md` as written.
+- **Fresh MFA:** required for 4 actions: `identity.product_code.issue`, `identity.code_rule.approve`, `commercial.order.confirm` and `commercial.change.decide`.
+- **Order confirm:** `commercial.order.confirm` goes to **`planning_officer`**, and the serials are allocated in the same transaction (DEC-006 L-A). This answers DEC-006 Q6.
+- **Customer scope:** all customers for all the roles above. There is no per-officer customer assignment; every read and change is audited.
+- **Owner:** `owner_admin` may decide directly on code-rule approval, order confirm and change-request decisions (an extension of DEC-056). **Self-approval stays forbidden:** the owner never approves his own request.
+- **Unchanged:**
+  - `management_viewer` is read-only.
+  - `employee` has no PHASE_02 access.
+  - Technical roles get no business approvals (DEC-003).
+- **Implementation:** matrix v2.0 is a seed migration in 02.2.
+- **Decided by:** بسام ربیهاوی (کارفرما).

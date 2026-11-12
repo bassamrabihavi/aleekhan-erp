@@ -8,7 +8,7 @@
 - **گام جاری:** 02.2 Database (در صف)
 - **پیشرفت:** 17/120 گام قبول‌شده
 - **آماده تست شما:** 0 مورد
-- **تصمیم P0 باز (کل پروژه):** 17
+- **تصمیم P0 باز (کل پروژه):** 16
 - **شروع پایلوت (PHASE_13):** خوش‌بینانه ۲۲ دی ۱۴۰۵ · مبنا **۱۵ بهمن ۱۴۰۵** · بدبینانه ۲ فروردین ۱۴۰۶
 - **مسیر بحرانی:** 00 → 01 → 02 → 03 → 04 → 05 → 07 → 08 → 09 → 10 → 12 → 13 — تا شروع پایلوت 36 هفته برآوردی
 
@@ -20,7 +20,6 @@
 
 | شناسه | اولویت | موضوع | مالک | وضعیت |
 |---|---|---|---|---|
-| DEC-057 | P0 | ماتریس دسترسی فاز ۲ (نقش‌های بازرگانی/برنامه‌ریزی، تأییدکننده سفارش، دامنه رکورد، حق مالک) | کارفرما + بازرگانی + برنامه‌ریزی | OPEN |
 | DEC-058 | P1 | داده پایه مشتری و سفارش (برند، یکتایی شماره سفارش مشتری، مرجع خارجی، واحد، نوع سفارش) | بازرگانی + برنامه‌ریزی | OPEN |
 | DEC-059 | P0 | تغییر سفارش پس از تأیید، لغو و توقف/ادامه (صفحه ۳۳ بخش فاز ۲) | بازرگانی + برنامه‌ریزی | OPEN |
 
@@ -114,6 +113,7 @@ flowchart LR
 
 ## آخرین رویدادها
 
+- `2026-11-12T09:06:02+00:00` decision id=DEC-057 status=APPROVED by=بسام ربیهاوی note=M-A: 5 business roles per packet table; 4 fresh-MFA actions; order confirm = planning_officer (+serials same tx); scope all customers; owner may decide directly except own requests
 - `2026-11-12T06:30:36+00:00` decision id=DEC-005 status=APPROVED by=بسام ربیهاوی note=Code14 = 02+type(2)+category(2)+product(4)+style(4); product=max per type+1 (belt=buckle code+width); style seq per product+category from 0001; B1 system reserves, Rahkaran confirms; family=product type; non-14 legacy DISPUTED; confirmer: employer
 - `2026-11-12T06:10:55+00:00` decision id=DEC-060 status=APPROVED by=بسام ربیهاوی note=amended 2026-11-12: X-A, repo stays public (DEC-046); real handoff names remain, accepted; handoff untouched; R-38 in force
 - `2026-11-12T05:25:15+00:00` decision id=DEC-006 status=APPROVED by=بسام ربیهاوی note=S-A one factory counter + L-A allocate at order confirm (same tx) + G-B gapless (counter row lock) + P-A start 63001 (legacy max <63000 in Planning intake 113f5400…) + format: plain integer, no prefix, no leading zeros; legacy variants (S-prefix, -digit/-P/-N suffix, BG) import as text history only, never generated. Who allocates -> DEC-057.
@@ -128,4 +128,3 @@ flowchart LR
 - `2026-11-11T15:04:54+00:00` step phase=PHASE_02 step=02.1 state=IN_PROGRESS
 - `2026-11-11T14:39:40+00:00` phase_started phase=PHASE_02 by=بسام ربیهاوی
 - `2026-11-11T14:38:44+00:00` gate phase=PHASE_01 verdict=ACCEPTED by=بسام ربیهاوی note=همه بندهای Gate بسته شد: T-003 قبول، چک‌لیست امنیتی پذیرش با شرط، پیش‌فرض‌های فنی، مرز محدوده و مرز برگشت تأیید (2026-11-11)
-- `2026-11-11T14:35:31+00:00` test_result id=T-003 result=PASS
