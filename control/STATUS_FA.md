@@ -115,6 +115,7 @@ flowchart LR
 
 ## آخرین رویدادها
 
+- `2026-11-12T06:10:55+00:00` decision id=DEC-060 status=APPROVED by=بسام ربیهاوی note=amended 2026-11-12: X-A, repo stays public (DEC-046); real handoff names remain, accepted; handoff untouched; R-38 in force
 - `2026-11-12T05:25:15+00:00` decision id=DEC-006 status=APPROVED by=بسام ربیهاوی note=S-A one factory counter + L-A allocate at order confirm (same tx) + G-B gapless (counter row lock) + P-A start 63001 (legacy max <63000 in Planning intake 113f5400…) + format: plain integer, no prefix, no leading zeros; legacy variants (S-prefix, -digit/-P/-N suffix, BG) import as text history only, never generated. Who allocates -> DEC-057.
 - `2026-11-11T18:28:32+00:00` decision id=DEC-060 status=APPROVED by=بسام ربیهاوی note=واقعی‌اند؛ فقط X-D: مخزن خصوصی؛ handoff دست نمی‌خورد (X-B پس گرفته شد پس از مسدودشدن ویرایش و دامنه وسیع)
 - `2026-11-11T16:26:39+00:00` decision id=DEC-060 status=APPROVED by=بسام ربیهاوی note=واقعی‌اند؛ X-B + X-D: حذف از فایل‌های handoff (استثنای یک‌باره) + مخزن GitHub خصوصی شود؛ بدون بازنویسی تاریخچه
@@ -129,4 +130,3 @@ flowchart LR
 - `2026-11-11T14:38:44+00:00` gate phase=PHASE_01 verdict=ACCEPTED by=بسام ربیهاوی note=همه بندهای Gate بسته شد: T-003 قبول، چک‌لیست امنیتی پذیرش با شرط، پیش‌فرض‌های فنی، مرز محدوده و مرز برگشت تأیید (2026-11-11)
 - `2026-11-11T14:35:31+00:00` test_result id=T-003 result=PASS
 - `2026-11-10T18:43:56+00:00` step phase=PHASE_01 step=01.8 state=PASS
-- `2026-11-10T18:43:56+00:00` gate_pending phase=PHASE_01

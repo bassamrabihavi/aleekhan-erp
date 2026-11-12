@@ -2397,9 +2397,9 @@
       "owner": "کارفرما",
       "phase": "PHASE_02",
       "source": "گام 02.1 2026-11-11 (C-72)",
-      "resolution": "واقعی‌اند؛ فقط X-D: مخزن خصوصی؛ handoff دست نمی‌خورد (X-B پس گرفته شد پس از مسدودشدن ویرایش و دامنه وسیع)",
+      "resolution": "amended 2026-11-12: X-A, repo stays public (DEC-046); real handoff names remain, accepted; handoff untouched; R-38 in force",
       "decided_by": "بسام ربیهاوی",
-      "decided_at": "2026-11-11T18:28:32+00:00"
+      "decided_at": "2026-11-12T06:10:55+00:00"
     }
   ],
   "ready_for_test": [
@@ -3289,7 +3289,15 @@
       "status": "APPROVED",
       "by": "بسام ربیهاوی",
       "note": "S-A one factory counter + L-A allocate at order confirm (same tx) + G-B gapless (counter row lock) + P-A start 63001 (legacy max <63000 in Planning intake 113f5400…) + format: plain integer, no prefix, no leading zeros; legacy variants (S-prefix, -digit/-P/-N suffix, BG) import as text history only, never generated. Who allocates -> DEC-057."
+    },
+    {
+      "at": "2026-11-12T06:10:55+00:00",
+      "kind": "decision",
+      "id": "DEC-060",
+      "status": "APPROVED",
+      "by": "بسام ربیهاوی",
+      "note": "amended 2026-11-12: X-A, repo stays public (DEC-046); real handoff names remain, accepted; handoff untouched; R-38 in force"
     }
   ],
-  "updated_at": "2026-11-12T05:25:15+00:00"
+  "updated_at": "2026-11-12T06:10:55+00:00"
 }

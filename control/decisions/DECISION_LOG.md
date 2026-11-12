@@ -129,3 +129,11 @@
 - **Scope:** golden tests and the DEC-005 extraction are locked to this hash.
 - **Resolves:** C-22 / C-74 for Planning (hash recorded in `control/SOURCE_INTAKE.csv`).
 - **Decided by:** بسام ربیهاوی (کارفرما).
+
+## 2026-11-12 — DEC-060 amended again: repo stays public (X-A)
+- **Decision:** the employer does **not** want the repo made private. It stays public so that it can be used without passwords or logins. This withdraws X-D and **reaffirms DEC-046 (public repo)**.
+- **Accepted consequence:** the real names already present in the `handoff/` catalogue files stay publicly visible. The employer knows that these values are real (DEC-060, 2026-11-11). `handoff/` stays untouched.
+- **Still in force:**
+  - R-38: no new document, test, fixture, image, log or message may repeat these values.
+  - DEC-005 / DEC-028 / DEC-046: real Planning values, codes, serials and customer names never enter Git. They stay only in `F:/aleekhan/private-extract` (outside the repo) and in the server DB.
+- **Decided by:** بسام ربیهاوی (کارفرما).
