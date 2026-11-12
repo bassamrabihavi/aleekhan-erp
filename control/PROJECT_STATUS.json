@@ -2379,13 +2379,13 @@
       "gate": "Phase-2",
       "domain": "Commercial",
       "issue": "تغییر سفارش پس از تأیید، لغو و توقف/ادامه (صفحه ۳۳ بخش فاز ۲)",
-      "status": "OPEN",
+      "status": "APPROVED",
       "owner": "بازرگانی + برنامه‌ریزی",
       "phase": "PHASE_02",
       "source": "گام 02.1 2026-11-11 (C-60/C-61)",
-      "resolution": null,
-      "decided_by": null,
-      "decided_at": null
+      "resolution": "CR-only changes, new version+snapshot; 7 change types, after release only due date + hold/resume; C-A cancel before release only, serial CANCELLED never reused; qty increase keeps serial; single ON_HOLD returns to previous; commercial_manager decides, planning applies; due-date change also needs planning approval",
+      "decided_by": "بسام ربیهاوی",
+      "decided_at": "2026-11-12T09:22:37+00:00"
     },
     {
       "id": "DEC-060",
@@ -3313,7 +3313,15 @@
       "status": "APPROVED",
       "by": "بسام ربیهاوی",
       "note": "M-A: 5 business roles per packet table; 4 fresh-MFA actions; order confirm = planning_officer (+serials same tx); scope all customers; owner may decide directly except own requests"
+    },
+    {
+      "at": "2026-11-12T09:22:37+00:00",
+      "kind": "decision",
+      "id": "DEC-059",
+      "status": "APPROVED",
+      "by": "بسام ربیهاوی",
+      "note": "CR-only changes, new version+snapshot; 7 change types, after release only due date + hold/resume; C-A cancel before release only, serial CANCELLED never reused; qty increase keeps serial; single ON_HOLD returns to previous; commercial_manager decides, planning applies; due-date change also needs planning approval"
     }
   ],
-  "updated_at": "2026-11-12T09:06:02+00:00"
+  "updated_at": "2026-11-12T09:22:37+00:00"
 }

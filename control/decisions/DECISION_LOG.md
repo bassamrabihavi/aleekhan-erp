@@ -164,3 +164,25 @@
   - Technical roles get no business approvals (DEC-003).
 - **Implementation:** matrix v2.0 is a seed migration in 02.2.
 - **Decided by:** بسام ربیهاوی (کارفرما).
+
+## 2026-11-12 — DEC-059 APPROVED (change after confirmation, cancel, hold)
+- **Base rule:** a confirmed order is never edited directly.
+  - Every change is a change request (CR).
+  - Applying an approved CR creates a new order version and a new serial snapshot. Earlier versions are never modified.
+- **Page 33 split (C-61):**
+  - PHASE_02 covers commercial order changes: lines, serials and snapshots.
+  - ECR/ECO belongs to PHASE_03 and PHASE_04.
+  - Effects on material, WIP, capacity and cost come in PHASE_05 and later.
+- **Change types:** quantity, due date, add line, cancel line, cancel whole order, hold and resume.
+  - **After the order is released to planning:** only due date and hold/resume are allowed.
+  - **Line cancel after release:** the employer also accepted it in the change-type answer. It is **blocked by C-A below** until PHASE_05, and the more specific cancel answer prevails.
+- **Cancel (C-A):** a confirmed order or line may be cancelled only before release to planning.
+  - After release, cancel is blocked until PHASE_05, where material and WIP disposition arrive.
+  - The serial of a cancelled line becomes `CANCELLED` and its number is never reused.
+- **Quantity increase:** the line keeps the same serial; only a new order version is created. No threshold exists. If the employer later wants one, he sets it; the system never guesses a number.
+- **Hold:** a single `ON_HOLD` state. Resume returns the order to its previous state.
+- **Approval:**
+  - `commercial_manager` decides every CR and `planning_officer` applies it.
+  - A **due-date change** also needs **planning approval**: a second approval by `planning_officer`, in addition to `commercial_manager`. This replaces the recommended "notify planning".
+  - The owner may decide directly, but never on his own request (DEC-057).
+- **Decided by:** بسام ربیهاوی (کارفرما).
