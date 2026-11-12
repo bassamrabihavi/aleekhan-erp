@@ -137,3 +137,17 @@
   - R-38: no new document, test, fixture, image, log or message may repeat these values.
   - DEC-005 / DEC-028 / DEC-046: real Planning values, codes, serials and customer names never enter Git. They stay only in `F:/aleekhan/private-extract` (outside the repo) and in the server DB.
 - **Decided by:** بسام ربیهاوی (کارفرما).
+
+## 2026-11-12 — DEC-005 APPROVED (14-digit product code rule)
+- **Evidence:** `docs/discovery/PLANNING_EXTRACTION_SUMMARY.md` (aggregates only). Real cases and cell addresses are only in the private report outside the repo.
+- **Rule:** `02` (nature = product) + product-type code (2) + category code (2) + product number (4) + style number (4).
+  - **New product number:** the largest number of the same product type + 1.
+  - **Belt:** the product number is the buckle-type code (2) followed by the belt width (2).
+  - **New style:** numbered sequentially from 0001 for each product within each category.
+  - Codes are always 14-character strings.
+- **Q-B:** **B1**. The system builds and reserves the code (`RESERVED / ERP_PENDING`). The item is created by hand in Rahkaran, and the code becomes `ERP_MATCHED` when the Rahkaran import shows it. Nothing is written to Rahkaran.
+- **Q-C:** "family" means the **product type**. All 5 types have more than 20 real cases. Belt is tested on its own because of its special product-number rule.
+- **Q-D:** the 634 legacy rows whose code is not 14 digits are imported as history and flagged `DISPUTED`. They are never corrected automatically, and planning decides each one.
+- **Q-A (confirmer):** the employer approves the rule and the golden cases **himself**. This replaces the recommended planning + commercial maker-checker for the rule.
+- **Technical note C-77:** the code preview in `Order form` and `NOrder!FY` look up the category code from different `Sorce` columns. Golden tests must assert that both give the same code.
+- **Decided by:** بسام ربیهاوی (کارفرما).

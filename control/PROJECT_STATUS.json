@@ -1623,13 +1623,13 @@
       "gate": "Phase-2",
       "domain": "Identity",
       "issue": "Golden Test قواعد NOrder/Codding/Sorce برای همه خانواده‌ها",
-      "status": "OPEN",
+      "status": "APPROVED",
       "owner": "برنامه‌ریزی + بازرگانی",
       "phase": "PHASE_02",
       "source": "Planning--.xlsm",
-      "resolution": null,
-      "decided_by": null,
-      "decided_at": null
+      "resolution": "Code14 = 02+type(2)+category(2)+product(4)+style(4); product=max per type+1 (belt=buckle code+width); style seq per product+category from 0001; B1 system reserves, Rahkaran confirms; family=product type; non-14 legacy DISPUTED; confirmer: employer",
+      "decided_by": "بسام ربیهاوی",
+      "decided_at": "2026-11-12T06:30:36+00:00"
     },
     {
       "id": "DEC-006",
@@ -3297,7 +3297,15 @@
       "status": "APPROVED",
       "by": "بسام ربیهاوی",
       "note": "amended 2026-11-12: X-A, repo stays public (DEC-046); real handoff names remain, accepted; handoff untouched; R-38 in force"
+    },
+    {
+      "at": "2026-11-12T06:30:36+00:00",
+      "kind": "decision",
+      "id": "DEC-005",
+      "status": "APPROVED",
+      "by": "بسام ربیهاوی",
+      "note": "Code14 = 02+type(2)+category(2)+product(4)+style(4); product=max per type+1 (belt=buckle code+width); style seq per product+category from 0001; B1 system reserves, Rahkaran confirms; family=product type; non-14 legacy DISPUTED; confirmer: employer"
     }
   ],
-  "updated_at": "2026-11-12T06:10:55+00:00"
+  "updated_at": "2026-11-12T06:30:36+00:00"
 }
