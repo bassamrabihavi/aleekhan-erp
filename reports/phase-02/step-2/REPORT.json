@@ -1,0 +1,77 @@
+{
+  "phase": "PHASE_02",
+  "step": "02.2",
+  "commit_sha": "c8b3dff",
+  "status": "COMPLETE",
+  "scope": [
+    "identity/commercial schema: 21 tables (migration 0019)",
+    "DB guards and 6 deferred commit-time checks (0020)",
+    "generic seed: units, order types, external ref types, serial counter start 63001 (0021)",
+    "DEC-057 permission matrix v2.0 (0022)",
+    "gapless idempotent serial allocation primitive with audit + outbox",
+    "REV-0201, REV-0202, REV-0203"
+  ],
+  "changes": [
+    "backend/platform_core/product_identity/",
+    "backend/platform_core/commercial/",
+    "backend/platform_core/migrations/0019_phase02_identity_commercial_schema.py",
+    "backend/platform_core/migrations/0020_phase02_db_guards.py",
+    "backend/platform_core/migrations/0021_phase02_seed_catalogue.py",
+    "backend/platform_core/migrations/0022_dec057_matrix_v20.py",
+    "backend/platform_core/models.py",
+    "backend/platform_core/schema_common.py",
+    "backend/platform_core/engine/events.py",
+    "backend/platform_core/authz/policy.py",
+    "backend/platform_core/tests/",
+    "ops/db/grants.sql",
+    "ops/db/roles_check.sh",
+    "ruff.toml",
+    "docs/db/ERD.md",
+    "docs/discovery/DATA_TABLE.md",
+    "docs/discovery/STATE_TRANSITIONS.md",
+    "docs/security/PERMISSION_MATRIX_DRAFT.md",
+    "docs/integration/EVENT_CATALOGUE.md",
+    "CHANGELOG.md"
+  ],
+  "migrations": [
+    "0019_phase02_identity_commercial_schema",
+    "0020_phase02_db_guards",
+    "0021_phase02_seed_catalogue",
+    "0022_dec057_matrix_v20"
+  ],
+  "test_evidence": [
+    {"command": "ruff check . && ruff format --check .", "outcome": "PASS", "log_path": "reports/phase-02/step-2/logs/orch/ruff.log"},
+    {"command": "cd backend && python -m mypy .", "outcome": "PASS", "log_path": "reports/phase-02/step-2/logs/orch/mypy.log"},
+    {"command": "manage.py makemigrations --check --dry-run (settings_test)", "outcome": "PASS", "log_path": "reports/phase-02/step-2/logs/orch/makemigrations.log"},
+    {"command": "cd backend && python -m pytest -m \"not perf\" (2029 passed, 1 skipped clamd)", "outcome": "PASS", "log_path": "reports/phase-02/step-2/logs/orch/pytest.log"},
+    {"command": "pytest -k \"concurrent or race or parallel\" x3 (29 passed each)", "outcome": "PASS", "log_path": "reports/phase-02/step-2/logs/orch/race_x3.log"},
+    {"command": "backend/scripts/db_roundtrip.sh", "outcome": "PASS", "log_path": "reports/phase-02/step-2/logs/orch/db_roundtrip.log"},
+    {"command": "ops/db/roles_check.sh (66 passed, 0 failed)", "outcome": "PASS", "log_path": "reports/phase-02/step-2/logs/orch/roles_check.log"},
+    {"command": "PHASE_02-only rollback to 0018 and re-apply", "outcome": "PASS", "log_path": "reports/phase-02/step-2/logs/phase02_partial_rollback.log"},
+    {"command": "golden code-rule cases with real Planning data", "outcome": "SKIPPED", "log_path": "reports/phase-02/step-2/REPORT.md"}
+  ],
+  "security_evidence": [
+    "no real code, category, customer or serial in repo: seeds generic, factories synthetic (DEC-060 / R-38)",
+    "no private source read in this step; no legacy XLSM/VBA/PY executed",
+    "path/account leak grep on reports/phase-02/step-2: 0 hits after redact_paths.py",
+    "secret_scan.py working tree: findings=0",
+    "roles_check.sh: 66 passed including grants on PHASE_02 tables",
+    "fresh MFA on the 4 DEC-057 actions; maker-checker on code_rule.approve, order.confirm, change.decide"
+  ],
+  "decisions": [
+    "implements DEC-005, DEC-006, DEC-057, DEC-058, DEC-059 (APPROVED 2026-11-12)",
+    "open question: owner has no PHASE_02 read permission in DEC-057 table",
+    "open question: permission and same-person rule for due-date planning approval (DEC-059)"
+  ],
+  "risks": [
+    "R-39 legacy serials >= 63000 must go to the import conflict queue (02.6)",
+    "R-43 matrix gaps above need employer answer before 02.4"
+  ],
+  "evidence_paths": [
+    "reports/phase-02/step-2/logs/",
+    "docs/db/ERD.md",
+    "docs/security/PERMISSION_MATRIX_DRAFT.md"
+  ],
+  "rollback": "manage.py migrate platform_core 0018 (tested: removes all PHASE_02 tables/functions/permissions, restores matrix v1.3), then git revert c8b3dff",
+  "review_request": "PASS"
+}
