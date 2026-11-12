@@ -200,3 +200,13 @@
 - **Order types:** the four Planning types: پیش تولید، سری تولید، نمونه‌سازی، تولید آزمایشی. The page 29 concept labels are not used.
 - **Q7 (required grade on the order):** not asked. The packet default applies, so the grade is free text only, with no comparison, until DEC-019 (PHASE_08). The employer can change this.
 - **Decided by:** بسام ربیهاوی (کارفرما).
+
+## 2026-11-12 — DEC-057 amendment (owner read) and DEC-059 amendment (due-date approver, cancel from hold)
+Raised by the 02.2 implementation and review (REV-0222); asked with AskUserQuestion; employer chose the recommended option each time.
+- **DEC-057, owner read:** `owner_admin` gets every PHASE_02 `identity.*`/`commercial.*` **read** permission. This is the same fix v1.3 made for documents. The no-self-approval rule is unchanged.
+- **DEC-059, due-date planning approval:**
+  - The approval is given by `planning_officer`.
+  - The approver must be a **different person** from the requester and from the commercial manager who decided the request. This is enforced in the DB and the engine.
+  - A matrix permission for this approval is added (commercial.change_request.planning_approve, final name set in 02.3).
+- **DEC-059, cancel from hold:** an order or line that is ON_HOLD may be **cancelled directly** when its stored previous state is before release. After release, cancel stays blocked (C-A).
+- **Decided by:** بسام ربیهاوی (کارفرما).

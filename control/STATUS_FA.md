@@ -110,6 +110,8 @@ flowchart LR
 
 ## آخرین رویدادها
 
+- `2026-11-12T18:34:55+00:00` decision id=DEC-059 status=APPROVED by=بسام ربیهاوی note=Amendment 2026-11-12: due-date approval by planning_officer, a different person from requester and decider; direct cancel from ON_HOLD allowed if previous state is pre-release
+- `2026-11-12T18:34:55+00:00` decision id=DEC-057 status=APPROVED by=بسام ربیهاوی note=Amendment 2026-11-12: owner_admin gets all PHASE_02 read permissions
 - `2026-11-12T17:41:29+00:00` step phase=PHASE_02 step=02.2 state=PASS
 - `2026-11-12T17:29:05+00:00` step phase=PHASE_02 step=02.2 state=IN_REVIEW commit=c8b3dff
 - `2026-11-12T09:30:34+00:00` step phase=PHASE_02 step=02.2 state=IN_PROGRESS
@@ -123,5 +125,3 @@ flowchart LR
 - `2026-11-11T16:26:39+00:00` decision id=DEC-060 status=APPROVED by=بسام ربیهاوی note=واقعی‌اند؛ X-B + X-D: حذف از فایل‌های handoff (استثنای یک‌باره) + مخزن GitHub خصوصی شود؛ بدون بازنویسی تاریخچه
 - `2026-11-11T16:26:39+00:00` step phase=PHASE_02 step=02.1 state=PASS
 - `2026-11-11T15:43:05+00:00` step phase=PHASE_02 step=02.1 state=IN_REVIEW commit=1c69e99
-- `2026-11-11T15:42:27+00:00` decision_added id=DEC-060 status=OPEN
-- `2026-11-11T15:42:27+00:00` decision_added id=DEC-059 status=OPEN
