@@ -235,9 +235,9 @@
         },
         "02.2": {
           "name": "Database",
-          "state": "IN_PROGRESS",
-          "commit": null,
-          "report": null,
+          "state": "IN_REVIEW",
+          "commit": "c8b3dff",
+          "report": "reports/phase-02/step-2/REPORT.md",
           "review": null,
           "rework_cycles": 0,
           "started_at": "2026-11-12T09:30:34+00:00",
@@ -3338,7 +3338,16 @@
       "state": "IN_PROGRESS",
       "note": null,
       "commit": null
+    },
+    {
+      "at": "2026-11-12T17:29:05+00:00",
+      "kind": "step",
+      "phase": "PHASE_02",
+      "step": "02.2",
+      "state": "IN_REVIEW",
+      "note": null,
+      "commit": "c8b3dff"
     }
   ],
-  "updated_at": "2026-11-12T09:30:34+00:00"
+  "updated_at": "2026-11-12T17:29:05+00:00"
 }
