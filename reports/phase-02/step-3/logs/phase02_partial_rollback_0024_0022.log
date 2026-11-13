@@ -1,0 +1,9 @@
+$ partial rollback 0024 -> 0022 on throw-away DB test_aleekhan_partial_0203 (pg_dump -s; comments and the random restrict tokens removed); after the DEC-005 2026-11-13 follow-up
+migrated to 0022
+migrated up to 0024
+new CHECKs at 0024: 2
+0024 order guard has the cancel-from-hold edge: 1
+rolled back to 0022
+schema diff 0022 vs 0022-after-rollback: EMPTY (7605 lines compared)
+matrix data identical (every role version; grants and permissions: 180 65 )
+dropped test_aleekhan_partial_0203

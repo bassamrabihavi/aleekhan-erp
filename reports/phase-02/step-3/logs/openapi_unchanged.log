@@ -1,0 +1,2 @@
+$ git diff --stat -- docs/api handoff control/PROJECT_STATUS.json
+(docs/api and handoff unchanged; control/PROJECT_STATUS.json was already modified before this step and was not touched by the implementer)

@@ -304,3 +304,31 @@ Review verdicts are in `reports/phase-00/step-N/REVIEW.md`. No version number is
   `docs/security/PERMISSION_MATRIX_DRAFT.md` v2.0 (section 7); `docs/db/ERD.md` section 7.
 - No real type, category, code, customer or serial in the repository (synthetic test data only).
 
+
+### 02.3 Domain Engine (commit SHA added by the orchestrator when committed)
+- Engine (no HTTP): `product_identity/coderule.py` (DEC-005 code rule as pure functions, `RULE_SPEC_V1`),
+  `product_identity/codes.py` (code rule revision lifecycle with >= 20 golden cases per family, maker != checker,
+  fresh MFA; side-effect-free preview; issue RESERVED / ERP_PENDING only under an ACTIVE revision, else
+  `RULE_NOT_APPROVED`; ERP match by the import), `product_identity/master.py` (customers, brands, products with
+  max + 1 / buckle + width numbers, styles with count + 1 numbers, style revisions), `commercial/orders.py` (draft,
+  validate, confirm with one serial per line in the same unit of work, release; PII masking + read audit; PO
+  duplicate warning), `commercial/changes.py` (7 change kinds, decide / planning approval / apply, new order
+  version + serial snapshots), `product_identity/refusals.py` (stable `errors[].code` reasons, golden),
+  `product_identity/usecase.py` (shared helpers, technical number sequences).
+- REV-0220: `allocate_serial` refuses the same key with another payload (`IDEMPOTENCY_KEY_REUSED` /
+  `IDEMPOTENCY_PAYLOAD_MISMATCH`); `add_snapshot`, `cancel_serial` added.
+- Migrations `0023_phase02_engine` (cancel from ON_HOLD when the stored state is CONFIRMED - DEC-059 amendment,
+  REV-0222; `ck_commercial_cr_planner_not_decider`; number sequences) and `0024_dec057_dec059_matrix_v21` (matrix
+  v2.1: owner PHASE_02 reads, `commercial.change.planning_approve` for planning_officer). Both reversible.
+- Events: 36 new catalogued types (`identity.*`, `commercial.*`); golden + `docs/integration/EVENT_CATALOGUE.md`.
+- Tests: `test_phase02_coderule.py` (unit + hypothesis), `test_phase02_golden_harness.py` (real data via
+  `ALEEKHAN_GOLDEN_FILE` outside the repo, skipped without it; synthetic self-test), `test_phase02_engine_identity.py`,
+  `test_phase02_engine_orders.py`, `test_phase02_engine_changes.py`, `test_phase02_engine_race.py`; PHASE_01/02
+  matrix tests moved to v2.1; `roles_check.sh` sequence checks.
+- Docs: STATE_TRANSITIONS 5.10, DATA_TABLE "02.3 result" (number format PROPOSED), ERD 7.5, PERMISSION_MATRIX v2.1,
+  ERROR_CODES "PHASE_02 refusal reasons". OpenAPI unchanged (02.4).
+- DEC-005 amendment 2026-11-13 (style `0000` legacy only): `coderule.validate_legacy_code` /
+  `parse_code(..., legacy=True)` accept it with exact segments; `build_code` / issue refuse it
+  (`STYLE_0000_LEGACY_ONLY`); golden harness and DB golden check count such cases in their family as legacy-only
+  (build refused + legacy parse exact) and report them separately; migration 0023 extended
+  (`ck_identity_style_no_fmt` allows 0000 for IMP/LEG only; `ck_identity_product_code_sys_no_style_0000`).

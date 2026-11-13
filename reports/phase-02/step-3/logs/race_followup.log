@@ -1,0 +1,3 @@
+$ pytest -m "not perf" -k race --create-db -q   (after the DEC-005 2026-11-13 follow-up, once)
+.............                                                            [100%]
+13 passed, 2327 deselected in 76.13s (0:01:16)

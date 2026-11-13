@@ -297,3 +297,38 @@ Rahkaran code that differs from the Planning code).
 - REV-0203 (untagged rules of the 02.1 draft): "one SUBMITTED/APPROVED change request per order" and "change request
   expires after 30 days" are **not** enforced (OPEN, not decided; the base-version check already makes two changes
   on one version impossible); "uom of the family" is now DEC-058 (enforced by trigger).
+
+### 02.3 result (domain engine, migrations 0023-0024)
+- **Technical numbers — PROPOSED, waiting for the employer's confirmation** (gapless not required; unique and
+  race-safe):
+
+  | Record | Format | Example (synthetic) | Source |
+  |---|---|---|---|
+  | Customer `customer_no` | `CU-` + at least 6 digits | `CU-000042` | sequence `identity_customer_no_seq` |
+  | Order `order_no` | `SO-` + at least 6 digits | `SO-000137` | sequence `commercial_order_no_seq` |
+  | Change request `request_no` | `CR-` + at least 6 digits | `CR-000009` | sequence `commercial_change_request_no_seq` |
+
+  One PostgreSQL sequence per kind (migration 0023): concurrent writers never get the same number; the UNIQUE
+  constraints of the tables stay the final guard. A rolled-back write consumes a number (gaps allowed). The width
+  grows past 6 digits instead of wrapping. These numbers are **not** the factory serial (DEC-006), which never
+  uses a sequence. Alternatives the employer may prefer: a Jalali-year prefix (`SO-1405-000137`, resets yearly)
+  or a per-customer order counter; neither is implemented.
+- Code rule (DEC-005): `CodeRuleRevision.rule_spec` = `product_identity.coderule.RULE_SPEC_V1` (prefix `02`,
+  segments 2/2/4/4, product number max + 1 per type or buckle + width, style count + 1 per product and category);
+  `scope` = `{"product_types": [...]}`; submit requires >= 20 golden cases per type of the scope, every one
+  reproduced; approval marks the cases verified by the approver.
+- Change requests: `items` schema per kind (`commercial.changes.normalise_items`): QTY_CHANGE
+  `{line_id, quantity}`, DUE_DATE_CHANGE `{line_id | null (header), requested_due_date}`, ADD_LINE
+  `{style_id, style_revision_id, product_code_id | null, quantity, requested_due_date | null}`, CANCEL_LINE
+  `{line_id}`, CANCEL_ORDER / HOLD / RESUME `[]`. `impact` = lines and serials touched (other modules
+  `NOT_AVAILABLE_IN_PHASE_02`).
+- Version images (`commercial_customer_order_version.image`) and serial snapshots carry identifiers, quantities,
+  dates, codes and serial numbers, but **never** the representative name (only `has_customer_representative`).
+- **Style 0000 (DEC-005 amendment 2026-11-13): legacy only.** The 14 real codes with style segment `0000` (all
+  product type 02, golden run on the Planning baseline) are history: imported (IMP / LEG) styles and codes may carry
+  `0000` and be registered / matched; the system never builds, issues or numbers it (new styles start at `0001`;
+  `STYLE_0000_LEGACY_ONLY`). Engine: `coderule.validate_legacy_code` / `parse_code(..., legacy=True)`; DB:
+  `ck_identity_style_no_fmt` (0000 only for IMP/LEG), `ck_identity_product_code_sys_no_style_0000`. Golden cases with
+  style 0000 count in their family and pass only if the build path refuses them and the legacy parse is exact.
+- DB: `ck_commercial_cr_planner_not_decider` (DEC-059 amendment 2026-11-12) and the ON_HOLD -> CANCELLED edge of
+  `commercial_order_guard()` (stored state CONFIRMED only).

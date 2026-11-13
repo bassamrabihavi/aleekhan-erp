@@ -186,6 +186,12 @@ expect_denied "app: INSERT unit of measure (catalogue)" "$APP" "INSERT INTO iden
 expect_denied "app: INSERT order type (catalogue)" "$APP" "INSERT INTO commercial_order_type (code, label_fa, sort_order, status, decision_id, provenance) SELECT 'rc_probe', 'x', 1, 'ACTIVE', 'DEC-058', 'SYS' WHERE false"
 expect_denied "app: DISABLE gapless counter trigger" "$APP" "ALTER TABLE identity_serial_counter DISABLE TRIGGER trg_identity_serial_counter_gapless"
 expect_denied "app: DISABLE serial guard trigger" "$APP" "ALTER TABLE identity_serial DISABLE TRIGGER trg_identity_serial_guard"
+# PHASE_02 / 02.3 (migration 0023): technical number sequences - the app draws numbers, never resets them
+for seq in identity_customer_no_seq commercial_order_no_seq commercial_change_request_no_seq; do
+  expect_ok "app: nextval $seq (technical number, 02.3)" "$APP" "SELECT nextval('public.$seq')"
+  expect_denied "app: setval $seq" "$APP" "SELECT setval('public.$seq', 1)"
+done
+expect_denied "app: DISABLE order guard trigger" "$APP" "ALTER TABLE commercial_customer_order DISABLE TRIGGER trg_commercial_customer_order_guard"
 seeded="$(admin -d "$DB" -c "SELECT start_value || '/' || next_value FROM identity_serial_counter WHERE namespace_key = 'factory_serial'")"
 if [ "$seeded" = "63001/63001" ]; then record "serial counter seeded at 63001 (DEC-006)" PASS; else record "serial counter seeded at 63001 (DEC-006)" FAIL "found $seeded"; fi
 

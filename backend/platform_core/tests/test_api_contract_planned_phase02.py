@@ -301,5 +301,9 @@ def test_seeded_phase02_permissions_equal_the_planned_operations_and_mfa_flags()
         p.action: p.mfa_step_up for p in Permission.objects.filter(action__regex=r"^(identity|commercial)[.]")
     }
     assert _decision_status().get("DEC-057") == "APPROVED"
-    assert {a: {m} for a, m in seeded.items()} == planned
-    assert len(seeded) == 22
+    # 02.3 (matrix v2.1, migration 0024, DEC-059 amendment 2026-11-12): the planning approval of a due-date
+    # change; its OpenAPI operation is owed to 02.4 (docs/api is not changed by the engine step)
+    owed_to_02_4 = {"commercial.change.planning_approve": True}
+    assert {a: m for a, m in seeded.items() if a in owed_to_02_4} == owed_to_02_4
+    assert {a: {m} for a, m in seeded.items() if a not in owed_to_02_4} == planned
+    assert len(seeded) == 23

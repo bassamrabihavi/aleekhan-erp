@@ -261,12 +261,15 @@ def test_roles_seeded_active_v1_and_technical_roles_have_no_business_approval() 
     assert set(roles) == set(ROLE_COLUMNS.values()) | set(PHASE02_ROLE_COLUMNS.values())
     assert {r.status for r in roles.values()} == {"ACTIVE"}
     # DEC-056 (+ extensions): owner_admin moved v1.1 -> v1.2 -> v1.3; DEC-057 (matrix v2.0, 0022) moved
-    # owner_admin and management_viewer to 2.0 and added five BUSINESS roles at 2.0; the rest keep v1.0
+    # owner_admin and management_viewer to 2.0 and added five BUSINESS roles at 2.0; the rest keep v1.0;
+    # matrix v2.1 (0024, amendments 2026-11-12) moved owner_admin (PHASE_02 reads) and planning_officer
+    # (due-date planning approval) to 2.1
     changed = {c: r.matrix_version for c, r in roles.items() if r.matrix_version != "1.0"}
     assert changed == {
-        "owner_admin": "2.0",
         "management_viewer": "2.0",
         **{code: "2.0" for code in PHASE02_ROLE_COLUMNS.values()},
+        "owner_admin": "2.1",
+        "planning_officer": "2.1",
     }
     technical = {c for c, r in roles.items() if r.kind == "TECHNICAL"}
     assert technical == {"owner_admin", "it_ops", "security_auditor"}

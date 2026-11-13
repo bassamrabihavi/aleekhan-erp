@@ -1,0 +1,10 @@
+$ pytest -m "not perf" -k race --create-db -q   (x3; selects the 7 new 02.3 engine race tests, the 2 serial race tests of 02.2, 4 PHASE_01 API race tests)
+== run 1
+.............                                                            [100%]
+13 passed, 2322 deselected in 76.75s (0:01:16)
+== run 2
+.............                                                            [100%]
+13 passed, 2322 deselected in 78.53s (0:01:18)
+== run 3
+.............                                                            [100%]
+13 passed, 2322 deselected in 70.97s (0:01:10)

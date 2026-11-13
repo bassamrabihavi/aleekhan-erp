@@ -19,8 +19,10 @@ section 7. Decisions built in (all APPROVED 2026-11-12):
   release to planning only the due date and hold/resume may change; cancel only before release. One ON_HOLD
   state that resumes to the stored previous state. A due-date change also needs the planning approval.
 
-Not decided, so NOT enforced here (reported as OPEN in 02.2): "one open change request per order", a change
-request expiry period, whether the planning approver of a due-date change may be the deciding manager.
+Not decided, so NOT enforced here (REV-0203): "one open change request per order", a change request expiry
+period. Decided 2026-11-12 (DEC-059 amendment, 02.3 migration 0023): the planning approver of a due-date
+change is neither the requester nor the deciding manager; a held order whose stored state is CONFIRMED may be
+cancelled directly.
 
 Triggers and deferred constraint triggers: migration 0020 (``0020_phase02_db_guards``).
 """
@@ -415,6 +417,13 @@ class OrderChangeRequest(models.Model):
             CheckConstraint(
                 condition=Q(planning_approved_by__isnull=True) | ~Q(planning_approved_by=F("requested_by")),
                 name="ck_commercial_cr_planner_not_requester",
+            ),
+            # DEC-059 amendment 2026-11-12: the planning approver is not the deciding manager (02.3, 0023)
+            CheckConstraint(
+                condition=Q(planning_approved_by__isnull=True)
+                | Q(decided_by__isnull=True)
+                | ~Q(planning_approved_by=F("decided_by")),
+                name="ck_commercial_cr_planner_not_decider",
             ),
             CheckConstraint(
                 condition=Q(decided_by__isnull=True, decided_at__isnull=True)

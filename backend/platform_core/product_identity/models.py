@@ -355,8 +355,10 @@ class Style(SourceProvenance, AuditColumns):
             UniqueConstraint(
                 fields=["product", "category", "style_no"], name="uq_identity_style_product_category_no"
             ),
+            # DEC-005 amendment 2026-11-13: style 0000 exists only as imported / legacy history (02.3, 0023)
             CheckConstraint(
-                condition=Q(style_no__regex=FOUR_DIGITS) & ~Q(style_no="0000"),
+                condition=Q(style_no__regex=FOUR_DIGITS)
+                & (~Q(style_no="0000") | Q(provenance_kind__in=[ProvenanceKind.IMP, ProvenanceKind.LEG])),
                 name="ck_identity_style_no_fmt",
             ),
             CheckConstraint(condition=~Q(name_fa=""), name="ck_identity_style_name_nonempty"),
@@ -630,6 +632,11 @@ class ProductCode(SourceProvenance, AuditColumns):
                     code__startswith="02",
                 ),
                 name="ck_identity_product_code_sys_issued",
+            ),
+            # DEC-005 amendment 2026-11-13: the system never issues style 0000 (legacy codes keep it)
+            CheckConstraint(
+                condition=~Q(provenance_kind=ProvenanceKind.SYS) | ~Q(code__endswith="0000"),
+                name="ck_identity_product_code_sys_no_style_0000",
             ),
             *provenance_constraints("identity_product_code"),
             _row_version("identity_product_code"),

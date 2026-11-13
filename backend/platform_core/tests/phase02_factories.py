@@ -82,8 +82,52 @@ def ensure_phase02_catalogue() -> None:
         )
     if not SerialCounter.objects.exists():
         SerialCounter.objects.create(**seed.SERIAL_COUNTER)
-    if Permission.objects.filter(action__in=list(matrix.PERMISSIONS)).exists():
+    if not Permission.objects.filter(action__in=list(matrix.PERMISSIONS)).exists():
+        _seed_matrix_v20(matrix)
+    _seed_matrix_v21()
+
+
+def _seed_matrix_v21() -> None:
+    """Matrix v2.1 (0024, same frozen values): owner reads + ``commercial.change.planning_approve``."""
+    v21 = import_module("platform_core.migrations.0024_dec057_dec059_matrix_v21")
+    if Permission.objects.filter(action__in=list(v21.NEW_PERMISSIONS)).exists():
         return
+    for action, (desc, mfa, ba, sod, decision) in v21.NEW_PERMISSIONS.items():
+        Permission.objects.create(
+            action=action,
+            module=action.split(".")[0],
+            description_fa=desc,
+            mfa_step_up=mfa,
+            business_approval=ba,
+            maker_checker=sod,
+            matrix_version=v21.MATRIX_VERSION,
+            decision_id=decision,
+        )
+    roles = {r.code: r for r in Role.objects.filter(code__in=list(v21.CHANGED_ROLES))}
+    if len(roles) != len(v21.CHANGED_ROLES):
+        return
+    from django.db import connection
+
+    with connection.cursor() as cur:
+        cur.execute("ALTER TABLE platform_role_permission DISABLE TRIGGER trg_role_permission_guard")
+        try:
+            for action, codes in v21.ADDED_GRANTS.items():
+                for code in codes:
+                    RolePermission.objects.get_or_create(
+                        role=roles[code], permission_id=action, defaults={"grant_mode": "SCOPE"}
+                    )
+            cur.execute("SET CONSTRAINTS ALL IMMEDIATE")
+        finally:
+            cur.execute("ALTER TABLE platform_role_permission ENABLE TRIGGER trg_role_permission_guard")
+        cur.execute("ALTER TABLE platform_role DISABLE TRIGGER trg_role_kind_guard")
+        try:
+            Role.objects.filter(code__in=list(roles)).update(matrix_version=v21.MATRIX_VERSION)
+            cur.execute("SET CONSTRAINTS ALL IMMEDIATE")
+        finally:
+            cur.execute("ALTER TABLE platform_role ENABLE TRIGGER trg_role_kind_guard")
+
+
+def _seed_matrix_v20(matrix: Any) -> None:
     for action, (desc, mfa, ba, sod) in matrix.PERMISSIONS.items():
         Permission.objects.create(
             action=action,

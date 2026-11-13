@@ -1,8 +1,1097 @@
 {
- "_note": "Golden event catalogue (PHASE_01 / 01.6). Generated from platform_core/engine/events.py and reviewed: every outbox event type of PHASE_00 + PHASE_01 (+ PHASE_02 / 02.2: identity.serial.allocated) with producer module, aggregate type, sensitivity (S1: ids, status codes, counts only), current and accepted schema versions and the JSON Schema of each payload version. A change of this file is a contract change (new version + reviewed commit). Human-readable copy: docs/integration/EVENT_CATALOGUE.md.",
+ "_note": "Golden event catalogue (PHASE_01 / 01.6). Generated from platform_core/engine/events.py and reviewed: every outbox event type of PHASE_00 + PHASE_01 (+ PHASE_02 / 02.2: identity.serial.allocated; + PHASE_02 / 02.3: the identity.* / commercial.* engine events) with producer module, aggregate type, sensitivity (S1: ids, status codes, counts only), current and accepted schema versions and the JSON Schema of each payload version. A change of this file is a contract change (new version + reviewed commit). Human-readable copy: docs/integration/EVENT_CATALOGUE.md.",
  "source_system": "aleekhan-erp",
- "schema_migration_head": "platform_core.0022_dec057_matrix_v20",
+ "schema_migration_head": "platform_core.0024_dec057_dec059_matrix_v21",
  "catalogue": {
+  "commercial.change_request.applied": {
+   "event_type": "commercial.change_request.applied",
+   "producer": "platform_core.commercial",
+   "aggregate_type": "commercial.change_request",
+   "description": "order change request applied (DEC-059)",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "kind",
+      "order_id",
+      "status"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "kind": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      },
+      "order_id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      }
+     }
+    }
+   }
+  },
+  "commercial.change_request.created": {
+   "event_type": "commercial.change_request.created",
+   "producer": "platform_core.commercial",
+   "aggregate_type": "commercial.change_request",
+   "description": "order change request created (DEC-059)",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "kind",
+      "order_id",
+      "status"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "kind": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      },
+      "order_id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      }
+     }
+    }
+   }
+  },
+  "commercial.change_request.decided": {
+   "event_type": "commercial.change_request.decided",
+   "producer": "platform_core.commercial",
+   "aggregate_type": "commercial.change_request",
+   "description": "order change request decided (DEC-059)",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "kind",
+      "order_id",
+      "status"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "kind": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      },
+      "order_id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      }
+     }
+    }
+   }
+  },
+  "commercial.change_request.planning_approved": {
+   "event_type": "commercial.change_request.planning_approved",
+   "producer": "platform_core.commercial",
+   "aggregate_type": "commercial.change_request",
+   "description": "order change request planning approved (DEC-059)",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "kind",
+      "order_id",
+      "status"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "kind": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      },
+      "order_id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      }
+     }
+    }
+   }
+  },
+  "commercial.change_request.submitted": {
+   "event_type": "commercial.change_request.submitted",
+   "producer": "platform_core.commercial",
+   "aggregate_type": "commercial.change_request",
+   "description": "order change request submitted (DEC-059)",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "kind",
+      "order_id",
+      "status"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "kind": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      },
+      "order_id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      }
+     }
+    }
+   }
+  },
+  "commercial.change_request.withdrawn": {
+   "event_type": "commercial.change_request.withdrawn",
+   "producer": "platform_core.commercial",
+   "aggregate_type": "commercial.change_request",
+   "description": "order change request withdrawn (DEC-059)",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "kind",
+      "order_id",
+      "status"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "kind": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      },
+      "order_id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      }
+     }
+    }
+   }
+  },
+  "commercial.order.cancelled": {
+   "event_type": "commercial.order.cancelled",
+   "producer": "platform_core.commercial",
+   "aggregate_type": "commercial.customer_order",
+   "description": "customer order cancelled",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "status",
+      "version"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      },
+      "version": {
+       "type": "integer",
+       "minimum": 0
+      }
+     }
+    }
+   }
+  },
+  "commercial.order.changed": {
+   "event_type": "commercial.order.changed",
+   "producer": "platform_core.commercial",
+   "aggregate_type": "commercial.customer_order",
+   "description": "approved change request applied: new order version (DEC-059)",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "change_request_id",
+      "id",
+      "kind",
+      "status",
+      "version"
+     ],
+     "properties": {
+      "change_request_id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "kind": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      },
+      "version": {
+       "type": "integer",
+       "minimum": 0
+      }
+     }
+    }
+   }
+  },
+  "commercial.order.confirmed": {
+   "event_type": "commercial.order.confirmed",
+   "producer": "platform_core.commercial",
+   "aggregate_type": "commercial.customer_order",
+   "description": "order confirmed; every line got its serial in the same transaction (DEC-006 L-A, DEC-057)",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "line_count",
+      "status",
+      "version"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "line_count": {
+       "type": "integer",
+       "minimum": 0
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      },
+      "version": {
+       "type": "integer",
+       "minimum": 0
+      }
+     }
+    }
+   }
+  },
+  "commercial.order.draft_changed": {
+   "event_type": "commercial.order.draft_changed",
+   "producer": "platform_core.commercial",
+   "aggregate_type": "commercial.customer_order",
+   "description": "customer order draft changed",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "status",
+      "version"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      },
+      "version": {
+       "type": "integer",
+       "minimum": 0
+      }
+     }
+    }
+   }
+  },
+  "commercial.order.drafted": {
+   "event_type": "commercial.order.drafted",
+   "producer": "platform_core.commercial",
+   "aggregate_type": "commercial.customer_order",
+   "description": "customer order drafted",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "status",
+      "version"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      },
+      "version": {
+       "type": "integer",
+       "minimum": 0
+      }
+     }
+    }
+   }
+  },
+  "commercial.order.released": {
+   "event_type": "commercial.order.released",
+   "producer": "platform_core.commercial",
+   "aggregate_type": "commercial.customer_order",
+   "description": "customer order released",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "status",
+      "version"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      },
+      "version": {
+       "type": "integer",
+       "minimum": 0
+      }
+     }
+    }
+   }
+  },
+  "commercial.order.reopened": {
+   "event_type": "commercial.order.reopened",
+   "producer": "platform_core.commercial",
+   "aggregate_type": "commercial.customer_order",
+   "description": "customer order reopened",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "status",
+      "version"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      },
+      "version": {
+       "type": "integer",
+       "minimum": 0
+      }
+     }
+    }
+   }
+  },
+  "commercial.order.validated": {
+   "event_type": "commercial.order.validated",
+   "producer": "platform_core.commercial",
+   "aggregate_type": "commercial.customer_order",
+   "description": "customer order validated",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "status",
+      "version"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      },
+      "version": {
+       "type": "integer",
+       "minimum": 0
+      }
+     }
+    }
+   }
+  },
+  "identity.code_rule.activated": {
+   "event_type": "identity.code_rule.activated",
+   "producer": "platform_core.product_identity",
+   "aggregate_type": "identity.code_rule_revision",
+   "description": "code rule revision activated (DEC-005)",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "revision_no",
+      "status"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "revision_no": {
+       "type": "integer",
+       "minimum": 0
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      }
+     }
+    }
+   }
+  },
+  "identity.code_rule.approved": {
+   "event_type": "identity.code_rule.approved",
+   "producer": "platform_core.product_identity",
+   "aggregate_type": "identity.code_rule_revision",
+   "description": "code rule revision approved (DEC-005)",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "revision_no",
+      "status"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "revision_no": {
+       "type": "integer",
+       "minimum": 0
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      }
+     }
+    }
+   }
+  },
+  "identity.code_rule.created": {
+   "event_type": "identity.code_rule.created",
+   "producer": "platform_core.product_identity",
+   "aggregate_type": "identity.code_rule_revision",
+   "description": "code rule revision created (DEC-005)",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "revision_no",
+      "status"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "revision_no": {
+       "type": "integer",
+       "minimum": 0
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      }
+     }
+    }
+   }
+  },
+  "identity.code_rule.golden_cases_added": {
+   "event_type": "identity.code_rule.golden_cases_added",
+   "producer": "platform_core.product_identity",
+   "aggregate_type": "identity.code_rule_revision",
+   "description": "code rule revision golden cases added (DEC-005)",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "revision_no",
+      "status"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "revision_no": {
+       "type": "integer",
+       "minimum": 0
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      }
+     }
+    }
+   }
+  },
+  "identity.code_rule.rejected": {
+   "event_type": "identity.code_rule.rejected",
+   "producer": "platform_core.product_identity",
+   "aggregate_type": "identity.code_rule_revision",
+   "description": "code rule revision rejected (DEC-005)",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "revision_no",
+      "status"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "revision_no": {
+       "type": "integer",
+       "minimum": 0
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      }
+     }
+    }
+   }
+  },
+  "identity.code_rule.retired": {
+   "event_type": "identity.code_rule.retired",
+   "producer": "platform_core.product_identity",
+   "aggregate_type": "identity.code_rule_revision",
+   "description": "code rule revision retired (DEC-005)",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "revision_no",
+      "status"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "revision_no": {
+       "type": "integer",
+       "minimum": 0
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      }
+     }
+    }
+   }
+  },
+  "identity.code_rule.submitted": {
+   "event_type": "identity.code_rule.submitted",
+   "producer": "platform_core.product_identity",
+   "aggregate_type": "identity.code_rule_revision",
+   "description": "code rule revision submitted (DEC-005)",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "revision_no",
+      "status"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "revision_no": {
+       "type": "integer",
+       "minimum": 0
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      }
+     }
+    }
+   }
+  },
+  "identity.customer.created": {
+   "event_type": "identity.customer.created",
+   "producer": "platform_core.product_identity",
+   "aggregate_type": "identity.customer",
+   "description": "customer created (in-app master data)",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "status"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      }
+     }
+    }
+   }
+  },
+  "identity.customer.updated": {
+   "event_type": "identity.customer.updated",
+   "producer": "platform_core.product_identity",
+   "aggregate_type": "identity.customer",
+   "description": "customer updated (in-app master data)",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "status"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      }
+     }
+    }
+   }
+  },
+  "identity.customer_brand.created": {
+   "event_type": "identity.customer_brand.created",
+   "producer": "platform_core.product_identity",
+   "aggregate_type": "identity.customer_brand",
+   "description": "brand of a customer created (DEC-058 B-A)",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "customer_id",
+      "id",
+      "status"
+     ],
+     "properties": {
+      "customer_id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      }
+     }
+    }
+   }
+  },
+  "identity.customer_brand.updated": {
+   "event_type": "identity.customer_brand.updated",
+   "producer": "platform_core.product_identity",
+   "aggregate_type": "identity.customer_brand",
+   "description": "brand of a customer updated (DEC-058 B-A)",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "customer_id",
+      "id",
+      "status"
+     ],
+     "properties": {
+      "customer_id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      }
+     }
+    }
+   }
+  },
+  "identity.product.created": {
+   "event_type": "identity.product.created",
+   "producer": "platform_core.product_identity",
+   "aggregate_type": "identity.product",
+   "description": "product created; number = max of type + 1, or buckle + width for belts (DEC-005)",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "product_type_id",
+      "status"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "product_type_id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      }
+     }
+    }
+   }
+  },
+  "identity.product.status_changed": {
+   "event_type": "identity.product.status_changed",
+   "producer": "platform_core.product_identity",
+   "aggregate_type": "identity.product",
+   "description": "product DRAFT/ACTIVE/RETIRED",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "status"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      }
+     }
+    }
+   }
+  },
+  "identity.product_code.erp_matched": {
+   "event_type": "identity.product_code.erp_matched",
+   "producer": "platform_core.product_identity",
+   "aggregate_type": "identity.product_code",
+   "description": "reserved code seen in the Rahkaran import -> ACTIVE / ERP_MATCHED (DEC-005 B1)",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "batch_id",
+      "erp_status",
+      "id",
+      "status"
+     ],
+     "properties": {
+      "batch_id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "erp_status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      },
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      }
+     }
+    }
+   }
+  },
+  "identity.product_code.reserved": {
+   "event_type": "identity.product_code.reserved",
+   "producer": "platform_core.product_identity",
+   "aggregate_type": "identity.product_code",
+   "description": "14-digit code issued RESERVED / ERP_PENDING under the ACTIVE rule (DEC-005 B1)",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "erp_status",
+      "id",
+      "rule_revision_id",
+      "status",
+      "style_id"
+     ],
+     "properties": {
+      "erp_status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      },
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "rule_revision_id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      },
+      "style_id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      }
+     }
+    }
+   }
+  },
   "identity.serial.allocated": {
    "event_type": "identity.serial.allocated",
    "producer": "platform_core.product_identity",
@@ -34,6 +1123,268 @@
       "status": {
        "type": "string",
        "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      }
+     }
+    }
+   }
+  },
+  "identity.serial.cancelled": {
+   "event_type": "identity.serial.cancelled",
+   "producer": "platform_core.product_identity",
+   "aggregate_type": "identity.serial",
+   "description": "serial cancelled with its line; the number is never re-used (DEC-059)",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "status"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      }
+     }
+    }
+   }
+  },
+  "identity.serial.snapshot_added": {
+   "event_type": "identity.serial.snapshot_added",
+   "producer": "platform_core.product_identity",
+   "aggregate_type": "identity.serial",
+   "description": "next serial snapshot written by an applied change request (DEC-059)",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "order_version",
+      "snapshot_version"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "order_version": {
+       "type": "integer",
+       "minimum": 0
+      },
+      "snapshot_version": {
+       "type": "integer",
+       "minimum": 0
+      }
+     }
+    }
+   }
+  },
+  "identity.style.created": {
+   "event_type": "identity.style.created",
+   "producer": "platform_core.product_identity",
+   "aggregate_type": "identity.style",
+   "description": "style created; number = count of the product and category + 1 (DEC-005)",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "category_id",
+      "id",
+      "product_id",
+      "status"
+     ],
+     "properties": {
+      "category_id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "product_id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      }
+     }
+    }
+   }
+  },
+  "identity.style.status_changed": {
+   "event_type": "identity.style.status_changed",
+   "producer": "platform_core.product_identity",
+   "aggregate_type": "identity.style",
+   "description": "style DRAFT/ACTIVE/RETIRED",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "status"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      }
+     }
+    }
+   }
+  },
+  "identity.style_revision.activated": {
+   "event_type": "identity.style_revision.activated",
+   "producer": "platform_core.product_identity",
+   "aggregate_type": "identity.style_revision",
+   "description": "style revision activated",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "revision_no",
+      "status",
+      "style_id"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "revision_no": {
+       "type": "integer",
+       "minimum": 0
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      },
+      "style_id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      }
+     }
+    }
+   }
+  },
+  "identity.style_revision.created": {
+   "event_type": "identity.style_revision.created",
+   "producer": "platform_core.product_identity",
+   "aggregate_type": "identity.style_revision",
+   "description": "style revision created",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "revision_no",
+      "status",
+      "style_id"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "revision_no": {
+       "type": "integer",
+       "minimum": 0
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      },
+      "style_id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      }
+     }
+    }
+   }
+  },
+  "identity.style_revision.status_changed": {
+   "event_type": "identity.style_revision.status_changed",
+   "producer": "platform_core.product_identity",
+   "aggregate_type": "identity.style_revision",
+   "description": "style revision status changed",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "revision_no",
+      "status",
+      "style_id"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "revision_no": {
+       "type": "integer",
+       "minimum": 0
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      },
+      "style_id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
       }
      }
     }

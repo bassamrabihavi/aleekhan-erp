@@ -1,4 +1,4 @@
-# ERD - platform tables (PHASE_00 migrations 0001-0006, PHASE_01 migrations 0007-0018)
+# ERD - platform tables (PHASE_00 migrations 0001-0006, PHASE_01 migrations 0007-0018, PHASE_02 0019-0024)
 
 Status: as of step 00.8 (code identical to commit `d6b6de96784d8d4d715e5978a2552c3531798faa` for the schema; no
 migration was added after 00.6). Source of every column, constraint and index below: the schema dump of the
@@ -226,6 +226,8 @@ unit of work instead of a FK.
 | `0020_phase02_db_guards` | `RunSQL` + `RunPython` | touch / no-delete / append-only / terminal / immutable-column triggers; classification, code registry, serial, legacy, order, line, version and change-request guards; 6 deferred constraint triggers (gapless counter, serial snapshot v1 + one line, order version row + no OPEN line, applied change request has its version, line/serial cancel pairing); FK/index renaming as 0009 | drop triggers/functions; rename back from the catalog comment |
 | `0021_phase02_seed_catalogue` | seed | units PIECE/PAIR, 4 order types, 4 external reference types (DEC-058); the factory serial counter `factory_serial` start 63001, legacy < 63000 (DEC-006). No type/category/code/customer/serial | deletes exactly these rows (counter only while no serial exists) |
 | `0022_dec057_matrix_v20` | `RunSQL` + `RunPython` | DEC-057 matrix v2.0: 22 `identity.*`/`commercial.*` permissions, 5 BUSINESS roles, grants; `management_viewer` read rows; owner exception widened to exactly six pairs | removes them; owner 1.3 / viewer 1.0; restores the 0015 guard bodies byte-identically |
+| `0023_phase02_engine` | `RunSQL` + schema | 02.3: ON_HOLD (stored CONFIRMED) -> CANCELLED edge of `commercial_order_guard()` (DEC-059 amendment); CHECK `ck_commercial_cr_planner_not_decider`; three technical number sequences (section 7.5); DEC-005 amendment 2026-11-13: `ck_identity_style_no_fmt` accepts style `0000` for IMP/LEG only, new `ck_identity_product_code_sys_no_style_0000` | the 0020 function body byte-identically; drop CHECKs and sequences; the 0019 style CHECK back (only while no legacy 0000 style exists) |
+| `0024_dec057_dec059_matrix_v21` | `RunPython` | 02.3 matrix v2.1: `commercial.change.planning_approve` (PO); owner_admin PHASE_02 reads; owner / PO -> 2.1 | removes permission + grants; both roles back to 2.0 |
 
 No users, no org units, no network ranges, no secrets are seeded. Round trip (up -> zero -> up, partial rollback
 to 0006, empty schema diff, no extension left): `reports/phase-01/step-2/logs/migration/`; on the final PHASE_01
@@ -378,7 +380,7 @@ line once the order is versioned; `ck_commercial_line_serial_by_status`: a CONFI
 |---|---|---|
 | `identity_product_class` | partial UNIQUE type segment; UNIQUE (parent, segment) for categories; `^[0-9]{2}$`; type has unit + product-number scheme | category under a type; segments immutable |
 | `identity_product` | UNIQUE (type, product_no); `^[0-9]{4}$`; belt: product_no = buckle (2) + width (2) | of a type; belt scheme ⇔ buckle + width |
-| `identity_style` | UNIQUE (product, category, style_no); `^[0-9]{4}$`, not `0000` | category of the product's type; segments immutable |
+| `identity_style` | UNIQUE (product, category, style_no); `^[0-9]{4}$`, not `0000` (since 0023: `0000` only for IMP/LEG provenance, DEC-005 amendment 2026-11-13) | category of the product's type; segments immutable |
 | `identity_style_revision` | UNIQUE (style, revision_no); one ACTIVE (partial UNIQUE) | ACTIVE immutable except -> SUPERSEDED (terminal) |
 | `identity_code_rule_revision` | UNIQUE (namespace, revision); one ACTIVE; approved_by ≠ created_by | lifecycle DRAFT -> IN_REVIEW -> APPROVED -> ACTIVE -> RETIRED / REJECTED; content frozen after DRAFT |
 | `identity_product_code` | UNIQUE (namespace, code); `varchar(14)` `^[0-9]{14}$`; ACTIVE ⇒ ERP_MATCHED; RESERVED ⇒ ERP_PENDING; SYS ⇒ rule + style + issuer + key + prefix `02` | SYS insert needs an ACTIVE rule (`RULE_NOT_APPROVED`); live code = `02` + style segments; style link set once |
@@ -398,6 +400,20 @@ written by migrations only; the counter row is inserted by migration 0021 only a
 external reference types are extensible at runtime (DEC-058).
 
 ### 7.4 Not enforced in the database on purpose (not decided)
-"One open change request per order", a change-request expiry period, whether the planning approver of a due-date
-change may also be the deciding manager, and which permission records that planning approval (see
-`reports/phase-02/step-2/REPORT.md`, open items).
+"One open change request per order" and a change-request expiry period (REV-0203, PROPOSED only). The two other
+02.2 open items were decided on 2026-11-12 and are enforced since 02.3 (section 7.5).
+
+### 7.5 PHASE_02 / 02.3 (migrations 0023-0024)
+| Migration | Content | Reverse |
+|---|---|---|
+| `0023_phase02_engine` | `commercial_order_guard()` gains ON_HOLD -> CANCELLED (stored state CONFIRMED, version + 1; DEC-059 amendment, REV-0222); CHECK `ck_commercial_cr_planner_not_decider`; sequences `identity_customer_no_seq`, `commercial_order_no_seq`, `commercial_change_request_no_seq` (technical numbers, PROPOSED format, DATA_TABLE "02.3 result") | the 0020 function body byte-identically (taken from the frozen 0020 text), drop the CHECK and the sequences |
+| `0024_dec057_dec059_matrix_v21` | permission `commercial.change.planning_approve` (planning_officer; flags MFA/BA/SoD PROPOSED); owner_admin gets the nine PHASE_02 read permissions; `owner_admin` / `planning_officer` -> matrix 2.1 | removes the permission and the ten grants, both roles back to 2.0 |
+
+DEC-005 amendment 2026-11-13 (also in 0023): style `0000` is legacy only. `ck_identity_style_no_fmt` accepts it only for
+imported / legacy styles (provenance IMP / LEG), so a legacy code with style 0000 can be registered and linked to its
+style; `ck_identity_product_code_sys_no_style_0000` keeps "never issued by the system" in the DB (a SYS code never
+ends with 0000, a SYS style is never 0000). Reverse: the 0019 CHECK (only while no legacy 0000 style exists).
+
+The app role may `nextval` the three sequences but not `setval` them (`roles_check.sh`). The engine that writes these
+tables is `product_identity/{master,codes,serials}.py` and `commercial/{orders,changes}.py`
+(docs/discovery/STATE_TRANSITIONS.md 5.10).

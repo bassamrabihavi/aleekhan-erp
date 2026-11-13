@@ -1,4 +1,4 @@
-# Permission matrix — PHASE_01 platform actions + PHASE_02 order & product identity (APPROVED v2.0)
+# Permission matrix — PHASE_01 platform actions + PHASE_02 order & product identity (APPROVED v2.0, amended v2.1)
 
 **Status: APPROVED v2.0 — DEC-049 (v1.0, employer بسام ربیهاوی, 2026-11-04) + DEC-056 (v1.1, 2026-11-06) + DEC-056
 extensions (v1.2 and v1.3, 2026-11-10) + DEC-057 (v2.0, PHASE_02, 2026-11-12; section 7, migration
@@ -6,6 +6,19 @@ extensions (v1.2 and v1.3, 2026-11-10) + DEC-057 (v2.0, PHASE_02, 2026-11-12; se
 `platform_core.0014_dec056_owner_approval_rights`); v1.2 from PHASE_01 / 01.6 (migration
 `platform_core.0015_dec056_matrix_v12`); v1.3 from PHASE_01 / 01.7 (migration
 `platform_core.0017_dec056_matrix_v13`).**
+
+**Change note v2.1 (employer amendments of 2026-11-12 to DEC-057 and DEC-059; PHASE_02 / 02.3, migration
+`platform_core.0024_dec057_dec059_matrix_v21`).** (a) DEC-057 owner read: the `owner_admin` (OA) cells of the nine
+PHASE_02 read permissions change from `—` to `●` (customer, product, product code, code rule, serial, external
+reference, historical record, order, change request). None is a business-approval permission, so the owner exception
+of principle 2 stays exactly six pairs and no guard function changes. (b) DEC-059 due-date planning approval: new
+permission `commercial.change.planning_approve` (name set in 02.3, family `commercial.change.*`), held by
+`planning_officer` only; the approver is neither the requester nor the deciding manager (engine + DB CHECKs
+`ck_commercial_cr_planner_not_requester` / `ck_commercial_cr_planner_not_decider`). Its flags **MFA, BA, SoD are
+PROPOSED by 02.3** (same as `commercial.change.decide`; a second approval of the same request) and wait for the
+employer's confirmation. `owner_admin` and `planning_officer` carry `matrix_version = 2.1`; the new permission
+carries 2.1 / DEC-059; every other role keeps its version. The customer representative name stays masked for
+`management_viewer` (engine, `commercial.orders.REPRESENTATIVE_MASKED_ROLES`).
 
 **Change note v2.0 (DEC-057, APPROVED 2026-11-12, option M-A).** The PHASE_02 permissions and five new BUSINESS
 roles (section 7). The explicit owner exception of principle 2 grows from three to exactly six pairs: `owner_admin` +
@@ -187,47 +200,49 @@ audit events for anyone (append-only, DB triggers since 00.2).
   download CLEAN only, audited) (change note at the top).
 - v2.0 (DEC-057, 2026-11-12): PHASE_02 permissions, five BUSINESS roles, owner_admin code-rule approve ●, order
   confirm ●, change decide ● (section 7; migration `platform_core.0022_dec057_matrix_v20`).
+- v2.1 (DEC-057 / DEC-059 amendments, 2026-11-12): owner_admin ● on the nine PHASE_02 read permissions;
+  `commercial.change.planning_approve` ● for planning_officer (flags PROPOSED) (section 7; migration
+  `platform_core.0024_dec057_dec059_matrix_v21`).
 
 A change to this matrix = new matrix version + reviewed commit + DEC entry; roles keep `matrix_version`. Seeds
 for dev/test use synthetic users only (`محیط آزمایشی — داده ساختگی`).
 
-## 7. Matrix v2.0 — PHASE_02 actions (DEC-057, APPROVED 2026-11-12)
+## 7. Matrix v2.0 — PHASE_02 actions (DEC-057, APPROVED 2026-11-12; amended v2.1 the same day)
 Source: `control/decisions/DEC-057_PACKET.md` table, option M-A, "as written". Roles: `commercial_officer` (CO),
 `commercial_manager` (CM), `planning_officer` (PO), `product_data_steward` (PDS), `code_rule_approver` (CRA) — all
 BUSINESS. Scope: all customers for every role (grant mode SCOPE, no per-officer customer assignment; every read and
 change is audited). `employee`, `it_ops`, `security_auditor` and the other PHASE_01 roles hold no PHASE_02
-permission. Fresh MFA: exactly the four MFA rows. Order confirm = `planning_officer` (the serials are allocated in
+permission. Fresh MFA: the four MFA rows of DEC-057, plus `commercial.change.planning_approve` (v2.1, flags
+PROPOSED). Order confirm = `planning_officer` (the serials are allocated in
 the same transaction, DEC-006 L-A). The customer representative name (DEC-058, PII) is masked for
 `management_viewer` by the engine (field level; 02.3/02.4).
 
 | Permission (`x-aleekhan-permission`) | Flags | OA | MGT | CO | CM | PO | PDS | CRA |
 |---|---|---|---|---|---|---|---|---|
-| identity.customer.read | | — | ● | ● | ● | ● | ● | ● |
+| identity.customer.read | | ● | ● | ● | ● | ● | ● | ● |
 | identity.customer.manage | | — | — | ● | — | — | — | — |
-| identity.product.read | | — | ● | ● | ● | ● | ● | ● |
+| identity.product.read | | ● | ● | ● | ● | ● | ● | ● |
 | identity.product.manage | | — | — | — | — | — | ● | — |
-| identity.product_code.read | | — | — | ● | ● | ● | ● | ● |
+| identity.product_code.read | | ● | — | ● | ● | ● | ● | ● |
 | identity.product_code.issue | MFA | — | — | — | — | — | ● | — |
-| identity.code_rule.read | | — | — | — | — | ● | ● | ● |
+| identity.code_rule.read | | ● | — | — | — | ● | ● | ● |
 | identity.code_rule.manage | | — | — | — | — | — | ● | — |
 | identity.code_rule.approve | MFA, BA, SoD | ● | — | — | — | — | — | ● |
-| identity.serial.read | | — | ● | ● | ● | ● | ● | ● |
+| identity.serial.read | | ● | ● | ● | ● | ● | ● | ● |
 | identity.serial.allocate | | — | — | — | — | ● | — | — |
-| identity.external_ref.read | | — | — | ● | ● | ● | ● | ● |
+| identity.external_ref.read | | ● | — | ● | ● | ● | ● | ● |
 | identity.external_ref.manage | | — | — | ● | — | — | ● | — |
-| identity.historical.read | | — | — | — | — | ● | ● | — |
-| commercial.order.read | | — | ● | ● | ● | ● | ● | ● |
+| identity.historical.read | | ● | — | — | — | ● | ● | — |
+| commercial.order.read | | ● | ● | ● | ● | ● | ● | ● |
 | commercial.order.manage | | — | — | ● | — | — | — | — |
 | commercial.order.confirm | MFA, BA, SoD | ● | — | — | — | ● | — | — |
 | commercial.order.release | | — | — | — | — | ● | — | — |
-| commercial.change.read | | — | ● | ● | ● | ● | ● | ● |
+| commercial.change.read | | ● | ● | ● | ● | ● | ● | ● |
 | commercial.change.request | | — | — | ● | — | ● | — | — |
 | commercial.change.decide | MFA, BA, SoD | ● | — | — | ● | — | — | — |
+| commercial.change.planning_approve | MFA, BA, SoD | — | — | — | — | ● | — | — |
 | commercial.change.apply | | — | — | — | — | ● | — | — |
 
-Open points of v2.0 (not decided, so not granted — the employer decides; reported in PHASE_02 / 02.2):
-- The owner decides code-rule approval, order confirm and change requests but holds no PHASE_02 **read**
-  permission in the packet table (v1.3 needed the same addition for documents).
-- DEC-059 asks for a second, planning approval of a due-date change by `planning_officer`; the packet table has no
-  permission row for it (`commercial.change.decide` is not granted to PO). The DB already stores the planning
-  approver separately and requires it for an applied due-date change.
+Open points of v2.0, closed by the employer on 2026-11-12 (v2.1 above): the owner's PHASE_02 read permissions;
+the due-date planning approval (`commercial.change.planning_approve`, a person other than the requester and the
+deciding manager). Still open (02.3): the flags of `commercial.change.planning_approve` (PROPOSED MFA, BA, SoD).

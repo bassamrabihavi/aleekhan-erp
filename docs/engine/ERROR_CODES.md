@@ -110,3 +110,25 @@ own decision id.
 `immutable_column`, `append_only`, `terminal_immutable`) to 409 `STATE_TRANSITION_NOT_ALLOWED` and a duplicate
 (`uq_*`) to 400 `VALIDATION_FAILED`, with the rule name (upper case) as `errors[].code`. The DB message text is
 never copied into the response.
+
+## PHASE_02 refusal reasons (02.3 domain engine)
+
+No new top-level code (the OpenAPI `ErrorCode` enum is unchanged). Every PHASE_02 refusal is one of the stable
+codes above, and the precise reason is the machine code in `errors[].code` (PHASE_01 style). Source of truth:
+`backend/platform_core/product_identity/refusals.py` (`Reason`, `REASON_CODE`); golden:
+`backend/platform_core/tests/golden/phase02_refusals.golden.json`. Adding a reason is additive; renaming or removing
+one breaks clients that branch on it.
+
+| Top-level code | `errors[].code` reasons |
+|---|---|
+| `VALIDATION_FAILED` (400) | `REQUIRED`, `INVALID`, `SEGMENT_FORMAT` (a code segment is not 2/4 ASCII digits as text), `CODE_FORMAT` (not `02` + 12 digits), `STYLE_0000_LEGACY_ONLY` (DEC-005 amendment 2026-11-13: style 0000 is history only, never built or issued), `BELT_SEGMENTS_REQUIRED`, `BELT_SEGMENTS_NOT_ALLOWED`, `PRODUCT_NO_EXHAUSTED` (max + 1 > 9999), `STYLE_NO_EXHAUSTED`, `DUE_BEFORE_ORDER_DATE`, `QUANTITY_NOT_POSITIVE`, `QUANTITY_UNCHANGED`, `DUE_DATE_UNCHANGED`, `DUPLICATE_ITEM`, `ITEMS_NOT_ALLOWED`, `DUPLICATE_PO_NUMBER` (DEC-058 warning not acknowledged), `DUPLICATE_CUSTOMER_NAME` (warning not acknowledged), `UNKNOWN_WARNING`, `BRAND_OF_OTHER_CUSTOMER` (DEC-058), `REPRESENTATIVE_NAME_INVALID` (DEC-058: a name only) |
+| `STATE_TRANSITION_NOT_ALLOWED` (409) | `STATE_NOT_ALLOWED`, `MASTER_NOT_ACTIVE`, `ORDER_HAS_NO_LINES`, `LAST_LINE_CANCEL` (use CANCEL_ORDER), `PRODUCT_NO_TAKEN`, `STYLE_NO_COLLISION` (count + 1 already used by a legacy style), `CODE_ALREADY_ISSUED`, `CODE_IN_REGISTRY`, `CODE_NOT_RESERVED`, `CODE_OF_OTHER_STYLE`, `GOLDEN_CASES_INSUFFICIENT` (< 20 per family), `GOLDEN_CASE_MISMATCH`, `GOLDEN_CASE_OUT_OF_SCOPE`, `RELEASED_KIND_NOT_ALLOWED` (DEC-059), `CANCEL_AFTER_RELEASE` (DEC-059 C-A), `ORDER_ON_HOLD`, `ORDER_NOT_ON_HOLD`, `ORDER_ALREADY_ON_HOLD`, `STALE_BASE_VERSION`, `PLANNING_APPROVAL_REQUIRED`, `PLANNING_APPROVAL_NOT_APPLICABLE`, `PLANNING_ALREADY_APPROVED`, `LINE_NOT_IN_ORDER`; plus the DB-guard rule names of `db_rules()` |
+| `SELF_APPROVAL_FORBIDDEN` (403) | `CONFIRMER_IS_CREATOR` (DEC-057), `DECIDER_IS_REQUESTER`, `DECIDER_IS_PLANNING_APPROVER`, `PLANNING_APPROVER_IS_REQUESTER`, `PLANNING_APPROVER_IS_DECIDER` (DEC-059 amendment 2026-11-12), `APPROVER_IS_MAKER` (DEC-005 Q-A) |
+| `RULE_NOT_APPROVED` (409, `decision_id` = `DEC-005`) | `NO_ACTIVE_CODE_RULE`, `TYPE_NOT_IN_RULE_SCOPE`, `RULE_SPEC_NOT_IMPLEMENTED` |
+| `IDEMPOTENCY_KEY_REUSED` (422) | `IDEMPOTENCY_PAYLOAD_MISMATCH` (REV-0220: an allocation / issue key reused for another line or style) |
+
+Order of checks in every use case: permission (403; PHASE_02 grants are SCOPE over all customers) -> fresh MFA
+(401) -> record lookup under a row lock (404) -> version (412) -> maker-checker (403) -> state machine (409) ->
+business rules. The engine registry
+`APPROVED_RULE_DECISIONS` stays empty: the DEC-005 gate of code issuing is the ACTIVE, employer-approved
+`CodeRuleRevision` row (maker-checker + MFA), not an in-code switch.

@@ -1,4 +1,4 @@
-# Event catalogue — PHASE_00 + PHASE_01 platform events (PHASE_01 / 01.6) + PHASE_02 / 02.2 serial allocation
+# Event catalogue — PHASE_00 + PHASE_01 platform events (PHASE_01 / 01.6) + PHASE_02 (02.2 serial allocation, 02.3 domain engine)
 
 Source of truth: `backend/platform_core/engine/events.py` (`CATALOGUE`); reviewed golden copy:
 `backend/platform_core/tests/golden/event_catalogue.golden.json` (JSON Schema per version). This table is
@@ -7,7 +7,7 @@ generated from the code and must be regenerated with it. Status: DRAFT (part of 
 Envelope (every event, `platform_outbox_event`): `event_id` (consumer dedupe key), `event_type`, `schema_version`,
 `aggregate_type`, `aggregate_id`, `aggregate_version`, `occurred_at` (UTC), `actor_type` / `actor_id`, `request_id`,
 `correlation_id`, `causation_id`, `payload`, and the provenance of the producing code (migration `0016`):
-`producer` (owning module), `build_commit` (`ALEEKHAN_BUILD_COMMIT`), `schema_migration` (`platform_core.0022_dec057_matrix_v20`
+`producer` (owning module), `build_commit` (`ALEEKHAN_BUILD_COMMIT`), `schema_migration` (`platform_core.0024_dec057_dec059_matrix_v21`
 in this build). Source system: `aleekhan-erp`. Rows written before migration 0016 carry `''` (unknown).
 
 Rules: producers emit only catalogued types, the matching aggregate type and the **current** version, with an exact
@@ -23,7 +23,43 @@ Field kinds: `uuid` (canonical lower-case), `ref` (id of another resource, `[A-Z
 
 | Event type | v | Producer | Aggregate | Payload | Meaning |
 |---|---|---|---|---|---|
+| `commercial.change_request.applied` | 1 | `platform_core.commercial` | `commercial.change_request` | `id`:uuid, `order_id`:uuid, `kind`:code, `status`:code | order change request applied (DEC-059) |
+| `commercial.change_request.created` | 1 | `platform_core.commercial` | `commercial.change_request` | `id`:uuid, `order_id`:uuid, `kind`:code, `status`:code | order change request created (DEC-059) |
+| `commercial.change_request.decided` | 1 | `platform_core.commercial` | `commercial.change_request` | `id`:uuid, `order_id`:uuid, `kind`:code, `status`:code | order change request decided (DEC-059) |
+| `commercial.change_request.planning_approved` | 1 | `platform_core.commercial` | `commercial.change_request` | `id`:uuid, `order_id`:uuid, `kind`:code, `status`:code | order change request planning approved (DEC-059) |
+| `commercial.change_request.submitted` | 1 | `platform_core.commercial` | `commercial.change_request` | `id`:uuid, `order_id`:uuid, `kind`:code, `status`:code | order change request submitted (DEC-059) |
+| `commercial.change_request.withdrawn` | 1 | `platform_core.commercial` | `commercial.change_request` | `id`:uuid, `order_id`:uuid, `kind`:code, `status`:code | order change request withdrawn (DEC-059) |
+| `commercial.order.cancelled` | 1 | `platform_core.commercial` | `commercial.customer_order` | `id`:uuid, `status`:code, `version`:count | customer order cancelled |
+| `commercial.order.changed` | 1 | `platform_core.commercial` | `commercial.customer_order` | `id`:uuid, `status`:code, `version`:count, `change_request_id`:uuid, `kind`:code | approved change request applied: new order version (DEC-059) |
+| `commercial.order.confirmed` | 1 | `platform_core.commercial` | `commercial.customer_order` | `id`:uuid, `status`:code, `version`:count, `line_count`:count | order confirmed; every line got its serial in the same transaction (DEC-006 L-A, DEC-057) |
+| `commercial.order.draft_changed` | 1 | `platform_core.commercial` | `commercial.customer_order` | `id`:uuid, `status`:code, `version`:count | customer order draft changed |
+| `commercial.order.drafted` | 1 | `platform_core.commercial` | `commercial.customer_order` | `id`:uuid, `status`:code, `version`:count | customer order drafted |
+| `commercial.order.released` | 1 | `platform_core.commercial` | `commercial.customer_order` | `id`:uuid, `status`:code, `version`:count | customer order released |
+| `commercial.order.reopened` | 1 | `platform_core.commercial` | `commercial.customer_order` | `id`:uuid, `status`:code, `version`:count | customer order reopened |
+| `commercial.order.validated` | 1 | `platform_core.commercial` | `commercial.customer_order` | `id`:uuid, `status`:code, `version`:count | customer order validated |
+| `identity.code_rule.activated` | 1 | `platform_core.product_identity` | `identity.code_rule_revision` | `id`:uuid, `revision_no`:count, `status`:code | code rule revision activated (DEC-005) |
+| `identity.code_rule.approved` | 1 | `platform_core.product_identity` | `identity.code_rule_revision` | `id`:uuid, `revision_no`:count, `status`:code | code rule revision approved (DEC-005) |
+| `identity.code_rule.created` | 1 | `platform_core.product_identity` | `identity.code_rule_revision` | `id`:uuid, `revision_no`:count, `status`:code | code rule revision created (DEC-005) |
+| `identity.code_rule.golden_cases_added` | 1 | `platform_core.product_identity` | `identity.code_rule_revision` | `id`:uuid, `revision_no`:count, `status`:code | code rule revision golden cases added (DEC-005) |
+| `identity.code_rule.rejected` | 1 | `platform_core.product_identity` | `identity.code_rule_revision` | `id`:uuid, `revision_no`:count, `status`:code | code rule revision rejected (DEC-005) |
+| `identity.code_rule.retired` | 1 | `platform_core.product_identity` | `identity.code_rule_revision` | `id`:uuid, `revision_no`:count, `status`:code | code rule revision retired (DEC-005) |
+| `identity.code_rule.submitted` | 1 | `platform_core.product_identity` | `identity.code_rule_revision` | `id`:uuid, `revision_no`:count, `status`:code | code rule revision submitted (DEC-005) |
+| `identity.customer.created` | 1 | `platform_core.product_identity` | `identity.customer` | `id`:uuid, `status`:code | customer created (in-app master data) |
+| `identity.customer.updated` | 1 | `platform_core.product_identity` | `identity.customer` | `id`:uuid, `status`:code | customer updated (in-app master data) |
+| `identity.customer_brand.created` | 1 | `platform_core.product_identity` | `identity.customer_brand` | `id`:uuid, `customer_id`:uuid, `status`:code | brand of a customer created (DEC-058 B-A) |
+| `identity.customer_brand.updated` | 1 | `platform_core.product_identity` | `identity.customer_brand` | `id`:uuid, `customer_id`:uuid, `status`:code | brand of a customer updated (DEC-058 B-A) |
+| `identity.product.created` | 1 | `platform_core.product_identity` | `identity.product` | `id`:uuid, `product_type_id`:uuid, `status`:code | product created; number = max of type + 1, or buckle + width for belts (DEC-005) |
+| `identity.product.status_changed` | 1 | `platform_core.product_identity` | `identity.product` | `id`:uuid, `status`:code | product DRAFT/ACTIVE/RETIRED |
+| `identity.product_code.erp_matched` | 1 | `platform_core.product_identity` | `identity.product_code` | `id`:uuid, `status`:code, `erp_status`:code, `batch_id`:uuid | reserved code seen in the Rahkaran import -> ACTIVE / ERP_MATCHED (DEC-005 B1) |
+| `identity.product_code.reserved` | 1 | `platform_core.product_identity` | `identity.product_code` | `id`:uuid, `style_id`:uuid, `rule_revision_id`:uuid, `status`:code, `erp_status`:code | 14-digit code issued RESERVED / ERP_PENDING under the ACTIVE rule (DEC-005 B1) |
 | `identity.serial.allocated` | 1 | `platform_core.product_identity` | `identity.serial` | `id`:uuid, `snapshot_version`:count, `status`:code | serial allocated at order confirm with its snapshot v1 (gapless counter, DEC-006) |
+| `identity.serial.cancelled` | 1 | `platform_core.product_identity` | `identity.serial` | `id`:uuid, `status`:code | serial cancelled with its line; the number is never re-used (DEC-059) |
+| `identity.serial.snapshot_added` | 1 | `platform_core.product_identity` | `identity.serial` | `id`:uuid, `snapshot_version`:count, `order_version`:count | next serial snapshot written by an applied change request (DEC-059) |
+| `identity.style.created` | 1 | `platform_core.product_identity` | `identity.style` | `id`:uuid, `product_id`:uuid, `category_id`:uuid, `status`:code | style created; number = count of the product and category + 1 (DEC-005) |
+| `identity.style.status_changed` | 1 | `platform_core.product_identity` | `identity.style` | `id`:uuid, `status`:code | style DRAFT/ACTIVE/RETIRED |
+| `identity.style_revision.activated` | 1 | `platform_core.product_identity` | `identity.style_revision` | `id`:uuid, `style_id`:uuid, `revision_no`:count, `status`:code | style revision activated |
+| `identity.style_revision.created` | 1 | `platform_core.product_identity` | `identity.style_revision` | `id`:uuid, `style_id`:uuid, `revision_no`:count, `status`:code | style revision created |
+| `identity.style_revision.status_changed` | 1 | `platform_core.product_identity` | `identity.style_revision` | `id`:uuid, `style_id`:uuid, `revision_no`:count, `status`:code | style revision status changed |
 | `platform.config.field.changed` | 1 | `platform_core.params` | `platform.dynamic_field` | `key`:key, `status`:code | dynamic field definition created/changed |
 | `platform.config.parameter.defined` | 1 | `platform_core.params` | `platform.parameter_definition` | `key`:key | parameter definition created |
 | `platform.config.parameter.proposed` | 1 | `platform_core.params` | `platform.parameter_value` | `id`:uuid, `parameter_key`:key, `status`:code | parameter value proposed |
@@ -77,6 +113,6 @@ Field kinds: `uuid` (canonical lower-case), `ref` (id of another resource, `[A-Z
 | `platform.workflow.instance.changed` | 1 | `platform_core.workflow` | `platform.workflow_instance` | `id`:uuid, `status`:code | workflow instance started/advanced/finished |
 | `platform.workflow.task.changed` | 1 | `platform_core.workflow` | `platform.work_task` | `id`:uuid, `status`:code, `verb`:key | work task state changed (verb = transition) |
 
-52 event types. Adding or changing one = edit `events.py` + regenerate the golden and this
+89 event types. Adding or changing one = edit `events.py` + regenerate the golden and this
 table + reviewed commit; a payload change that is not additive-compatible needs a new version with an upcaster from
 the previous one (consumers keep accepting N-1 for one release).

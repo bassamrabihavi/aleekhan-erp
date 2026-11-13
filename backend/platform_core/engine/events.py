@@ -43,7 +43,7 @@ from .errors import EngineContractError
 SOURCE_SYSTEM: Final = "aleekhan-erp"
 # Newest platform_core migration this code was written for (provenance of every outbox row). Pinned to the
 # leaf of the migration graph by test_integration_events.py::test_schema_migration_head_is_the_graph_leaf.
-SCHEMA_MIGRATION_HEAD: Final = "platform_core.0022_dec057_matrix_v20"
+SCHEMA_MIGRATION_HEAD: Final = "platform_core.0024_dec057_dec059_matrix_v21"
 SYNTHETIC_TEST_PREFIX: Final = "platform.synthetic."
 
 _UUID_RE = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")
@@ -189,6 +189,7 @@ CFG: Final = "platform_core.params"
 OPS: Final = "platform_core.jobs"
 INT: Final = "platform_core.integration"
 PID: Final = "platform_core.product_identity"
+COM: Final = "platform_core.commercial"
 
 
 def _spec(
@@ -426,6 +427,136 @@ _SPECS: tuple[EventSpec, ...] = (
         "identity.serial",
         "serial allocated at order confirm with its snapshot v1 (gapless counter, DEC-006)",
         {"id": U, "status": CODE, "snapshot_version": N},
+    ),
+    # PHASE_02 / 02.3 domain engine. Identifiers, status codes, versions and counts only: no customer,
+    # brand, product or representative name, no code value, no serial number (consumers read the API).
+    *(
+        _spec(
+            f"identity.customer.{v}",
+            PID,
+            "identity.customer",
+            f"customer {v} (in-app master data)",
+            _ID_STATUS,
+        )
+        for v in ("created", "updated")
+    ),
+    *(
+        _spec(
+            f"identity.customer_brand.{v}",
+            PID,
+            "identity.customer_brand",
+            f"brand of a customer {v} (DEC-058 B-A)",
+            {"id": U, "customer_id": U, "status": CODE},
+        )
+        for v in ("created", "updated")
+    ),
+    _spec(
+        "identity.product.created",
+        PID,
+        "identity.product",
+        "product created; number = max of type + 1, or buckle + width for belts (DEC-005)",
+        {"id": U, "product_type_id": U, "status": CODE},
+    ),
+    _spec(
+        "identity.product.status_changed", PID, "identity.product", "product DRAFT/ACTIVE/RETIRED", _ID_STATUS
+    ),
+    _spec(
+        "identity.style.created",
+        PID,
+        "identity.style",
+        "style created; number = count of the product and category + 1 (DEC-005)",
+        {"id": U, "product_id": U, "category_id": U, "status": CODE},
+    ),
+    _spec("identity.style.status_changed", PID, "identity.style", "style DRAFT/ACTIVE/RETIRED", _ID_STATUS),
+    *(
+        _spec(
+            f"identity.style_revision.{v}",
+            PID,
+            "identity.style_revision",
+            f"style revision {v.replace('_', ' ')}",
+            {"id": U, "style_id": U, "revision_no": N, "status": CODE},
+        )
+        for v in ("created", "activated", "status_changed")
+    ),
+    *(
+        _spec(
+            f"identity.code_rule.{v}",
+            PID,
+            "identity.code_rule_revision",
+            f"code rule revision {v.replace('_', ' ')} (DEC-005)",
+            {"id": U, "revision_no": N, "status": CODE},
+        )
+        for v in (
+            "created",
+            "golden_cases_added",
+            "submitted",
+            "approved",
+            "rejected",
+            "activated",
+            "retired",
+        )
+    ),
+    _spec(
+        "identity.product_code.reserved",
+        PID,
+        "identity.product_code",
+        "14-digit code issued RESERVED / ERP_PENDING under the ACTIVE rule (DEC-005 B1)",
+        {"id": U, "style_id": U, "rule_revision_id": U, "status": CODE, "erp_status": CODE},
+    ),
+    _spec(
+        "identity.product_code.erp_matched",
+        PID,
+        "identity.product_code",
+        "reserved code seen in the Rahkaran import -> ACTIVE / ERP_MATCHED (DEC-005 B1)",
+        {"id": U, "status": CODE, "erp_status": CODE, "batch_id": U},
+    ),
+    _spec(
+        "identity.serial.cancelled",
+        PID,
+        "identity.serial",
+        "serial cancelled with its line; the number is never re-used (DEC-059)",
+        _ID_STATUS,
+    ),
+    _spec(
+        "identity.serial.snapshot_added",
+        PID,
+        "identity.serial",
+        "next serial snapshot written by an applied change request (DEC-059)",
+        {"id": U, "snapshot_version": N, "order_version": N},
+    ),
+    *(
+        _spec(
+            f"commercial.order.{v}",
+            COM,
+            "commercial.customer_order",
+            f"customer order {v.replace('_', ' ')}",
+            {"id": U, "status": CODE, "version": N},
+        )
+        for v in ("drafted", "draft_changed", "validated", "reopened", "released", "cancelled")
+    ),
+    _spec(
+        "commercial.order.confirmed",
+        COM,
+        "commercial.customer_order",
+        "order confirmed; every line got its serial in the same transaction (DEC-006 L-A, DEC-057)",
+        {"id": U, "status": CODE, "version": N, "line_count": N},
+    ),
+    _spec(
+        "commercial.order.changed",
+        COM,
+        "commercial.customer_order",
+        "approved change request applied: new order version (DEC-059)",
+        {"id": U, "status": CODE, "version": N, "change_request_id": U, "kind": CODE},
+    ),
+    *(
+        _spec(
+            f"commercial.change_request.{v}",
+            COM,
+            "commercial.change_request",
+            f"order change request {v.replace('_', ' ')} (DEC-059)",
+            {"id": U, "order_id": U, "kind": CODE, "status": CODE},
+        )
+        for v in ("created", "submitted", "withdrawn", "decided", "planning_approved", "applied")
     ),
 )
 

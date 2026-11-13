@@ -1,0 +1,3 @@
+$ mypy .
+Success: no issues found in 221 source files
+rc=0

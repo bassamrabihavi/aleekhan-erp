@@ -330,3 +330,58 @@ ON_HOLD resuming to `status_before_hold`; cancel only from DRAFT/VALIDATED, or f
 same transaction). Serial ALLOCATED -> CANCELLED only in PHASE_02. Change request DRAFT -> SUBMITTED -> APPROVED /
 REJECTED / WITHDRAWN / EXPIRED -> APPLIED (writes order version base + 1). Code rule DRAFT -> IN_REVIEW -> APPROVED
 -> ACTIVE -> RETIRED / REJECTED. Who may act (DEC-057) and the error codes are the 02.3 engine.
+
+### 5.10 02.3 result (domain engine; DEC-005/006/057/058/059 + amendments 2026-11-12)
+Engine machines (`engine.state.StateMachine`, tested pair by pair against the lists below and against the DB guards):
+`commercial.orders.ORDER_MACHINE` / `LINE_MACHINE`, `commercial.changes.CHANGE_MACHINE`,
+`product_identity.codes.CODE_RULE_MACHINE` / `PRODUCT_CODE_MACHINE`, `product_identity.master.MASTER_MACHINE` /
+`PARTY_MACHINE` / `STYLE_REVISION_MACHINE`. Refusal reasons: docs/engine/ERROR_CODES.md "PHASE_02 refusal reasons".
+
+**Order** (who: matrix v2.1, PERMISSION_MATRIX_DRAFT section 7)
+| From | Action | To | Who | Guard |
+|---|---|---|---|---|
+| — | `create_order` | DRAFT | commercial_officer | customer ACTIVE; brand of the customer (optional); order type ACTIVE; due >= order date; representative = a name only |
+| DRAFT | `update_order`, `add_line`, `update_line`, `remove_line` | DRAFT | commercial_officer | every line edit moves the order ETag; line unit = product type unit; `line_no` never re-used |
+| DRAFT | `validate_order` | VALIDATED | commercial_officer | >= 1 OPEN line; customer/brand/type/style/product/revision ACTIVE; duplicate PO number of the same customer acknowledged (`DUPLICATE_PO_NUMBER`) |
+| VALIDATED | `reopen_order` | DRAFT | commercial_officer | reason |
+| DRAFT, VALIDATED | `cancel_unconfirmed_order` | CANCELLED | commercial_officer | reason; nothing allocated |
+| VALIDATED | `confirm_order` | CONFIRMED (v1) | planning_officer, owner | BA + fresh MFA; confirmer ≠ creator; every OPEN line gets its serial in the same unit of work |
+| CONFIRMED | `release_order` | RELEASED_TO_PLAN | planning_officer | >= 1 confirmed line |
+| CONFIRMED, RELEASED_TO_PLAN | CR `HOLD` applied | ON_HOLD (+1) | CR flow | stores the previous state |
+| ON_HOLD | CR `RESUME` applied | stored state (+1) | CR flow | — |
+| CONFIRMED, ON_HOLD (stored CONFIRMED) | CR `CANCEL_ORDER` applied | CANCELLED (+1) | CR flow | **amendment 2026-11-12** for ON_HOLD; every line and serial CANCELLED |
+| RELEASED_TO_PLAN, ON_HOLD (stored RELEASED) | cancel | — | — | refused `CANCEL_AFTER_RELEASE` until PHASE_05 (C-A) |
+
+**Change request** (`commercial.changes`)
+| From | Action | To | Who | Guard |
+|---|---|---|---|---|
+| — | `create_change_request` | DRAFT / SUBMITTED | commercial_officer, planning_officer | order CONFIRMED / RELEASED / ON_HOLD; base = current version; kind allowed in the order state (below) |
+| DRAFT | `submit_change_request` | SUBMITTED | the requester | base still current; impact computed |
+| DRAFT, SUBMITTED | `withdraw_change_request` | WITHDRAWN | the requester | reason |
+| SUBMITTED | `decide_change_request` | APPROVED / REJECTED | commercial_manager, owner | BA + fresh MFA; ≠ requester; ≠ planning approver; a rejection needs a note |
+| SUBMITTED, APPROVED (DUE_DATE_CHANGE) | `planning_approve_change_request` | (same) | planning_officer | fresh MFA; ≠ requester and ≠ deciding manager (amendment 2026-11-12; DB CHECKs); once |
+| APPROVED | `apply_change_request` | APPLIED | planning_officer | base still current (`STALE_BASE_VERSION`); kind still allowed (the order may have been released or held since); due-date change needs the planning approval; writes order version n+1 and the next snapshot of every touched serial |
+| SUBMITTED, APPROVED | expiry | EXPIRED | — | not written: no period is decided (REV-0203) |
+
+Kinds by order state: CONFIRMED - all seven; RELEASED_TO_PLAN - DUE_DATE_CHANGE, HOLD; ON_HOLD (stored CONFIRMED) -
+RESUME, CANCEL_ORDER, CANCEL_LINE; ON_HOLD (stored RELEASED) - RESUME, DUE_DATE_CHANGE is **refused** (see open
+items). QTY_CHANGE keeps the serial (no new number); ADD_LINE draws a new serial; CANCEL_LINE of every live line is
+refused (`LAST_LINE_CANCEL`: use CANCEL_ORDER).
+
+**Code rule / product code** (`product_identity.codes`): DRAFT -> IN_REVIEW (identity.code_rule.manage; >= 20
+golden cases per type of the scope, all reproduced) -> APPROVED / REJECTED (identity.code_rule.approve: BA + fresh
+MFA, ≠ maker; golden cases marked verified) -> ACTIVE (previous ACTIVE -> RETIRED, same transaction). Issue:
+RESERVED / ERP_PENDING (identity.product_code.issue, fresh MFA) only under an ACTIVE revision whose spec this engine
+implements and whose scope covers the type, else 409 `RULE_NOT_APPROVED` (DEC-005); one live code per style;
+idempotent per key. RESERVED -> ACTIVE / ERP_MATCHED by the Rahkaran import only (system actor, 02.6).
+Style `0000` (DEC-005 amendment 2026-11-13) is legacy only: a legacy code / imported style may carry it (preview
+shows `legacy_only: true`), but issue refuses it (`STYLE_0000_LEGACY_ONLY`) and the DB refuses a SYS style or SYS
+code with style 0000.
+
+**Interpretations made by 02.3 (conservative; the employer may change them):**
+- On a held order, only RESUME and the cancellations are accepted; quantity, due date and new lines are refused
+  (`ORDER_ON_HOLD`) because DEC-059 does not say whether a held order may change.
+- Cancelling every live line through CANCEL_LINE is refused (`LAST_LINE_CANCEL`); CANCEL_ORDER is the way.
+- A due-date planning approval can only approve (no planning rejection): the commercial manager rejects.
+- `apply` has no maker-checker of its own (DEC-059 names the applier role only).
+- Products and styles are created DRAFT; an order line needs the style, its product and the product type ACTIVE.

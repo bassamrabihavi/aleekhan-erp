@@ -889,7 +889,8 @@ def test_matrix_v20_seed_equals_section_7_of_the_matrix_document_cell_by_cell() 
     from platform_core.identity.models import Permission, Role, RolePermission
 
     doc = _matrix_v20_doc()
-    assert len(doc) == 22
+    assert len(doc) == 23  # 22 of v2.0 (0022) + the due-date planning approval of v2.1 (0024)
+    v21 = {"commercial.change.planning_approve": ("2.1", "DEC-059")}
     for action, (flags, holders) in doc.items():
         p = Permission.objects.get(action=action)
         assert (p.mfa_step_up, p.business_approval, p.maker_checker) == (
@@ -897,12 +898,15 @@ def test_matrix_v20_seed_equals_section_7_of_the_matrix_document_cell_by_cell() 
             "BA" in flags,
             "SoD" in flags,
         )
-        assert (p.matrix_version, p.decision_id) == ("2.0", "DEC-057")
+        assert (p.matrix_version, p.decision_id) == v21.get(action, ("2.0", "DEC-057"))
         grants = set(RolePermission.objects.filter(permission=p).values_list("role__code", "grant_mode"))
         assert grants == {(code, "SCOPE") for code in holders}, action  # all customers (DEC-057 answer 3)
     new = {r.code: r for r in Role.objects.filter(code__in=list(V20_COLUMNS.values())[2:])}
-    assert {(r.kind, r.status, r.matrix_version, r.decision_id) for r in new.values()} == {
-        ("BUSINESS", "ACTIVE", "2.0", "DEC-057")
+    assert {(r.kind, r.status, r.decision_id) for r in new.values()} == {("BUSINESS", "ACTIVE", "DEC-057")}
+    # v2.1 (0024): planning_officer gained the due-date planning approval; the other four stay at 2.0
+    assert {c: r.matrix_version for c, r in new.items()} == {
+        **{c: "2.0" for c in new},
+        "planning_officer": "2.1",
     }
     # nobody else holds a PHASE_02 permission (employee, technical roles, other business roles)
     others = RolePermission.objects.filter(permission__action__regex=r"^(identity|commercial)[.]").exclude(
