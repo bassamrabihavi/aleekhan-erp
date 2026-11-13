@@ -245,9 +245,9 @@
         },
         "02.3": {
           "name": "Domain Engine",
-          "state": "IN_PROGRESS",
-          "commit": null,
-          "report": null,
+          "state": "IN_REVIEW",
+          "commit": "3fb0162",
+          "report": "reports/phase-02/step-3/REPORT.md",
           "review": null,
           "rework_cycles": 0,
           "started_at": "2026-11-12T18:35:10+00:00",
@@ -3389,7 +3389,16 @@
       "status": "APPROVED",
       "by": "بسام ربیهاوی",
       "note": "Amendment 2026-11-13: style 0000 legacy-only (accepted at import, never issued)"
+    },
+    {
+      "at": "2026-11-13T05:17:58+00:00",
+      "kind": "step",
+      "phase": "PHASE_02",
+      "step": "02.3",
+      "state": "IN_REVIEW",
+      "note": null,
+      "commit": "3fb0162"
     }
   ],
-  "updated_at": "2026-11-13T04:34:50+00:00"
+  "updated_at": "2026-11-13T05:17:58+00:00"
 }
