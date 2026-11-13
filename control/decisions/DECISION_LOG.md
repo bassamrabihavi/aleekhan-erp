@@ -210,3 +210,10 @@ Raised by the 02.2 implementation and review (REV-0222); asked with AskUserQuest
   - A matrix permission for this approval is added (commercial.change_request.planning_approve, final name set in 02.3).
 - **DEC-059, cancel from hold:** an order or line that is ON_HOLD may be **cancelled directly** when its stored previous state is before release. After release, cancel stays blocked (C-A).
 - **Decided by:** بسام ربیهاوی (کارفرما).
+
+## 2026-11-13 — DEC-005 amendment: style number 0000
+Found by the 02.3 golden run on the Planning baseline (aggregates only): 14 real 14-digit codes, all of product type code 02, have style segment 0000. Asked with AskUserQuestion; the employer chose the recommended option.
+- **Legacy only:** existing codes with style 0000 are accepted as history at import, and may be registered or matched like any other legacy code.
+- **Never issued:** the system never generates style 0000; new styles always start at 0001.
+- **Golden tests:** these cases are marked legacy-only. They must parse exactly, and the build path must refuse them.
+- **Decided by:** بسام ربیهاوی (کارفرما).

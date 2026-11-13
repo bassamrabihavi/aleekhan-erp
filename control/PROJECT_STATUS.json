@@ -245,12 +245,12 @@
         },
         "02.3": {
           "name": "Domain Engine",
-          "state": "TODO",
+          "state": "IN_PROGRESS",
           "commit": null,
           "report": null,
           "review": null,
           "rework_cycles": 0,
-          "started_at": null,
+          "started_at": "2026-11-12T18:35:10+00:00",
           "done_at": null
         },
         "02.4": {
@@ -1627,9 +1627,9 @@
       "owner": "برنامه‌ریزی + بازرگانی",
       "phase": "PHASE_02",
       "source": "Planning--.xlsm",
-      "resolution": "Code14 = 02+type(2)+category(2)+product(4)+style(4); product=max per type+1 (belt=buckle code+width); style seq per product+category from 0001; B1 system reserves, Rahkaran confirms; family=product type; non-14 legacy DISPUTED; confirmer: employer",
+      "resolution": "Amendment 2026-11-13: style 0000 legacy-only (accepted at import, never issued)",
       "decided_by": "بسام ربیهاوی",
-      "decided_at": "2026-11-12T06:30:36+00:00"
+      "decided_at": "2026-11-13T04:34:50+00:00"
     },
     {
       "id": "DEC-006",
@@ -3372,7 +3372,24 @@
       "status": "APPROVED",
       "by": "بسام ربیهاوی",
       "note": "Amendment 2026-11-12: due-date approval by planning_officer, a different person from requester and decider; direct cancel from ON_HOLD allowed if previous state is pre-release"
+    },
+    {
+      "at": "2026-11-12T18:35:10+00:00",
+      "kind": "step",
+      "phase": "PHASE_02",
+      "step": "02.3",
+      "state": "IN_PROGRESS",
+      "note": null,
+      "commit": null
+    },
+    {
+      "at": "2026-11-13T04:34:50+00:00",
+      "kind": "decision",
+      "id": "DEC-005",
+      "status": "APPROVED",
+      "by": "بسام ربیهاوی",
+      "note": "Amendment 2026-11-13: style 0000 legacy-only (accepted at import, never issued)"
     }
   ],
-  "updated_at": "2026-11-12T18:34:55+00:00"
+  "updated_at": "2026-11-13T04:34:50+00:00"
 }
