@@ -1,0 +1,65 @@
+{
+  "phase": "PHASE_02",
+  "step": "02.3",
+  "commit_sha": "3fb0162",
+  "status": "COMPLETE",
+  "scope": [
+    "DEC-005 code rule engine (pure), code rule revision lifecycle, preview/issue/ERP match, style 0000 legacy-only",
+    "master data use cases: customers, brands, products, styles",
+    "order use cases: draft, confirm with serial allocation, release, hold/resume, cancel",
+    "change requests: 7 kinds, decide, planning approval, apply with versions and snapshots",
+    "PII masking and read audit for the representative name",
+    "stable refusal reasons, 36 outbox events",
+    "matrix v2.1 (owner read, planning_approve), migrations 0023-0024",
+    "golden harness + real Planning golden run (private file outside repo)"
+  ],
+  "changes": [
+    "backend/platform_core/product_identity/",
+    "backend/platform_core/commercial/",
+    "backend/platform_core/migrations/0023_phase02_engine.py",
+    "backend/platform_core/migrations/0024_dec057_dec059_matrix_v21.py",
+    "backend/platform_core/engine/events.py",
+    "backend/platform_core/tests/",
+    "ops/db/roles_check.sh",
+    "docs/discovery/STATE_TRANSITIONS.md",
+    "docs/discovery/DATA_TABLE.md",
+    "docs/db/ERD.md",
+    "docs/security/PERMISSION_MATRIX_DRAFT.md",
+    "docs/engine/ERROR_CODES.md",
+    "docs/integration/EVENT_CATALOGUE.md",
+    "CHANGELOG.md"
+  ],
+  "migrations": ["0023_phase02_engine", "0024_dec057_dec059_matrix_v21"],
+  "test_evidence": [
+    {"command": "ruff check . && ruff format --check .", "outcome": "PASS", "log_path": "reports/phase-02/step-3/logs/orch/ruff.log"},
+    {"command": "cd backend && python -m mypy .", "outcome": "PASS", "log_path": "reports/phase-02/step-3/logs/orch/mypy.log"},
+    {"command": "manage.py makemigrations --check --dry-run", "outcome": "PASS", "log_path": "reports/phase-02/step-3/logs/orch/makemigrations.log"},
+    {"command": "pytest -m \"not perf\" (2331 passed, 2 skipped)", "outcome": "PASS", "log_path": "reports/phase-02/step-3/logs/orch/pytest.log"},
+    {"command": "golden harness with ALEEKHAN_GOLDEN_FILE (2313 real cases, 0 not reproduced, 14 legacy-only)", "outcome": "PASS", "log_path": "reports/phase-02/step-3/logs/orch/golden_real.log"},
+    {"command": "pytest -k \"concurrent or race or parallel\" x3 (36 passed each)", "outcome": "PASS", "log_path": "reports/phase-02/step-3/logs/orch/race_x3.log"},
+    {"command": "backend/scripts/db_roundtrip.sh", "outcome": "PASS", "log_path": "reports/phase-02/step-3/logs/orch/db_roundtrip.log"},
+    {"command": "ops/db/roles_check.sh", "outcome": "PASS", "log_path": "reports/phase-02/step-3/logs/orch/roles_check.log"},
+    {"command": "tools/secret_scan.py", "outcome": "PASS", "log_path": "reports/phase-02/step-3/logs/orch/secret_scan.log"}
+  ],
+  "security_evidence": [
+    "real golden cases built in memory from the Planning baseline, macros not executed, stored only in F:/aleekhan/private-extract (outside repo); harness prints counts/indexes only",
+    "no real code, category, customer, person or serial in the repo",
+    "representative name masked for management_viewer, reads audited, excluded from events/snapshots",
+    "maker-checker and fresh MFA on code rule approve, order confirm, change decide; planning approver differs from requester and decider",
+    "app DB role may nextval but not setval sequences and cannot disable guards (roles_check)",
+    "secret scan findings=0; leak grep 0 hits"
+  ],
+  "decisions": [
+    "DEC-005 amendment 2026-11-13: style 0000 legacy-only",
+    "DEC-057 amendment 2026-11-12: owner read on PHASE_02",
+    "DEC-059 amendment 2026-11-12: due-date planning approver, cancel from hold",
+    "PROPOSED for employer: number formats CU-/SO-/CR-, planning_approve flags, held-order and last-line rules"
+  ],
+  "risks": [
+    "C-77 category lookup mismatch not yet checked",
+    "PHASE_02 approvals not linked to the platform approval inbox (02.4/02.5)"
+  ],
+  "evidence_paths": ["reports/phase-02/step-3/logs/", "docs/discovery/STATE_TRANSITIONS.md", "docs/engine/ERROR_CODES.md"],
+  "rollback": "manage.py migrate platform_core 0022 (tested), then git revert the step commit",
+  "review_request": "PASS"
+}
