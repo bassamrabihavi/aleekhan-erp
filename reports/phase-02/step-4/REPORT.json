@@ -1,0 +1,104 @@
+{
+  "phase": "PHASE_02",
+  "step": "02.4",
+  "commit_sha": "ee9d4e7",
+  "status": "COMPLETE",
+  "scope": [
+    "66 PHASE_02 API operations routed (contract 0.8.0-draft)",
+    "Jalali-year numbering with guarded counter (0025)",
+    "planning reject of due-date change",
+    "style collision -> first free number",
+    "golden harness C-77 and belt checks"
+  ],
+  "changes": [
+    "backend/platform_core/api/phase02/",
+    "backend/platform_core/api/urls.py",
+    "backend/platform_core/product_identity/",
+    "backend/platform_core/commercial/",
+    "backend/platform_core/migrations/0025_phase02_api_numbers.py",
+    "backend/platform_core/tests/",
+    "docs/api/openapi-draft.yaml",
+    "docs/api/API_RUNTIME.md",
+    "docs/",
+    "ops/db/grants.sql",
+    "ops/db/roles_check.sh",
+    "CHANGELOG.md"
+  ],
+  "migrations": [
+    "0025_phase02_api_numbers"
+  ],
+  "test_evidence": [
+    {
+      "command": "ruff check . && ruff format --check .",
+      "outcome": "PASS",
+      "log_path": "reports/phase-02/step-4/logs/orch/ruff.log"
+    },
+    {
+      "command": "cd backend && python -m mypy .",
+      "outcome": "PASS",
+      "log_path": "reports/phase-02/step-4/logs/orch/mypy.log"
+    },
+    {
+      "command": "manage.py makemigrations --check --dry-run",
+      "outcome": "PASS",
+      "log_path": "reports/phase-02/step-4/logs/orch/makemigrations.log"
+    },
+    {
+      "command": "openapi-spec-validator docs/api/openapi-draft.yaml",
+      "outcome": "PASS",
+      "log_path": "reports/phase-02/step-4/logs/orch/openapi_validate.log"
+    },
+    {
+      "command": "pytest -m \"not perf\" (3060 passed, 2 skipped)",
+      "outcome": "PASS",
+      "log_path": "reports/phase-02/step-4/logs/orch/pytest.log"
+    },
+    {
+      "command": "golden harness, real Planning v2 (2313 cases, 0 not reproduced, c77_disagree=0, belt_checked=169)",
+      "outcome": "PASS",
+      "log_path": "reports/phase-02/step-4/logs/orch/golden_real.log"
+    },
+    {
+      "command": "race tests x3 (38 passed each)",
+      "outcome": "PASS",
+      "log_path": "reports/phase-02/step-4/logs/orch/race_x3.log"
+    },
+    {
+      "command": "backend/scripts/db_roundtrip.sh",
+      "outcome": "PASS",
+      "log_path": "reports/phase-02/step-4/logs/orch/db_roundtrip.log"
+    },
+    {
+      "command": "ops/db/roles_check.sh (78/78)",
+      "outcome": "PASS",
+      "log_path": "reports/phase-02/step-4/logs/orch/roles_check.log"
+    },
+    {
+      "command": "tools/secret_scan.py",
+      "outcome": "PASS",
+      "log_path": "reports/phase-02/step-4/logs/orch/secret_scan.log"
+    }
+  ],
+  "security_evidence": [
+    "representative name returned only by getCustomerOrder (audited), [REDACTED] for management_viewer and in all list/write responses",
+    "no anonymous route; management_viewer and employee get 403 on every write (contract test per operation)",
+    "app DB role cannot reset or delete number counters",
+    "real golden data only in F:/aleekhan/private-extract (outside repo)",
+    "secret scan findings=0; leak grep 0 hits; handoff unchanged"
+  ],
+  "decisions": [
+    "DECISION_LOG 2026-11-14: Jalali-year numbers, held order resume/cancel only, style collision first free, planning may reject",
+    "open: allocateSerial keep/remove, planning_approve flags, approval inbox linkage, belt width source"
+  ],
+  "risks": [
+    "belt width not independently evidenced in Planning",
+    "PHASE_02 approvals not in platform approval inbox"
+  ],
+  "evidence_paths": [
+    "reports/phase-02/step-4/logs/",
+    "docs/api/openapi-draft.yaml",
+    "docs/api/API_RUNTIME.md"
+  ],
+  "rollback": "manage.py migrate platform_core 0024 (tested), then git revert ee9d4e7",
+  "review_request": "PASS"
+}
