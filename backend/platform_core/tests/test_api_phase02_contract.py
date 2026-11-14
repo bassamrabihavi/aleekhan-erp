@@ -46,6 +46,7 @@ MUTATING = {"post", "put", "patch", "delete"}
 SIDE_EFFECT_FREE = {"validateProductCode", "previewProductCode"}
 # POST on these sub-collections creates a child resource (no If-Match on the parent required by the rules).
 SUB_COLLECTIONS = {"brands", "styles", "revisions", "lines", "golden-cases"}
+SEEDED_WITHOUT_OPERATION = frozenset({"identity.serial.allocate"})
 ADDED_IN_02_4 = {"updateCustomerBrand", "addCodeRuleGoldenCases", "decidePlanningChangeRequest"}
 
 
@@ -73,7 +74,8 @@ def _schema(name: str) -> dict[str, Any]:
 # ---------------------------------------------------------------------------------------- static rules
 def test_every_phase02_operation_is_implemented_and_nothing_is_planned() -> None:
     ops = phase02_operations()
-    assert len(ops) == 66
+    assert len(ops) == 65  # 66 in 0.8.0-draft; allocateSerial removed (employer decision 2026-11-14)
+    assert "post" not in oc.spec()["paths"]["/identity/serials"]
     assert oc.planned_paths() == set()
     for path, _m, _op in ops:
         assert path.startswith(("/identity/", "/commercial/")), path  # owning-module prefix (C-63)
@@ -323,7 +325,10 @@ def test_seeded_phase02_permissions_equal_the_operations_and_mfa_flags() -> None
     seeded = {
         p.action: p.mfa_step_up for p in Permission.objects.filter(action__regex=r"^(identity|commercial)[.]")
     }
-    assert {a: {m} for a, m in seeded.items()} == operations
+    # allocateSerial was removed (DEC-006 L-A, decision 2026-11-14); its matrix row stays seeded (matrix v2.1
+    # unchanged, the grant reaches no operation) until the employer drops it in a later matrix version
+    assert SEEDED_WITHOUT_OPERATION <= set(seeded) and not SEEDED_WITHOUT_OPERATION & set(operations)
+    assert {a: {m} for a, m in seeded.items() if a not in SEEDED_WITHOUT_OPERATION} == operations
     assert len(seeded) == 23
 
 

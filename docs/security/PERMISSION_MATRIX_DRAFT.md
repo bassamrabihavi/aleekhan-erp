@@ -251,5 +251,6 @@ deciding manager). Still open (02.3): the flags of `commercial.change.planning_a
 `commercial.change.planning_approve` covers BOTH planning outcomes of a due-date change - approve and reject
 (DEC-059 amendment 2026-11-14; operation `decidePlanningChangeRequest`). The id is kept (no rename, no migration)
 so matrix v2.1 is unchanged; its flags stay MFA + BA + SoD as seeded by 0024 (still to be confirmed by the
-employer at the Gate). `identity.serial.allocate` maps to `allocateSerial`, which always answers 409
-`SERIAL_ALLOCATED_AT_CONFIRM` (DEC-006 L-A: serials are drawn by `commercial.order.confirm`).
+employer at the Gate). `identity.serial.allocate`: its operation `allocateSerial` was **removed** by the
+employer on 2026-11-14 (DEC-006 L-A: serials are drawn only by `commercial.order.confirm`). The row stays seeded
+(matrix v2.1 unchanged) and reaches no operation; dropping it needs a matrix version (open question).

@@ -110,8 +110,6 @@ PHASE02_BODIES: Final[dict[str, dict[str, F]]] = {
         "buckle_type_code": F("str", pattern=TWO),
         "belt_width_code": F("str", pattern=TWO),
         "category_code_order_form": F("str", pattern=TWO),
-        "belt_width_source": F("str", min_len=1, max_len=200),
-        "legacy_disputed": F("str", min_len=3, max_len=500),
     },
     "GoldenCase": {
         "inputs": F("obj", required=True, nested="GoldenCaseInputs"),
@@ -121,10 +119,6 @@ PHASE02_BODIES: Final[dict[str, dict[str, F]]] = {
     },
     "GoldenCasesAddRequest": {
         "cases": F("objlist", required=True, nested="GoldenCase", min_items=1, max_items=2000),
-    },
-    "SerialAllocateRequest": {
-        "order_line_id": F("uuid", required=True),
-        "order_line_row_version": F("int", required=True, minimum=1),
     },
     "ExternalRefCreateRequest": {
         "target_type": F("str", required=True, choices=TARGET_TYPES),

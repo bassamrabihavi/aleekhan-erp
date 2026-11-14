@@ -207,7 +207,8 @@ class GoldenCase:
     category_code_order_form: str | None = None
     # REV-0231: where the belt width segment was read (evidence text only, never checked as data)
     belt_width_source: str | None = None
-    # REV-0231: a legacy row planning disputes (non-empty reason): reported, never failed, never counted
+    # REV-0231: a legacy row the extraction disputes (non-empty reason): the OFFLINE harness reports it and
+    # does not count it; the server gate never sees it (refused at input, REV-0240), never skips a stored case
     legacy_disputed: str | None = None
 
     @classmethod

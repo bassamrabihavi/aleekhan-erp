@@ -243,7 +243,7 @@ All 99 PHASE_01 operations are served (`backend/platform_core/api/phase01/`, rou
 
 ## 14. PHASE_02 implemented (contract 0.8.0-draft, step 02.4)
 
-All 66 PHASE_02 operations are served (`backend/platform_core/api/phase02/`, routes in `phase02/urls.py`) on top
+All 66 PHASE_02 operations (65 since 0.8.2-draft, section 14.2) are served (`backend/platform_core/api/phase02/`, routes in `phase02/urls.py`) on top
 of the 02.3 use cases; route parity covers all 139 paths and no path is planned any more. Contract tests:
 `test_api_phase02_contract.py` (body specs == request schemas, routed permission == `x-aleekhan-permission`,
 seeded matrix == operations + MFA flags, refusal reasons == engine catalogue, real-session 428 / 412 / 400 on
@@ -282,11 +282,29 @@ every write, employee 403 on every operation, management_viewer 403 on every wri
   call, counts-only response), `decidePlanningChangeRequest` (POST `/commercial/change-requests/{id}/planning-decision`,
   `{decision: APPROVE | REJECT, note}`; DEC-059 amendments 2026-11-12 / 2026-11-14; one permission
   `commercial.change.planning_approve` for both outcomes; a rejection needs a note and closes the request REJECTED).
-- **Decided refusals kept** (conservative, documented in the contract): `allocateSerial` always 409
-  `SERIAL_ALLOCATED_AT_CONFIRM` (DEC-006 L-A); a confirmed order is cancelled only by a `CANCEL_ORDER` change
+- **Decided refusals kept** (conservative, documented in the contract): ~~`allocateSerial` always 409
+  `SERIAL_ALLOCATED_AT_CONFIRM`~~ (removed in 0.8.2-draft, section 14.2); a confirmed order is cancelled only by a `CANCEL_ORDER` change
   request; held orders accept only resume or cancel (DEC-059 amendment 2026-11-14); product / style numbers are
   never typed in (computed by the DEC-005 rule); product types and categories are read-only (server import).
 - **Search** (`q`): normalised contains (`ي`/`ی`, `ك`/`ک`, half-space -> space, lower case) on both sides; never a
   merge. `findSimilarStyles` ranks deterministically (1.0 same product + similar name, 0.5 similar name).
 - **Rate limits / pagination / request id**: unchanged (section 2): `principal` bucket per user, cursor pages of
   1..100, `X-Request-ID` echoed (canonical UUID) and in every problem body.
+
+### 14.1 Rework 1 (contract 0.8.1-draft)
+- `addCodeRuleGoldenCases` refuses the harness-only inputs `legacy_disputed` / `belt_width_source` (400
+  `GOLDEN_FIELD_NOT_ALLOWED`); the server gate checks and counts every stored case at submit and approve
+  (REV-0240). Every code rule revision read carries `golden_summary` (counts only) for the approver.
+- `getStyleTracking` / `getSerialTracking`: a block under another read permission the caller lacks is withheld
+  (`withheld_sections`; style counts become null) - REV-0242.
+
+### 14.2 Employer decisions 2026-11-14 (contract 0.8.2-draft)
+- `allocateSerial` (POST `/identity/serials`) is removed: the path answers 405 for POST; a serial is created only
+  by `confirmCustomerOrder` (and an applied ADD_LINE change request) in the same transaction (DEC-006 L-A). The
+  reason `SERIAL_ALLOCATED_AT_CONFIRM` is removed. The matrix row `identity.serial.allocate` stays seeded (matrix
+  v2.1 unchanged) but reaches no operation.
+- Belt products: `createProduct` takes the user-typed 2-digit width (`belt_width_code`, e.g. `35` = 3.5 cm) with
+  `buckle_type_code`; both are stored on the product and `product_no` = buckle + width. A missing segment answers
+  400 `BELT_SEGMENTS_REQUIRED` naming the missing field; a segment for a non-belt type 400
+  `BELT_SEGMENTS_NOT_ALLOWED`. Storage and DB guards already existed (0019 `ck_identity_product_belt_no`, 0020
+  `ck_identity_product_belt_scheme`); no migration.

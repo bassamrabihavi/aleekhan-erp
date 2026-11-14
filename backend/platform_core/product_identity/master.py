@@ -313,7 +313,11 @@ def proposed_product_no(
     belt = t.product_no_scheme == ProductNoScheme.BELT_BUCKLE_WIDTH
     if belt:
         if buckle_type_code is None or belt_width_code is None:
-            refuse(Reason.BELT_SEGMENTS_REQUIRED, field="buckle_type_code")
+            # DEC-005 follow-up 2026-11-14: the user types the 2-digit width with the buckle-type code
+            missing = "buckle_type_code" if buckle_type_code is None else "belt_width_code"
+            refuse(
+                Reason.BELT_SEGMENTS_REQUIRED, field=missing, detail="a belt product needs buckle and width"
+            )
         return coderule.belt_product_no(buckle_type_code, belt_width_code)
     if buckle_type_code is not None or belt_width_code is not None:
         refuse(Reason.BELT_SEGMENTS_NOT_ALLOWED, field="buckle_type_code")

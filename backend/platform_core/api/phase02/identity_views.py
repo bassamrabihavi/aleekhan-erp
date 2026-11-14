@@ -6,8 +6,8 @@ flags it (401 ``MFA_REQUIRED``), GLOBAL record scope (404), ``Idempotency-Key`` 
 permission, version and state again inside their unit of work (defence in depth).
 
 Product types and categories are read-only here (they come from the Planning ``Sorce`` sheet through the
-server import, DEC-005 / R-38). A stand-alone serial allocation does not exist (DEC-006 L-A: serials are drawn
-by the order confirmation): ``allocateSerial`` answers 409 ``SERIAL_ALLOCATED_AT_CONFIRM``.
+server import, DEC-005 / R-38). A stand-alone serial allocation does not exist (DEC-006 L-A, employer
+decision 2026-11-14: ``allocateSerial`` is removed; serials are drawn only by the order confirmation).
 """
 
 from __future__ import annotations
@@ -19,6 +19,7 @@ from django.db.models import Count, Q
 from rest_framework.request import Request
 from rest_framework.response import Response
 
+from platform_core.authz import policy as P
 from platform_core.authz.policy import Caller
 from platform_core.commercial.models import CustomerOrderLine
 from platform_core.engine.errors import FieldError, NotFound, ValidationFailed
@@ -60,7 +61,7 @@ from ..phase01.common import (
     write,
 )
 from . import serializers as S
-from .common import Phase02View, apply_search, object_or_404, query_date, scoped
+from .common import GLOBAL, Phase02View, apply_search, object_or_404, query_date, scoped
 
 CUSTOMER_READ: Final = "identity.customer.read"
 CUSTOMER_MANAGE: Final = "identity.customer.manage"
@@ -72,7 +73,6 @@ RULE_READ: Final = "identity.code_rule.read"
 RULE_MANAGE: Final = "identity.code_rule.manage"
 RULE_APPROVE: Final = "identity.code_rule.approve"
 SERIAL_READ: Final = "identity.serial.read"
-SERIAL_ALLOCATE: Final = "identity.serial.allocate"
 REF_READ: Final = "identity.external_ref.read"
 REF_MANAGE: Final = "identity.external_ref.manage"
 HISTORICAL_READ: Final = "identity.historical.read"
@@ -365,13 +365,20 @@ class ActivateStyleRevisionView(Phase02View):
 
 
 class StyleTrackingView(Phase02View):
-    """Page 4 (Product/Style 360), PHASE_02 part: counts and the serials of the style (server-computed)."""
+    """Page 4 (Product/Style 360), PHASE_02 part: counts and the serials of the style (server-computed).
+
+    REV-0242: every block is under its own read permission - serials and their counts need
+    ``identity.serial.read``, the order count ``commercial.order.read``; a block the caller may not read is
+    empty / null and named in ``withheld_sections`` (never leaked through the style permission)."""
 
     required_action = PRODUCT_READ
 
     def get(self, request: Request, style_id: uuid.UUID) -> Response:
         s = object_or_404(self, Style.objects.all(), style_id)
-        serials = Serial.objects.filter(style=s)
+        caller = self.caller()
+        see_serials = P.can(caller, SERIAL_READ, GLOBAL)
+        see_orders = P.can(caller, "commercial.order.read", GLOBAL)
+        serials = Serial.objects.filter(style=s) if see_serials else Serial.objects.none()
         customer = query_uuid(request, "customer_id")
         if customer is not None:
             serials = serials.filter(customer_id=customer)
@@ -384,19 +391,26 @@ class StyleTrackingView(Phase02View):
         if end is not None:
             serials = serials.filter(allocated_at__date__lte=end)
         page = paginate(request, self, serials, S.serial_summary, ordering="-serial_value")
-        orders = CustomerOrderLine.objects.filter(style=s).values("order_id").distinct().count()
+        orders = (
+            CustomerOrderLine.objects.filter(style=s).values("order_id").distinct().count()
+            if see_orders
+            else None
+        )
         counts = Serial.objects.filter(style=s).aggregate(
             total=Count("pk"), active=Count("pk", filter=~Q(status=SerialStatus.CANCELLED))
         )
         body = {
             "style": S.style(s),
             "counts": {
-                "serials_total": counts["total"],
-                "serials_active": counts["active"],
+                "serials_total": counts["total"] if see_serials else None,
+                "serials_active": counts["active"] if see_serials else None,
                 "orders_total": orders,
             },
             "serials": page.data["items"],
             "unavailable_sections": S.UNAVAILABLE,
+            "withheld_sections": [
+                n for n, ok in (("serials", see_serials), ("orders", see_orders)) if not ok
+            ],
             "page": page.data["page"],
         }
         return Response(body, headers=NO_STORE)
@@ -629,6 +643,19 @@ class CodeRuleView(Phase02View):
         return etag_response(S.code_rule(r), r.row_version)
 
 
+def _refuse_harness_only_fields(raw: Any) -> None:
+    """REV-0240: ``legacy_disputed`` / ``belt_width_source`` belong to the offline harness report; the server
+    gate never accepts them (stable reason, before the generic body validation)."""
+    cases = raw.get("cases") if isinstance(raw, dict) else None
+    if not isinstance(cases, list):
+        return
+    for i, case in enumerate(cases[:2000]):
+        inputs = case.get("inputs") if isinstance(case, dict) else None
+        if isinstance(inputs, dict):
+            for key in sorted(set(inputs) & codes.HARNESS_ONLY_GOLDEN_FIELDS):
+                refuse(Reason.GOLDEN_FIELD_NOT_ALLOWED, field=f"cases[{i}].inputs.{key}")
+
+
 class CodeRuleGoldenCasesView(Phase02View):
     """Attach golden cases to a DRAFT revision (evidence, checked at submit). Real cases are entered on the
     server only (DEC-028 / DEC-046); the response carries counts only, never a case value."""
@@ -636,6 +663,7 @@ class CodeRuleGoldenCasesView(Phase02View):
     required_action = RULE_MANAGE
 
     def post(self, request: Request, rule_revision_id: uuid.UUID) -> Response:
+        _refuse_harness_only_fields(request.data)
         data = body_of(request, "GoldenCasesAddRequest")
 
         def run(caller: Caller, rid: uuid.UUID) -> StoredResponse:
@@ -698,7 +726,6 @@ ActivateCodeRuleView = _rule_action(
 # ------------------------------------------------------------------------------------------------- serials
 class SerialsView(Phase02View):
     required_action = SERIAL_READ
-    write_action = SERIAL_ALLOCATE
 
     def get(self, request: Request) -> Response:
         qs = scoped(self, Serial.objects.select_related("serial_counter"))
@@ -720,18 +747,6 @@ class SerialsView(Phase02View):
         if status:
             qs = qs.filter(status=status)
         return paginate(request, self, qs, S.serial, ordering="-serial_value")
-
-    def post(self, request: Request) -> Response:
-        body_of(request, "SerialAllocateRequest")
-
-        def run(caller: Caller, rid: uuid.UUID) -> StoredResponse:
-            refuse(
-                Reason.SERIAL_ALLOCATED_AT_CONFIRM,
-                field="order_line_id",
-                detail="serials are allocated by the order confirmation (DEC-006 L-A)",
-            )
-
-        return write(self, run)
 
 
 class SerialView(Phase02View):
@@ -775,7 +790,11 @@ _REF_TYPE: Final = {
 
 class SerialTrackingView(Phase02View):
     """Pages 1/2 (serial 360), PHASE_02 part: the serial, its order versions and the audited events of the
-    serial, its order and the order's change requests (newest 200)."""
+    serial, its order and the order's change requests (newest 200).
+
+    REV-0242: order versions and order events need ``commercial.order.read``, change-request events
+    ``commercial.change.read``; a block the caller may not read is left out and named in
+    ``withheld_sections``."""
 
     required_action = SERIAL_READ
 
@@ -783,13 +802,19 @@ class SerialTrackingView(Phase02View):
         from platform_core.commercial.models import CustomerOrderVersion, OrderChangeRequest
 
         s = object_or_404(self, Serial.objects.select_related("serial_counter"), serial_id)
+        caller = self.caller()
+        see_orders = P.can(caller, "commercial.order.read", GLOBAL)
+        see_changes = P.can(caller, "commercial.change.read", GLOBAL)
         ln = CustomerOrderLine.objects.filter(serial_id=s.pk).first()
         versions = (
-            CustomerOrderVersion.objects.filter(order_id=ln.order_id).order_by("version")[:200] if ln else []
+            CustomerOrderVersion.objects.filter(order_id=ln.order_id).order_by("version")[:200]
+            if ln and see_orders
+            else []
         )
         ids = [str(s.pk)]
-        if ln is not None:
+        if ln is not None and see_orders:
             ids.append(str(ln.order_id))
+        if ln is not None and see_changes:
             ids += [
                 str(x)
                 for x in OrderChangeRequest.objects.filter(order_id=ln.order_id).values_list("pk", flat=True)
@@ -816,6 +841,15 @@ class SerialTrackingView(Phase02View):
                 for e in events
             ],
             "unavailable_sections": S.UNAVAILABLE,
+            "withheld_sections": [
+                n
+                for n, ok in (
+                    ("order_versions", see_orders),
+                    ("order_events", see_orders),
+                    ("change_requests", see_changes),
+                )
+                if not ok
+            ],
         }
         return Response(body, headers=NO_STORE)
 

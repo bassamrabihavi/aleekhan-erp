@@ -687,20 +687,10 @@ def test_order_lifecycle_representative_masking_serials_and_versions() -> None:
         "get",
     )
     assert style_track["counts"]["serials_total"] == 1 and style_track["serials"][0]["serial_id"] == sid
-    # a stand-alone allocation does not exist (DEC-006 L-A)
-    refused(
-        post(
-            t.c["po"],
-            "/identity/serials",
-            {"order_line_id": live[0]["line_id"], "order_line_row_version": 1},
-            **idem(),
-        ),
-        "/identity/serials",
-        "post",
-        409,
-        "STATE_TRANSITION_NOT_ALLOWED",
-        "SERIAL_ALLOCATED_AT_CONFIRM",
-    )
+    # a stand-alone allocation does not exist (DEC-006 L-A, decision 2026-11-14): the operation is gone
+    r = post(t.c["po"], "/identity/serials", {"order_line_id": live[0]["line_id"]}, **idem())
+    assert r.status_code == 405 and code(r) == "METHOD_NOT_ALLOWED"
+    assert Serial.objects.count() == 1
     # cancel an unconfirmed order
     d = _draft(t)
     can = ok(
@@ -1235,3 +1225,227 @@ def test_anonymous_and_non_session_callers_are_refused() -> None:
     c = Client(REMOTE_ADDR=INTERNAL_IP)
     r = c.get(f"{API}/identity/customers")
     refused(r, "/identity/customers", "get", 401, "AUTHENTICATION_REQUIRED")
+
+
+# ------------------------------------------------------------------------- 02.4 rework 1 (REV-0240..0243)
+def test_rev0240_golden_cases_api_refuses_harness_fields_and_shows_the_counts() -> None:
+    t = Team()
+    s, _rev = _chain()
+    seg = s.product.product_type.segment_value
+    rp = "/identity/code-rule-revisions"
+    gp = "/identity/code-rule-revisions/{rule_revision_id}/golden-cases"
+    rule = ok(
+        post(
+            t.c["pds"],
+            rp,
+            {"product_type_codes": [seg], "source_workbook_sha256": SHA, "reason": "synthetic"},
+            **idem(),
+        ),
+        rp,
+        "post",
+        201,
+    )
+    one = f"{rp}/{rule['rule_revision_id']}"
+    for field in ("legacy_disputed", "belt_width_source"):
+        cases = _golden(seg)
+        cases[0]["inputs"] = {**cases[0]["inputs"], field: "synthetic"}
+        refused(
+            post(t.c["pds"], f"{one}/golden-cases", {"cases": cases}, **idem()),
+            gp,
+            "post",
+            400,
+            "VALIDATION_FAILED",
+            "GOLDEN_FIELD_NOT_ALLOWED",
+        )
+    ok(post(t.c["pds"], f"{one}/golden-cases", {"cases": _golden(seg)}, **idem()), gp, "post", 201)
+    got = ok(get(t.c["cra"], one), "/identity/code-rule-revisions/{rule_revision_id}", "get")
+    assert got["golden_summary"] == {
+        "total": 20,
+        "per_family": {seg: 20},
+        "belt_checked": 0,
+        "legacy_only_style_0000": 0,
+        "not_reproduced": 0,
+        "families_below_minimum": [],
+    }
+
+
+def _approved_rule(t: Team) -> tuple[str, dict[str, Any]]:
+    s, _rev = _chain()
+    seg = s.product.product_type.segment_value
+    rp = "/identity/code-rule-revisions"
+    rule = ok(
+        post(
+            t.c["pds"],
+            rp,
+            {"product_type_codes": [seg], "source_workbook_sha256": SHA, "reason": "synthetic"},
+            **idem(),
+        ),
+        rp,
+        "post",
+        201,
+    )
+    one = f"{rp}/{rule['rule_revision_id']}"
+    rule = ok(
+        post(t.c["pds"], f"{one}/golden-cases", {"cases": _golden(seg)}, **idem()),
+        "/identity/code-rule-revisions/{rule_revision_id}/golden-cases",
+        "post",
+        201,
+    )["revision"]
+    rule = ok(
+        post(t.c["pds"], f"{one}/submit-review", {"reason": "synthetic"}, **if_match(rule["row_version"])),
+        "/identity/code-rule-revisions/{rule_revision_id}/submit-review",
+        "post",
+    )
+    return one, rule
+
+
+def test_rev0243_stale_mfa_is_refused_on_reject_activate_and_planning_decision() -> None:
+    t = Team()
+    stale = session_client(t.cra, mfa=False)
+    one, rule = _approved_rule(t)
+    refused(
+        post(stale, f"{one}/reject", {"reason": "synthetic"}, **if_match(rule["row_version"])),
+        "/identity/code-rule-revisions/{rule_revision_id}/reject",
+        "post",
+        401,
+        "MFA_REQUIRED",
+    )
+    rule = ok(
+        post(
+            t.c["cra"],
+            f"{one}/approve",
+            {"resource_revision": rule["revision_no"], "note": "syn"},
+            **if_match(rule["row_version"]),
+        ),
+        "/identity/code-rule-revisions/{rule_revision_id}/approve",
+        "post",
+    )
+    refused(
+        post(stale, f"{one}/activate", {"reason": "synthetic"}, **if_match(rule["row_version"])),
+        "/identity/code-rule-revisions/{rule_revision_id}/activate",
+        "post",
+        401,
+        "MFA_REQUIRED",
+    )
+    o = _confirmed(t)
+    cr = _cr(t, o, "DUE_DATE_CHANGE", [{"line_id": None, "requested_due_date": "2030-07-01"}])
+    refused(
+        post(
+            session_client(t.po2, mfa=False),
+            f"/commercial/change-requests/{cr['change_request_id']}/planning-decision",
+            {"decision": "APPROVE"},
+            **if_match(cr["row_version"]),
+        ),
+        "/commercial/change-requests/{change_request_id}/planning-decision",
+        "post",
+        401,
+        "MFA_REQUIRED",
+    )
+
+
+def _role_with(*perms: str) -> User:
+    """A synthetic BUSINESS role holding exactly ``perms`` (a matrix where the read permissions differ)."""
+    import secrets
+
+    from platform_core.identity.models import Permission, Role, RolePermission
+
+    code_ = f"syn_p2_{secrets.token_hex(3)}"
+    r = Role.objects.create(code=code_, name_fa=f"نقش ساختگی {f.SYN}", kind="BUSINESS", status="DRAFT")
+    for p in Permission.objects.filter(action__in=perms):
+        RolePermission.objects.create(role=r, permission=p, grant_mode="SCOPE")
+    Role.objects.filter(pk=r.pk).update(status="ACTIVE", matrix_version="1.0")
+    u = person()
+    give_role(u, code_)
+    return u
+
+
+def test_rev0242_tracking_blocks_need_their_own_read_permission() -> None:
+    t = Team()
+    o = _confirmed(t)
+    sid = o["lines"][0]["serial_id"]
+    style_id = o["lines"][0]["style_id"]
+    sp = "/identity/styles/{style_id}/tracking"
+    tp = "/identity/serials/{serial_id}/tracking"
+    product_only = session_client(_role_with("identity.product.read"))
+    tr = ok(get(product_only, f"/identity/styles/{style_id}/tracking"), sp, "get")
+    assert tr["serials"] == [] and tr["withheld_sections"] == ["serials", "orders"]
+    assert tr["counts"] == {"serials_total": None, "serials_active": None, "orders_total": None}
+    full = ok(get(t.c["viewer"], f"/identity/styles/{style_id}/tracking"), sp, "get")
+    assert full["withheld_sections"] == [] and full["counts"]["serials_total"] == 1
+    serial_only = session_client(_role_with("identity.serial.read"))
+    st = ok(get(serial_only, f"/identity/serials/{sid}/tracking"), tp, "get")
+    assert st["order_versions"] == [] and st["withheld_sections"] == [
+        "order_versions",
+        "order_events",
+        "change_requests",
+    ]
+    assert {e["ref"]["entity_type"] for e in st["events"]} <= {"serial"}
+    with_orders = session_client(_role_with("identity.serial.read", "commercial.order.read"))
+    st2 = ok(get(with_orders, f"/identity/serials/{sid}/tracking"), tp, "get")
+    assert [v["version"] for v in st2["order_versions"]] == [1] and st2["withheld_sections"] == [
+        "change_requests"
+    ]
+    assert ok(get(t.c["viewer"], f"/identity/serials/{sid}/tracking"), tp, "get")["withheld_sections"] == []
+
+
+def test_belt_product_takes_the_typed_width_with_the_buckle_and_refuses_a_missing_segment() -> None:
+    """DEC-005 follow-up 2026-11-14: the user types the 2-digit width; product_no = buckle + width."""
+    t = Team()
+    belt = f.product_type(product_no_scheme="BELT_BUCKLE_WIDTH")
+    plain = f.product_type()
+    pp = "/identity/products"
+    base = {"product_class_id": str(belt.pk), "name_fa": f"کمربند ساختگی {f.SYN}"}
+    made = ok(
+        post(t.c["pds"], pp, {**base, "buckle_type_code": "07", "belt_width_code": "35"}, **idem()),
+        pp,
+        "post",
+        201,
+    )
+    assert (made["product_no"], made["buckle_type_code"], made["belt_width_code"]) == ("0735", "07", "35")
+    refused(
+        post(t.c["pds"], pp, {**base, "buckle_type_code": "07"}, **idem()),
+        pp,
+        "post",
+        400,
+        "VALIDATION_FAILED",
+        "BELT_SEGMENTS_REQUIRED",
+    )
+    r = post(t.c["pds"], pp, {**base, "belt_width_code": "35"}, **idem())
+    refused(r, pp, "post", 400, "VALIDATION_FAILED", "BELT_SEGMENTS_REQUIRED")
+    assert body(r)["errors"][0]["field"] == "buckle_type_code"
+    r = post(t.c["pds"], pp, {**base, "buckle_type_code": "07"}, **idem())
+    assert body(r)["errors"][0]["field"] == "belt_width_code"
+    refused(
+        post(t.c["pds"], pp, {**base, "buckle_type_code": "07", "belt_width_code": "3.5"}, **idem()),
+        pp,
+        "post",
+        400,
+        "VALIDATION_FAILED",
+        "PATTERN_MISMATCH",
+    )
+    refused(
+        post(
+            t.c["pds"],
+            pp,
+            {
+                "product_class_id": str(plain.pk),
+                "name_fa": f"م {f.SYN}",
+                "belt_width_code": "35",
+                "buckle_type_code": "07",
+            },
+            **idem(),
+        ),
+        pp,
+        "post",
+        400,
+        "VALIDATION_FAILED",
+        "BELT_SEGMENTS_NOT_ALLOWED",
+    )
+    refused(
+        post(t.c["pds"], pp, {**base, "buckle_type_code": "07", "belt_width_code": "35"}, **idem()),
+        pp,
+        "post",
+        409,
+        "STATE_TRANSITION_NOT_ALLOWED",
+        "PRODUCT_NO_TAKEN",
+    )

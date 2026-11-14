@@ -364,3 +364,23 @@ Review verdicts are in `reports/phase-00/step-N/REVIEW.md`. No version number is
   `roles_check.sh` updated.
 - Tests: `test_api_phase02_contract.py` (replaces `test_api_contract_planned_phase02.py`), `test_api_phase02_flows.py`,
   `test_phase02_jalali.py`, harness / engine additions.
+
+### 02.4 rework 1 (REV-0240 / REV-0242 / REV-0243)
+- REV-0240 [P1]: the server code-rule gate never skips a stored golden case (`codes.golden_report`: the
+  `legacy_disputed` skip is removed; any non-reproducing case blocks submit and approve). Harness-only inputs
+  (`legacy_disputed`, `belt_width_source`) and unknown input keys are refused at input (API and engine:
+  400 `GOLDEN_FIELD_NOT_ALLOWED`, new refusal reason). `CodeRuleRevision.golden_summary` (total, per family,
+  belt-checked, legacy-only 0000, not reproduced, families below minimum) is shown on every revision read. The
+  offline pytest harness keeps reporting `legacy_disputed` separately as evidence only (docstrings say so).
+- REV-0242: style / serial tracking check each block's own read permission (`identity.serial.read`,
+  `commercial.order.read`, `commercial.change.read`); withheld blocks are empty / null and named in
+  `withheld_sections`.
+- REV-0243: HTTP stale-MFA 401 tests for rejectCodeRuleRevision, activateCodeRuleRevision,
+  decidePlanningChangeRequest.
+- Contract 0.8.1-draft (GoldenCaseInputs without the harness fields, GoldenSummary, withheld_sections, nullable
+  style tracking counts, GOLDEN_FIELD_NOT_ALLOWED).
+- Employer decisions 2026-11-14 (contract 0.8.2-draft): `allocateSerial` removed (route, view, body,
+  `SERIAL_ALLOCATED_AT_CONFIRM`; contract and route-parity tests 65 operations; matrix row
+  `identity.serial.allocate` stays seeded, unused). Belt products take the typed 2-digit width with the buckle
+  code (existing columns and guards; missing segment named in `BELT_SEGMENTS_REQUIRED`). DATA_TABLE: the legacy
+  belt import rule (14-digit code authoritative, order buckle column kept as a note).

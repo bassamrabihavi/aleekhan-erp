@@ -37,6 +37,12 @@ never a code, product or style value (logs and reports stay free of real data).
 * **Legacy disputed** (``legacy_disputed``: a non-empty reason): the case is reported
   (``legacy_disputed=<n>``) and never fails, but it counts neither toward the family minimum nor toward the
   belt minimum, and it is not part of the C-77 counts.
+
+**This harness is offline evidence only, never the publish gate (REV-0240).** The server gate
+(``product_identity.codes.golden_report`` at submit and approve) checks and counts EVERY stored case and
+refuses the harness-only fields ``legacy_disputed`` / ``belt_width_source`` at input
+(``GOLDEN_FIELD_NOT_ALLOWED``); a row the extraction labels disputed must be resolved (excluded from the
+upload by a recorded decision, or kept and made to reproduce) before a revision can be submitted.
 """
 
 from __future__ import annotations

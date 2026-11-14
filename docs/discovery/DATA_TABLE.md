@@ -358,3 +358,16 @@ Rahkaran code that differs from the Planning code).
   manager; excludes a planning approval).
 - **External references:** written by `product_identity/external.py` (create / end; raw value kept exactly, never
   parsed; duplicate per system + type + value + target refused `EXTERNAL_REF_EXISTS`).
+
+### Employer decisions 2026-11-14 (DEC-005 / DEC-006 follow-ups; REV-0241)
+- **Belt width, new products:** the user types the 2-digit width (e.g. `35` = 3.5 cm) with the buckle-type code
+  in the product form; both are stored on `identity_product` (`buckle_type_code`, `belt_width_code`) and
+  `product_no` = buckle + width (`coderule.belt_product_no`; CHECK `ck_identity_product_belt_no`, trigger
+  `ck_identity_product_belt_scheme`). No new column was needed.
+- **Import rule for 02.6 (legacy belt rows):** the **14-digit code is authoritative**. A legacy belt product's
+  segments are read from the code: buckle = `product_no[0:2]`, width = `product_no[2:4]`. When the order row's
+  buckle-type column differs from the code (15 rows in the Planning baseline), the row is imported without review
+  and that column is kept only as a note (payload text), never used to build or correct a segment. Golden
+  evidence for belts uses only rows whose order buckle agrees with the code.
+- **Serials:** `allocateSerial` is removed from the API; a serial is created only by order confirmation (and an
+  applied ADD_LINE) in the same transaction (DEC-006 L-A).

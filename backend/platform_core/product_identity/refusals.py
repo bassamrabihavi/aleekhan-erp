@@ -50,6 +50,7 @@ class Reason(StrEnum):
     UNKNOWN_WARNING = "UNKNOWN_WARNING"  # acknowledged a warning code that does not exist
     BRAND_OF_OTHER_CUSTOMER = "BRAND_OF_OTHER_CUSTOMER"  # DEC-058
     REPRESENTATIVE_NAME_INVALID = "REPRESENTATIVE_NAME_INVALID"  # DEC-058: a name only
+    GOLDEN_FIELD_NOT_ALLOWED = "GOLDEN_FIELD_NOT_ALLOWED"  # REV-0240: harness-only / unknown golden input
     # --- state / conflict (409 STATE_TRANSITION_NOT_ALLOWED)
     STATE_NOT_ALLOWED = "STATE_NOT_ALLOWED"  # generic: the record is not in a state that allows it
     MASTER_NOT_ACTIVE = "MASTER_NOT_ACTIVE"  # customer / brand / type / style / revision not ACTIVE
@@ -75,7 +76,6 @@ class Reason(StrEnum):
     LINE_NOT_IN_ORDER = "LINE_NOT_IN_ORDER"
     # 02.4
     EXTERNAL_REF_EXISTS = "EXTERNAL_REF_EXISTS"  # same system + type + value + target already recorded
-    SERIAL_ALLOCATED_AT_CONFIRM = "SERIAL_ALLOCATED_AT_CONFIRM"  # DEC-006 L-A: no stand-alone allocation
     RULE_REVISION_NOT_ACTIVE = "RULE_REVISION_NOT_ACTIVE"  # the named rule revision is not the ACTIVE one
     # --- maker-checker (403 SELF_APPROVAL_FORBIDDEN)
     CONFIRMER_IS_CREATOR = "CONFIRMER_IS_CREATOR"  # DEC-057
@@ -121,6 +121,7 @@ _BY_CODE: dict[ErrorCode, tuple[Reason, ...]] = {
         Reason.UNKNOWN_WARNING,
         Reason.BRAND_OF_OTHER_CUSTOMER,
         Reason.REPRESENTATIVE_NAME_INVALID,
+        Reason.GOLDEN_FIELD_NOT_ALLOWED,
     ),
     _S: (
         Reason.STATE_NOT_ALLOWED,
@@ -146,7 +147,6 @@ _BY_CODE: dict[ErrorCode, tuple[Reason, ...]] = {
         Reason.PLANNING_ALREADY_APPROVED,
         Reason.LINE_NOT_IN_ORDER,
         Reason.EXTERNAL_REF_EXISTS,
-        Reason.SERIAL_ALLOCATED_AT_CONFIRM,
         Reason.RULE_REVISION_NOT_ACTIVE,
     ),
     _SA: (

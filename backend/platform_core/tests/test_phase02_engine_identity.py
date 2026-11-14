@@ -574,3 +574,76 @@ def test_rev0231_rev0230_submit_refuses_belt_cases_without_segments_and_c77_disa
     with pytest.raises(StateTransitionNotAllowed) as exc2:
         codes.submit_rule_revision(p.pds.caller, bad.pk, expected_version=bad.row_version)
     assert _reason(exc2.value) == "GOLDEN_CASE_MISMATCH"
+
+
+# ------------------------------------------------------------------- REV-0240: the server gate skips nothing
+def test_rev0240_harness_only_golden_fields_are_refused_at_input(p: e.People) -> None:
+    r = codes.create_rule_revision(p.pds.caller, product_type_codes=["91"], source_workbook_sha256=SHA)
+    for extra in (
+        {"legacy_disputed": "synthetic reason"},
+        {"belt_width_source": "synthetic"},
+        {"syn_unknown": "x"},
+    ):
+        cases = _golden(["91"])
+        cases[0]["inputs"] = {**cases[0]["inputs"], **extra}
+        with pytest.raises(ValidationFailed) as exc:
+            codes.add_golden_cases(p.pds.caller, r.pk, cases=cases)
+        assert _reason(exc.value) == "GOLDEN_FIELD_NOT_ALLOWED"
+    assert not CodeRuleGoldenCase.objects.filter(rule_revision=r).exists()
+
+
+def _store_bad_case(r: CodeRuleRevision, maker: e.Who, **inputs: str) -> None:
+    """A stored case that does not reproduce, written directly (e.g. by an older build) - never skipped."""
+    case = _golden(["91"], 1)[0]
+    CodeRuleGoldenCase.objects.create(
+        rule_revision=r,
+        product_type_code="91",
+        inputs={**case["inputs"], **inputs},
+        expected_code="02910799990001",  # not what the segments build
+        source_sheet="SyntheticSheet",
+        source_cell_ref="BAD1",
+        source_workbook_sha256=r.source_workbook_sha256,
+        created_by_id=maker.pk,
+    )
+
+
+def test_rev0240_a_stored_non_reproducing_case_blocks_submit_and_approve(p: e.People) -> None:
+    r = codes.create_rule_revision(p.pds.caller, product_type_codes=["91"], source_workbook_sha256=SHA)
+    codes.add_golden_cases(p.pds.caller, r.pk, cases=_golden(["91"]))
+    _store_bad_case(r, p.pds, legacy_disputed="synthetic: set aside by an older build")
+    r.refresh_from_db()
+    with pytest.raises(StateTransitionNotAllowed) as exc:
+        codes.submit_rule_revision(p.pds.caller, r.pk, expected_version=r.row_version)
+    assert _reason(exc.value) == "GOLDEN_CASE_MISMATCH"
+    summary = codes.golden_summary(r)
+    assert (summary["total"], summary["per_family"], summary["not_reproduced"]) == (21, {"91": 21}, 1)
+    # approve re-checks: a case stored after the submit blocks the approval as well
+    good = codes.create_rule_revision(p.pds.caller, product_type_codes=["91"], source_workbook_sha256=SHA)
+    codes.add_golden_cases(p.pds.caller, good.pk, cases=_golden(["91"]))
+    good.refresh_from_db()
+    good = codes.submit_rule_revision(p.pds.caller, good.pk, expected_version=good.row_version)
+    assert good.golden_case_count == 20
+    _store_bad_case(good, p.pds, legacy_disputed="synthetic")
+    with pytest.raises(StateTransitionNotAllowed) as exc2:
+        codes.approve_rule_revision(p.cra.caller, good.pk, expected_version=good.row_version)
+    assert _reason(exc2.value) == "GOLDEN_CASE_MISMATCH"
+    assert CodeRuleRevision.objects.get(pk=good.pk).status == "IN_REVIEW"
+
+
+def test_rev0240_golden_summary_counts_belt_and_legacy_cases(p: e.People) -> None:
+    belt = f.product_type(product_no_scheme="BELT_BUCKLE_WIDTH")
+    t = belt.segment_value
+    cases = _golden([t])
+    for i, case in enumerate(cases[:5]):
+        buckle, width = f"{10 + i:02d}", "35"
+        case["inputs"] = {**case["inputs"], "product_no": buckle + width, "buckle_type_code": buckle,
+                          "belt_width_code": width}  # fmt: skip
+        case["expected_code"] = "02" + t + "07" + buckle + width + "0001"
+    cases[6]["inputs"] = {**cases[6]["inputs"], "style_no": "0000"}
+    cases[6]["expected_code"] = cases[6]["expected_code"][:10] + "0000"
+    r = codes.create_rule_revision(p.pds.caller, product_type_codes=[t], source_workbook_sha256=SHA)
+    codes.add_golden_cases(p.pds.caller, r.pk, cases=cases)
+    s = codes.golden_summary(r)
+    assert (s["total"], s["belt_checked"], s["legacy_only_style_0000"]) == (20, 5, 1)
+    assert s["not_reproduced"] == 15  # belt-type cases without both segments are problems, never skipped
+    assert s["families_below_minimum"] == []

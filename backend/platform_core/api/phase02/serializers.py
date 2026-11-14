@@ -23,6 +23,7 @@ from platform_core.commercial.models import (
     OrderChangeRequest,
 )
 from platform_core.engine.redaction import REDACTED
+from platform_core.product_identity import codes
 from platform_core.product_identity.models import (
     CodeRuleRevision,
     Customer,
@@ -197,6 +198,7 @@ def code_rule(r: CodeRuleRevision) -> dict[str, Any]:
         "created_by": sid(r.created_by_id),
         "approved_by": sid(r.approved_by_id),
         "approved_at": utc(r.approved_at),
+        "golden_summary": codes.golden_summary(r),  # REV-0240: what the approver approves (counts only)
         "row_version": r.row_version,
     }
 

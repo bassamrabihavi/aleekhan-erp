@@ -69,6 +69,19 @@ CODE_ISSUE: Final = "identity.product_code.issue"
 DECISION: Final = "DEC-005"
 GOLDEN_MIN_PER_FAMILY: Final = 20  # PHASE_02 Gate: "20+ real cases per known family"
 MAX_GOLDEN_PER_CALL: Final = 2000
+# REV-0240: the inputs a stored golden case may carry (harness-only fields like legacy_disputed are refused)
+GOLDEN_INPUT_KEYS: Final = frozenset(
+    {
+        "type_code",
+        "category_code",
+        "product_no",
+        "style_no",
+        "buckle_type_code",
+        "belt_width_code",
+        "category_code_order_form",
+    }
+)
+HARNESS_ONLY_GOLDEN_FIELDS: Final = frozenset({"legacy_disputed", "belt_width_source"})
 LIVE_CODE_STATES: Final = (ProductCodeStatus.RESERVED, ProductCodeStatus.ACTIVE)
 
 CODE_RULE_MACHINE: Final = StateMachine(
@@ -199,10 +212,13 @@ def add_golden_cases(
     request_id: uuid.UUID | None = None,
 ) -> int:
     """Attach golden cases to a DRAFT revision. Each case: ``inputs`` (``type_code``, ``category_code``,
-    ``product_no``, ``style_no`` as text; optional ``buckle_type_code`` / ``belt_width_code``),
-    ``expected_code``, ``source_sheet``, ``source_cell_ref``. They are evidence: stored as given and checked
-    at submit (a case the engine does not reproduce blocks the submit, it is never "corrected").
-    Real cases exist only in the server DB (DEC-028/046, R-38)."""
+    ``product_no``, ``style_no`` as text; optional ``buckle_type_code`` / ``belt_width_code`` /
+    ``category_code_order_form``), ``expected_code``, ``source_sheet``, ``source_cell_ref``. They are
+    evidence: stored as given and checked at submit AND approve - every stored case counts, and a case the
+    engine does not reproduce blocks both (it is never "corrected" and never set aside). Harness-only fields
+    (``legacy_disputed``, ``belt_width_source``: evidence of the offline pytest harness, REV-0240) and any
+    other unknown input key are refused (``GOLDEN_FIELD_NOT_ALLOWED``). Real cases exist only in the server DB
+    (DEC-028/046, R-38)."""
     authorize(caller, RULE_MANAGE)
     rows = list(cases)
     if not rows or len(rows) > MAX_GOLDEN_PER_CALL:
@@ -219,6 +235,8 @@ def add_golden_cases(
             expected = raw.get("expected_code")
             if not isinstance(inputs, Mapping) or not isinstance(expected, str) or len(expected) != 14:
                 refuse(Reason.INVALID, field=f"cases[{i}]")
+            for key in sorted(set(inputs) - GOLDEN_INPUT_KEYS):
+                refuse(Reason.GOLDEN_FIELD_NOT_ALLOWED, field=f"cases[{i}].inputs.{str(key)[:40]}")
             for key in ("type_code", "category_code", "product_no", "style_no"):
                 if not isinstance(inputs.get(key), str):
                     refuse(Reason.SEGMENT_FORMAT, field=f"cases[{i}].inputs.{key}")
@@ -256,15 +274,13 @@ def golden_report(r: CodeRuleRevision) -> tuple[dict[str, int], list[FieldError]
 
     02.4 (REV-0230 / REV-0231): a case of a belt type (``BELT_BUCKLE_WIDTH``) must carry both belt segments
     (``BELT_SEGMENTS_REQUIRED``); a case whose ``category_code_order_form`` differs from ``category_code``
-    does not reproduce (C-77). A case marked ``legacy_disputed`` is neither checked nor counted (it is
-    reported by the harness, DEC-005 Q-D: planning decides it)."""
+    does not reproduce (C-77). REV-0240: every stored case is checked and counted - nothing is set aside here
+    (``legacy_disputed`` is an offline harness report only and is refused at input)."""
     types = scope_types(r)
     belts = belt_type_codes()
     counts: Counter[str] = Counter()
     problems: list[FieldError] = []
     for g in CodeRuleGoldenCase.objects.filter(rule_revision=r).order_by("id"):
-        if g.inputs.get("legacy_disputed"):
-            continue
         counts[g.product_type_code] += 1
         if g.product_type_code in belts and not (
             g.inputs.get("buckle_type_code") and g.inputs.get("belt_width_code")
@@ -287,6 +303,34 @@ def golden_report(r: CodeRuleRevision) -> tuple[dict[str, int], list[FieldError]
         if counts[t] < GOLDEN_MIN_PER_FAMILY:
             problems.append(FieldError(f"family:{t}", Reason.GOLDEN_CASES_INSUFFICIENT.value))
     return dict(counts), problems
+
+
+def golden_summary(r: CodeRuleRevision) -> dict[str, Any]:
+    """What the approver sees on the revision (REV-0240): counts only, never a case value."""
+    counts, problems = golden_report(r)
+    belts = belt_type_codes()
+    belt_checked = 0
+    legacy_only = 0
+    for inputs in CodeRuleGoldenCase.objects.filter(rule_revision=r).values_list("inputs", flat=True):
+        if (
+            inputs.get("type_code") in belts
+            and inputs.get("buckle_type_code")
+            and inputs.get("belt_width_code")
+        ):
+            belt_checked += 1
+        if inputs.get("style_no") == coderule.LEGACY_ONLY_STYLE_NO:
+            legacy_only += 1
+    case_problems = {p.field for p in problems if p.field.startswith("golden_case:")}
+    return {
+        "total": sum(counts.values()),
+        "per_family": dict(sorted(counts.items())),
+        "belt_checked": belt_checked,
+        "legacy_only_style_0000": legacy_only,
+        "not_reproduced": len(case_problems),
+        "families_below_minimum": sorted(
+            p.field.removeprefix("family:") for p in problems if p.field.startswith("family:")
+        ),
+    }
 
 
 def _refuse_golden(problems: list[FieldError]) -> None:
