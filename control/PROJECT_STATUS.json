@@ -1627,9 +1627,9 @@
       "owner": "برنامه‌ریزی + بازرگانی",
       "phase": "PHASE_02",
       "source": "Planning--.xlsm",
-      "resolution": "Amendment 2026-11-13: style 0000 legacy-only (accepted at import, never issued)",
+      "resolution": "Amendment 2026-11-14: see DECISION_LOG (number format with Jalali year; held order resume/cancel only; style collision -> next free; planning may reject)",
       "decided_by": "بسام ربیهاوی",
-      "decided_at": "2026-11-13T04:34:50+00:00"
+      "decided_at": "2026-11-14T08:03:12+00:00"
     },
     {
       "id": "DEC-006",
@@ -2369,9 +2369,9 @@
       "owner": "بازرگانی + برنامه‌ریزی",
       "phase": "PHASE_02",
       "source": "گام 02.1 2026-11-11 (C-54..C-68)",
-      "resolution": "B-A brand table; customer rep NAME recorded (PII, no contact data, masked for viewers); PO no. not unique, warn; 4 external ref types; units shoe=pair others=piece; order types = 4 Planning types; grade text-only default",
+      "resolution": "Amendment 2026-11-14: see DECISION_LOG (number format with Jalali year; held order resume/cancel only; style collision -> next free; planning may reject)",
       "decided_by": "بسام ربیهاوی",
-      "decided_at": "2026-11-12T09:30:08+00:00"
+      "decided_at": "2026-11-14T08:03:12+00:00"
     },
     {
       "id": "DEC-059",
@@ -2383,9 +2383,9 @@
       "owner": "بازرگانی + برنامه‌ریزی",
       "phase": "PHASE_02",
       "source": "گام 02.1 2026-11-11 (C-60/C-61)",
-      "resolution": "Amendment 2026-11-12: due-date approval by planning_officer, a different person from requester and decider; direct cancel from ON_HOLD allowed if previous state is pre-release",
+      "resolution": "Amendment 2026-11-14: see DECISION_LOG (number format with Jalali year; held order resume/cancel only; style collision -> next free; planning may reject)",
       "decided_by": "بسام ربیهاوی",
-      "decided_at": "2026-11-12T18:34:55+00:00"
+      "decided_at": "2026-11-14T08:03:12+00:00"
     },
     {
       "id": "DEC-060",
@@ -3407,7 +3407,31 @@
       "state": "PASS",
       "note": null,
       "commit": null
+    },
+    {
+      "at": "2026-11-14T08:03:12+00:00",
+      "kind": "decision",
+      "id": "DEC-005",
+      "status": "APPROVED",
+      "by": "بسام ربیهاوی",
+      "note": "Amendment 2026-11-14: see DECISION_LOG (number format with Jalali year; held order resume/cancel only; style collision -> next free; planning may reject)"
+    },
+    {
+      "at": "2026-11-14T08:03:12+00:00",
+      "kind": "decision",
+      "id": "DEC-058",
+      "status": "APPROVED",
+      "by": "بسام ربیهاوی",
+      "note": "Amendment 2026-11-14: see DECISION_LOG (number format with Jalali year; held order resume/cancel only; style collision -> next free; planning may reject)"
+    },
+    {
+      "at": "2026-11-14T08:03:12+00:00",
+      "kind": "decision",
+      "id": "DEC-059",
+      "status": "APPROVED",
+      "by": "بسام ربیهاوی",
+      "note": "Amendment 2026-11-14: see DECISION_LOG (number format with Jalali year; held order resume/cancel only; style collision -> next free; planning may reject)"
     }
   ],
-  "updated_at": "2026-11-13T05:32:10+00:00"
+  "updated_at": "2026-11-14T08:03:12+00:00"
 }

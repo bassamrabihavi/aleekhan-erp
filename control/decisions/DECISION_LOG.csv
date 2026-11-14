@@ -36,3 +36,6 @@ DEC-058,APPROVED,بسام ربیهاوی,2026-11-12,"B-A brand table; customer r
 DEC-057,APPROVED,بسام ربیهاوی,2026-11-12,Amendment 2026-11-12: owner_admin gets all PHASE_02 read permissions
 DEC-059,APPROVED,بسام ربیهاوی,2026-11-12,"Amendment 2026-11-12: due-date approval by planning_officer, a different person from requester and decider; direct cancel from ON_HOLD allowed if previous state is pre-release"
 DEC-005,APPROVED,بسام ربیهاوی,2026-11-13,"Amendment 2026-11-13: style 0000 legacy-only (accepted at import, never issued)"
+DEC-005,APPROVED,بسام ربیهاوی,2026-11-14,Amendment 2026-11-14: see DECISION_LOG (number format with Jalali year; held order resume/cancel only; style collision -> next free; planning may reject)
+DEC-058,APPROVED,بسام ربیهاوی,2026-11-14,Amendment 2026-11-14: see DECISION_LOG (number format with Jalali year; held order resume/cancel only; style collision -> next free; planning may reject)
+DEC-059,APPROVED,بسام ربیهاوی,2026-11-14,Amendment 2026-11-14: see DECISION_LOG (number format with Jalali year; held order resume/cancel only; style collision -> next free; planning may reject)

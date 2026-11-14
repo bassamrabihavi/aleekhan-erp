@@ -217,3 +217,20 @@ Found by the 02.3 golden run on the Planning baseline (aggregates only): 14 real
 - **Never issued:** the system never generates style 0000; new styles always start at 0001.
 - **Golden tests:** these cases are marked legacy-only. They must parse exactly, and the build path must refuse them.
 - **Decided by:** بسام ربیهاوی (کارفرما).
+
+## 2026-11-14 — PHASE_02 engine rules (02.3 review REV-0232 + implementer open items)
+Asked with AskUserQuestion, in Persian.
+- **Number format (DEC-058 amendment):** the employer chose **with the year**: `SO-1405-000001`, and likewise `CU-` for customers and `CR-` for change requests.
+  - The year is the Jalali year of creation, in Asia/Tehran time.
+  - Numbering restarts at 1 every year.
+  - Numbers are unique and race-safe; gaps are allowed.
+  - This replaces the PROPOSED plain format of 02.3.
+- **Held order (DEC-059 amendment):** recommended option. While ON_HOLD, only resume or cancel is allowed, and cancel only before release. Quantity, due-date and add-line changes are refused.
+- **Style number collision (DEC-005 amendment, REV-0232):** recommended option.
+  - If count + 1 is already used, the system takes the **first free number after it**.
+  - It records an audit reason. A duplicate code is never created.
+  - This replaces the STYLE_NO_COLLISION refusal.
+- **Planning reject (DEC-059 amendment):** recommended option. Planning may approve **or reject** a due-date change.
+  - A rejection needs a reason.
+  - The change request is closed as REJECTED and the old due date stays.
+- **Decided by:** بسام ربیهاوی (کارفرما).
