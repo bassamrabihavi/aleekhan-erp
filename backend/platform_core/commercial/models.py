@@ -384,6 +384,9 @@ class OrderChangeRequest(models.Model):
     decided_at = models.DateTimeField(null=True, blank=True)
     planning_approved_by = _user_fk()
     planning_approved_at = models.DateTimeField(null=True, blank=True)
+    # DEC-059 amendment 2026-11-14: planning may also reject a due-date change (the request closes REJECTED)
+    planning_rejected_by = _user_fk()
+    planning_rejected_at = models.DateTimeField(null=True, blank=True)
     applied_by = _user_fk()
     applied_at = models.DateTimeField(null=True, blank=True)
     applied_version = models.IntegerField(null=True, blank=True)
@@ -445,10 +448,40 @@ class OrderChangeRequest(models.Model):
                 | Q(submitted_at__isnull=False),
                 name="ck_commercial_cr_submitted_has_ts",
             ),
+            # an approved / applied request has its manager decision; a rejected one has the manager's or
+            # (DEC-059 amendment 2026-11-14) the planning rejection
             CheckConstraint(
-                condition=~Q(status__in=[ChangeStatus.APPROVED, ChangeStatus.REJECTED, ChangeStatus.APPLIED])
-                | Q(decided_by__isnull=False),
+                condition=(
+                    ~Q(status__in=[ChangeStatus.APPROVED, ChangeStatus.APPLIED]) | Q(decided_by__isnull=False)
+                )
+                & (
+                    ~Q(status=ChangeStatus.REJECTED)
+                    | Q(decided_by__isnull=False)
+                    | Q(planning_rejected_by__isnull=False)
+                ),
                 name="ck_commercial_cr_decided_has_decider",
+            ),
+            CheckConstraint(
+                condition=Q(planning_rejected_by__isnull=True, planning_rejected_at__isnull=True)
+                | Q(planning_rejected_by__isnull=False, planning_rejected_at__isnull=False),
+                name="ck_commercial_cr_planning_rejected_pair",
+            ),
+            CheckConstraint(
+                condition=Q(planning_rejected_by__isnull=True)
+                | Q(
+                    kind=ChangeKind.DUE_DATE_CHANGE,
+                    status=ChangeStatus.REJECTED,
+                    planning_approved_by__isnull=True,
+                ),
+                name="ck_commercial_cr_planning_rejected_closes",
+            ),
+            CheckConstraint(
+                condition=Q(planning_rejected_by__isnull=True)
+                | (
+                    ~Q(planning_rejected_by=F("requested_by"))
+                    & (Q(decided_by__isnull=True) | ~Q(planning_rejected_by=F("decided_by")))
+                ),
+                name="ck_commercial_cr_planning_rejecter_independent",
             ),
             CheckConstraint(
                 condition=~Q(status=ChangeStatus.APPLIED)
@@ -479,6 +512,7 @@ class OrderChangeRequest(models.Model):
             models.Index(fields=["requested_by"], name="ix_ccr_requested_by"),
             models.Index(fields=["decided_by"], name="ix_ccr_decided_by"),
             models.Index(fields=["planning_approved_by"], name="ix_ccr_planning_by"),
+            models.Index(fields=["planning_rejected_by"], name="ix_ccr_planning_rejected_by"),
             models.Index(fields=["applied_by"], name="ix_ccr_applied_by"),
         ]
 

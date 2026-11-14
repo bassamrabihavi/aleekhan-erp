@@ -43,7 +43,7 @@ from .errors import EngineContractError
 SOURCE_SYSTEM: Final = "aleekhan-erp"
 # Newest platform_core migration this code was written for (provenance of every outbox row). Pinned to the
 # leaf of the migration graph by test_integration_events.py::test_schema_migration_head_is_the_graph_leaf.
-SCHEMA_MIGRATION_HEAD: Final = "platform_core.0024_dec057_dec059_matrix_v21"
+SCHEMA_MIGRATION_HEAD: Final = "platform_core.0025_phase02_api_numbers"
 SYNTHETIC_TEST_PREFIX: Final = "platform.synthetic."
 
 _UUID_RE = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")
@@ -556,7 +556,26 @@ _SPECS: tuple[EventSpec, ...] = (
             f"order change request {v.replace('_', ' ')} (DEC-059)",
             {"id": U, "order_id": U, "kind": CODE, "status": CODE},
         )
-        for v in ("created", "submitted", "withdrawn", "decided", "planning_approved", "applied")
+        for v in (
+            "created",
+            "submitted",
+            "withdrawn",
+            "decided",
+            "planning_approved",
+            "planning_rejected",
+            "applied",
+        )
+    ),
+    # PHASE_02 / 02.4: external references (DEC-058; raw value never in the payload)
+    *(
+        _spec(
+            f"identity.external_ref.{v}",
+            PID,
+            "identity.external_ref",
+            f"external reference {v} (DEC-058; the value is not in the payload)",
+            {"id": U, "target_type": KEY, "system": CODE},
+        )
+        for v in ("created", "ended")
     ),
 )
 

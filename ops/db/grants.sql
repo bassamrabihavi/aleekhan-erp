@@ -57,6 +57,9 @@ REVOKE UPDATE, DELETE ON identity_serial_snapshot, commercial_customer_order_ver
 -- by 0021 and only moved (UPDATE) by the allocation at runtime)
 REVOKE INSERT, UPDATE, DELETE ON identity_unit_of_measure, commercial_order_type FROM :"app";
 REVOKE INSERT ON identity_serial_counter FROM :"app";
+-- PHASE_02 / 02.4 (migration 0025): technical number counters (CU-/SO-/CR-<jalali year>-<n>) only move forward;
+-- the app inserts a year row (starts at 1) and updates it by +1 (guard trigger), never deletes or resets it
+REVOKE DELETE ON platform_number_counter FROM :"app";
 
 -- migration bookkeeping and the schema contract are owned by the deploy step, never written at runtime
 REVOKE INSERT, UPDATE, DELETE ON django_migrations FROM :"app";

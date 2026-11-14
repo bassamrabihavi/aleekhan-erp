@@ -7,8 +7,11 @@
   optimistic version (412 ``VERSION_CONFLICT``).
 * :func:`reason_text` - a short operator justification (>= 3 characters), never personal data.
 * :func:`next_number` - race-safe, unique technical numbers for customers, orders and change requests
-  (PROPOSED format, docs/discovery/DATA_TABLE.md "02.3 numbers"): a database sequence per kind (gaps are
-  allowed: a rolled back write consumes a number; uniqueness is the UNIQUE constraint of each table).
+  (DEC-058 amendment 2026-11-14): ``CU-`` / ``SO-`` / ``CR-`` + the Jalali year of creation (Asia/Tehran) +
+  ``-`` + at least 6 digits, e.g. ``SO-1405-000001``. Numbering restarts at 1 every Jalali year. One counter
+  row per (kind, year) in ``platform_number_counter`` (migration 0025), moved by an atomic upsert under its
+  row lock: two concurrent writers never get the same number; uniqueness is also the UNIQUE constraint of
+  each table. Gaps are allowed. The DB lets the counter only move forward (no reset, no delete).
 """
 
 from __future__ import annotations
@@ -20,19 +23,22 @@ from typing import Any, Final
 from django.db import connections, models
 
 from platform_core.authz.policy import Caller, Decision, RecordScope, require_record, require_step_up
+from platform_core.engine.context import db_now
 from platform_core.engine.errors import NotFound, VersionConflict
 
+from .jalali import jalali_year_tehran
 from .refusals import Reason, refuse
 
 GLOBAL_RECORD: Final = RecordScope()
 
-# kind -> (sequence, prefix). Created by migration 0023 (``platform_core.0023_phase02_engine``).
-NUMBER_SEQUENCES: Final = {
-    "customer": ("identity_customer_no_seq", "CU-"),
-    "order": ("commercial_order_no_seq", "SO-"),
-    "change_request": ("commercial_change_request_no_seq", "CR-"),
-}
-NUMBER_PATTERN: Final = r"^(CU|SO|CR)-[0-9]{6,}$"
+# kind -> prefix. Counter table: migration 0025 (``platform_core.0025_phase02_api_numbers``).
+NUMBER_PREFIXES: Final = {"customer": "CU", "order": "SO", "change_request": "CR"}
+NUMBER_PATTERN: Final = r"^(CU|SO|CR)-[0-9]{4}-[0-9]{6,}$"
+_NEXT_NUMBER_SQL: Final = (
+    "INSERT INTO public.platform_number_counter AS c (kind, jalali_year, last_value) VALUES (%s, %s, 1) "
+    "ON CONFLICT (kind, jalali_year) DO UPDATE SET last_value = c.last_value + 1, updated_at = now() "
+    "RETURNING c.last_value"
+)
 
 
 def authorize(caller: Caller, action: str, *, record: RecordScope | None = GLOBAL_RECORD) -> Decision:
@@ -90,12 +96,14 @@ def required_text(value: str | None, *, max_len: int, field: str) -> str:
 
 
 def next_number(kind: str, *, using: str = "default") -> str:
-    sequence, prefix = NUMBER_SEQUENCES[kind]
+    """``<prefix>-<jalali year>-<n, at least 6 digits>``; call inside the creating unit of work."""
+    prefix = NUMBER_PREFIXES[kind]
+    year = jalali_year_tehran(db_now(using))
     with connections[using].cursor() as cur:
-        cur.execute("SELECT nextval(%s::regclass)", [f"public.{sequence}"])
+        cur.execute(_NEXT_NUMBER_SQL, [kind, year])
         row = cur.fetchone()
     assert row is not None
-    return f"{prefix}{int(row[0]):06d}"
+    return f"{prefix}-{year:04d}-{int(row[0]):06d}"
 
 
 def uuid_or_refuse(value: Any, *, field: str) -> uuid.UUID:

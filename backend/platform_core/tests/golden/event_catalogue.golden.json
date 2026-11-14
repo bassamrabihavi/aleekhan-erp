@@ -1,7 +1,7 @@
 {
- "_note": "Golden event catalogue (PHASE_01 / 01.6). Generated from platform_core/engine/events.py and reviewed: every outbox event type of PHASE_00 + PHASE_01 (+ PHASE_02 / 02.2: identity.serial.allocated; + PHASE_02 / 02.3: the identity.* / commercial.* engine events) with producer module, aggregate type, sensitivity (S1: ids, status codes, counts only), current and accepted schema versions and the JSON Schema of each payload version. A change of this file is a contract change (new version + reviewed commit). Human-readable copy: docs/integration/EVENT_CATALOGUE.md.",
+ "_note": "Golden event catalogue (PHASE_01 / 01.6). Generated from platform_core/engine/events.py and reviewed: every outbox event type of PHASE_00 + PHASE_01 (+ PHASE_02 / 02.2: identity.serial.allocated; + PHASE_02 / 02.3: the identity.* / commercial.* engine events; + 02.4: planning rejection, external references) with producer module, aggregate type, sensitivity (S1: ids, status codes, counts only), current and accepted schema versions and the JSON Schema of each payload version. A change of this file is a contract change (new version + reviewed commit). Human-readable copy: docs/integration/EVENT_CATALOGUE.md.",
  "source_system": "aleekhan-erp",
- "schema_migration_head": "platform_core.0024_dec057_dec059_matrix_v21",
+ "schema_migration_head": "platform_core.0025_phase02_api_numbers",
  "catalogue": {
   "commercial.change_request.applied": {
    "event_type": "commercial.change_request.applied",
@@ -131,6 +131,47 @@
    "producer": "platform_core.commercial",
    "aggregate_type": "commercial.change_request",
    "description": "order change request planning approved (DEC-059)",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "kind",
+      "order_id",
+      "status"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "kind": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      },
+      "order_id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      }
+     }
+    }
+   }
+  },
+  "commercial.change_request.planning_rejected": {
+   "event_type": "commercial.change_request.planning_rejected",
+   "producer": "platform_core.commercial",
+   "aggregate_type": "commercial.change_request",
+   "description": "order change request planning rejected (DEC-059)",
    "sensitivity": "S1",
    "current_version": 1,
    "accepted_versions": [
@@ -933,6 +974,78 @@
       "status": {
        "type": "string",
        "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      }
+     }
+    }
+   }
+  },
+  "identity.external_ref.created": {
+   "event_type": "identity.external_ref.created",
+   "producer": "platform_core.product_identity",
+   "aggregate_type": "identity.external_ref",
+   "description": "external reference created (DEC-058; the value is not in the payload)",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "system",
+      "target_type"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "system": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      },
+      "target_type": {
+       "type": "string",
+       "pattern": "^[a-z][a-z0-9_]{0,99}$"
+      }
+     }
+    }
+   }
+  },
+  "identity.external_ref.ended": {
+   "event_type": "identity.external_ref.ended",
+   "producer": "platform_core.product_identity",
+   "aggregate_type": "identity.external_ref",
+   "description": "external reference ended (DEC-058; the value is not in the payload)",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "system",
+      "target_type"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "system": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      },
+      "target_type": {
+       "type": "string",
+       "pattern": "^[a-z][a-z0-9_]{0,99}$"
       }
      }
     }

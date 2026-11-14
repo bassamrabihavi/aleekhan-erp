@@ -167,15 +167,31 @@ def test_style_number_is_count_of_product_and_category_plus_one(p: e.People) -> 
         master.create_style(p.pds.caller, product_id=prod.pk, category_id=other_type_cat.pk, name_fa="x")
 
 
-def test_non_contiguous_legacy_styles_collide_and_are_refused(p: e.People) -> None:
+def test_rev0232_style_collision_takes_the_first_free_number_after_count_plus_one(p: e.People) -> None:
+    """DEC-005 amendment 2026-11-14: count + 1 taken -> first free number after it, audited; never refused."""
+    from platform_core.models import AuditEvent
+
     t = f.product_type()
     c = f.category(t, "01")
     prod = f.product(t, "9001")
     f.style(prod, c, "0001")
     f.style(prod, c, "0003")  # legacy gap: count + 1 = 0003 already exists
-    with pytest.raises(StateTransitionNotAllowed) as exc:
-        master.create_style(p.pds.caller, product_id=prod.pk, category_id=c.pk, name_fa="x")
-    assert _reason(exc.value) == "STYLE_NO_COLLISION"
+    f.style(prod, c, "0004")  # ... and so does the next one
+    s = master.create_style(p.pds.caller, product_id=prod.pk, category_id=c.pk, name_fa=f"س {f.SYN}")
+    assert s.style_no == "0005"  # count (3) + 1 = 0004 is taken -> first free after it
+    audit = AuditEvent.objects.get(action="identity.style.create", resource_id=str(s.pk))
+    assert "first free number" in audit.reason
+    assert audit.scope["style_no_collision"] == {"count_plus_one": "0004", "assigned": "0005"}
+    s2 = master.create_style(p.pds.caller, product_id=prod.pk, category_id=c.pk, name_fa=f"س {f.SYN}")
+    assert s2.style_no == "0006"  # count (4) + 1 = 0005 is taken -> 0006; the gap 0002 is never back-filled
+    f.style(prod, f.category(t, "02"), "0001")
+    s3 = master.create_style(p.pds.caller, product_id=prod.pk, category_id=c.pk, name_fa=f"س {f.SYN}")
+    assert s3.style_no == "0007"
+    clean = master.create_style(
+        p.pds.caller, product_id=prod.pk, category_id=f.category(t, "03").pk, name_fa=f"س {f.SYN}"
+    )
+    assert clean.style_no == "0001"
+    assert AuditEvent.objects.get(action="identity.style.create", resource_id=str(clean.pk)).reason == ""
 
 
 def test_master_status_and_style_revisions(p: e.People) -> None:
@@ -522,3 +538,39 @@ def test_golden_cases_with_style_0000_pass_as_legacy_only(p: e.People) -> None:
     r.refresh_from_db()
     r = codes.submit_rule_revision(p.pds.caller, r.pk, expected_version=r.row_version)
     assert (r.status, r.golden_case_count) == ("IN_REVIEW", 20)
+
+
+def test_rev0231_rev0230_submit_refuses_belt_cases_without_segments_and_c77_disagreement(p: e.People) -> None:
+    belt = f.product_type(product_no_scheme="BELT_BUCKLE_WIDTH")
+    t = belt.segment_value
+    plain = _golden([t])  # belt-type cases WITHOUT buckle / width
+    r = codes.create_rule_revision(p.pds.caller, product_type_codes=[t], source_workbook_sha256=SHA)
+    codes.add_golden_cases(p.pds.caller, r.pk, cases=plain)
+    r.refresh_from_db()
+    with pytest.raises(ValidationFailed) as exc:  # BELT_SEGMENTS_REQUIRED is an input refusal (400)
+        codes.submit_rule_revision(p.pds.caller, r.pk, expected_version=r.row_version)
+    assert _reason(exc.value) == "BELT_SEGMENTS_REQUIRED"
+    with_segments = _golden([t])
+    for i, case in enumerate(with_segments):
+        buckle, width = f"{10 + i % 5:02d}", f"{30 + i // 5:02d}"
+        case["inputs"] = {
+            **case["inputs"],
+            "product_no": buckle + width,
+            "buckle_type_code": buckle,
+            "belt_width_code": width,
+            "category_code_order_form": "07",
+        }
+        case["expected_code"] = "02" + t + "07" + buckle + width + "0001"
+    good = codes.create_rule_revision(p.pds.caller, product_type_codes=[t], source_workbook_sha256=SHA)
+    codes.add_golden_cases(p.pds.caller, good.pk, cases=with_segments)
+    good.refresh_from_db()
+    good = codes.submit_rule_revision(p.pds.caller, good.pk, expected_version=good.row_version)
+    assert good.status == "IN_REVIEW"
+    c77 = [dict(c, inputs=dict(c["inputs"])) for c in with_segments]
+    c77[3]["inputs"]["category_code_order_form"] = "08"  # the Order form lookup disagrees (C-77)
+    bad = codes.create_rule_revision(p.pds.caller, product_type_codes=[t], source_workbook_sha256=SHA)
+    codes.add_golden_cases(p.pds.caller, bad.pk, cases=c77)
+    bad.refresh_from_db()
+    with pytest.raises(StateTransitionNotAllowed) as exc2:
+        codes.submit_rule_revision(p.pds.caller, bad.pk, expected_version=bad.row_version)
+    assert _reason(exc2.value) == "GOLDEN_CASE_MISMATCH"

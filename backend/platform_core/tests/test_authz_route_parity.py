@@ -50,7 +50,8 @@ def _url(route: str) -> str:
     out = route
     while "<" in out:
         start, end = out.index("<"), out.index(">")
-        out = out[:start] + SAMPLE_UUID + out[end + 1 :]
+        sample = "1" if out[start:end].startswith("<int:") else SAMPLE_UUID  # 02.4: order versions
+        out = out[:start] + sample + out[end + 1 :]
     return "/" + out
 
 

@@ -1,6 +1,6 @@
 """Routes under ``/api/v1`` (openapi-draft ``servers``). PHASE_00: platform probes, access gate,
 integration. PHASE_01 / 01.4: ``api/phase01/urls.py`` (auth, me, admin identity, org, workflow, audit, jobs,
-documents, parameters)."""
+documents, parameters). PHASE_02 / 02.4: ``api/phase02/urls.py`` (identity, commercial)."""
 
 from __future__ import annotations
 
@@ -30,4 +30,5 @@ urlpatterns: list[URLPattern | URLResolver] = [
         name="integration-conflict-resolve",
     ),
     path("", include("platform_core.api.phase01.urls")),
+    path("", include("platform_core.api.phase02.urls")),
 ]

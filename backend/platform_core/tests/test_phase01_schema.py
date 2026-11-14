@@ -185,7 +185,7 @@ def _contract_permissions() -> dict[str, set[bool]]:
     flags: dict[str, set[bool]] = defaultdict(set)
     for _path, _method, op in oc.operations(planned=False):
         perm = op.get("x-aleekhan-permission")
-        if perm:
+        if perm and perm.startswith("platform."):  # PHASE_02 rows: test_api_phase02_contract.py
             flags[perm].add(bool(op.get("x-aleekhan-mfa-step-up", False)))
     return flags
 
@@ -193,7 +193,7 @@ def _contract_permissions() -> dict[str, set[bool]]:
 def test_seeded_permissions_equal_contract_permissions_and_mfa_flags() -> None:
     """Platform permissions (matrix v1.x) = the implemented operations; the PHASE_02 rows of matrix v2.0
     (0022)
-    are compared with the planned operations in test_api_contract_planned_phase02.py."""
+    are compared with the planned operations in test_api_phase02_contract.py."""
     contract = _contract_permissions()
     seeded = {p.action: p.mfa_step_up for p in Permission.objects.filter(action__startswith="platform.")}
     assert len(seeded) == 43

@@ -202,6 +202,9 @@ def line_snapshot(o: CustomerOrder, ln: CustomerOrderLine, version: int) -> dict
     """Serial snapshot image of one line at an order version (no personal data)."""
     img = line_image(ln)
     img.pop("serial_number", None)
+    # 02.4: the image's order_version is the version it represents (the line's own counter used to win the
+    # key collision and showed the pre-confirm 0 in snapshot v1)
+    img.pop("order_version", None)
     return {
         "order_id": str(o.pk),
         "order_no": o.order_no,
@@ -624,9 +627,15 @@ def update_line(
 
 
 def remove_line(
-    caller: Caller, line_id: uuid.UUID, *, expected_version: int, request_id: uuid.UUID | None = None
+    caller: Caller,
+    line_id: uuid.UUID,
+    *,
+    expected_version: int,
+    reason: str = "",
+    request_id: uuid.UUID | None = None,
 ) -> CustomerOrderLine:
     authorize(caller, ORDER_MANAGE)
+    text = reason.strip()[:500]
     with unit_of_work(caller.context(request_id)) as uow:
         o, ln = _draft_line(line_id, expected_version)
         LINE_MACHINE.assert_transition(ln.status, L.REMOVED)
@@ -639,6 +648,7 @@ def remove_line(
             o,
             before=None,
             after={**_state_view(o), "line_id": str(ln.pk)},
+            reason=text,
             event="commercial.order.draft_changed",
         )
         ln.refresh_from_db()

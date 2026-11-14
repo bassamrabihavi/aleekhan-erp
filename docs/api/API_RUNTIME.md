@@ -1,4 +1,4 @@
-# API runtime — PHASE_00 / 00.4, PHASE_01 / 01.4
+# API runtime — PHASE_00 / 00.4, PHASE_01 / 01.4, PHASE_02 / 02.4
 
 Contract: [openapi-draft.yaml](openapi-draft.yaml) (contract-first, hand-written; the backend is tested
 against it). Code: `backend/platform_core/api/`. Error codes: [../engine/ERROR_CODES.md](../engine/ERROR_CODES.md).
@@ -238,3 +238,55 @@ All 99 PHASE_01 operations are served (`backend/platform_core/api/phase01/`, rou
 - Planned error codes (join `ErrorCode` in 02.3): `SERIAL_ALREADY_ALLOCATED`, `PRODUCT_CODE_TAKEN`,
   `POSSIBLE_DUPLICATE`, `ORDER_VERSION_STALE` (all 409).
 - `/version` reports `contract_version` 0.7.0-draft; runtime behaviour of the implemented operations is unchanged.
+- Superseded by section 14 (02.4): every operation is implemented; the blocked markers and the four planned
+  error codes are gone.
+
+## 14. PHASE_02 implemented (contract 0.8.0-draft, step 02.4)
+
+All 66 PHASE_02 operations are served (`backend/platform_core/api/phase02/`, routes in `phase02/urls.py`) on top
+of the 02.3 use cases; route parity covers all 139 paths and no path is planned any more. Contract tests:
+`test_api_phase02_contract.py` (body specs == request schemas, routed permission == `x-aleekhan-permission`,
+seeded matrix == operations + MFA flags, refusal reasons == engine catalogue, real-session 428 / 412 / 400 on
+every write, employee 403 on every operation, management_viewer 403 on every write) and
+`test_api_phase02_flows.py` (happy path of every operation with response-schema validation, role matrix, MFA,
+412, replay, pagination, rate limit, ID-01..ID-04, concurrent confirms and style creations through API clients).
+
+- **Authentication / permission**: session cookie + CSRF as section 9. `ScopedPermission` checks the action of
+  matrix v2.1 (DEC-057 + amendments; 403), then the MFA step-up of the permission (401 `MFA_REQUIRED`):
+  `identity.product_code.issue`, `identity.code_rule.approve` (approve / reject / activate),
+  `commercial.order.confirm`, `commercial.change.decide`, `commercial.change.planning_approve`. The use cases
+  check permission, MFA, version and state again inside their unit of work.
+- **Record scope**: PHASE_02 records carry no org unit (DEC-057 answer 3: all customers). A record is visible
+  only through a GLOBAL-scope assignment of the action: an object otherwise answers 404 and a list is empty.
+  Request-level rules answer 404 as well (only the requester submits / withdraws a change request; a line or
+  revision id under another order / style).
+- **Writes**: `Idempotency-Key` on every mutation except `validateProductCode` / `previewProductCode` (pure,
+  `side_effect_free_operations`); `If-Match` = the resource's `row_version` on PATCH and actions; line operations
+  send the ORDER's `If-Match` (the order row version covers its lines); `createChangeRequest` sends the order
+  version it saw in the body (`order_row_version`). `issueProductCode` uses the HTTP Idempotency-Key as the
+  engine's issue key. Deterministic refusals are stored and replayed (section 2).
+- **Errors**: stable top-level codes (`VALIDATION_FAILED` 400, `SELF_APPROVAL_FORBIDDEN` 403,
+  `STATE_TRANSITION_NOT_ALLOWED` 409, `RULE_NOT_APPROVED` 409 with `decision_id` DEC-005, `VERSION_CONFLICT` 412,
+  `IDEMPOTENCY_KEY_REUSED` 422, ...); the precise reason is `errors[0].code`
+  (`x-aleekhan-conventions.phase02_refusal_reasons`, 55 reasons, golden `phase02_refusals.golden.json`).
+- **Numbers** (DEC-058 amendment 2026-11-14): `CU-` / `SO-` / `CR-` + Jalali year of creation (Asia/Tehran) +
+  `-` + at least 6 digits (`TechnicalNumber`), restarting every Jalali year; serials `^[1-9][0-9]*$` from 63001
+  (`SerialNumber`, DEC-006); 14-digit codes and segments are text (`Code14`, 2/4-digit patterns).
+- **Representative name** (DEC-058, PII): only `getCustomerOrder` returns it, from the engine's `get_order`
+  (value for callers who may see it, every such read audited as `commercial.order.representative_read`;
+  `[REDACTED]` for management_viewer). Lists never carry it; write responses show `[REDACTED]` when one is
+  recorded, so the value never enters an idempotency record, a replay or an access log (logs carry the path
+  without query string and never bodies, section 3).
+- **Added operations** (additive): `updateCustomerBrand` (PATCH `/identity/customers/{customer_id}/brands/{brand_id}`,
+  status + reason), `addCodeRuleGoldenCases` (POST `/identity/code-rule-revisions/{id}/golden-cases`, max 2000 per
+  call, counts-only response), `decidePlanningChangeRequest` (POST `/commercial/change-requests/{id}/planning-decision`,
+  `{decision: APPROVE | REJECT, note}`; DEC-059 amendments 2026-11-12 / 2026-11-14; one permission
+  `commercial.change.planning_approve` for both outcomes; a rejection needs a note and closes the request REJECTED).
+- **Decided refusals kept** (conservative, documented in the contract): `allocateSerial` always 409
+  `SERIAL_ALLOCATED_AT_CONFIRM` (DEC-006 L-A); a confirmed order is cancelled only by a `CANCEL_ORDER` change
+  request; held orders accept only resume or cancel (DEC-059 amendment 2026-11-14); product / style numbers are
+  never typed in (computed by the DEC-005 rule); product types and categories are read-only (server import).
+- **Search** (`q`): normalised contains (`ي`/`ی`, `ك`/`ک`, half-space -> space, lower case) on both sides; never a
+  merge. `findSimilarStyles` ranks deterministically (1.0 same product + similar name, 0.5 similar name).
+- **Rate limits / pagination / request id**: unchanged (section 2): `principal` bucket per user, cursor pages of
+  1..100, `X-Request-ID` echoed (canonical UUID) and in every problem body.

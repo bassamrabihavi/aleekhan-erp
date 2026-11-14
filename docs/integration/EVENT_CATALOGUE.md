@@ -7,7 +7,7 @@ generated from the code and must be regenerated with it. Status: DRAFT (part of 
 Envelope (every event, `platform_outbox_event`): `event_id` (consumer dedupe key), `event_type`, `schema_version`,
 `aggregate_type`, `aggregate_id`, `aggregate_version`, `occurred_at` (UTC), `actor_type` / `actor_id`, `request_id`,
 `correlation_id`, `causation_id`, `payload`, and the provenance of the producing code (migration `0016`):
-`producer` (owning module), `build_commit` (`ALEEKHAN_BUILD_COMMIT`), `schema_migration` (`platform_core.0024_dec057_dec059_matrix_v21`
+`producer` (owning module), `build_commit` (`ALEEKHAN_BUILD_COMMIT`), `schema_migration` (`platform_core.0025_phase02_api_numbers`
 in this build). Source system: `aleekhan-erp`. Rows written before migration 0016 carry `''` (unknown).
 
 Rules: producers emit only catalogued types, the matching aggregate type and the **current** version, with an exact
@@ -27,6 +27,9 @@ Field kinds: `uuid` (canonical lower-case), `ref` (id of another resource, `[A-Z
 | `commercial.change_request.created` | 1 | `platform_core.commercial` | `commercial.change_request` | `id`:uuid, `order_id`:uuid, `kind`:code, `status`:code | order change request created (DEC-059) |
 | `commercial.change_request.decided` | 1 | `platform_core.commercial` | `commercial.change_request` | `id`:uuid, `order_id`:uuid, `kind`:code, `status`:code | order change request decided (DEC-059) |
 | `commercial.change_request.planning_approved` | 1 | `platform_core.commercial` | `commercial.change_request` | `id`:uuid, `order_id`:uuid, `kind`:code, `status`:code | order change request planning approved (DEC-059) |
+| `commercial.change_request.planning_rejected` | 1 | `platform_core.commercial` | `commercial.change_request` | `id`:uuid, `order_id`:uuid, `kind`:code, `status`:code | order change request planning rejected (DEC-059) |
+| `identity.external_ref.created` | 1 | `platform_core.product_identity` | `identity.external_ref` | `id`:uuid, `target_type`:key, `system`:code | external reference created (DEC-058; the value is not in the payload) |
+| `identity.external_ref.ended` | 1 | `platform_core.product_identity` | `identity.external_ref` | `id`:uuid, `target_type`:key, `system`:code | external reference ended (DEC-058; the value is not in the payload) |
 | `commercial.change_request.submitted` | 1 | `platform_core.commercial` | `commercial.change_request` | `id`:uuid, `order_id`:uuid, `kind`:code, `status`:code | order change request submitted (DEC-059) |
 | `commercial.change_request.withdrawn` | 1 | `platform_core.commercial` | `commercial.change_request` | `id`:uuid, `order_id`:uuid, `kind`:code, `status`:code | order change request withdrawn (DEC-059) |
 | `commercial.order.cancelled` | 1 | `platform_core.commercial` | `commercial.customer_order` | `id`:uuid, `status`:code, `version`:count | customer order cancelled |

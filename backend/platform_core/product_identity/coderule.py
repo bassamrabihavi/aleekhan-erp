@@ -9,8 +9,10 @@
   Above ``9999`` the engine refuses (``PRODUCT_NO_EXHAUSTED``); it never wraps or widens.
 * Belt types: product number = buckle-type code (2) + belt width (2).
 * New style number: styles are counted per (product, category) and numbered ``count + 1``, four digits
-  (Planning ``Order form!J11``: ``COUNTIFS(...) + 1``). The legacy macro refuses a style key that already
-  exists; the engine does the same (``STYLE_NO_COLLISION``) instead of guessing another number.
+  (Planning ``Order form!J11``: ``COUNTIFS(...) + 1``). DEC-005 amendment 2026-11-14 (REV-0232): when
+  ``count + 1`` is already used (legacy styles that are not contiguous), the style gets the **first free
+  number after it** (:func:`first_free_style_no`); the use case records the collision in the audit row. A
+  duplicate style number is never created (UNIQUE constraint) and nothing is refused for this case.
 * DEC-005 amendment 2026-11-13: style segment ``0000`` is **legacy only**. Existing codes with it are accepted
   as history (:func:`validate_legacy_code` / ``parse_code(..., legacy=True)`` return their exact segments),
   but the system path never builds or issues one (``STYLE_0000_LEGACY_ONLY``); new styles start at ``0001``.
@@ -170,6 +172,24 @@ def next_style_no(existing_count: int) -> str:
     return f"{nxt:04d}"
 
 
+def first_free_style_no(used: Iterable[str]) -> tuple[str, str | None]:
+    """DEC-005 + amendment 2026-11-14: ``(style_no, collided)`` for a (product, category) whose existing
+    style numbers are ``used``. ``style_no`` = ``count + 1`` when free, else the first free number after it;
+    ``collided`` = the taken ``count + 1`` (``None`` without a collision). Never above ``9999``."""
+    taken = {_segment(v, STYLE_NO_WIDTH, "style_no") for v in used}
+    first = next_style_no(len(taken))
+    if first not in taken:
+        return first, None
+    n = int(first)
+    while True:
+        n += 1
+        if n > MAX_FOUR_DIGITS:
+            refuse(Reason.STYLE_NO_EXHAUSTED, field="style_no", detail="no four-digit style number is left")
+        candidate = f"{n:04d}"
+        if candidate not in taken:
+            return candidate, first
+
+
 # ------------------------------------------------------------------------------------- golden cases
 @dataclass(frozen=True)
 class GoldenCase:
@@ -183,6 +203,12 @@ class GoldenCase:
     family: str
     buckle_type_code: str | None = None
     belt_width_code: str | None = None
+    # REV-0230 (C-77): the category code as the ``Order form`` lookup gives it (must equal category_code)
+    category_code_order_form: str | None = None
+    # REV-0231: where the belt width segment was read (evidence text only, never checked as data)
+    belt_width_source: str | None = None
+    # REV-0231: a legacy row planning disputes (non-empty reason): reported, never failed, never counted
+    legacy_disputed: str | None = None
 
     @classmethod
     def from_mapping(cls, raw: Mapping[str, Any]) -> GoldenCase:
@@ -205,7 +231,29 @@ class GoldenCase:
             family=str(text("family")),
             buckle_type_code=text("buckle_type_code", optional=True),
             belt_width_code=text("belt_width_code", optional=True),
+            category_code_order_form=text("category_code_order_form", optional=True),
+            belt_width_source=text("belt_width_source", optional=True),
+            legacy_disputed=_reason_text(raw.get("legacy_disputed")),
         )
+
+    @property
+    def has_belt_segments(self) -> bool:
+        return self.buckle_type_code is not None and self.belt_width_code is not None
+
+    @property
+    def c77_disagrees(self) -> bool:
+        """C-77: the two category lookups of the workbook give different codes for this case."""
+        return (
+            self.category_code_order_form is not None and self.category_code_order_form != self.category_code
+        )
+
+
+def _reason_text(value: object) -> str | None:
+    if value is None:
+        return None
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError("golden case field 'legacy_disputed' must be a non-empty reason text")
+    return value
 
 
 def is_legacy_only_case(case: GoldenCase) -> bool:
@@ -244,6 +292,8 @@ def golden_case_problems(case: GoldenCase) -> list[str]:
             return [Reason.SEGMENT_FORMAT.value]
         if built != case.expected_code:
             problems.append(Reason.GOLDEN_CASE_MISMATCH.value)
+    if case.c77_disagrees:  # REV-0230 / DEC-005 C-77: both category lookups must give the same code
+        problems.append(Reason.GOLDEN_CASE_MISMATCH.value)
     if (case.buckle_type_code is None) != (case.belt_width_code is None):
         problems.append(Reason.BELT_SEGMENTS_REQUIRED.value)
     elif case.buckle_type_code is not None and case.belt_width_code is not None:

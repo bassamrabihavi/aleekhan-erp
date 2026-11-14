@@ -110,7 +110,14 @@ def test_only_platform_tables_no_business_or_django_auth_tables() -> None:
     with connection.cursor() as cur:
         cur.execute("SELECT tablename FROM pg_tables WHERE schemaname = 'public'")
         tables = {r[0] for r in cur.fetchall()}
-    assert tables == {*PLATFORM_TABLES, *PHASE01_TABLES, *phase02, "django_migrations"}
+    # 02.4 (migration 0025): the technical number counter (SQL table, no Django model)
+    assert tables == {
+        *PLATFORM_TABLES,
+        *PHASE01_TABLES,
+        *phase02,
+        "platform_number_counter",
+        "django_migrations",
+    }
 
 
 @pytest.mark.django_db

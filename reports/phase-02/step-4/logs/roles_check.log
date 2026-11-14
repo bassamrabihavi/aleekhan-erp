@@ -1,0 +1,90 @@
+== server: 17.9
+== throw-away database test_roles_p02s4, roles owner/app/ro with suffix a75ea223 (NOLOGIN, no password)
+NOTICE:  database "test_roles_p02s4" does not exist, skipping
+== migrate as the owner role
+PASS all tables owned by the owner role
+== app role: allowed runtime path
+PASS app: INSERT audit row
+PASS app: SELECT audit
+PASS app: UPDATE integration source (DML)
+PASS app: unit of work (audit + outbox) via Django
+PASS app: manage.py outbox_status
+PASS app: audit hash chain verified + integrity run recorded (01.3)
+== app role: audit bypass and DDL must be refused
+PASS app: DELETE audit rows  (ERROR:  permission denied for table platform_audit_event)
+PASS app: UPDATE audit rows  (ERROR:  permission denied for table platform_audit_event)
+PASS app: TRUNCATE audit  (ERROR:  permission denied for table platform_audit_event)
+PASS app: DISABLE audit trigger  (ERROR:  must be owner of table platform_audit_event)
+PASS app: DISABLE TRIGGER ALL  (ERROR:  must be owner of table platform_audit_event)
+PASS app: DROP audit trigger  (ERROR:  must be owner of relation platform_audit_event)
+PASS app: session_replication_role=replica (skips triggers)  (ERROR:  permission denied to set parameter "session_replication_role")
+PASS app: DELETE compensation rows  (ERROR:  permission denied for table platform_compensation_record)
+PASS app: write django_migrations  (ERROR:  permission denied for table django_migrations)
+PASS app: CREATE TABLE  (ERROR:  permission denied for schema public)
+PASS app: CREATE FUNCTION  (ERROR:  permission denied for schema public)
+PASS app: DROP TABLE  (ERROR:  must be owner of table platform_outbox_event)
+PASS app: ALTER TABLE ADD COLUMN  (ERROR:  must be owner of table platform_outbox_event)
+== app role: PHASE_01 tables (01.2)
+PASS app: INSERT synthetic org unit (tree trigger reads parameter; history via SECURITY DEFINER)
+PASS app: SELECT permission catalogue
+PASS app: INSERT permission (catalogue is migration-only)  (ERROR:  permission denied for table platform_permission)
+PASS app: UPDATE permission flags  (ERROR:  permission denied for table platform_permission)
+PASS app: INSERT upload type  (ERROR:  permission denied for table platform_upload_type)
+PASS app: UPDATE protected job type  (ERROR:  permission denied for table platform_job_definition)
+PASS app: DELETE user  (ERROR:  permission denied for table platform_user)
+PASS app: DELETE role assignment  (ERROR:  permission denied for table platform_role_assignment)
+PASS app: DELETE org unit  (ERROR:  permission denied for table platform_org_unit)
+PASS app: DELETE document revision  (ERROR:  permission denied for table platform_document_revision)
+PASS app: UPDATE password history  (ERROR:  permission denied for table platform_password_history)
+PASS app: DELETE password history  (ERROR:  permission denied for table platform_password_history)
+PASS app: UPDATE login attempt  (ERROR:  permission denied for table platform_login_attempt)
+PASS app: INSERT org unit history directly  (ERROR:  permission denied for table platform_org_unit_history)
+PASS app: UPDATE org unit history  (ERROR:  permission denied for table platform_org_unit_history)
+PASS app: DISABLE TECHNICAL/BA guard trigger  (ERROR:  must be owner of table platform_role_permission)
+PASS app: DISABLE org tree trigger  (ERROR:  must be owner of table platform_org_unit)
+PASS app: DROP exclusion constraint  (ERROR:  must be owner of table platform_position_assignment)
+PASS app: TRUNCATE login attempts  (ERROR:  permission denied for table platform_login_attempt)
+PASS history row written by trigger for the app role's insert
+== app role: PHASE_02 tables (02.2)
+PASS app: SELECT serial counter
+PASS app: UPDATE serial counter (allocation step)
+PASS app: INSERT external reference type (steward-extensible, DEC-058)
+PASS app: INSERT serial counter (seed is migration-only)  (ERROR:  permission denied for table identity_serial_counter)
+PASS app: DELETE serial counter  (ERROR:  permission denied for table identity_serial_counter)
+PASS app: DELETE serial  (ERROR:  permission denied for table identity_serial)
+PASS app: UPDATE serial snapshot  (ERROR:  permission denied for table identity_serial_snapshot)
+PASS app: DELETE serial snapshot  (ERROR:  permission denied for table identity_serial_snapshot)
+PASS app: UPDATE order version  (ERROR:  permission denied for table commercial_customer_order_version)
+PASS app: DELETE order line  (ERROR:  permission denied for table commercial_customer_order_line)
+PASS app: DELETE product code  (ERROR:  permission denied for table identity_product_code)
+PASS app: INSERT unit of measure (catalogue)  (ERROR:  permission denied for table identity_unit_of_measure)
+PASS app: INSERT order type (catalogue)  (ERROR:  permission denied for table commercial_order_type)
+PASS app: DISABLE gapless counter trigger  (ERROR:  must be owner of table identity_serial_counter)
+PASS app: DISABLE serial guard trigger  (ERROR:  must be owner of table identity_serial)
+PASS app: draw a technical number (insert year row)
+PASS app: draw the next technical number (+1)
+PASS app: reset a number counter  (ck_number_counter_forward_only)
+PASS app: move a number counter by more than one  (ck_number_counter_forward_only)
+PASS app: insert a counter row above 1  (ck_number_counter_starts_at_one)
+PASS app: DELETE number counter  (ERROR:  permission denied for table platform_number_counter)
+PASS app: TRUNCATE number counter  (ERROR:  permission denied for table platform_number_counter)
+PASS app: DISABLE number counter guard  (ERROR:  must be owner of table platform_number_counter)
+PASS 0023 sequence identity_customer_no_seq replaced by the counter (0025)
+PASS 0023 sequence commercial_order_no_seq replaced by the counter (0025)
+PASS 0023 sequence commercial_change_request_no_seq replaced by the counter (0025)
+PASS app: DISABLE order guard trigger  (ERROR:  must be owner of table commercial_customer_order)
+PASS serial counter seeded at 63001 (DEC-006)
+== readonly role
+PASS ro: SELECT audit
+PASS ro: SELECT outbox
+PASS ro: INSERT audit  (ERROR:  permission denied for table platform_audit_event)
+PASS ro: UPDATE integration source  (ERROR:  permission denied for table platform_integration_source)
+PASS ro: DELETE outbox  (ERROR:  permission denied for table platform_outbox_event)
+PASS ro: SELECT role grants
+PASS ro: UPDATE user  (ERROR:  permission denied for table platform_user)
+== audit trigger still enabled and rows intact
+PASS all platform triggers enabled
+PASS audit triggers enabled  (trg_audit_event_append_only=O,trg_audit_event_no_truncate=O)
+PASS audit rows written by app are intact (2)
+== roles check: passed=78 failed=0
+== cleanup: drop test_roles_p02s4 and roles *_a75ea223

@@ -7,6 +7,7 @@ its stored previous state, cancel from hold (migration 0023), the due-date plann
 
 from __future__ import annotations
 
+import re
 import uuid
 from datetime import date
 from itertools import product
@@ -32,7 +33,7 @@ from platform_core.engine.errors import (
     StateTransitionNotAllowed,
     ValidationFailed,
 )
-from platform_core.models import OutboxEvent
+from platform_core.models import AuditEvent, OutboxEvent
 from platform_core.product_identity.models import Serial, SerialCounter, SerialSnapshot
 
 from . import phase02_engine as e
@@ -377,6 +378,7 @@ CR_ALLOWED = {
     ("SUBMITTED", "EXPIRED"),
     ("APPROVED", "APPLIED"),
     ("APPROVED", "EXPIRED"),
+    ("APPROVED", "REJECTED"),  # planning rejection of a due-date change only (amendment 2026-11-14)
 }
 
 
@@ -506,3 +508,117 @@ def test_change_request_permissions_per_role(p: e.People, role: str) -> None:
         else:
             with pytest.raises(AccessDenied):
                 run()
+
+
+# --------------------------------------------------------------- 02.4: planning reject (amendment 2026-11-14)
+def test_planning_rejects_a_due_date_change_before_or_after_the_manager(p: e.People) -> None:
+    o = e.released_order(p.co, p.po)
+    old_due = CustomerOrder.objects.get(pk=o.pk).requested_due_date
+    items = [{"line_id": None, "requested_due_date": "2030-04-01"}]
+    # after the manager approved it: APPROVED -> REJECTED, a reason is required
+    cr = _cr(p.co, o, "DUE_DATE_CHANGE", items, submit=True)
+    cr = changes.decide_change_request(p.cm.caller, cr.pk, approve=True, expected_version=cr.row_version)
+    with pytest.raises(ValidationFailed):
+        changes.planning_decide_change_request(
+            p.po2.caller, cr.pk, approve=False, expected_version=cr.row_version, note=""
+        )
+    rej = changes.planning_decide_change_request(
+        p.po2.caller, cr.pk, approve=False, expected_version=cr.row_version, note="synthetic: capacity"
+    )
+    assert (rej.status, rej.planning_rejected_by_id, rej.planning_approved_by_id) == (
+        "REJECTED",
+        p.po2.pk,
+        None,
+    )
+    assert CustomerOrder.objects.get(pk=o.pk).requested_due_date == old_due  # the old due date stays
+    with pytest.raises(StateTransitionNotAllowed):
+        changes.apply_change_request(p.po.caller, rej.pk, expected_version=rej.row_version)
+    audit = AuditEvent.objects.get(
+        action="commercial.change_request.planning_reject", resource_id=str(rej.pk)
+    )
+    assert audit.reason == "synthetic: capacity"
+    assert OutboxEvent.objects.filter(
+        event_type="commercial.change_request.planning_rejected", aggregate_id=str(rej.pk)
+    ).exists()
+    # before the manager decided: SUBMITTED -> REJECTED; the manager can no longer decide it
+    cr2 = _cr(p.co, o, "DUE_DATE_CHANGE", items, submit=True)
+    cr2 = changes.planning_decide_change_request(
+        p.po2.caller, cr2.pk, approve=False, expected_version=cr2.row_version, note="synthetic"
+    )
+    assert cr2.status == "REJECTED" and cr2.decided_by_id is None
+    with pytest.raises(StateTransitionNotAllowed):
+        changes.decide_change_request(p.cm.caller, cr2.pk, approve=True, expected_version=cr2.row_version)
+    # an approved planning decision cannot be turned into a rejection
+    cr3 = _cr(p.co, o, "DUE_DATE_CHANGE", items, submit=True)
+    cr3 = changes.planning_approve_change_request(p.po2.caller, cr3.pk, expected_version=cr3.row_version)
+    with pytest.raises(StateTransitionNotAllowed) as exc:
+        changes.planning_decide_change_request(
+            p.po.caller, cr3.pk, approve=False, expected_version=cr3.row_version, note="synthetic"
+        )
+    assert _reason(exc.value) == "PLANNING_ALREADY_APPROVED"
+    # never the requester, never the deciding manager; never a non-due-date change
+    planner_requester = e.holder("planning_officer")
+    cr4 = _cr(planner_requester, o, "DUE_DATE_CHANGE", items, submit=True)
+    with pytest.raises(SelfApprovalForbidden):
+        changes.planning_decide_change_request(
+            planner_requester.caller, cr4.pk, approve=False, expected_version=cr4.row_version, note="syn"
+        )
+    hold = _cr(p.co, o, "HOLD", submit=True)
+    with pytest.raises(StateTransitionNotAllowed) as exc2:
+        changes.planning_decide_change_request(
+            p.po.caller, hold.pk, approve=False, expected_version=hold.row_version, note="synthetic"
+        )
+    assert _reason(exc2.value) == "PLANNING_APPROVAL_NOT_APPLICABLE"
+    # the manager never moves an APPROVED request to REJECTED (only planning does)
+    cr5 = _cr(p.co, o, "DUE_DATE_CHANGE", items, submit=True)
+    cr5 = changes.decide_change_request(p.cm.caller, cr5.pk, approve=True, expected_version=cr5.row_version)
+    with pytest.raises(StateTransitionNotAllowed):
+        changes.decide_change_request(
+            p.cm2.caller, cr5.pk, approve=False, expected_version=cr5.row_version, note="synthetic"
+        )
+
+
+def test_db_refuses_a_planning_rejection_that_is_not_final_or_not_independent(p: e.People) -> None:
+    o = e.released_order(p.co, p.po)
+    items = [{"line_id": None, "requested_due_date": "2030-04-02"}]
+    cr = _cr(p.co, o, "DUE_DATE_CHANGE", items, submit=True)
+    with db_refuses("ck_commercial_cr_planning_rejected_closes"):  # a rejection closes the request
+        OrderChangeRequest.objects.filter(pk=cr.pk).update(
+            planning_rejected_by_id=p.po.pk, planning_rejected_at=Now()
+        )
+    with db_refuses("ck_commercial_cr_planning_rejecter_independent"):
+        OrderChangeRequest.objects.filter(pk=cr.pk).update(
+            status="REJECTED", planning_rejected_by_id=p.co.pk, planning_rejected_at=Now()
+        )
+    with db_refuses("ck_commercial_cr_planning_rejected_pair"):
+        OrderChangeRequest.objects.filter(pk=cr.pk).update(status="REJECTED", planning_rejected_by_id=p.po.pk)
+    approved = changes.decide_change_request(
+        p.cm.caller, cr.pk, approve=True, expected_version=cr.row_version
+    )
+    with db_refuses("ck_commercial_cr_lifecycle"):  # APPROVED -> REJECTED only with a planning rejection
+        OrderChangeRequest.objects.filter(pk=approved.pk).update(status="REJECTED")
+
+
+def test_numbers_carry_the_jalali_year_and_restart_every_year(p: e.People) -> None:
+    from django.db import connection
+
+    from platform_core.engine.context import db_now
+    from platform_core.product_identity.jalali import jalali_year_tehran
+    from platform_core.product_identity.usecase import NUMBER_PATTERN, next_number
+
+    year = jalali_year_tehran(db_now())
+    o = e.confirmed_order(p.co, p.po)
+    cr = _cr(p.co, o, "HOLD")
+    for number, prefix in ((o.order_no, "SO"), (cr.request_no, "CR")):
+        assert re.fullmatch(NUMBER_PATTERN, number), number
+        assert number.startswith(f"{prefix}-{year}-")
+    with connection.cursor() as cur:  # a synthetic far year starts at 1 (restart per Jalali year)
+        cur.execute(
+            "INSERT INTO platform_number_counter (kind, jalali_year, last_value) VALUES ('order', 1999, 1)"
+        )
+        with db_refuses("ck_number_counter_forward_only"):
+            cur.execute("UPDATE platform_number_counter SET last_value = 1 WHERE jalali_year = 1999")
+        with db_refuses("ck_number_counter_no_delete"):
+            cur.execute("DELETE FROM platform_number_counter WHERE jalali_year = 1999")
+    a, b = next_number("order"), next_number("order")
+    assert int(b.rsplit("-", 1)[1]) == int(a.rsplit("-", 1)[1]) + 1

@@ -74,6 +74,16 @@ expect_ok() {  # name role sql
   if as_role "$2" "$3"; then record "$1" PASS; else record "$1" FAIL "unexpected error: $ERR"; fi
 }
 
+expect_refused() {  # name role sql rule - refused by a DB guard naming <rule> (not by a missing privilege)
+  if as_role "$2" "$3"; then
+    record "$1" FAIL "statement was ALLOWED"
+  elif printf '%s' "$ERR" | grep -q -e "$4"; then
+    record "$1" PASS "$4"
+  else
+    record "$1" FAIL "failed for another reason: $ERR"
+  fi
+}
+
 expect_denied() {  # name role sql
   if as_role "$2" "$3"; then
     record "$1" FAIL "statement was ALLOWED"
@@ -186,10 +196,20 @@ expect_denied "app: INSERT unit of measure (catalogue)" "$APP" "INSERT INTO iden
 expect_denied "app: INSERT order type (catalogue)" "$APP" "INSERT INTO commercial_order_type (code, label_fa, sort_order, status, decision_id, provenance) SELECT 'rc_probe', 'x', 1, 'ACTIVE', 'DEC-058', 'SYS' WHERE false"
 expect_denied "app: DISABLE gapless counter trigger" "$APP" "ALTER TABLE identity_serial_counter DISABLE TRIGGER trg_identity_serial_counter_gapless"
 expect_denied "app: DISABLE serial guard trigger" "$APP" "ALTER TABLE identity_serial DISABLE TRIGGER trg_identity_serial_guard"
-# PHASE_02 / 02.3 (migration 0023): technical number sequences - the app draws numbers, never resets them
+# PHASE_02 / 02.4 (migration 0025): technical numbers CU-/SO-/CR-<jalali year>-<n> - the app draws numbers
+# (upsert +1), never resets, rewinds, deletes or truncates a counter (guard trigger + grants.sql)
+NUMBER_UPSERT="INSERT INTO platform_number_counter AS c (kind, jalali_year, last_value) VALUES ('order', 1999, 1) ON CONFLICT (kind, jalali_year) DO UPDATE SET last_value = c.last_value + 1"
+expect_ok "app: draw a technical number (insert year row)" "$APP" "$NUMBER_UPSERT"
+expect_ok "app: draw the next technical number (+1)" "$APP" "$NUMBER_UPSERT"
+expect_refused "app: reset a number counter" "$APP" "UPDATE platform_number_counter SET last_value = 1" ck_number_counter_forward_only
+expect_refused "app: move a number counter by more than one" "$APP" "UPDATE platform_number_counter SET last_value = last_value + 5" ck_number_counter_forward_only
+expect_refused "app: insert a counter row above 1" "$APP" "INSERT INTO platform_number_counter (kind, jalali_year, last_value) VALUES ('customer', 1998, 500)" ck_number_counter_starts_at_one
+expect_denied "app: DELETE number counter" "$APP" "DELETE FROM platform_number_counter"
+expect_denied "app: TRUNCATE number counter" "$APP" "TRUNCATE platform_number_counter"
+expect_denied "app: DISABLE number counter guard" "$APP" "ALTER TABLE platform_number_counter DISABLE TRIGGER trg_platform_number_counter_guard"
 for seq in identity_customer_no_seq commercial_order_no_seq commercial_change_request_no_seq; do
-  expect_ok "app: nextval $seq (technical number, 02.3)" "$APP" "SELECT nextval('public.$seq')"
-  expect_denied "app: setval $seq" "$APP" "SELECT setval('public.$seq', 1)"
+  gone="$(admin -d "$DB" -c "SELECT count(*) FROM pg_class WHERE relkind = 'S' AND relname = '$seq'")"
+  if [ "$gone" = "0" ]; then record "0023 sequence $seq replaced by the counter (0025)" PASS; else record "0023 sequence $seq replaced by the counter (0025)" FAIL "still present"; fi
 done
 expect_denied "app: DISABLE order guard trigger" "$APP" "ALTER TABLE commercial_customer_order DISABLE TRIGGER trg_commercial_customer_order_guard"
 seeded="$(admin -d "$DB" -c "SELECT start_value || '/' || next_value FROM identity_serial_counter WHERE namespace_key = 'factory_serial'")"

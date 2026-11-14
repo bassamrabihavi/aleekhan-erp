@@ -7,10 +7,11 @@ A confirmed order is never edited in place. Every change is a change request (CR
     withdraw DRAFT/SUBMITTED -> WITHDRAWN   the requester
     decide  SUBMITTED -> APPROVED / REJECTED  commercial.change.decide (commercial_manager, or the owner
                                   directly; business approval + fresh MFA); never the requester (DEC-057)
-    planning approval (DUE_DATE_CHANGE only)  commercial.change.planning_approve (planning_officer,
-                                  fresh MFA);
-                                  a person different from the requester AND from the deciding manager
-                                  (amendment 2026-11-12; DB CHECKs, migration 0023)
+    planning decision (DUE_DATE_CHANGE only)  commercial.change.planning_approve (planning_officer,
+                                  fresh MFA) - approve OR reject (amendment 2026-11-14; one permission for
+                                  both); a rejection needs a reason and closes the request REJECTED (the old
+                                  due date stays); a person different from the requester AND from the deciding
+                                  manager (amendment 2026-11-12; DB CHECKs, migrations 0023 / 0025)
     apply   APPROVED -> APPLIED  commercial.change.apply (planning_officer): base version still current,
                                   writes order version n+1 (image) and the next serial snapshot of every line
                                   it touches - in one unit of work
@@ -82,7 +83,8 @@ CHANGE_MACHINE: Final = StateMachine(
         C.DRAFT: frozenset({C.SUBMITTED, C.WITHDRAWN}),
         # EXPIRED is reserved: no expiry period is decided (REV-0203), the engine never writes it
         C.SUBMITTED: frozenset({C.APPROVED, C.REJECTED, C.WITHDRAWN, C.EXPIRED}),
-        C.APPROVED: frozenset({C.APPLIED, C.EXPIRED}),
+        # APPROVED -> REJECTED: only a planning rejection of a due-date change (amendment 2026-11-14)
+        C.APPROVED: frozenset({C.APPLIED, C.EXPIRED, C.REJECTED}),
         C.REJECTED: frozenset(),
         C.APPLIED: frozenset(),
         C.WITHDRAWN: frozenset(),
@@ -100,6 +102,7 @@ def _view(cr: OrderChangeRequest) -> dict[str, Any]:
         "status": cr.status,
         "base_order_version": cr.base_order_version,
         "planning_approved": cr.planning_approved_by_id is not None,
+        "planning_rejected": cr.planning_rejected_by_id is not None,
     }
 
 
@@ -379,6 +382,8 @@ def decide_change_request(
         if cr.planning_approved_by_id == caller.user_id:
             refuse(Reason.DECIDER_IS_PLANNING_APPROVER, field="change_request")
         target = C.APPROVED if approve else C.REJECTED
+        if cr.status != C.SUBMITTED:  # the manager decides a submitted request once
+            refuse(Reason.STATE_NOT_ALLOWED, field="status")
         CHANGE_MACHINE.assert_transition(cr.status, target)
         before = _view(cr)
         with db_rules():
@@ -398,17 +403,21 @@ def decide_change_request(
     return cr
 
 
-def planning_approve_change_request(
+def planning_decide_change_request(
     caller: Caller,
     cr_id: uuid.UUID,
     *,
+    approve: bool,
     expected_version: int,
     note: str = "",
     request_id: uuid.UUID | None = None,
 ) -> OrderChangeRequest:
-    """DEC-059: the second approval of a due-date change, by planning (before or after the manager's
-    decision, never by the requester or the deciding manager)."""
+    """DEC-059: the second decision on a due-date change, by planning (before or after the manager's
+    decision, never by the requester or the deciding manager). Approve: the request may be applied once the
+    manager approved it too. Reject (amendment 2026-11-14): a reason is required, the request closes REJECTED
+    and the order keeps its due date. Permission ``commercial.change.planning_approve`` covers both."""
     decision = authorize(caller, CHANGE_PLANNING_APPROVE)
+    text = note.strip()[:500] if approve else reason_text(note, field="note")
     with unit_of_work(caller.context(request_id)) as uow:
         cr = lock(OrderChangeRequest, cr_id)
         check_version(cr, expected_version)
@@ -424,20 +433,43 @@ def planning_approve_change_request(
             refuse(Reason.PLANNING_ALREADY_APPROVED, field="change_request")
         before = _view(cr)
         with db_rules():
-            OrderChangeRequest.objects.filter(pk=cr.pk).update(
-                planning_approved_by_id=caller.user_id, planning_approved_at=Now()
-            )
+            if approve:
+                OrderChangeRequest.objects.filter(pk=cr.pk).update(
+                    planning_approved_by_id=caller.user_id, planning_approved_at=Now()
+                )
+            else:
+                CHANGE_MACHINE.assert_transition(cr.status, C.REJECTED)
+                OrderChangeRequest.objects.filter(pk=cr.pk).update(
+                    status=C.REJECTED, planning_rejected_by_id=caller.user_id, planning_rejected_at=Now()
+                )
         cr.refresh_from_db()
+        verb, past = (
+            ("planning_approve", "planning_approved") if approve else ("planning_reject", "planning_rejected")
+        )
         _event(
             uow,
-            "planning_approve",
-            "planning_approved",
+            verb,
+            past,
             cr,
             before=before,
-            reason=note.strip()[:500],
-            scope={"via_role": decision.grant.role_code if decision.grant else ""},
+            reason=text,
+            scope={"via_role": decision.grant.role_code if decision.grant else "", "approved": approve},
         )
     return cr
+
+
+def planning_approve_change_request(
+    caller: Caller,
+    cr_id: uuid.UUID,
+    *,
+    expected_version: int,
+    note: str = "",
+    request_id: uuid.UUID | None = None,
+) -> OrderChangeRequest:
+    """The approve half of :func:`planning_decide_change_request` (02.3 name, kept for callers)."""
+    return planning_decide_change_request(
+        caller, cr_id, approve=True, expected_version=expected_version, note=note, request_id=request_id
+    )
 
 
 def _snapshot_lines(
@@ -642,6 +674,7 @@ def get_change_request(caller: Caller, cr_id: uuid.UUID) -> dict[str, Any]:
         "requested_by": str(cr.requested_by_id),
         "decided_by": str(cr.decided_by_id) if cr.decided_by_id else None,
         "planning_approved_by": str(cr.planning_approved_by_id) if cr.planning_approved_by_id else None,
+        "planning_rejected_by": str(cr.planning_rejected_by_id) if cr.planning_rejected_by_id else None,
         "applied_version": cr.applied_version,
         "row_version": cr.row_version,
     }

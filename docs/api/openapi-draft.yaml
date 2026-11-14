@@ -2,8 +2,8 @@ openapi: 3.1.0
 jsonSchemaDialect: https://spec.openapis.org/oas/3.1/dialect/base
 info:
   title: Aleekhan Factory Platform API
-  version: 0.7.0-draft
-  summary: PHASE_00 + PHASE_01 platform contract (implemented) + PHASE_02 identity/commercial operations (PLANNED, 02.1).
+  version: 0.8.0-draft
+  summary: PHASE_00 + PHASE_01 platform contract + PHASE_02 identity/commercial operations (all implemented; 02.4).
   description: |
     Status: DRAFT (PHASE_00 / 00.1 Discovery & Contract, implemented in 00.4). Not approved. This hand-written
     document is the contract (contract-first): the backend is tested against it (route parity, security
@@ -90,6 +90,22 @@ info:
     codes are listed in `planned_error_codes`. Existing PHASE_00/PHASE_01 paths, operations and components are
     unchanged (additive change only). Sources: docs/discovery/CONFLICTS.md C-47..C-76, DATA_TABLE.md and
     STATE_TRANSITIONS.md section 5 (PHASE_02).
+
+    0.8.0-draft (PHASE_02 / 02.4 Backend/API): every PHASE_02 operation is IMPLEMENTED (the planned markers are
+    removed; route parity covers every path) over the 02.3 domain engine, with the APPROVED decisions DEC-005,
+    DEC-006, DEC-057 (matrix v2.1) and DEC-059 plus the employer amendments of 2026-11-12/13/14: the
+    `x-aleekhan-blocked-by` markers are replaced by `x-aleekhan-decided-by`. Additions: `updateCustomerBrand`,
+    `addCodeRuleGoldenCases` and `decidePlanningChangeRequest` (planning approves OR rejects a due-date change;
+    one permission `commercial.change.planning_approve`, fresh MFA). Technical numbers `CU-`/`SO-`/`CR-` + Jalali
+    year + at least 6 digits (`TechnicalNumber`). `SerialNumber` gets the DEC-006 pattern `^[1-9][0-9]*$`. The
+    PHASE_02 request/response schemas, which no client used while they were planned, are aligned with the
+    engine (DATA_TABLE / ERD 02.2-02.3): `ProductClass.level_key` product_type | category with 2-digit segments,
+    product and style numbers as 4-digit text, `Style.category_id`, `CustomerOrderStatus` without PAUSED (single
+    hold state), order lines without SERIAL_ALLOCATED, `CustomerOrder.customer_representative_name` (masked
+    `[REDACTED]` for management_viewer and in write responses), historical-record match fields, change request
+    items of the engine. Refusals keep the stable top-level codes; the reason is `errors[].code`
+    (`x-aleekhan-conventions.phase02_refusal_reasons`); the four planned codes of 0.7.0-draft were not added.
+    PHASE_00/PHASE_01 paths, operations and components are unchanged.
 
     Stack: Django 5.2 LTS + DRF (DEC-001). Base path is versioned: every endpoint lives under `/api/v1`.
     A breaking change requires `/api/v2` (or an explicitly approved deprecation window); additive changes only
@@ -4666,18 +4682,19 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /identity/customers:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '02.4'
     get:
       tags:
       - identity
       operationId: listCustomers
       summary: List customers
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.customer.read` (deny by default;
-        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+      description: 'Requires permission `identity.customer.read` (deny by default; GLOBAL record scope - out of scope = 404).
+        Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
         '
       x-aleekhan-permission: identity.customer.read
+      x-aleekhan-decided-by:
+      - DEC-057
+      - DEC-058
       parameters:
       - $ref: '#/components/parameters/RequestId'
       - $ref: '#/components/parameters/Cursor'
@@ -4713,15 +4730,15 @@ paths:
       tags:
       - identity
       operationId: createCustomer
-      summary: Create a customer (duplicate check, no auto-merge)
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.customer.manage` (deny by
-        default; record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before
-        DEC-057.
-
-        A possible duplicate answers 409 POSSIBLE_DUPLICATE (planned code) unless acknowledged.
+      summary: Create a customer (duplicate name = acknowledged warning, never merged)
+      description: 'Requires permission `identity.customer.manage` (deny by default; GLOBAL record scope - out of scope = 404).
+        Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
         '
       x-aleekhan-permission: identity.customer.manage
+      x-aleekhan-decided-by:
+      - DEC-057
+      - DEC-058
       parameters:
       - $ref: '#/components/parameters/RequestId'
       - $ref: '#/components/parameters/IdempotencyKey'
@@ -4758,8 +4775,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /identity/customers/{customer_id}:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '02.4'
     parameters:
     - $ref: '#/components/parameters/CustomerId'
     get:
@@ -4767,8 +4782,8 @@ paths:
       - identity
       operationId: getCustomer
       summary: Get a customer
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.customer.read` (deny by default;
-        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+      description: 'Requires permission `identity.customer.read` (deny by default; GLOBAL record scope - out of scope = 404).
+        Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
         '
       x-aleekhan-permission: identity.customer.read
@@ -4801,9 +4816,8 @@ paths:
       - identity
       operationId: updateCustomer
       summary: Update a customer
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.customer.manage` (deny by
-        default; record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before
-        DEC-057.
+      description: 'Requires permission `identity.customer.manage` (deny by default; GLOBAL record scope - out of scope = 404).
+        If-Match = the row version (ETag) of the resource. Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
         '
       x-aleekhan-permission: identity.customer.manage
@@ -4848,8 +4862,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /identity/customers/{customer_id}/brands:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '02.4'
     parameters:
     - $ref: '#/components/parameters/CustomerId'
     get:
@@ -4857,8 +4869,8 @@ paths:
       - identity
       operationId: listCustomerBrands
       summary: List the brands of a customer
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.customer.read` (deny by default;
-        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+      description: 'Requires permission `identity.customer.read` (deny by default; GLOBAL record scope - out of scope = 404).
+        Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
         '
       x-aleekhan-permission: identity.customer.read
@@ -4890,10 +4902,9 @@ paths:
       tags:
       - identity
       operationId: createCustomerBrand
-      summary: Add a brand to a customer
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.customer.manage` (deny by
-        default; record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before
-        DEC-057.
+      summary: Add a brand to a customer (DEC-058 B-A)
+      description: 'Requires permission `identity.customer.manage` (deny by default; GLOBAL record scope - out of scope = 404).
+        Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
         '
       x-aleekhan-permission: identity.customer.manage
@@ -4934,18 +4945,68 @@ paths:
           $ref: '#/components/responses/PreconditionRequired'
         '429':
           $ref: '#/components/responses/RateLimited'
+  /identity/customers/{customer_id}/brands/{brand_id}:
+    parameters:
+    - $ref: '#/components/parameters/CustomerId'
+    - $ref: '#/components/parameters/BrandId'
+    patch:
+      tags:
+      - identity
+      operationId: updateCustomerBrand
+      summary: Activate / deactivate a brand (02.4, additive)
+      description: 'Requires permission `identity.customer.manage` (deny by default; GLOBAL record scope - out of scope = 404).
+        If-Match = the row version (ETag) of the resource. Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
+
+        '
+      x-aleekhan-permission: identity.customer.manage
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerBrandUpdateRequest'
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerBrand'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '412':
+          $ref: '#/components/responses/VersionConflict'
+        '422':
+          $ref: '#/components/responses/IdempotencyKeyReused'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+        '429':
+          $ref: '#/components/responses/RateLimited'
   /identity/product-classes:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '02.4'
     get:
       tags:
       - identity
       operationId: listProductClasses
-      summary: List product classes (family/type/category)
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.product.read` (deny by default;
-        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
-
-        Empty until the class list is confirmed (DEC-005 E-2; C-58).
+      summary: List product types and categories (read-only; server import)
+      description: 'Requires permission `identity.product.read` (deny by default; GLOBAL record scope - out of scope = 404).
+        Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
         '
       x-aleekhan-permission: identity.product.read
@@ -4959,6 +5020,23 @@ paths:
         schema:
           type: string
           format: uuid
+      - name: level_key
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - product_type
+          - category
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - DRAFT
+          - ACTIVE
+          - RETIRED
       responses:
         '200':
           description: Success
@@ -4978,15 +5056,13 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /identity/products:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '02.4'
     get:
       tags:
       - identity
       operationId: listProducts
       summary: List products
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.product.read` (deny by default;
-        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+      description: 'Requires permission `identity.product.read` (deny by default; GLOBAL record scope - out of scope = 404).
+        Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
         '
       x-aleekhan-permission: identity.product.read
@@ -5001,6 +5077,15 @@ paths:
         schema:
           type: string
           format: uuid
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - DRAFT
+          - ACTIVE
+          - RETIRED
       responses:
         '200':
           description: Success
@@ -5023,12 +5108,15 @@ paths:
       tags:
       - identity
       operationId: createProduct
-      summary: Create a product
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.product.manage` (deny by default;
-        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+      summary: Create a product (number computed, DEC-005)
+      description: 'Requires permission `identity.product.manage` (deny by default; GLOBAL record scope - out of scope = 404).
+        Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
         '
       x-aleekhan-permission: identity.product.manage
+      x-aleekhan-decided-by:
+      - DEC-005
+      - DEC-057
       parameters:
       - $ref: '#/components/parameters/RequestId'
       - $ref: '#/components/parameters/IdempotencyKey'
@@ -5065,8 +5153,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /identity/products/{product_id}:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '02.4'
     parameters:
     - $ref: '#/components/parameters/ProductId'
     get:
@@ -5074,8 +5160,8 @@ paths:
       - identity
       operationId: getProduct
       summary: Get a product
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.product.read` (deny by default;
-        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+      description: 'Requires permission `identity.product.read` (deny by default; GLOBAL record scope - out of scope = 404).
+        Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
         '
       x-aleekhan-permission: identity.product.read
@@ -5107,9 +5193,9 @@ paths:
       tags:
       - identity
       operationId: updateProduct
-      summary: Update a product
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.product.manage` (deny by default;
-        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+      summary: Change the status of a product
+      description: 'Requires permission `identity.product.manage` (deny by default; GLOBAL record scope - out of scope = 404).
+        If-Match = the row version (ETag) of the resource. Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
         '
       x-aleekhan-permission: identity.product.manage
@@ -5154,8 +5240,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /identity/products/{product_id}/styles:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '02.4'
     parameters:
     - $ref: '#/components/parameters/ProductId'
     get:
@@ -5163,8 +5247,8 @@ paths:
       - identity
       operationId: listProductStyles
       summary: List the styles of a product
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.product.read` (deny by default;
-        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+      description: 'Requires permission `identity.product.read` (deny by default; GLOBAL record scope - out of scope = 404).
+        Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
         '
       x-aleekhan-permission: identity.product.read
@@ -5196,12 +5280,14 @@ paths:
       tags:
       - identity
       operationId: createStyle
-      summary: Create a style (with revision 1)
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.product.manage` (deny by default;
-        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+      summary: Create a style (number computed, DEC-005 + amendment 2026-11-14)
+      description: 'Requires permission `identity.product.manage` (deny by default; GLOBAL record scope - out of scope = 404).
+        Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
         '
       x-aleekhan-permission: identity.product.manage
+      x-aleekhan-decided-by:
+      - DEC-005
       parameters:
       - $ref: '#/components/parameters/RequestId'
       - $ref: '#/components/parameters/IdempotencyKey'
@@ -5240,8 +5326,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /identity/styles/{style_id}:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '02.4'
     parameters:
     - $ref: '#/components/parameters/StyleId'
     get:
@@ -5249,8 +5333,8 @@ paths:
       - identity
       operationId: getStyle
       summary: Get a style
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.product.read` (deny by default;
-        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+      description: 'Requires permission `identity.product.read` (deny by default; GLOBAL record scope - out of scope = 404).
+        Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
         '
       x-aleekhan-permission: identity.product.read
@@ -5282,9 +5366,9 @@ paths:
       tags:
       - identity
       operationId: updateStyle
-      summary: Update a style (name/status)
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.product.manage` (deny by default;
-        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+      summary: Change the status of a style
+      description: 'Requires permission `identity.product.manage` (deny by default; GLOBAL record scope - out of scope = 404).
+        If-Match = the row version (ETag) of the resource. Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
         '
       x-aleekhan-permission: identity.product.manage
@@ -5329,8 +5413,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /identity/styles/{style_id}/revisions:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '02.4'
     parameters:
     - $ref: '#/components/parameters/StyleId'
     get:
@@ -5338,8 +5420,8 @@ paths:
       - identity
       operationId: listStyleRevisions
       summary: List style revisions
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.product.read` (deny by default;
-        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+      description: 'Requires permission `identity.product.read` (deny by default; GLOBAL record scope - out of scope = 404).
+        Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
         '
       x-aleekhan-permission: identity.product.read
@@ -5371,9 +5453,9 @@ paths:
       tags:
       - identity
       operationId: createStyleRevision
-      summary: Create a DRAFT style revision
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.product.manage` (deny by default;
-        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+      summary: New DRAFT style revision
+      description: 'Requires permission `identity.product.manage` (deny by default; GLOBAL record scope - out of scope = 404).
+        Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
         '
       x-aleekhan-permission: identity.product.manage
@@ -5415,8 +5497,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /identity/styles/{style_id}/revisions/{style_revision_id}/activate:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '02.4'
     parameters:
     - $ref: '#/components/parameters/StyleId'
     - $ref: '#/components/parameters/StyleRevisionId'
@@ -5424,9 +5504,9 @@ paths:
       tags:
       - identity
       operationId: activateStyleRevision
-      summary: Activate a style revision (the previous one is superseded)
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.product.manage` (deny by default;
-        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+      summary: Activate a revision (the previous ACTIVE one becomes SUPERSEDED)
+      description: 'Requires permission `identity.product.manage` (deny by default; GLOBAL record scope - out of scope = 404).
+        If-Match = the row version (ETag) of the resource. Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
         '
       x-aleekhan-permission: identity.product.manage
@@ -5471,17 +5551,15 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /identity/styles/{style_id}/tracking:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '02.4'
     parameters:
     - $ref: '#/components/parameters/StyleId'
     get:
       tags:
       - identity
       operationId: getStyleTracking
-      summary: Product/Style 360 (page 4)
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.product.read` (deny by default;
-        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+      summary: Product/Style 360 (page 4), PHASE_02 part
+      description: 'Requires permission `identity.product.read` (deny by default; GLOBAL record scope - out of scope = 404).
+        Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
         '
       x-aleekhan-permission: identity.product.read
@@ -5497,25 +5575,18 @@ paths:
         in: query
         required: false
         schema:
-          type: string
-          enum:
-          - ALLOCATED
-          - CANCELLED
+          $ref: '#/components/schemas/SerialStatus'
       - name: from
         in: query
         required: false
         schema:
-          type:
-          - string
-          - 'null'
+          type: string
           format: date
       - name: to
         in: query
         required: false
         schema:
-          type:
-          - string
-          - 'null'
+          type: string
           format: date
       - $ref: '#/components/parameters/Cursor'
       - $ref: '#/components/parameters/PageSize'
@@ -5540,15 +5611,16 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /identity/style-suggestions:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '02.4'
     get:
       tags:
       - identity
       operationId: findSimilarStyles
-      summary: Suggest similar existing styles (never merges)
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.product.read` (deny by default;
-        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+      summary: Similar styles (ranked suggestions only; no merge, C-71)
+      description: 'Requires permission `identity.product.read` (deny by default; GLOBAL record scope - out of scope = 404).
+        Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
+
+
+        Deterministic score: 1.0 = same product and similar name, 0.5 = similar name (normalised contains).
 
         '
       x-aleekhan-permission: identity.product.read
@@ -5561,7 +5633,6 @@ paths:
           type: string
           minLength: 1
           maxLength: 100
-        description: Server-side search text (normalised for ی/ي, ک/ك and half-space; never a merge).
       - name: product_id
         in: query
         required: false
@@ -5587,22 +5658,18 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /identity/product-codes/validate:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '02.4'
     post:
       tags:
       - identity
       operationId: validateProductCode
-      summary: 'Check a 14-digit code: format, namespace, registry'
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.product_code.read` (deny by
-        default; record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before
-        DEC-057.
-
-        Side-effect free computation (no write, no audit of business data, no outbox): no Idempotency-Key (`x-aleekhan-conventions.side_effect_free_operations`).
-        POST only so the code is not placed in URLs/logs.
+      summary: Validate a 14-digit code (side-effect free)
+      description: 'Requires permission `identity.product_code.read` (deny by default; GLOBAL record scope - out of scope =
+        404). Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
         '
       x-aleekhan-permission: identity.product_code.read
+      x-aleekhan-decided-by:
+      - DEC-005
       parameters:
       - $ref: '#/components/parameters/RequestId'
       requestBody:
@@ -5630,26 +5697,17 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /identity/product-codes/preview:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '02.4'
     post:
       tags:
       - identity
       operationId: previewProductCode
-      summary: Preview the code an ACTIVE rule would give (nothing reserved)
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.product_code.read` (deny by
-        default; record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before
-        DEC-057.
-
-        BLOCKED: answers 409 RULE_NOT_APPROVED with the blocking decision_id until DEC-005 = product code rules (NOrder/Sorce/Codding
-        golden extraction) is APPROVED.
-
-        Side-effect free computation (no write, no audit of business data, no outbox): no Idempotency-Key (`x-aleekhan-conventions.side_effect_free_operations`).
-        POST only so the code is not placed in URLs/logs.
+      summary: Preview the code of a style (side-effect free)
+      description: 'Requires permission `identity.product_code.read` (deny by default; GLOBAL record scope - out of scope =
+        404). Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
         '
       x-aleekhan-permission: identity.product_code.read
-      x-aleekhan-blocked-by:
+      x-aleekhan-decided-by:
       - DEC-005
       parameters:
       - $ref: '#/components/parameters/RequestId'
@@ -5675,21 +5733,20 @@ paths:
           $ref: '#/components/responses/AuthenticationRequired'
         '403':
           $ref: '#/components/responses/AccessDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '409':
           $ref: '#/components/responses/Conflict'
         '429':
           $ref: '#/components/responses/RateLimited'
   /identity/product-codes:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '02.4'
     get:
       tags:
       - identity
       operationId: listProductCodes
-      summary: List registry codes (product_code namespace)
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.product_code.read` (deny by
-        default; record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before
-        DEC-057.
+      summary: List product codes (registry)
+      description: 'Requires permission `identity.product_code.read` (deny by default; GLOBAL record scope - out of scope =
+        404). Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
         '
       x-aleekhan-permission: identity.product_code.read
@@ -5750,24 +5807,18 @@ paths:
       tags:
       - identity
       operationId: issueProductCode
-      summary: Reserve a new product code under an ACTIVE rule (ERP_PENDING until Rahkaran matches)
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.product_code.issue` (deny
-        by default; record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before
-        DEC-057.
+      summary: 'Issue a 14-digit code: RESERVED / ERP_PENDING (DEC-005 B1)'
+      description: 'Requires permission `identity.product_code.issue` (deny by default; GLOBAL record scope - out of scope =
+        404). Fresh MFA step-up (401 MFA_REQUIRED -> stepUpMfa). Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
-        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (DEC-051:
-        15 min; also inside the factory network, DEC-049).
 
-        BLOCKED: answers 409 RULE_NOT_APPROVED with the blocking decision_id until DEC-005 = product code rules (NOrder/Sorce/Codding
-        golden extraction); DEC-057 = PHASE_02 permission matrix (who confirms/approves) is APPROVED.
-
-        Race: UNIQUE(code_namespace, code); the loser gets 409 PRODUCT_CODE_TAKEN (planned code). Nothing is written to Rahkaran
-        (ADR-001; C-75).
+        409 RULE_NOT_APPROVED (decision_id DEC-005) without an ACTIVE code rule revision covering the type. Nothing is written
+        to Rahkaran.
 
         '
       x-aleekhan-permission: identity.product_code.issue
       x-aleekhan-mfa-step-up: true
-      x-aleekhan-blocked-by:
+      x-aleekhan-decided-by:
       - DEC-005
       - DEC-057
       parameters:
@@ -5806,18 +5857,15 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /identity/product-codes/{product_code_id}:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '02.4'
     parameters:
     - $ref: '#/components/parameters/ProductCodeId'
     get:
       tags:
       - identity
       operationId: getProductCode
-      summary: Get a registry code
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.product_code.read` (deny by
-        default; record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before
-        DEC-057.
+      summary: Get a product code
+      description: 'Requires permission `identity.product_code.read` (deny by default; GLOBAL record scope - out of scope =
+        404). Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
         '
       x-aleekhan-permission: identity.product_code.read
@@ -5846,15 +5894,13 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /identity/code-rule-revisions:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '02.4'
     get:
       tags:
       - identity
       operationId: listCodeRuleRevisions
       summary: List code rule revisions
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.code_rule.read` (deny by default;
-        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+      description: 'Requires permission `identity.code_rule.read` (deny by default; GLOBAL record scope - out of scope = 404).
+        Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
         '
       x-aleekhan-permission: identity.code_rule.read
@@ -5896,17 +5942,13 @@ paths:
       tags:
       - identity
       operationId: createCodeRuleRevision
-      summary: Create a DRAFT code rule revision
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.code_rule.manage` (deny by
-        default; record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before
-        DEC-057.
-
-        BLOCKED: answers 409 RULE_NOT_APPROVED with the blocking decision_id until DEC-005 = product code rules (NOrder/Sorce/Codding
-        golden extraction) is APPROVED.
+      summary: Draft a code rule revision (DEC-005)
+      description: 'Requires permission `identity.code_rule.manage` (deny by default; GLOBAL record scope - out of scope = 404).
+        Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
         '
       x-aleekhan-permission: identity.code_rule.manage
-      x-aleekhan-blocked-by:
+      x-aleekhan-decided-by:
       - DEC-005
       parameters:
       - $ref: '#/components/parameters/RequestId'
@@ -5944,8 +5986,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /identity/code-rule-revisions/{rule_revision_id}:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '02.4'
     parameters:
     - $ref: '#/components/parameters/RuleRevisionId'
     get:
@@ -5953,8 +5993,8 @@ paths:
       - identity
       operationId: getCodeRuleRevision
       summary: Get a code rule revision
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.code_rule.read` (deny by default;
-        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+      description: 'Requires permission `identity.code_rule.read` (deny by default; GLOBAL record scope - out of scope = 404).
+        Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
         '
       x-aleekhan-permission: identity.code_rule.read
@@ -5982,26 +6022,72 @@ paths:
           $ref: '#/components/responses/NotFound'
         '429':
           $ref: '#/components/responses/RateLimited'
+  /identity/code-rule-revisions/{rule_revision_id}/golden-cases:
+    parameters:
+    - $ref: '#/components/parameters/RuleRevisionId'
+    post:
+      tags:
+      - identity
+      operationId: addCodeRuleGoldenCases
+      summary: Attach golden cases to a DRAFT revision (02.4, additive)
+      description: 'Requires permission `identity.code_rule.manage` (deny by default; GLOBAL record scope - out of scope = 404).
+        Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
+
+        '
+      x-aleekhan-permission: identity.code_rule.manage
+      x-aleekhan-decided-by:
+      - DEC-005
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GoldenCasesAddRequest'
+      responses:
+        '201':
+          description: Created
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GoldenCasesAdded'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/IdempotencyKeyReused'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+        '429':
+          $ref: '#/components/responses/RateLimited'
   /identity/code-rule-revisions/{rule_revision_id}/submit-review:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '02.4'
     parameters:
     - $ref: '#/components/parameters/RuleRevisionId'
     post:
       tags:
       - identity
       operationId: submitCodeRuleRevision
-      summary: Submit for review (>= 20 golden cases per covered family)
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.code_rule.manage` (deny by
-        default; record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before
-        DEC-057.
-
-        BLOCKED: answers 409 RULE_NOT_APPROVED with the blocking decision_id until DEC-005 = product code rules (NOrder/Sorce/Codding
-        golden extraction) is APPROVED.
+      summary: Submit for review (>= 20 reproducing golden cases per type)
+      description: 'Requires permission `identity.code_rule.manage` (deny by default; GLOBAL record scope - out of scope = 404).
+        If-Match = the row version (ETag) of the resource. Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
         '
       x-aleekhan-permission: identity.code_rule.manage
-      x-aleekhan-blocked-by:
+      x-aleekhan-decided-by:
       - DEC-005
       parameters:
       - $ref: '#/components/parameters/RequestId'
@@ -6044,29 +6130,24 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /identity/code-rule-revisions/{rule_revision_id}/approve:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '02.4'
     parameters:
     - $ref: '#/components/parameters/RuleRevisionId'
     post:
       tags:
       - identity
       operationId: approveCodeRuleRevision
-      summary: Approve (maker != checker)
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.code_rule.approve` (deny by
-        default; record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before
-        DEC-057.
+      summary: Approve (approver != maker)
+      description: 'Requires permission `identity.code_rule.approve` (deny by default; GLOBAL record scope - out of scope =
+        404). Fresh MFA step-up (401 MFA_REQUIRED -> stepUpMfa). If-Match = the row version (ETag) of the resource. Refusal
+        reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
-        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (DEC-051:
-        15 min; also inside the factory network, DEC-049).
 
-        BLOCKED: answers 409 RULE_NOT_APPROVED with the blocking decision_id until DEC-005 = product code rules (NOrder/Sorce/Codding
-        golden extraction); DEC-057 = PHASE_02 permission matrix (who confirms/approves) is APPROVED.
+        resource_revision must equal the revision_no being approved.
 
         '
       x-aleekhan-permission: identity.code_rule.approve
       x-aleekhan-mfa-step-up: true
-      x-aleekhan-blocked-by:
+      x-aleekhan-decided-by:
       - DEC-005
       - DEC-057
       parameters:
@@ -6110,29 +6191,21 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /identity/code-rule-revisions/{rule_revision_id}/reject:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '02.4'
     parameters:
     - $ref: '#/components/parameters/RuleRevisionId'
     post:
       tags:
       - identity
       operationId: rejectCodeRuleRevision
-      summary: Reject (a correction is a new revision)
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.code_rule.approve` (deny by
-        default; record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before
-        DEC-057.
-
-        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (DEC-051:
-        15 min; also inside the factory network, DEC-049).
-
-        BLOCKED: answers 409 RULE_NOT_APPROVED with the blocking decision_id until DEC-005 = product code rules (NOrder/Sorce/Codding
-        golden extraction); DEC-057 = PHASE_02 permission matrix (who confirms/approves) is APPROVED.
+      summary: Reject (approver != maker)
+      description: 'Requires permission `identity.code_rule.approve` (deny by default; GLOBAL record scope - out of scope =
+        404). Fresh MFA step-up (401 MFA_REQUIRED -> stepUpMfa). If-Match = the row version (ETag) of the resource. Refusal
+        reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
         '
       x-aleekhan-permission: identity.code_rule.approve
       x-aleekhan-mfa-step-up: true
-      x-aleekhan-blocked-by:
+      x-aleekhan-decided-by:
       - DEC-005
       - DEC-057
       parameters:
@@ -6176,29 +6249,21 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /identity/code-rule-revisions/{rule_revision_id}/activate:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '02.4'
     parameters:
     - $ref: '#/components/parameters/RuleRevisionId'
     post:
       tags:
       - identity
       operationId: activateCodeRuleRevision
-      summary: Activate an APPROVED revision (the previous one retires)
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.code_rule.approve` (deny by
-        default; record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before
-        DEC-057.
-
-        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (DEC-051:
-        15 min; also inside the factory network, DEC-049).
-
-        BLOCKED: answers 409 RULE_NOT_APPROVED with the blocking decision_id until DEC-005 = product code rules (NOrder/Sorce/Codding
-        golden extraction); DEC-057 = PHASE_02 permission matrix (who confirms/approves) is APPROVED.
+      summary: Activate (the previous ACTIVE revision is retired)
+      description: 'Requires permission `identity.code_rule.approve` (deny by default; GLOBAL record scope - out of scope =
+        404). Fresh MFA step-up (401 MFA_REQUIRED -> stepUpMfa). If-Match = the row version (ETag) of the resource. Refusal
+        reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
         '
       x-aleekhan-permission: identity.code_rule.approve
       x-aleekhan-mfa-step-up: true
-      x-aleekhan-blocked-by:
+      x-aleekhan-decided-by:
       - DEC-005
       - DEC-057
       parameters:
@@ -6242,15 +6307,13 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /identity/serials:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '02.4'
     get:
       tags:
       - identity
       operationId: listSerials
       summary: List serials
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.serial.read` (deny by default;
-        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+      description: 'Requires permission `identity.serial.read` (deny by default; GLOBAL record scope - out of scope = 404).
+        Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
         '
       x-aleekhan-permission: identity.serial.read
@@ -6258,7 +6321,15 @@ paths:
       - $ref: '#/components/parameters/RequestId'
       - $ref: '#/components/parameters/Cursor'
       - $ref: '#/components/parameters/PageSize'
-      - $ref: '#/components/parameters/SearchText'
+      - name: q
+        in: query
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 32
+          pattern: ^[0-9]{1,32}$
+        description: Serial number prefix (digits).
       - name: customer_id
         in: query
         required: false
@@ -6281,14 +6352,7 @@ paths:
         in: query
         required: false
         schema:
-          type: string
-          enum:
-          - ALLOCATED
-          - CANCELLED
-          - IN_PRODUCTION
-          - PARTIALLY_DELIVERED
-          - DELIVERED
-          - CLOSED
+          $ref: '#/components/schemas/SerialStatus'
       responses:
         '200':
           description: Success
@@ -6311,20 +6375,17 @@ paths:
       tags:
       - identity
       operationId: allocateSerial
-      summary: Allocate the serial of a CONFIRMED order line (atomic, idempotent, snapshot v1)
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.serial.allocate` (deny by
-        default; record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before
-        DEC-057.
+      summary: No stand-alone allocation (DEC-006 L-A)
+      description: 'Requires permission `identity.serial.allocate` (deny by default; GLOBAL record scope - out of scope = 404).
+        Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
-        BLOCKED: answers 409 RULE_NOT_APPROVED with the blocking decision_id until DEC-006 = serial namespace/format and its
-        relation to the order line; DEC-057 = PHASE_02 permission matrix (who confirms/approves) is APPROVED.
 
-        One transaction: serial + SerialSnapshot v1 + audit + outbox `SerialAllocated` (ID-02/03/04). Number from the namespace
-        under a row lock or a DB sequence, never MAX()+1 (R-13).
+        Always 409 STATE_TRANSITION_NOT_ALLOWED / errors[].code SERIAL_ALLOCATED_AT_CONFIRM: serials are drawn by confirmCustomerOrder
+        in the same transaction. Kept so the permission row of DEC-057 maps to an operation.
 
         '
       x-aleekhan-permission: identity.serial.allocate
-      x-aleekhan-blocked-by:
+      x-aleekhan-decided-by:
       - DEC-006
       - DEC-057
       parameters:
@@ -6363,17 +6424,15 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /identity/serials/{serial_id}:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '02.4'
     parameters:
     - $ref: '#/components/parameters/SerialId'
     get:
       tags:
       - identity
       operationId: getSerial
-      summary: Get a serial (page 1 header)
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.serial.read` (deny by default;
-        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+      summary: Get a serial
+      description: 'Requires permission `identity.serial.read` (deny by default; GLOBAL record scope - out of scope = 404).
+        Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
         '
       x-aleekhan-permission: identity.serial.read
@@ -6402,17 +6461,15 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /identity/serials/{serial_id}/snapshots:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '02.4'
     parameters:
     - $ref: '#/components/parameters/SerialId'
     get:
       tags:
       - identity
       operationId: listSerialSnapshots
-      summary: List the snapshots of a serial
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.serial.read` (deny by default;
-        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+      summary: List serial snapshots (append-only)
+      description: 'Requires permission `identity.serial.read` (deny by default; GLOBAL record scope - out of scope = 404).
+        Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
         '
       x-aleekhan-permission: identity.serial.read
@@ -6441,17 +6498,15 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /identity/serials/{serial_id}/tracking:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '02.4'
     parameters:
     - $ref: '#/components/parameters/SerialId'
     get:
       tags:
       - identity
       operationId: getSerialTracking
-      summary: 'Serial 360: order versions and events (pages 1/2)'
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.serial.read` (deny by default;
-        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+      summary: Serial 360 (pages 1/2), PHASE_02 part
+      description: 'Requires permission `identity.serial.read` (deny by default; GLOBAL record scope - out of scope = 404).
+        Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
         '
       x-aleekhan-permission: identity.serial.read
@@ -6478,16 +6533,13 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /identity/external-refs:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '02.4'
     get:
       tags:
       - identity
       operationId: listExternalRefs
-      summary: List external references of a target
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.external_ref.read` (deny by
-        default; record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before
-        DEC-057.
+      summary: List external references
+      description: 'Requires permission `identity.external_ref.read` (deny by default; GLOBAL record scope - out of scope =
+        404). Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
         '
       x-aleekhan-permission: identity.external_ref.read
@@ -6557,13 +6609,14 @@ paths:
       tags:
       - identity
       operationId: createExternalRef
-      summary: Add an external reference
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.external_ref.manage` (deny
-        by default; record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before
-        DEC-057.
+      summary: Record an external reference (never our serial)
+      description: 'Requires permission `identity.external_ref.manage` (deny by default; GLOBAL record scope - out of scope
+        = 404). Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
         '
       x-aleekhan-permission: identity.external_ref.manage
+      x-aleekhan-decided-by:
+      - DEC-058
       parameters:
       - $ref: '#/components/parameters/RequestId'
       - $ref: '#/components/parameters/IdempotencyKey'
@@ -6600,18 +6653,15 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /identity/external-refs/{external_ref_id}/end:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '02.4'
     parameters:
     - $ref: '#/components/parameters/ExternalRefId'
     post:
       tags:
       - identity
       operationId: endExternalRef
-      summary: End the validity of an external reference (never deleted)
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.external_ref.manage` (deny
-        by default; record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before
-        DEC-057.
+      summary: End an external reference
+      description: 'Requires permission `identity.external_ref.manage` (deny by default; GLOBAL record scope - out of scope
+        = 404). If-Match = the row version (ETag) of the resource. Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
         '
       x-aleekhan-permission: identity.external_ref.manage
@@ -6656,18 +6706,13 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /identity/historical-order-records:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '02.4'
     get:
       tags:
       - identity
       operationId: listHistoricalOrderRecords
-      summary: List read-only legacy order evidence
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `identity.historical.read` (deny by
-        default; record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before
-        DEC-057.
-
-        Read-only. Bulk import of legacy orders stays BLOCKED (DEC-025/DEC-035, PHASE_12; C-65).
+      summary: List legacy order records (read-only evidence)
+      description: 'Requires permission `identity.historical.read` (deny by default; GLOBAL record scope - out of scope = 404).
+        Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
         '
       x-aleekhan-permission: identity.historical.read
@@ -6691,6 +6736,15 @@ paths:
           - SUGGESTED
           - CONFIRMED
           - REJECTED
+      - name: code_flag
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - OK
+          - DISPUTED
+          - ABSENT
       responses:
         '200':
           description: Success
@@ -6710,15 +6764,13 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /commercial/customer-orders:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '02.4'
     get:
       tags:
       - commercial
       operationId: listCustomerOrders
       summary: List customer orders
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `commercial.order.read` (deny by default;
-        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+      description: 'Requires permission `commercial.order.read` (deny by default; GLOBAL record scope - out of scope = 404).
+        Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
         '
       x-aleekhan-permission: commercial.order.read
@@ -6726,6 +6778,7 @@ paths:
       - $ref: '#/components/parameters/RequestId'
       - $ref: '#/components/parameters/Cursor'
       - $ref: '#/components/parameters/PageSize'
+      - $ref: '#/components/parameters/SearchText'
       - name: customer_id
         in: query
         required: false
@@ -6766,14 +6819,15 @@ paths:
       tags:
       - commercial
       operationId: createCustomerOrder
-      summary: Create a DRAFT order (PO header)
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `commercial.order.manage` (deny by default;
-        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
-
-        A PO number already used by the same customer answers 409 POSSIBLE_DUPLICATE (planned code) unless acknowledged (C-55).
+      summary: Create a DRAFT order
+      description: 'Requires permission `commercial.order.manage` (deny by default; GLOBAL record scope - out of scope = 404).
+        Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
         '
       x-aleekhan-permission: commercial.order.manage
+      x-aleekhan-decided-by:
+      - DEC-057
+      - DEC-058
       parameters:
       - $ref: '#/components/parameters/RequestId'
       - $ref: '#/components/parameters/IdempotencyKey'
@@ -6810,8 +6864,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /commercial/customer-orders/{order_id}:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '02.4'
     parameters:
     - $ref: '#/components/parameters/OrderId'
     get:
@@ -6819,8 +6871,11 @@ paths:
       - commercial
       operationId: getCustomerOrder
       summary: Get an order with its lines
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `commercial.order.read` (deny by default;
-        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+      description: 'Requires permission `commercial.order.read` (deny by default; GLOBAL record scope - out of scope = 404).
+        Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
+
+
+        An unmasked representative name is audited on every read (DEC-058).
 
         '
       x-aleekhan-permission: commercial.order.read
@@ -6852,9 +6907,9 @@ paths:
       tags:
       - commercial
       operationId: updateCustomerOrder
-      summary: Update a DRAFT order header
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `commercial.order.manage` (deny by default;
-        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+      summary: Edit the header of a DRAFT order
+      description: 'Requires permission `commercial.order.manage` (deny by default; GLOBAL record scope - out of scope = 404).
+        If-Match = the row version (ETag) of the resource. Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
         '
       x-aleekhan-permission: commercial.order.manage
@@ -6899,17 +6954,15 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /commercial/customer-orders/{order_id}/lines:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '02.4'
     parameters:
     - $ref: '#/components/parameters/OrderId'
     post:
       tags:
       - commercial
       operationId: addCustomerOrderLine
-      summary: Add a line to a DRAFT order
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `commercial.order.manage` (deny by default;
-        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+      summary: Add a line to a DRAFT order (order If-Match)
+      description: 'Requires permission `commercial.order.manage` (deny by default; GLOBAL record scope - out of scope = 404).
+        If-Match = the row version (ETag) of the resource (the ORDER for line operations). Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
         '
       x-aleekhan-permission: commercial.order.manage
@@ -6954,8 +7007,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /commercial/customer-orders/{order_id}/lines/{line_id}:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '02.4'
     parameters:
     - $ref: '#/components/parameters/OrderId'
     - $ref: '#/components/parameters/LineId'
@@ -6963,9 +7014,9 @@ paths:
       tags:
       - commercial
       operationId: updateCustomerOrderLine
-      summary: Update a line of a DRAFT order
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `commercial.order.manage` (deny by default;
-        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+      summary: Edit an OPEN line (order If-Match)
+      description: 'Requires permission `commercial.order.manage` (deny by default; GLOBAL record scope - out of scope = 404).
+        If-Match = the row version (ETag) of the resource (the ORDER for line operations). Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
         '
       x-aleekhan-permission: commercial.order.manage
@@ -7010,8 +7061,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /commercial/customer-orders/{order_id}/lines/{line_id}/remove:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '02.4'
     parameters:
     - $ref: '#/components/parameters/OrderId'
     - $ref: '#/components/parameters/LineId'
@@ -7019,9 +7068,9 @@ paths:
       tags:
       - commercial
       operationId: removeCustomerOrderLine
-      summary: Remove a line of a DRAFT order (the line number is not re-used)
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `commercial.order.manage` (deny by default;
-        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+      summary: Remove an OPEN line (order If-Match; line_no never re-used)
+      description: 'Requires permission `commercial.order.manage` (deny by default; GLOBAL record scope - out of scope = 404).
+        If-Match = the row version (ETag) of the resource (the ORDER for line operations). Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
         '
       x-aleekhan-permission: commercial.order.manage
@@ -7066,22 +7115,20 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /commercial/customer-orders/{order_id}/validate:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '02.4'
     parameters:
     - $ref: '#/components/parameters/OrderId'
     post:
       tags:
       - commercial
       operationId: validateCustomerOrder
-      summary: DRAFT -> VALIDATED (server-side checks)
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `commercial.order.manage` (deny by default;
-        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
-
-        Failed checks answer 400 VALIDATION_FAILED with `errors[]`.
+      summary: DRAFT -> VALIDATED
+      description: 'Requires permission `commercial.order.manage` (deny by default; GLOBAL record scope - out of scope = 404).
+        If-Match = the row version (ETag) of the resource. Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
         '
       x-aleekhan-permission: commercial.order.manage
+      x-aleekhan-decided-by:
+      - DEC-058
       parameters:
       - $ref: '#/components/parameters/RequestId'
       - $ref: '#/components/parameters/IdempotencyKey'
@@ -7091,7 +7138,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/OptionalNoteRequest'
+              $ref: '#/components/schemas/CustomerOrderValidateRequest'
       responses:
         '200':
           description: Success
@@ -7123,8 +7170,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /commercial/customer-orders/{order_id}/reopen:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '02.4'
     parameters:
     - $ref: '#/components/parameters/OrderId'
     post:
@@ -7132,8 +7177,8 @@ paths:
       - commercial
       operationId: reopenCustomerOrder
       summary: VALIDATED -> DRAFT
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `commercial.order.manage` (deny by default;
-        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+      description: 'Requires permission `commercial.order.manage` (deny by default; GLOBAL record scope - out of scope = 404).
+        If-Match = the row version (ETag) of the resource. Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
         '
       x-aleekhan-permission: commercial.order.manage
@@ -7178,17 +7223,18 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /commercial/customer-orders/{order_id}/cancel:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '02.4'
     parameters:
     - $ref: '#/components/parameters/OrderId'
     post:
       tags:
       - commercial
       operationId: cancelCustomerOrder
-      summary: Cancel a DRAFT/VALIDATED order (after confirmation only by change request, DEC-059)
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `commercial.order.manage` (deny by default;
-        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+      summary: Cancel an unconfirmed order (DRAFT / VALIDATED)
+      description: 'Requires permission `commercial.order.manage` (deny by default; GLOBAL record scope - out of scope = 404).
+        If-Match = the row version (ETag) of the resource. Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
+
+
+        A confirmed order is cancelled only by a CANCEL_ORDER change request (DEC-059).
 
         '
       x-aleekhan-permission: commercial.order.manage
@@ -7233,31 +7279,25 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /commercial/customer-orders/{order_id}/confirm:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '02.4'
     parameters:
     - $ref: '#/components/parameters/OrderId'
     post:
       tags:
       - commercial
       operationId: confirmCustomerOrder
-      summary: VALIDATED -> CONFIRMED (writes order version 1)
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `commercial.order.confirm` (deny by
-        default; record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before
-        DEC-057.
+      summary: 'Confirm: every line gets its serial in the same transaction (DEC-006 L-A)'
+      description: 'Requires permission `commercial.order.confirm` (deny by default; GLOBAL record scope - out of scope = 404).
+        Fresh MFA step-up (401 MFA_REQUIRED -> stepUpMfa). If-Match = the row version (ETag) of the resource. Refusal reasons:
+        errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
-        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (DEC-051:
-        15 min; also inside the factory network, DEC-049).
 
-        BLOCKED: answers 409 RULE_NOT_APPROVED with the blocking decision_id until DEC-006 = serial namespace/format and its
-        relation to the order line; DEC-057 = PHASE_02 permission matrix (who confirms/approves) is APPROVED.
-
-        Whether the serials of all lines are allocated in this same transaction is DEC-006 question 2.
+        planning_officer or the owner; never the creator (403 SELF_APPROVAL_FORBIDDEN / CONFIRMER_IS_CREATOR). Two concurrent
+        confirms: one 200, the other 412; never a second serial.
 
         '
       x-aleekhan-permission: commercial.order.confirm
       x-aleekhan-mfa-step-up: true
-      x-aleekhan-blocked-by:
+      x-aleekhan-decided-by:
       - DEC-006
       - DEC-057
       parameters:
@@ -7301,25 +7341,19 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /commercial/customer-orders/{order_id}/release-to-plan:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '02.4'
     parameters:
     - $ref: '#/components/parameters/OrderId'
     post:
       tags:
       - commercial
       operationId: releaseCustomerOrderToPlan
-      summary: 'CONFIRMED -> RELEASED_TO_PLAN (consumer: PHASE_05)'
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `commercial.order.release` (deny by
-        default; record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before
-        DEC-057.
-
-        BLOCKED: answers 409 RULE_NOT_APPROVED with the blocking decision_id until DEC-057 = PHASE_02 permission matrix (who
-        confirms/approves) is APPROVED.
+      summary: CONFIRMED -> RELEASED_TO_PLAN
+      description: 'Requires permission `commercial.order.release` (deny by default; GLOBAL record scope - out of scope = 404).
+        If-Match = the row version (ETag) of the resource. Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
         '
       x-aleekhan-permission: commercial.order.release
-      x-aleekhan-blocked-by:
+      x-aleekhan-decided-by:
       - DEC-057
       parameters:
       - $ref: '#/components/parameters/RequestId'
@@ -7362,17 +7396,15 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /commercial/customer-orders/{order_id}/versions:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '02.4'
     parameters:
     - $ref: '#/components/parameters/OrderId'
     get:
       tags:
       - commercial
       operationId: listCustomerOrderVersions
-      summary: List the immutable versions of an order
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `commercial.order.read` (deny by default;
-        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+      summary: List order versions
+      description: 'Requires permission `commercial.order.read` (deny by default; GLOBAL record scope - out of scope = 404).
+        Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
         '
       x-aleekhan-permission: commercial.order.read
@@ -7401,8 +7433,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /commercial/customer-orders/{order_id}/versions/{order_version}:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '02.4'
     parameters:
     - $ref: '#/components/parameters/OrderId'
     - $ref: '#/components/parameters/OrderVersion'
@@ -7410,9 +7440,9 @@ paths:
       tags:
       - commercial
       operationId: getCustomerOrderVersion
-      summary: Get one immutable order version
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `commercial.order.read` (deny by default;
-        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+      summary: Get an order version (immutable)
+      description: 'Requires permission `commercial.order.read` (deny by default; GLOBAL record scope - out of scope = 404).
+        Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
         '
       x-aleekhan-permission: commercial.order.read
@@ -7439,15 +7469,13 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /commercial/change-requests:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '02.4'
     get:
       tags:
       - commercial
       operationId: listChangeRequests
-      summary: List order change requests
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `commercial.change.read` (deny by default;
-        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+      summary: List change requests
+      description: 'Requires permission `commercial.change.read` (deny by default; GLOBAL record scope - out of scope = 404).
+        Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
         '
       x-aleekhan-permission: commercial.change.read
@@ -7507,17 +7535,16 @@ paths:
       tags:
       - commercial
       operationId: createChangeRequest
-      summary: Create a DRAFT change request
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `commercial.change.request` (deny by
-        default; record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before
-        DEC-057.
+      summary: Request a change of a confirmed order (DEC-059)
+      description: 'Requires permission `commercial.change.request` (deny by default; GLOBAL record scope - out of scope = 404).
+        Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
-        BLOCKED: answers 409 RULE_NOT_APPROVED with the blocking decision_id until DEC-059 = order changes after confirmation
-        is APPROVED.
+
+        After release only DUE_DATE_CHANGE / HOLD / RESUME; on hold only RESUME / CANCEL_ORDER / CANCEL_LINE (before release).
 
         '
       x-aleekhan-permission: commercial.change.request
-      x-aleekhan-blocked-by:
+      x-aleekhan-decided-by:
       - DEC-059
       parameters:
       - $ref: '#/components/parameters/RequestId'
@@ -7548,6 +7575,8 @@ paths:
           $ref: '#/components/responses/AccessDenied'
         '409':
           $ref: '#/components/responses/Conflict'
+        '412':
+          $ref: '#/components/responses/VersionConflict'
         '422':
           $ref: '#/components/responses/IdempotencyKeyReused'
         '428':
@@ -7555,8 +7584,6 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /commercial/change-requests/{change_request_id}:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '02.4'
     parameters:
     - $ref: '#/components/parameters/ChangeRequestId'
     get:
@@ -7564,8 +7591,8 @@ paths:
       - commercial
       operationId: getChangeRequest
       summary: Get a change request
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `commercial.change.read` (deny by default;
-        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+      description: 'Requires permission `commercial.change.read` (deny by default; GLOBAL record scope - out of scope = 404).
+        Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
         '
       x-aleekhan-permission: commercial.change.read
@@ -7594,17 +7621,15 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /commercial/change-requests/{change_request_id}/impact:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '02.4'
     parameters:
     - $ref: '#/components/parameters/ChangeRequestId'
     get:
       tags:
       - commercial
       operationId: getChangeRequestImpact
-      summary: 'Impact of a change request (PHASE_02 part: lines, serials, snapshots)'
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `commercial.change.read` (deny by default;
-        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
+      summary: PHASE_02 impact (lines, serials)
+      description: 'Requires permission `commercial.change.read` (deny by default; GLOBAL record scope - out of scope = 404).
+        Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
         '
       x-aleekhan-permission: commercial.change.read
@@ -7616,6 +7641,8 @@ paths:
           headers:
             X-Request-ID:
               $ref: '#/components/headers/X-Request-ID'
+            ETag:
+              $ref: '#/components/headers/ETag'
           content:
             application/json:
               schema:
@@ -7631,25 +7658,19 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /commercial/change-requests/{change_request_id}/submit:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '02.4'
     parameters:
     - $ref: '#/components/parameters/ChangeRequestId'
     post:
       tags:
       - commercial
       operationId: submitChangeRequest
-      summary: DRAFT -> SUBMITTED (one open request per order)
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `commercial.change.request` (deny by
-        default; record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before
-        DEC-057.
-
-        BLOCKED: answers 409 RULE_NOT_APPROVED with the blocking decision_id until DEC-059 = order changes after confirmation
-        is APPROVED.
+      summary: DRAFT -> SUBMITTED (the requester)
+      description: 'Requires permission `commercial.change.request` (deny by default; GLOBAL record scope - out of scope = 404).
+        If-Match = the row version (ETag) of the resource. Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
         '
       x-aleekhan-permission: commercial.change.request
-      x-aleekhan-blocked-by:
+      x-aleekhan-decided-by:
       - DEC-059
       parameters:
       - $ref: '#/components/parameters/RequestId'
@@ -7692,18 +7713,15 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /commercial/change-requests/{change_request_id}/withdraw:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '02.4'
     parameters:
     - $ref: '#/components/parameters/ChangeRequestId'
     post:
       tags:
       - commercial
       operationId: withdrawChangeRequest
-      summary: Withdraw a DRAFT/SUBMITTED request (requester only)
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `commercial.change.request` (deny by
-        default; record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before
-        DEC-057.
+      summary: Withdraw (the requester)
+      description: 'Requires permission `commercial.change.request` (deny by default; GLOBAL record scope - out of scope = 404).
+        If-Match = the row version (ETag) of the resource. Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
         '
       x-aleekhan-permission: commercial.change.request
@@ -7748,29 +7766,24 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /commercial/change-requests/{change_request_id}/decide:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '02.4'
     parameters:
     - $ref: '#/components/parameters/ChangeRequestId'
     post:
       tags:
       - commercial
       operationId: decideChangeRequest
-      summary: Approve or reject (decider != requester)
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `commercial.change.decide` (deny by
-        default; record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before
-        DEC-057.
+      summary: 'Manager decision: approve or reject'
+      description: 'Requires permission `commercial.change.decide` (deny by default; GLOBAL record scope - out of scope = 404).
+        Fresh MFA step-up (401 MFA_REQUIRED -> stepUpMfa). If-Match = the row version (ETag) of the resource. Refusal reasons:
+        errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
-        MFA step-up: a session whose last MFA verification is older than the step-up window gets 401 MFA_REQUIRED (DEC-051:
-        15 min; also inside the factory network, DEC-049).
 
-        BLOCKED: answers 409 RULE_NOT_APPROVED with the blocking decision_id until DEC-057 = PHASE_02 permission matrix (who
-        confirms/approves); DEC-059 = order changes after confirmation is APPROVED.
+        commercial_manager or the owner; never the requester nor the planning approver.
 
         '
       x-aleekhan-permission: commercial.change.decide
       x-aleekhan-mfa-step-up: true
-      x-aleekhan-blocked-by:
+      x-aleekhan-decided-by:
       - DEC-057
       - DEC-059
       parameters:
@@ -7813,28 +7826,82 @@ paths:
           $ref: '#/components/responses/PreconditionRequired'
         '429':
           $ref: '#/components/responses/RateLimited'
+  /commercial/change-requests/{change_request_id}/planning-decision:
+    parameters:
+    - $ref: '#/components/parameters/ChangeRequestId'
+    post:
+      tags:
+      - commercial
+      operationId: decidePlanningChangeRequest
+      summary: 'Planning decision on a due-date change: approve or reject (02.4)'
+      description: 'Requires permission `commercial.change.planning_approve` (deny by default; GLOBAL record scope - out of
+        scope = 404). Fresh MFA step-up (401 MFA_REQUIRED -> stepUpMfa). If-Match = the row version (ETag) of the resource.
+        Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
+
+
+        DEC-059 amendments 2026-11-12 / 2026-11-14: planning_officer, a person other than the requester and the deciding manager;
+        before or after the manager''s decision. REJECT needs a note and closes the request REJECTED (the old due date stays).
+        One permission (commercial.change.planning_approve) covers both outcomes.
+
+        '
+      x-aleekhan-permission: commercial.change.planning_approve
+      x-aleekhan-mfa-step-up: true
+      x-aleekhan-decided-by:
+      - DEC-059
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeRequestDecisionRequest'
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeRequest'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '412':
+          $ref: '#/components/responses/VersionConflict'
+        '422':
+          $ref: '#/components/responses/IdempotencyKeyReused'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+        '429':
+          $ref: '#/components/responses/RateLimited'
   /commercial/change-requests/{change_request_id}/apply:
-    x-aleekhan-status: planned
-    x-aleekhan-step: '02.4'
     parameters:
     - $ref: '#/components/parameters/ChangeRequestId'
     post:
       tags:
       - commercial
       operationId: applyChangeRequest
-      summary: 'Apply an APPROVED request: new order version + new serial snapshots'
-      description: 'PLANNED (02.4): contract draft, not routed yet. Requires permission `commercial.change.apply` (deny by default;
-        record scope enforced server-side; out of scope = 404). The permission is a proposal: no role holds it before DEC-057.
-
-        BLOCKED: answers 409 RULE_NOT_APPROVED with the blocking decision_id until DEC-057 = PHASE_02 permission matrix (who
-        confirms/approves); DEC-059 = order changes after confirmation is APPROVED.
-
-        A stale base order version answers 409 ORDER_VERSION_STALE (planned code).
+      summary: 'Apply an approved request: order version n+1 and the next serial snapshots'
+      description: 'Requires permission `commercial.change.apply` (deny by default; GLOBAL record scope - out of scope = 404).
+        If-Match = the row version (ETag) of the resource. Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
 
         '
       x-aleekhan-permission: commercial.change.apply
-      x-aleekhan-blocked-by:
-      - DEC-057
+      x-aleekhan-decided-by:
       - DEC-059
       parameters:
       - $ref: '#/components/parameters/RequestId'
@@ -8269,6 +8336,13 @@ components:
         maxLength: 64
     CustomerId:
       name: customer_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    BrandId:
+      name: brand_id
       in: path
       required: true
       schema:
@@ -11246,6 +11320,668 @@ components:
           - string
           - 'null'
           maxLength: 500
+    CustomerCreateRequest:
+      type: object
+      additionalProperties: false
+      description: A possible duplicate name answers 400 errors[].code DUPLICATE_CUSTOMER_NAME unless acknowledged.
+      required:
+      - display_name_fa
+      properties:
+        display_name_fa:
+          type: string
+          minLength: 1
+          maxLength: 200
+        legal_name_fa:
+          type:
+          - string
+          - 'null'
+          maxLength: 300
+        default_required_quality_ref:
+          type:
+          - string
+          - 'null'
+          maxLength: 64
+        acknowledge_possible_duplicate:
+          type: boolean
+    CustomerUpdateRequest:
+      type: object
+      additionalProperties: false
+      description: null clears an optional text. A status change needs the reason (stored in the audit trail).
+      required:
+      - reason
+      properties:
+        display_name_fa:
+          type: string
+          minLength: 1
+          maxLength: 200
+        legal_name_fa:
+          type:
+          - string
+          - 'null'
+          maxLength: 300
+        status:
+          type: string
+          enum:
+          - ACTIVE
+          - INACTIVE
+        default_required_quality_ref:
+          type:
+          - string
+          - 'null'
+          maxLength: 64
+        acknowledge_possible_duplicate:
+          type: boolean
+        reason:
+          type: string
+          minLength: 3
+          maxLength: 500
+          description: Mandatory justification, stored in the audit trail; no personal data.
+      minProperties: 2
+    CustomerBrandCreateRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - brand_name_fa
+      properties:
+        brand_name_fa:
+          type: string
+          minLength: 1
+          maxLength: 200
+    CustomerBrandUpdateRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - status
+      - reason
+      properties:
+        status:
+          type: string
+          enum:
+          - ACTIVE
+          - INACTIVE
+        reason:
+          type: string
+          minLength: 3
+          maxLength: 500
+          description: Mandatory justification, stored in the audit trail; no personal data.
+    ProductCreateRequest:
+      type: object
+      additionalProperties: false
+      description: 'product_class_id = the product TYPE. The product number is computed (DEC-005: max of the type + 1; belt types:
+        buckle + width, both required). The unit comes from the type (DEC-058).'
+      required:
+      - product_class_id
+      - name_fa
+      properties:
+        product_class_id:
+          type: string
+          format: uuid
+        name_fa:
+          type: string
+          minLength: 1
+          maxLength: 200
+        buckle_type_code:
+          type:
+          - string
+          - 'null'
+          pattern: ^[0-9]{2}$
+        belt_width_code:
+          type:
+          - string
+          - 'null'
+          pattern: ^[0-9]{2}$
+    ProductUpdateRequest:
+      type: object
+      additionalProperties: false
+      description: Status only (DRAFT -> ACTIVE -> RETIRED).
+      required:
+      - status
+      - reason
+      properties:
+        status:
+          type: string
+          enum:
+          - DRAFT
+          - ACTIVE
+          - RETIRED
+        reason:
+          type: string
+          minLength: 3
+          maxLength: 500
+          description: Mandatory justification, stored in the audit trail; no personal data.
+    StyleAttributes:
+      type: object
+      additionalProperties: false
+      description: Identity attributes as text references only; material/colour master lists are PHASE_04/06.
+      required: []
+      properties:
+        colour_fa:
+          type: string
+          minLength: 1
+          maxLength: 200
+        main_material_fa:
+          type: string
+          minLength: 1
+          maxLength: 200
+        lining_fa:
+          type: string
+          minLength: 1
+          maxLength: 200
+        hardware_colour_fa:
+          type: string
+          minLength: 1
+          maxLength: 200
+        notes_fa:
+          type: string
+          minLength: 1
+          maxLength: 500
+    StyleCreateRequest:
+      type: object
+      additionalProperties: false
+      description: 'The style number is computed: count of (product, category) + 1, or the first free number after it when taken
+        (DEC-005 amendment 2026-11-14). initial_attributes create revision 1 (DRAFT) in the same transaction.'
+      required:
+      - category_id
+      - name_fa
+      properties:
+        category_id:
+          type: string
+          format: uuid
+        name_fa:
+          type: string
+          minLength: 1
+          maxLength: 200
+        initial_attributes:
+          $ref: '#/components/schemas/StyleAttributes'
+    StyleUpdateRequest:
+      type: object
+      additionalProperties: false
+      description: Status only (DRAFT -> ACTIVE -> RETIRED).
+      required:
+      - status
+      - reason
+      properties:
+        status:
+          type: string
+          enum:
+          - DRAFT
+          - ACTIVE
+          - RETIRED
+        reason:
+          type: string
+          minLength: 3
+          maxLength: 500
+          description: Mandatory justification, stored in the audit trail; no personal data.
+    StyleRevisionCreateRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - attributes
+      - reason
+      properties:
+        attributes:
+          $ref: '#/components/schemas/StyleAttributes'
+        reason:
+          type: string
+          minLength: 3
+          maxLength: 500
+          description: Mandatory justification, stored in the audit trail; no personal data.
+    ProductCodeValidateRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - code
+      - code_namespace
+      properties:
+        code:
+          type: string
+          maxLength: 64
+        code_namespace:
+          type: string
+          enum:
+          - product_code
+          - die_code
+    ProductCodePreviewRequest:
+      type: object
+      additionalProperties: false
+      description: Either style_id alone (the code of an existing style) or product_class_id (type) + category_id with an optional
+        product_id (the code a NEW style would get; belt types need buckle + width for a new product).
+      required: []
+      properties:
+        style_id:
+          type: string
+          format: uuid
+        product_class_id:
+          type: string
+          format: uuid
+        category_id:
+          type: string
+          format: uuid
+        product_id:
+          type: string
+          format: uuid
+        buckle_type_code:
+          type:
+          - string
+          - 'null'
+          pattern: ^[0-9]{2}$
+        belt_width_code:
+          type:
+          - string
+          - 'null'
+          pattern: ^[0-9]{2}$
+    ProductCodeIssueRequest:
+      type: object
+      additionalProperties: false
+      description: 'rule_revision_id (optional): the ACTIVE revision the caller saw; another one answers 409 RULE_REVISION_NOT_ACTIVE.'
+      required:
+      - style_id
+      properties:
+        style_id:
+          type: string
+          format: uuid
+        rule_revision_id:
+          type: string
+          format: uuid
+    CodeRuleRevisionCreateRequest:
+      type: object
+      additionalProperties: false
+      description: The rule spec is the one this engine implements (DEC-005 RULE_SPEC_V1); the scope is the list of product-type
+        codes.
+      required:
+      - product_type_codes
+      - source_workbook_sha256
+      - reason
+      properties:
+        product_type_codes:
+          type: array
+          minItems: 1
+          maxItems: 99
+          items:
+            type: string
+            maxLength: 2
+            pattern: ^[0-9]{2}$
+        source_workbook_sha256:
+          type: string
+          pattern: ^[0-9a-f]{64}$
+        evidence_document_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        reason:
+          type: string
+          minLength: 3
+          maxLength: 500
+          description: Mandatory justification, stored in the audit trail; no personal data.
+    GoldenCaseInputs:
+      type: object
+      additionalProperties: false
+      required:
+      - type_code
+      - category_code
+      - product_no
+      - style_no
+      properties:
+        type_code:
+          type: string
+          pattern: ^[0-9]{2}$
+        category_code:
+          type: string
+          pattern: ^[0-9]{2}$
+        product_no:
+          type: string
+          pattern: ^[0-9]{4}$
+        style_no:
+          type: string
+          pattern: ^[0-9]{4}$
+        buckle_type_code:
+          type: string
+          pattern: ^[0-9]{2}$
+        belt_width_code:
+          type: string
+          pattern: ^[0-9]{2}$
+        category_code_order_form:
+          type: string
+          pattern: ^[0-9]{2}$
+        belt_width_source:
+          type: string
+          minLength: 1
+          maxLength: 200
+        legacy_disputed:
+          type: string
+          minLength: 3
+          maxLength: 500
+    GoldenCase:
+      type: object
+      additionalProperties: false
+      required:
+      - inputs
+      - expected_code
+      - source_sheet
+      - source_cell_ref
+      properties:
+        inputs:
+          $ref: '#/components/schemas/GoldenCaseInputs'
+        expected_code:
+          type: string
+          minLength: 14
+          maxLength: 14
+          pattern: ^[0-9]{14}$
+        source_sheet:
+          type: string
+          minLength: 1
+          maxLength: 100
+        source_cell_ref:
+          type: string
+          minLength: 1
+          maxLength: 32
+    GoldenCasesAddRequest:
+      type: object
+      additionalProperties: false
+      description: Golden cases of a DRAFT revision (real cases on the server only, DEC-028/046). Belt types need both belt segments;
+        category_code_order_form (C-77) must equal category_code; legacy_disputed cases are neither checked nor counted.
+      required:
+      - cases
+      properties:
+        cases:
+          type: array
+          minItems: 1
+          maxItems: 2000
+          items:
+            $ref: '#/components/schemas/GoldenCase'
+    SerialAllocateRequest:
+      type: object
+      additionalProperties: false
+      description: 'Always 409 SERIAL_ALLOCATED_AT_CONFIRM: serials are allocated by the order confirmation (DEC-006 L-A).'
+      required:
+      - order_line_id
+      - order_line_row_version
+      properties:
+        order_line_id:
+          type: string
+          format: uuid
+        order_line_row_version:
+          type: integer
+          minimum: 1
+    ExternalRefCreateRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - target_type
+      - target_id
+      - system
+      - namespace
+      - value
+      - reason
+      properties:
+        target_type:
+          type: string
+          enum:
+          - customer
+          - product
+          - style
+          - customer_order
+          - order_line
+          - serial
+        target_id:
+          type: string
+          format: uuid
+        system:
+          type: string
+          enum:
+          - RAHKARAN
+          - CUSTOMER
+          - LEGACY_PLANNING
+          - OTHER
+        namespace:
+          type: string
+          pattern: ^[a-z][a-z0-9_]{2,63}$
+        value:
+          type: string
+          minLength: 1
+          maxLength: 64
+        reason:
+          type: string
+          minLength: 3
+          maxLength: 500
+          description: Mandatory justification, stored in the audit trail; no personal data.
+    CustomerOrderCreateRequest:
+      type: object
+      additionalProperties: false
+      description: 'customer_representative_name: a name only (DEC-058; no digits, no ''@''); personal data, never echoed in write
+        responses.'
+      required:
+      - customer_id
+      - order_type
+      - order_date
+      properties:
+        customer_id:
+          type: string
+          format: uuid
+        brand_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        external_po_number:
+          type:
+          - string
+          - 'null'
+          maxLength: 64
+        order_type:
+          type: string
+          pattern: ^[a-z][a-z0-9_]{2,63}$
+        program_ref:
+          type:
+          - string
+          - 'null'
+          maxLength: 64
+        order_date:
+          type: string
+          format: date
+        requested_due_date:
+          type:
+          - string
+          - 'null'
+          format: date
+        required_quality_requirement:
+          type:
+          - string
+          - 'null'
+          maxLength: 64
+        customer_representative_name:
+          type:
+          - string
+          - 'null'
+          maxLength: 200
+    CustomerOrderUpdateRequest:
+      type: object
+      additionalProperties: false
+      description: DRAFT orders only; the customer never changes (a new order instead).
+      required: []
+      properties:
+        brand_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        external_po_number:
+          type:
+          - string
+          - 'null'
+          maxLength: 64
+        order_type:
+          type: string
+          pattern: ^[a-z][a-z0-9_]{2,63}$
+        program_ref:
+          type:
+          - string
+          - 'null'
+          maxLength: 64
+        order_date:
+          type: string
+          format: date
+        requested_due_date:
+          type:
+          - string
+          - 'null'
+          format: date
+        required_quality_requirement:
+          type:
+          - string
+          - 'null'
+          maxLength: 64
+        customer_representative_name:
+          type:
+          - string
+          - 'null'
+          maxLength: 200
+      minProperties: 1
+    CustomerOrderLineCreateRequest:
+      type: object
+      additionalProperties: false
+      description: 'The unit comes from the product type (DEC-058). Default revision: the ACTIVE revision of the style.'
+      required:
+      - style_id
+      - quantity
+      properties:
+        style_id:
+          type: string
+          format: uuid
+        style_revision_id:
+          type: string
+          format: uuid
+        product_code_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        quantity:
+          type: integer
+          minimum: 1
+        requested_due_date:
+          type:
+          - string
+          - 'null'
+          format: date
+    CustomerOrderLineUpdateRequest:
+      type: object
+      additionalProperties: false
+      description: DRAFT orders only; CONFIRMED lines change only through change requests (INV-02-06).
+      required: []
+      properties:
+        style_revision_id:
+          type: string
+          format: uuid
+        product_code_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        quantity:
+          type: integer
+          minimum: 1
+        requested_due_date:
+          type:
+          - string
+          - 'null'
+          format: date
+      minProperties: 1
+    CustomerOrderValidateRequest:
+      type: object
+      additionalProperties: false
+      description: A duplicate customer PO number of the same customer answers 400 DUPLICATE_PO_NUMBER unless acknowledged (DEC-058).
+      required: []
+      properties:
+        note:
+          type: string
+          maxLength: 500
+        acknowledge_possible_duplicate:
+          type: boolean
+    ChangeRequestItem:
+      type: object
+      additionalProperties: false
+      description: 'QTY_CHANGE: line_id + quantity; DUE_DATE_CHANGE: requested_due_date with line_id (a line) or line_id null
+        (the header); CANCEL_LINE: line_id; ADD_LINE: style_id, quantity, optional style_revision_id / product_code_id / requested_due_date.
+        CANCEL_ORDER / HOLD / RESUME: no items.'
+      required: []
+      properties:
+        line_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        quantity:
+          type: integer
+          minimum: 1
+        requested_due_date:
+          type: string
+          format: date
+        style_id:
+          type: string
+          format: uuid
+        style_revision_id:
+          type: string
+          format: uuid
+        product_code_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+    ChangeRequestCreateRequest:
+      type: object
+      additionalProperties: false
+      description: 'order_row_version: the order version (ETag) the requester saw (stale -> 412). submit=true creates it SUBMITTED.'
+      required:
+      - order_id
+      - order_row_version
+      - kind
+      - reason
+      properties:
+        order_id:
+          type: string
+          format: uuid
+        order_row_version:
+          type: integer
+          minimum: 1
+        kind:
+          type: string
+          enum:
+          - QTY_CHANGE
+          - DUE_DATE_CHANGE
+          - ADD_LINE
+          - CANCEL_LINE
+          - CANCEL_ORDER
+          - HOLD
+          - RESUME
+        items:
+          type: array
+          maxItems: 200
+          items:
+            $ref: '#/components/schemas/ChangeRequestItem'
+        reason:
+          type: string
+          minLength: 3
+          maxLength: 500
+          description: Mandatory justification, stored in the audit trail; no personal data.
+        submit:
+          type: boolean
+    ChangeRequestDecisionRequest:
+      type: object
+      additionalProperties: false
+      description: REJECT needs a note of at least 3 characters (400 REQUIRED).
+      required:
+      - decision
+      properties:
+        decision:
+          type: string
+          enum:
+          - APPROVE
+          - REJECT
+        note:
+          type: string
+          maxLength: 500
     Provenance:
       type: object
       additionalProperties: false
@@ -11288,32 +12024,12 @@ components:
       - PIECE
       - PAIR
       description: PHASE_02 order units (C-67); no conversion before DEC-017.
-    DuplicateWarning:
-      type: object
-      additionalProperties: false
-      description: A possible duplicate. Never merged automatically (C-71); the caller acknowledges it explicitly.
-      required:
-      - code
-      - message_fa
-      - candidates
-      properties:
-        code:
-          type: string
-          enum:
-          - POSSIBLE_DUPLICATE_CUSTOMER
-          - POSSIBLE_DUPLICATE_PRODUCT
-          - POSSIBLE_DUPLICATE_STYLE
-          - POSSIBLE_DUPLICATE_PO_NUMBER
-        message_fa:
-          type: string
-          minLength: 1
-          maxLength: 300
-        candidates:
-          type: array
-          maxItems: 20
-          items:
-            type: string
-            format: uuid
+    TechnicalNumber:
+      type: string
+      minLength: 1
+      maxLength: 32
+      pattern: ^(CU|SO|CR)-[0-9]{4}-[0-9]{6,}$
+      description: CU-/SO-/CR- + Jalali year + '-' + at least 6 digits (DEC-058 amendment 2026-11-14).
     Customer:
       type: object
       additionalProperties: false
@@ -11334,10 +12050,9 @@ components:
           type: string
           format: uuid
         customer_no:
-          type: string
-          minLength: 1
-          maxLength: 32
-          description: Internal, system-generated text; not a Rahkaran code.
+          $ref: '#/components/schemas/TechnicalNumber'
+          description: 'Internal, system-generated technical number: CU-<Jalali year of creation, Asia/Tehran>-<at least 6 digits>,
+            numbering restarts every Jalali year (DEC-058 amendment 2026-11-14); unique, gaps allowed. Not a Rahkaran code.'
         display_name_fa:
           type: string
           minLength: 1
@@ -11381,64 +12096,10 @@ components:
             $ref: '#/components/schemas/Customer'
         page:
           $ref: '#/components/schemas/PageMeta'
-    CustomerCreateRequest:
-      type: object
-      additionalProperties: false
-      required:
-      - display_name_fa
-      properties:
-        display_name_fa:
-          type: string
-          minLength: 1
-          maxLength: 200
-        legal_name_fa:
-          type:
-          - string
-          - 'null'
-          maxLength: 300
-        default_required_quality_ref:
-          type:
-          - string
-          - 'null'
-          maxLength: 64
-        acknowledge_possible_duplicate:
-          type: boolean
-          default: false
-    CustomerUpdateRequest:
-      type: object
-      additionalProperties: false
-      required:
-      - reason
-      properties:
-        display_name_fa:
-          type: string
-          minLength: 1
-          maxLength: 200
-        legal_name_fa:
-          type:
-          - string
-          - 'null'
-          maxLength: 300
-        status:
-          type: string
-          enum:
-          - ACTIVE
-          - INACTIVE
-        default_required_quality_ref:
-          type:
-          - string
-          - 'null'
-          maxLength: 64
-        reason:
-          type: string
-          minLength: 3
-          maxLength: 500
-          description: Mandatory justification, stored in the audit trail; no personal data.
-      minProperties: 2
     CustomerBrand:
       type: object
       additionalProperties: false
-      description: Optional brand level under a customer (DEC-058 question 1).
+      description: Brand under a customer (DEC-058 B-A).
       required:
       - brand_id
       - customer_id
@@ -11478,29 +12139,21 @@ components:
             $ref: '#/components/schemas/CustomerBrand'
         page:
           $ref: '#/components/schemas/PageMeta'
-    CustomerBrandCreateRequest:
-      type: object
-      additionalProperties: false
-      required:
-      - brand_name_fa
-      properties:
-        brand_name_fa:
-          type: string
-          minLength: 1
-          maxLength: 200
     ProductClass:
       type: object
       additionalProperties: false
-      description: Product family/type/category node. The levels and the list come from the Planning `Sorce` sheet after DEC-005
-        (E-2); nothing is seeded before (C-58).
+      description: Product type / category from the Planning Sorce sheet (server import only, DEC-005 / R-38; read-only here).
       required:
       - product_class_id
       - parent_class_id
       - level_key
       - label_fa
       - segment_value
-      - rule_revision_id
+      - uom
+      - product_no_scheme
       - status
+      - provenance
+      - row_version
       properties:
         product_class_id:
           type: string
@@ -11511,28 +12164,45 @@ components:
           - 'null'
           format: uuid
         level_key:
-          $ref: '#/components/schemas/SystemKey'
+          type: string
+          enum:
+          - product_type
+          - category
+          description: product_type = code segment 2 (the golden-test family, DEC-005 Q-C); category = code segment 3, under a
+            type.
         label_fa:
           type: string
           minLength: 1
           maxLength: 200
         segment_value:
+          type: string
+          pattern: ^[0-9]{2}$
+          description: 2-digit code segment as text (DEC-005).
+        uom:
+          oneOf:
+          - $ref: '#/components/schemas/UnitOfMeasure'
+          - type: 'null'
+          description: Product types only (DEC-058).
+        product_no_scheme:
           type:
           - string
           - 'null'
-          pattern: ^[0-9]{1,8}$
-          description: 'BLOCKED (DEC-005): width and uniqueness scope are not approved; null until an APPROVED CodeRuleRevision.'
-        rule_revision_id:
-          type:
-          - string
-          - 'null'
-          format: uuid
+          enum:
+          - SEQUENTIAL_PER_TYPE
+          - BELT_BUCKLE_WIDTH
+          - null
+          description: Product types only (DEC-005).
         status:
           type: string
           enum:
           - DRAFT
           - ACTIVE
           - RETIRED
+        provenance:
+          $ref: '#/components/schemas/Provenance'
+        row_version:
+          type: integer
+          minimum: 1
     ProductClassPage:
       type: object
       additionalProperties: false
@@ -11556,6 +12226,8 @@ components:
       - product_no
       - name_fa
       - uom
+      - buckle_type_code
+      - belt_width_code
       - status
       - provenance
       - row_version
@@ -11568,18 +12240,27 @@ components:
         product_class_id:
           type: string
           format: uuid
+          description: The product type.
         product_no:
-          type:
-          - string
-          - 'null'
-          pattern: ^[0-9]{1,8}$
-          description: 'BLOCKED (DEC-005): width and uniqueness scope are not approved; null until an APPROVED CodeRuleRevision.'
+          type: string
+          pattern: ^[0-9]{4}$
+          description: 'Code segment 4 (DEC-005: max of the type + 1; belt: buckle + width).'
         name_fa:
           type: string
           minLength: 1
           maxLength: 200
         uom:
           $ref: '#/components/schemas/UnitOfMeasure'
+        buckle_type_code:
+          type:
+          - string
+          - 'null'
+          pattern: ^[0-9]{2}$
+        belt_width_code:
+          type:
+          - string
+          - 'null'
+          pattern: ^[0-9]{2}$
         status:
           type: string
           enum:
@@ -11609,86 +12290,13 @@ components:
             $ref: '#/components/schemas/Product'
         page:
           $ref: '#/components/schemas/PageMeta'
-    ProductCreateRequest:
-      type: object
-      additionalProperties: false
-      required:
-      - product_class_id
-      - name_fa
-      - uom
-      properties:
-        product_class_id:
-          type: string
-          format: uuid
-        product_no:
-          type:
-          - string
-          - 'null'
-          pattern: ^[0-9]{1,8}$
-          description: Existing legacy number only; issuing a new number is BLOCKED (DEC-005).
-        name_fa:
-          type: string
-          minLength: 1
-          maxLength: 200
-        uom:
-          $ref: '#/components/schemas/UnitOfMeasure'
-        acknowledge_possible_duplicate:
-          type: boolean
-          default: false
-    ProductUpdateRequest:
-      type: object
-      additionalProperties: false
-      required:
-      - reason
-      properties:
-        name_fa:
-          type: string
-          minLength: 1
-          maxLength: 200
-        status:
-          type: string
-          enum:
-          - DRAFT
-          - ACTIVE
-          - RETIRED
-        reason:
-          type: string
-          minLength: 3
-          maxLength: 500
-          description: Mandatory justification, stored in the audit trail; no personal data.
-      minProperties: 2
-    StyleAttributes:
-      type: object
-      additionalProperties: false
-      description: Identity attributes as text references only; material/colour master lists are PHASE_04/06.
-      required: []
-      properties:
-        colour_fa:
-          type: string
-          minLength: 1
-          maxLength: 200
-        main_material_fa:
-          type: string
-          minLength: 1
-          maxLength: 200
-        lining_fa:
-          type: string
-          minLength: 1
-          maxLength: 200
-        hardware_colour_fa:
-          type: string
-          minLength: 1
-          maxLength: 200
-        notes_fa:
-          type: string
-          minLength: 1
-          maxLength: 500
     Style:
       type: object
       additionalProperties: false
       required:
       - style_id
       - product_id
+      - category_id
       - style_no
       - name_fa
       - current_revision_id
@@ -11704,13 +12312,15 @@ components:
         product_id:
           type: string
           format: uuid
+        category_id:
+          type: string
+          format: uuid
+          description: Category (code segment 3) under the product's type.
         style_no:
-          type:
-          - string
-          - 'null'
-          pattern: ^[0-9]{1,8}$
-          description: 'BLOCKED (DEC-005): width and uniqueness scope are not approved; null until an APPROVED CodeRuleRevision.
-            Unique per product (C-57).'
+          type: string
+          pattern: ^[0-9]{4}$
+          description: 'Code segment 5: count of (product, category) + 1 from 0001, or the first free number after it (DEC-005
+            + amendment 2026-11-14). 0000 exists only in legacy codes.'
         name_fa:
           type: string
           minLength: 1
@@ -11749,50 +12359,6 @@ components:
             $ref: '#/components/schemas/Style'
         page:
           $ref: '#/components/schemas/PageMeta'
-    StyleCreateRequest:
-      type: object
-      additionalProperties: false
-      required:
-      - name_fa
-      - initial_attributes
-      properties:
-        name_fa:
-          type: string
-          minLength: 1
-          maxLength: 200
-        style_no:
-          type:
-          - string
-          - 'null'
-          pattern: ^[0-9]{1,8}$
-          description: Existing legacy number only; issuing a new number is BLOCKED (DEC-005).
-        initial_attributes:
-          $ref: '#/components/schemas/StyleAttributes'
-        acknowledge_possible_duplicate:
-          type: boolean
-          default: false
-    StyleUpdateRequest:
-      type: object
-      additionalProperties: false
-      required:
-      - reason
-      properties:
-        name_fa:
-          type: string
-          minLength: 1
-          maxLength: 200
-        status:
-          type: string
-          enum:
-          - DRAFT
-          - ACTIVE
-          - RETIRED
-        reason:
-          type: string
-          minLength: 3
-          maxLength: 500
-          description: Mandatory justification, stored in the audit trail; no personal data.
-      minProperties: 2
     StyleRevision:
       type: object
       additionalProperties: false
@@ -11849,20 +12415,6 @@ components:
             $ref: '#/components/schemas/StyleRevision'
         page:
           $ref: '#/components/schemas/PageMeta'
-    StyleRevisionCreateRequest:
-      type: object
-      additionalProperties: false
-      required:
-      - attributes
-      - reason
-      properties:
-        attributes:
-          $ref: '#/components/schemas/StyleAttributes'
-        reason:
-          type: string
-          minLength: 3
-          maxLength: 500
-          description: Mandatory justification, stored in the audit trail; no personal data.
     StyleSuggestion:
       type: object
       additionalProperties: false
@@ -11924,8 +12476,9 @@ components:
       type: string
       minLength: 1
       maxLength: 32
-      description: 'Serial number as text. NO pattern: the format is BLOCKED (DEC-006); a pattern is added only with the approved
-        rule. Independent of product and die codes; never re-used.'
+      pattern: ^[1-9][0-9]*$
+      description: 'Factory serial issued by the system: a plain integer as text, from 63001, gapless, never re-used (DEC-006
+        APPROVED). Legacy variants are history text only (HistoricalOrderRecord.legacy_serial_ref).'
     SerialSummary:
       type: object
       additionalProperties: false
@@ -11952,19 +12505,27 @@ components:
           type: string
           format: uuid
         order_id:
-          type: string
+          type:
+          - string
+          - 'null'
           format: uuid
         line_no:
-          type: integer
+          type:
+          - integer
+          - 'null'
           minimum: 1
         quantity:
-          type: integer
+          type:
+          - integer
+          - 'null'
           minimum: 1
         uom:
-          $ref: '#/components/schemas/UnitOfMeasure'
+          oneOf:
+          - $ref: '#/components/schemas/UnitOfMeasure'
+          - type: 'null'
         attributes:
           $ref: '#/components/schemas/StyleAttributes'
-          description: From the serial's own snapshot, not the current style.
+          description: Of the serial's style revision (immutable once ACTIVE).
         allocated_at:
           $ref: '#/components/schemas/UtcTimestamp'
     UnavailableSections:
@@ -12102,23 +12663,11 @@ components:
             $ref: '#/components/schemas/ProductCode'
         page:
           $ref: '#/components/schemas/PageMeta'
-    ProductCodeValidateRequest:
-      type: object
-      additionalProperties: false
-      required:
-      - code
-      - code_namespace
-      properties:
-        code:
-          type: string
-          maxLength: 64
-          description: Raw input as typed; checked, never normalised (no Persian-digit conversion).
-        code_namespace:
-          $ref: '#/components/schemas/CodeNamespace'
     ProductCodeValidation:
       type: object
       additionalProperties: false
-      description: 'Side-effect free check: format + namespace + registry lookup. Segment checks are BLOCKED (DEC-005).'
+      description: 'Side-effect free check: format + namespace + DEC-005 segments (product prefix, legacy-only style 0000) + registry
+        lookup.'
       required:
       - input
       - format_valid
@@ -12142,7 +12691,7 @@ components:
           - type: 'null'
         segments_checked:
           type: boolean
-          description: false until an ACTIVE CodeRuleRevision exists (DEC-005).
+          description: true when the input has the Code14 format in the product_code namespace (DEC-005 APPROVED).
         segments_decision_id:
           type:
           - string
@@ -12158,43 +12707,34 @@ components:
             - NON_ASCII_DIGIT
             - NON_DIGIT_CHARACTER
             - SURROUNDING_WHITESPACE
+            - NOT_PRODUCT_PREFIX
+            - LEGACY_ONLY_STYLE_0000
             - NOT_IN_REGISTRY
             - DISPUTED_IN_REGISTRY
             - WRONG_NAMESPACE
-    ProductCodePreviewRequest:
-      type: object
-      additionalProperties: false
-      required:
-      - product_class_id
-      - product_id
-      - style_id
-      properties:
-        product_class_id:
-          type: string
-          format: uuid
-        product_id:
-          type: string
-          format: uuid
-        style_id:
-          type: string
-          format: uuid
     ProductCodePreview:
       type: object
       additionalProperties: false
-      description: Computed from an ACTIVE CodeRuleRevision; nothing is reserved. BLOCKED (DEC-005).
+      description: Computed by the DEC-005 rule; nothing is reserved, the numbers may be taken before creation.
       required:
       - code
       - rule_revision_id
       - segments
+      - new_product
+      - legacy_only
+      - issued
       properties:
         code:
           $ref: '#/components/schemas/Code14'
         rule_revision_id:
-          type: string
+          type:
+          - string
+          - 'null'
           format: uuid
+          description: 'The ACTIVE revision (null: none yet; issuing then answers 409 RULE_NOT_APPROVED).'
         segments:
           type: array
-          maxItems: 10
+          maxItems: 4
           items:
             type: object
             additionalProperties: false
@@ -12203,29 +12743,23 @@ components:
             - value
             properties:
               level_key:
-                $ref: '#/components/schemas/SystemKey'
+                type: string
+                enum:
+                - product_type
+                - category
+                - product_no
+                - style_no
               value:
                 type: string
-                pattern: ^[0-9]{1,8}$
-    ProductCodeIssueRequest:
-      type: object
-      additionalProperties: false
-      required:
-      - style_id
-      - rule_revision_id
-      - reason
-      properties:
-        style_id:
-          type: string
-          format: uuid
-        rule_revision_id:
-          type: string
-          format: uuid
-        reason:
-          type: string
-          minLength: 3
-          maxLength: 500
-          description: Mandatory justification, stored in the audit trail; no personal data.
+                pattern: ^[0-9]{2,4}$
+        new_product:
+          type: boolean
+        legacy_only:
+          type: boolean
+          description: 'Style 0000: history only, never issued (DEC-005 amendment 2026-11-13).'
+        issued:
+          type: boolean
+          description: The style already has a live code in the registry.
     CodeRuleRevision:
       type: object
       additionalProperties: false
@@ -12256,10 +12790,11 @@ components:
           minimum: 1
         scope:
           type: object
-          description: Classes covered. JSON schema written after the DEC-005 extraction.
+          description: '{product_types: [2-digit type codes]} (DEC-005 Q-C: family = product type).'
         rule_spec:
           type: object
-          description: Rule definition. JSON schema written after the DEC-005 extraction; no segment model exists before (C-50).
+          description: The machine description of the DEC-005 rule (RULE_SPEC_V1); an ACTIVE revision with another spec cannot
+            issue (RULE_SPEC_NOT_IMPLEMENTED).
         source_workbook_sha256:
           type: string
           pattern: ^[0-9a-f]{64}$
@@ -12316,34 +12851,27 @@ components:
             $ref: '#/components/schemas/CodeRuleRevision'
         page:
           $ref: '#/components/schemas/PageMeta'
-    CodeRuleRevisionCreateRequest:
+    GoldenCasesAdded:
       type: object
       additionalProperties: false
+      description: Counts only; never a case value.
       required:
-      - scope
-      - rule_spec
-      - source_workbook_sha256
-      - reason
+      - rule_revision_id
+      - added
+      - revision
       properties:
-        scope:
-          type: object
-        rule_spec:
-          type: object
-        source_workbook_sha256:
-          type: string
-          pattern: ^[0-9a-f]{64}$
-        evidence_document_id:
+        rule_revision_id:
           type: string
           format: uuid
-        reason:
-          type: string
-          minLength: 3
-          maxLength: 500
-          description: Mandatory justification, stored in the audit trail; no personal data.
+        added:
+          type: integer
+          minimum: 1
+        revision:
+          $ref: '#/components/schemas/CodeRuleRevision'
     Serial:
       type: object
       additionalProperties: false
-      description: UNIQUE(serial_namespace, serial_number) and UNIQUE(order_line_id) (ID-02/ID-03).
+      description: UNIQUE(serial_namespace, serial_number); one serial per order line (ID-02/ID-03).
       required:
       - serial_id
       - serial_number
@@ -12368,13 +12896,19 @@ components:
         serial_namespace:
           $ref: '#/components/schemas/SystemKey'
         order_id:
-          type: string
+          type:
+          - string
+          - 'null'
           format: uuid
         order_line_id:
-          type: string
+          type:
+          - string
+          - 'null'
           format: uuid
         line_no:
-          type: integer
+          type:
+          - integer
+          - 'null'
           minimum: 1
         customer_id:
           type: string
@@ -12413,104 +12947,83 @@ components:
             $ref: '#/components/schemas/Serial'
         page:
           $ref: '#/components/schemas/PageMeta'
-    SerialAllocateRequest:
-      type: object
-      additionalProperties: false
-      description: Same Idempotency-Key + body => the same serial and response (ID-04). A second allocation for a line that already
-        has a serial (other key) => 409 SERIAL_ALREADY_ALLOCATED (planned code).
-      required:
-      - order_line_id
-      - order_line_row_version
-      properties:
-        order_line_id:
-          type: string
-          format: uuid
-        order_line_row_version:
-          type: integer
-          minimum: 1
     SerialSnapshotImage:
       type: object
       additionalProperties: false
+      description: Identifiers and business fields of the line at an order version; no personal data (DEC-058).
       required:
-      - customer_id
-      - customer_display_name_fa
-      - brand_name_fa
-      - external_po_number
+      - order_id
       - order_no
+      - customer_id
+      - order_version
+      - line_id
       - line_no
-      - product_code
       - style_id
-      - style_revision_no
-      - attributes
+      - style_revision_id
       - quantity
-      - uom
-      - order_date
-      - requested_due_date
-      - required_quality_requirement
       properties:
-        customer_id:
+        order_id:
           type: string
           format: uuid
-        customer_display_name_fa:
-          type: string
-          minLength: 1
-          maxLength: 200
-        brand_name_fa:
-          type:
-          - string
-          - 'null'
-          maxLength: 200
-        external_po_number:
-          type:
-          - string
-          - 'null'
-          maxLength: 64
         order_no:
           type: string
           minLength: 1
           maxLength: 32
+        order_status:
+          $ref: '#/components/schemas/CustomerOrderStatus'
+        customer_id:
+          type: string
+          format: uuid
+        order_version:
+          type: integer
+          minimum: 1
+        line_id:
+          type: string
+          format: uuid
         line_no:
           type: integer
           minimum: 1
+        status:
+          type: string
+          enum:
+          - OPEN
+          - CONFIRMED
+          - REMOVED
+          - CANCELLED
+        style_id:
+          type: string
+          format: uuid
+        style_revision_id:
+          type: string
+          format: uuid
         product_code:
           oneOf:
           - $ref: '#/components/schemas/Code14'
           - type: 'null'
-        style_id:
-          type: string
-          format: uuid
-        style_revision_no:
-          type: integer
-          minimum: 1
-        attributes:
-          $ref: '#/components/schemas/StyleAttributes'
         quantity:
           type: integer
           minimum: 1
         uom:
           $ref: '#/components/schemas/UnitOfMeasure'
-        order_date:
-          type: string
-          format: date
-          description: ISO 8601 calendar date (Gregorian); Jalali only in the UI.
         requested_due_date:
           type:
           - string
           - 'null'
           format: date
-        required_quality_requirement:
+        serial_id:
           type:
           - string
           - 'null'
-          maxLength: 64
+          format: uuid
     SerialSnapshot:
       type: object
       additionalProperties: false
-      description: Append-only; version 1 is written in the allocation transaction (exactly one per committed line, ID-02).
+      description: Append-only; version 1 is written in the allocation transaction (ID-02).
       required:
       - serial_id
       - version
       - reason
+      - order_version
       - change_request_id
       - created_at
       - snapshot
@@ -12527,6 +13040,9 @@ components:
           - ALLOCATED
           - CHANGE_APPLIED
           - TECH_PACKAGE_LINKED
+        order_version:
+          type: integer
+          minimum: 1
         change_request_id:
           type:
           - string
@@ -12679,67 +13195,33 @@ components:
             $ref: '#/components/schemas/ExternalRef'
         page:
           $ref: '#/components/schemas/PageMeta'
-    ExternalRefCreateRequest:
-      type: object
-      additionalProperties: false
-      required:
-      - target_type
-      - target_id
-      - system
-      - namespace
-      - value
-      - reason
-      properties:
-        target_type:
-          type: string
-          enum:
-          - customer
-          - product
-          - style
-          - customer_order
-          - order_line
-          - serial
-        target_id:
-          type: string
-          format: uuid
-        system:
-          type: string
-          enum:
-          - RAHKARAN
-          - CUSTOMER
-          - LEGACY_PLANNING
-          - OTHER
-        namespace:
-          $ref: '#/components/schemas/SystemKey'
-        value:
-          type: string
-          minLength: 1
-          maxLength: 64
-        reason:
-          type: string
-          minLength: 3
-          maxLength: 500
-          description: Mandatory justification, stored in the audit trail; no personal data.
     HistoricalOrderRecord:
       type: object
       additionalProperties: false
-      description: Read-only legacy evidence (C-65); never an official order. Bulk import BLOCKED (DEC-025/DEC-035).
+      description: Read-only legacy evidence (C-65); never an official order. Rows come from the import (02.6).
       required:
       - record_id
       - import_batch_id
       - legacy_order_ref
       - legacy_serial_ref
+      - legacy_serial_duplicate
       - legacy_product_code_raw
       - normalised_product_code
+      - code_flag
       - match_status
+      - matched_style_id
+      - matched_product_code_id
       - matched_serial_id
+      - matched_at
       - provenance
       properties:
         record_id:
           type: string
           format: uuid
         import_batch_id:
-          type: string
+          type:
+          - string
+          - 'null'
           format: uuid
         legacy_order_ref:
           type:
@@ -12750,17 +13232,27 @@ components:
           type:
           - string
           - 'null'
-          maxLength: 64
+          maxLength: 32
+          description: Legacy serial exactly as written (text; S-prefix and suffix variants kept, DEC-006).
+        legacy_serial_duplicate:
+          type: boolean
+          description: Flagged at import, never merged (DEC-006).
         legacy_product_code_raw:
           type:
           - string
           - 'null'
-          maxLength: 64
           description: Raw legacy text; not Code14-checked (C-51).
         normalised_product_code:
           oneOf:
           - $ref: '#/components/schemas/Code14'
           - type: 'null'
+        code_flag:
+          type: string
+          enum:
+          - OK
+          - DISPUTED
+          - ABSENT
+          description: 'DISPUTED: not a valid 14-digit code; planning decides (DEC-005 Q-D), never auto-fixed.'
         match_status:
           type: string
           enum:
@@ -12768,11 +13260,26 @@ components:
           - SUGGESTED
           - CONFIRMED
           - REJECTED
+        matched_style_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        matched_product_code_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
         matched_serial_id:
           type:
           - string
           - 'null'
           format: uuid
+          description: Reserved (always null in PHASE_02).
+        matched_at:
+          oneOf:
+          - $ref: '#/components/schemas/UtcTimestamp'
+          - type: 'null'
         provenance:
           $ref: '#/components/schemas/Provenance'
     HistoricalOrderRecordPage:
@@ -12797,16 +13304,16 @@ components:
       - CONFIRMED
       - RELEASED_TO_PLAN
       - ON_HOLD
-      - PAUSED
       - CANCELLED
       - PARTIAL_FULFILLED
       - FULFILLED
       - CLOSED
-      description: STATE_TRANSITIONS 5.1. PARTIAL_FULFILLED/FULFILLED/CLOSED are written only by later phases (DEC-020).
+      description: STATE_TRANSITIONS 5.1 (single hold state ON_HOLD, DEC-059). PARTIAL_FULFILLED/FULFILLED/CLOSED are written
+        only by later phases (DEC-020).
     CustomerOrderLine:
       type: object
       additionalProperties: false
-      description: One Product/Style per line (README_FA).
+      description: One style per line.
       required:
       - line_id
       - line_no
@@ -12820,6 +13327,7 @@ components:
       - status
       - serial_id
       - serial_number
+      - order_version
       - row_version
       properties:
         line_id:
@@ -12859,19 +13367,22 @@ components:
           enum:
           - OPEN
           - CONFIRMED
-          - SERIAL_ALLOCATED
           - REMOVED
           - CANCELLED
+          description: CONFIRMED lines carry their serial (DEC-006 L-A).
         serial_id:
           type:
           - string
           - 'null'
           format: uuid
-          description: At most one serial per line (C-47; DEC-006 decides when).
+          description: At most one serial per line (C-47), allocated at confirm.
         serial_number:
           oneOf:
           - $ref: '#/components/schemas/SerialNumber'
           - type: 'null'
+        order_version:
+          type: integer
+          minimum: 0
         row_version:
           type: integer
           minimum: 1
@@ -12890,13 +13401,13 @@ components:
       - order_date
       - requested_due_date
       - required_quality_requirement
+      - customer_representative_name
       - status
+      - status_before_hold
       - hold_reason
       - cancel_reason
       - current_version
       - lines
-      - warnings
-      - provenance
       - row_version
       - created_at
       - updated_at
@@ -12905,10 +13416,10 @@ components:
           type: string
           format: uuid
         order_no:
-          type: string
-          minLength: 1
-          maxLength: 32
-          description: Internal, system-generated text; not the serial and not the customer PO number.
+          $ref: '#/components/schemas/TechnicalNumber'
+          description: 'Internal, system-generated technical number: SO-<Jalali year of creation, Asia/Tehran>-<at least 6 digits>,
+            numbering restarts every Jalali year (DEC-058 amendment 2026-11-14); unique, gaps allowed. Not a Rahkaran code; not
+            the serial and not the customer PO number.'
         customer_id:
           type: string
           format: uuid
@@ -12922,18 +13433,15 @@ components:
           - string
           - 'null'
           maxLength: 64
-          description: Customer PO number; not unique (C-55).
+          description: Customer PO number; not unique (duplicate = acknowledged warning, DEC-058).
         order_type:
-          oneOf:
-          - $ref: '#/components/schemas/SystemKey'
-          - type: 'null'
-          description: 'List: DEC-058 question 6.'
+          $ref: '#/components/schemas/SystemKey'
+          description: 'DEC-058: pre_production, series_production, sampling, trial_production.'
         program_ref:
           type:
           - string
           - 'null'
           maxLength: 64
-          description: Text reference; programmes are owned by PHASE_05.
         order_date:
           type: string
           format: date
@@ -12949,8 +13457,19 @@ components:
           - 'null'
           maxLength: 64
           description: Text only until DEC-019 (C-68).
+        customer_representative_name:
+          type:
+          - string
+          - 'null'
+          maxLength: 200
+          description: 'DEC-058, personal data: the name for callers who may see it (every such read audited); ''[REDACTED]''
+            for management_viewer and in every write response; null when none is recorded. Never logged.'
         status:
           $ref: '#/components/schemas/CustomerOrderStatus'
+        status_before_hold:
+          oneOf:
+          - $ref: '#/components/schemas/CustomerOrderStatus'
+          - type: 'null'
         hold_reason:
           type:
           - string
@@ -12970,16 +13489,10 @@ components:
           maxItems: 200
           items:
             $ref: '#/components/schemas/CustomerOrderLine'
-        warnings:
-          type: array
-          maxItems: 10
-          items:
-            $ref: '#/components/schemas/DuplicateWarning'
-        provenance:
-          $ref: '#/components/schemas/Provenance'
         row_version:
           type: integer
           minimum: 1
+          description: ETag; covers the lines (line operations send the order's If-Match).
         created_at:
           $ref: '#/components/schemas/UtcTimestamp'
         updated_at:
@@ -12992,8 +13505,11 @@ components:
       - order_no
       - customer_id
       - external_po_number
+      - order_type
       - status
       - order_date
+      - requested_due_date
+      - current_version
       - line_count
       - row_version
       properties:
@@ -13001,9 +13517,7 @@ components:
           type: string
           format: uuid
         order_no:
-          type: string
-          minLength: 1
-          maxLength: 32
+          $ref: '#/components/schemas/TechnicalNumber'
         customer_id:
           type: string
           format: uuid
@@ -13012,12 +13526,22 @@ components:
           - string
           - 'null'
           maxLength: 64
+        order_type:
+          $ref: '#/components/schemas/SystemKey'
         status:
           $ref: '#/components/schemas/CustomerOrderStatus'
         order_date:
           type: string
           format: date
           description: ISO 8601 calendar date (Gregorian); Jalali only in the UI.
+        requested_due_date:
+          type:
+          - string
+          - 'null'
+          format: date
+        current_version:
+          type: integer
+          minimum: 0
         line_count:
           type: integer
           minimum: 0
@@ -13038,147 +13562,6 @@ components:
             $ref: '#/components/schemas/CustomerOrderSummary'
         page:
           $ref: '#/components/schemas/PageMeta'
-    CustomerOrderCreateRequest:
-      type: object
-      additionalProperties: false
-      required:
-      - customer_id
-      - order_date
-      properties:
-        customer_id:
-          type: string
-          format: uuid
-        brand_id:
-          type:
-          - string
-          - 'null'
-          format: uuid
-        external_po_number:
-          type:
-          - string
-          - 'null'
-          maxLength: 64
-        order_type:
-          oneOf:
-          - $ref: '#/components/schemas/SystemKey'
-          - type: 'null'
-        program_ref:
-          type:
-          - string
-          - 'null'
-          maxLength: 64
-        order_date:
-          type: string
-          format: date
-          description: ISO 8601 calendar date (Gregorian); Jalali only in the UI.
-        requested_due_date:
-          type:
-          - string
-          - 'null'
-          format: date
-        required_quality_requirement:
-          type:
-          - string
-          - 'null'
-          maxLength: 64
-        acknowledge_possible_duplicate:
-          type: boolean
-          default: false
-    CustomerOrderUpdateRequest:
-      type: object
-      additionalProperties: false
-      description: DRAFT orders only.
-      required: []
-      properties:
-        customer_id:
-          type: string
-          format: uuid
-        brand_id:
-          type:
-          - string
-          - 'null'
-          format: uuid
-        external_po_number:
-          type:
-          - string
-          - 'null'
-          maxLength: 64
-        order_type:
-          oneOf:
-          - $ref: '#/components/schemas/SystemKey'
-          - type: 'null'
-        program_ref:
-          type:
-          - string
-          - 'null'
-          maxLength: 64
-        order_date:
-          type: string
-          format: date
-          description: ISO 8601 calendar date (Gregorian); Jalali only in the UI.
-        requested_due_date:
-          type:
-          - string
-          - 'null'
-          format: date
-        required_quality_requirement:
-          type:
-          - string
-          - 'null'
-          maxLength: 64
-        acknowledge_possible_duplicate:
-          type: boolean
-          default: false
-      minProperties: 1
-    CustomerOrderLineCreateRequest:
-      type: object
-      additionalProperties: false
-      description: The unit comes from the product (C-67).
-      required:
-      - style_id
-      - quantity
-      properties:
-        style_id:
-          type: string
-          format: uuid
-        style_revision_id:
-          type: string
-          format: uuid
-          description: 'Default: the ACTIVE revision of the style.'
-        product_code_id:
-          type: string
-          format: uuid
-        quantity:
-          type: integer
-          minimum: 1
-        requested_due_date:
-          type:
-          - string
-          - 'null'
-          format: date
-    CustomerOrderLineUpdateRequest:
-      type: object
-      additionalProperties: false
-      description: DRAFT orders only; CONFIRMED lines change only through change requests (INV-02-06).
-      required: []
-      properties:
-        style_revision_id:
-          type: string
-          format: uuid
-        product_code_id:
-          type:
-          - string
-          - 'null'
-          format: uuid
-        quantity:
-          type: integer
-          minimum: 1
-        requested_due_date:
-          type:
-          - string
-          - 'null'
-          format: date
-      minProperties: 1
     CustomerOrderVersionSummary:
       type: object
       additionalProperties: false
@@ -13225,7 +13608,7 @@ components:
     CustomerOrderVersion:
       type: object
       additionalProperties: false
-      description: Immutable image of header and lines (C-64).
+      description: Append-only (old versions are never modified).
       required:
       - order_id
       - version
@@ -13261,18 +13644,8 @@ components:
           format: uuid
         image:
           type: object
-          additionalProperties: false
-          required:
-          - header
-          - lines
-          properties:
-            header:
-              $ref: '#/components/schemas/CustomerOrderSummary'
-            lines:
-              type: array
-              maxItems: 200
-              items:
-                $ref: '#/components/schemas/CustomerOrderLine'
+          description: Immutable image of header and lines at this version (C-64); the representative name is never copied (only
+            has_customer_representative).
     ChangeRequestKind:
       type: string
       enum:
@@ -13284,43 +13657,11 @@ components:
       - HOLD
       - RESUME
       description: 'PHASE_02 kinds (C-61); which kinds are allowed in which state: DEC-059.'
-    ChangeRequestItem:
-      type: object
-      additionalProperties: false
-      required:
-      - field
-      properties:
-        line_id:
-          type:
-          - string
-          - 'null'
-          format: uuid
-        field:
-          type: string
-          enum:
-          - quantity
-          - requested_due_date
-          - line
-          - order
-          - hold
-        old_value:
-          type:
-          - string
-          - integer
-          - 'null'
-          maxLength: 200
-        new_value:
-          type:
-          - string
-          - integer
-          - 'null'
-          maxLength: 200
-        new_line:
-          $ref: '#/components/schemas/CustomerOrderLineCreateRequest'
     ChangeRequest:
       type: object
       additionalProperties: false
-      description: STATE_TRANSITIONS 5.5. decided_by != requested_by.
+      description: STATE_TRANSITIONS 5.5. decided_by != requested_by; the planning decider is neither the requester nor the deciding
+        manager (DEC-059 amendments).
       required:
       - change_request_id
       - request_no
@@ -13330,10 +13671,15 @@ components:
       - items
       - reason
       - status
-      - approval_id
       - requested_by
+      - submitted_at
       - decided_by
       - decided_at
+      - planning_required
+      - planning_approved_by
+      - planning_approved_at
+      - planning_rejected_by
+      - planning_rejected_at
       - applied_version
       - row_version
       - created_at
@@ -13342,9 +13688,9 @@ components:
           type: string
           format: uuid
         request_no:
-          type: string
-          minLength: 1
-          maxLength: 32
+          $ref: '#/components/schemas/TechnicalNumber'
+          description: 'Internal, system-generated technical number: CR-<Jalali year of creation, Asia/Tehran>-<at least 6 digits>,
+            numbering restarts every Jalali year (DEC-058 amendment 2026-11-14); unique, gaps allowed. Not a Rahkaran code.'
         order_id:
           type: string
           format: uuid
@@ -13355,14 +13701,14 @@ components:
           $ref: '#/components/schemas/ChangeRequestKind'
         items:
           type: array
-          maxItems: 50
+          maxItems: 200
           items:
-            $ref: '#/components/schemas/ChangeRequestItem'
+            type: object
+          description: Normalised items of the kind (ChangeRequestItem).
         reason:
           type: string
           minLength: 3
           maxLength: 500
-          description: Mandatory justification, stored in the audit trail; no personal data.
         status:
           type: string
           enum:
@@ -13373,22 +13719,42 @@ components:
           - APPLIED
           - WITHDRAWN
           - EXPIRED
-        approval_id:
-          type:
-          - string
-          - 'null'
-          format: uuid
         requested_by:
           type:
           - string
           - 'null'
           format: uuid
+        submitted_at:
+          oneOf:
+          - $ref: '#/components/schemas/UtcTimestamp'
+          - type: 'null'
         decided_by:
           type:
           - string
           - 'null'
           format: uuid
         decided_at:
+          oneOf:
+          - $ref: '#/components/schemas/UtcTimestamp'
+          - type: 'null'
+        planning_required:
+          type: boolean
+          description: 'DUE_DATE_CHANGE: planning approves or rejects too (DEC-059).'
+        planning_approved_by:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        planning_approved_at:
+          oneOf:
+          - $ref: '#/components/schemas/UtcTimestamp'
+          - type: 'null'
+        planning_rejected_by:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        planning_rejected_at:
           oneOf:
           - $ref: '#/components/schemas/UtcTimestamp'
           - type: 'null'
@@ -13416,31 +13782,6 @@ components:
             $ref: '#/components/schemas/ChangeRequest'
         page:
           $ref: '#/components/schemas/PageMeta'
-    ChangeRequestCreateRequest:
-      type: object
-      additionalProperties: false
-      required:
-      - order_id
-      - kind
-      - items
-      - reason
-      properties:
-        order_id:
-          type: string
-          format: uuid
-        kind:
-          $ref: '#/components/schemas/ChangeRequestKind'
-        items:
-          type: array
-          minItems: 1
-          maxItems: 50
-          items:
-            $ref: '#/components/schemas/ChangeRequestItem'
-        reason:
-          type: string
-          minLength: 3
-          maxLength: 500
-          description: Mandatory justification, stored in the audit trail; no personal data.
     ChangeRequestImpact:
       type: object
       additionalProperties: false
@@ -13450,6 +13791,7 @@ components:
       - base_order_version
       - lines_affected
       - serials_affected
+      - new_lines
       - snapshots_to_write
       - unavailable_sections
       properties:
@@ -13471,32 +13813,14 @@ components:
           items:
             type: string
             format: uuid
+        new_lines:
+          type: integer
+          minimum: 0
         snapshots_to_write:
           type: integer
           minimum: 0
         unavailable_sections:
           $ref: '#/components/schemas/UnavailableSections'
-    ChangeRequestDecisionRequest:
-      type: object
-      additionalProperties: false
-      required:
-      - decision
-      - resource_revision
-      - note
-      properties:
-        decision:
-          type: string
-          enum:
-          - APPROVE
-          - REJECT
-        resource_revision:
-          type: integer
-          minimum: 1
-          description: Must equal the base order version of the request.
-        note:
-          type: string
-          minLength: 1
-          maxLength: 500
 x-aleekhan-conventions:
   status: DRAFT
   error_codes:
@@ -13545,16 +13869,13 @@ x-aleekhan-conventions:
       credentials whose hash must not be persisted. Duplicate submission is harmless (a second login simply
       rotates the session again). Protection instead: CSRF, rate limits, lockout (DEC-051), audit of every attempt.
       (CONFLICTS C-27.)
-  planned_error_codes:
-    SERIAL_ALREADY_ALLOCATED: 409
-    PRODUCT_CODE_TAKEN: 409
-    POSSIBLE_DUPLICATE: 409
-    ORDER_VERSION_STALE: 409
+  planned_error_codes: {}
   planned_error_codes_note: |
     Codes proposed by a step but not yet in `ErrorCode` (the engine catalogue, golden file and this enum change
     together in one reviewed commit, docs/engine/ERROR_CODES.md rule 5). Empty since 0.5.2-draft: the PHASE_01
     codes were implemented by the 01.3 domain engine.
-    0.7.0-draft (02.1): the four PHASE_02 codes above join `ErrorCode` with the 02.3 domain engine.
+    0.7.0-draft (02.1) proposed four PHASE_02 codes; 0.8.0-draft (02.4) replaces them by refusal reasons in
+    `errors[].code` under the existing top-level codes (`phase02_refusal_reasons`), so `ErrorCode` is unchanged.
   mfa_step_up_rule: |
     Operations with `x-aleekhan-mfa-step-up: true` require an MFA verification younger than the step-up window
     (DEC-051: 15 minutes) for every caller, inside or outside the factory network (DEC-049); this is in addition to the login-time MFA
@@ -13566,7 +13887,7 @@ x-aleekhan-conventions:
     - previewProductCode
     reason: 'Pure computations over a request body (no write, no outbox, no business audit): replaying them is harmless, so
       no Idempotency-Key. POST keeps 14-digit codes out of URLs and access logs (S2 data).'
-  planned_phase02:
+  implemented_phase02:
     step: '02.4'
     tags:
     - identity
@@ -13574,9 +13895,67 @@ x-aleekhan-conventions:
     permission_prefixes:
     - identity.
     - commercial.
-    permissions_decided_by: 'DEC-057 (OPEN): until approved no role holds any PHASE_02 permission (DEC-047).'
-    serial_number_pattern: none until DEC-006 is APPROVED
-    code_segments: none until DEC-005 is APPROVED (only the Code14 format is checked)
+    permissions_decided_by: 'DEC-057 APPROVED (matrix v2.1 with the 2026-11-12 amendments): migrations 0022 / 0024.'
+    record_scope: 'GLOBAL (all customers, DEC-057 answer 3): a record is visible only through a GLOBAL-scope assignment of the action; otherwise 404.'
+    serial_number_pattern: ^[1-9][0-9]*$ (DEC-006 APPROVED; from 63001, gapless)
+    technical_numbers: CU-/SO-/CR-<Jalali year, Asia/Tehran>-<at least 6 digits> (DEC-058 amendment 2026-11-14)
+    code_segments: 02 + type (2) + category (2) + product number (4) + style number (4) (DEC-005 APPROVED)
+  phase02_refusal_reasons:
+    REQUIRED: VALIDATION_FAILED
+    INVALID: VALIDATION_FAILED
+    SEGMENT_FORMAT: VALIDATION_FAILED
+    CODE_FORMAT: VALIDATION_FAILED
+    STYLE_0000_LEGACY_ONLY: VALIDATION_FAILED
+    BELT_SEGMENTS_REQUIRED: VALIDATION_FAILED
+    BELT_SEGMENTS_NOT_ALLOWED: VALIDATION_FAILED
+    PRODUCT_NO_EXHAUSTED: VALIDATION_FAILED
+    STYLE_NO_EXHAUSTED: VALIDATION_FAILED
+    DUE_BEFORE_ORDER_DATE: VALIDATION_FAILED
+    QUANTITY_NOT_POSITIVE: VALIDATION_FAILED
+    QUANTITY_UNCHANGED: VALIDATION_FAILED
+    DUE_DATE_UNCHANGED: VALIDATION_FAILED
+    DUPLICATE_ITEM: VALIDATION_FAILED
+    ITEMS_NOT_ALLOWED: VALIDATION_FAILED
+    DUPLICATE_PO_NUMBER: VALIDATION_FAILED
+    DUPLICATE_CUSTOMER_NAME: VALIDATION_FAILED
+    UNKNOWN_WARNING: VALIDATION_FAILED
+    BRAND_OF_OTHER_CUSTOMER: VALIDATION_FAILED
+    REPRESENTATIVE_NAME_INVALID: VALIDATION_FAILED
+    STATE_NOT_ALLOWED: STATE_TRANSITION_NOT_ALLOWED
+    MASTER_NOT_ACTIVE: STATE_TRANSITION_NOT_ALLOWED
+    ORDER_HAS_NO_LINES: STATE_TRANSITION_NOT_ALLOWED
+    LAST_LINE_CANCEL: STATE_TRANSITION_NOT_ALLOWED
+    PRODUCT_NO_TAKEN: STATE_TRANSITION_NOT_ALLOWED
+    CODE_ALREADY_ISSUED: STATE_TRANSITION_NOT_ALLOWED
+    CODE_IN_REGISTRY: STATE_TRANSITION_NOT_ALLOWED
+    CODE_NOT_RESERVED: STATE_TRANSITION_NOT_ALLOWED
+    CODE_OF_OTHER_STYLE: STATE_TRANSITION_NOT_ALLOWED
+    GOLDEN_CASES_INSUFFICIENT: STATE_TRANSITION_NOT_ALLOWED
+    GOLDEN_CASE_MISMATCH: STATE_TRANSITION_NOT_ALLOWED
+    GOLDEN_CASE_OUT_OF_SCOPE: STATE_TRANSITION_NOT_ALLOWED
+    RELEASED_KIND_NOT_ALLOWED: STATE_TRANSITION_NOT_ALLOWED
+    CANCEL_AFTER_RELEASE: STATE_TRANSITION_NOT_ALLOWED
+    ORDER_ON_HOLD: STATE_TRANSITION_NOT_ALLOWED
+    ORDER_NOT_ON_HOLD: STATE_TRANSITION_NOT_ALLOWED
+    ORDER_ALREADY_ON_HOLD: STATE_TRANSITION_NOT_ALLOWED
+    STALE_BASE_VERSION: STATE_TRANSITION_NOT_ALLOWED
+    PLANNING_APPROVAL_REQUIRED: STATE_TRANSITION_NOT_ALLOWED
+    PLANNING_APPROVAL_NOT_APPLICABLE: STATE_TRANSITION_NOT_ALLOWED
+    PLANNING_ALREADY_APPROVED: STATE_TRANSITION_NOT_ALLOWED
+    LINE_NOT_IN_ORDER: STATE_TRANSITION_NOT_ALLOWED
+    EXTERNAL_REF_EXISTS: STATE_TRANSITION_NOT_ALLOWED
+    SERIAL_ALLOCATED_AT_CONFIRM: STATE_TRANSITION_NOT_ALLOWED
+    RULE_REVISION_NOT_ACTIVE: STATE_TRANSITION_NOT_ALLOWED
+    CONFIRMER_IS_CREATOR: SELF_APPROVAL_FORBIDDEN
+    DECIDER_IS_REQUESTER: SELF_APPROVAL_FORBIDDEN
+    DECIDER_IS_PLANNING_APPROVER: SELF_APPROVAL_FORBIDDEN
+    PLANNING_APPROVER_IS_REQUESTER: SELF_APPROVAL_FORBIDDEN
+    PLANNING_APPROVER_IS_DECIDER: SELF_APPROVAL_FORBIDDEN
+    APPROVER_IS_MAKER: SELF_APPROVAL_FORBIDDEN
+    NO_ACTIVE_CODE_RULE: RULE_NOT_APPROVED
+    TYPE_NOT_IN_RULE_SCOPE: RULE_NOT_APPROVED
+    RULE_SPEC_NOT_IMPLEMENTED: RULE_NOT_APPROVED
+    IDEMPOTENCY_PAYLOAD_MISMATCH: IDEMPOTENCY_KEY_REUSED
   out_of_scope_phase_02:
   - prices/costing (PHASE_10)
   - engineering ECR/ECO (PHASE_03/04)

@@ -56,7 +56,6 @@ class Reason(StrEnum):
     ORDER_HAS_NO_LINES = "ORDER_HAS_NO_LINES"
     LAST_LINE_CANCEL = "LAST_LINE_CANCEL"  # cancelling the last live line: use CANCEL_ORDER
     PRODUCT_NO_TAKEN = "PRODUCT_NO_TAKEN"
-    STYLE_NO_COLLISION = "STYLE_NO_COLLISION"  # count + 1 already used (non-contiguous legacy styles)
     CODE_ALREADY_ISSUED = "CODE_ALREADY_ISSUED"  # the style already has a live code
     CODE_IN_REGISTRY = "CODE_IN_REGISTRY"  # the code value exists (e.g. imported); a person links it
     CODE_NOT_RESERVED = "CODE_NOT_RESERVED"  # ERP match of a code that is not RESERVED / ERP_PENDING
@@ -74,6 +73,10 @@ class Reason(StrEnum):
     PLANNING_APPROVAL_NOT_APPLICABLE = "PLANNING_APPROVAL_NOT_APPLICABLE"  # not a due-date change
     PLANNING_ALREADY_APPROVED = "PLANNING_ALREADY_APPROVED"
     LINE_NOT_IN_ORDER = "LINE_NOT_IN_ORDER"
+    # 02.4
+    EXTERNAL_REF_EXISTS = "EXTERNAL_REF_EXISTS"  # same system + type + value + target already recorded
+    SERIAL_ALLOCATED_AT_CONFIRM = "SERIAL_ALLOCATED_AT_CONFIRM"  # DEC-006 L-A: no stand-alone allocation
+    RULE_REVISION_NOT_ACTIVE = "RULE_REVISION_NOT_ACTIVE"  # the named rule revision is not the ACTIVE one
     # --- maker-checker (403 SELF_APPROVAL_FORBIDDEN)
     CONFIRMER_IS_CREATOR = "CONFIRMER_IS_CREATOR"  # DEC-057
     DECIDER_IS_REQUESTER = "DECIDER_IS_REQUESTER"  # DEC-057 / DEC-059
@@ -125,7 +128,6 @@ _BY_CODE: dict[ErrorCode, tuple[Reason, ...]] = {
         Reason.ORDER_HAS_NO_LINES,
         Reason.LAST_LINE_CANCEL,
         Reason.PRODUCT_NO_TAKEN,
-        Reason.STYLE_NO_COLLISION,
         Reason.CODE_ALREADY_ISSUED,
         Reason.CODE_IN_REGISTRY,
         Reason.CODE_NOT_RESERVED,
@@ -143,6 +145,9 @@ _BY_CODE: dict[ErrorCode, tuple[Reason, ...]] = {
         Reason.PLANNING_APPROVAL_NOT_APPLICABLE,
         Reason.PLANNING_ALREADY_APPROVED,
         Reason.LINE_NOT_IN_ORDER,
+        Reason.EXTERNAL_REF_EXISTS,
+        Reason.SERIAL_ALLOCATED_AT_CONFIRM,
+        Reason.RULE_REVISION_NOT_ACTIVE,
     ),
     _SA: (
         Reason.CONFIRMER_IS_CREATOR,

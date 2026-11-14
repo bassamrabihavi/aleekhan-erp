@@ -332,3 +332,35 @@ Review verdicts are in `reports/phase-00/step-N/REVIEW.md`. No version number is
   (`STYLE_0000_LEGACY_ONLY`); golden harness and DB golden check count such cases in their family as legacy-only
   (build refused + legacy parse exact) and report them separately; migration 0023 extended
   (`ck_identity_style_no_fmt` allows 0000 for IMP/LEG only; `ck_identity_product_code_sys_no_style_0000`).
+
+### 02.4 Backend/API (commit SHA added by the orchestrator when committed)
+- API: all 66 PHASE_02 operations served (`backend/platform_core/api/phase02/`: `bodies.py`, `serializers.py`,
+  `identity_views.py`, `commercial_views.py`, `urls.py`) over the 02.3 use cases - session cookie, permission per
+  action (DEC-057 matrix v2.1), GLOBAL record scope (404), fresh MFA on issue / code-rule decisions / confirm /
+  decide / planning decision, rate limits, ETag + If-Match, cursor pagination, request id, Idempotency-Key on every
+  mutation (except the two side-effect free POSTs), refusal reasons in `errors[].code`.
+- Contract `0.8.0-draft` (`docs/api/openapi-draft.yaml`): planned markers removed, `x-aleekhan-blocked-by`
+  (DEC-005/006/057/059) replaced by `x-aleekhan-decided-by`; added `updateCustomerBrand`,
+  `addCodeRuleGoldenCases`, `decidePlanningChangeRequest`; `SerialNumber` pattern `^[1-9][0-9]*$`;
+  `TechnicalNumber`; PHASE_02 schemas aligned with the engine (enums without PAUSED / SERIAL_ALLOCATED, type /
+  category levels, `Style.category_id`, masked `customer_representative_name`, historical match fields, change
+  request items); `phase02_refusal_reasons`; planned error codes dropped (reasons instead). `/version` reports
+  0.8.0-draft. API_RUNTIME section 14.
+- Employer amendments of 2026-11-14: numbers `CU-`/`SO-`/`CR-` + Jalali year (Asia/Tehran) + 6+ digits, restart
+  every year (`product_identity/jalali.py`, `platform_number_counter`); style collision -> first free number
+  after count + 1, audited (REV-0232; `coderule.first_free_style_no`, `STYLE_NO_COLLISION` removed); planning
+  may approve or reject a due-date change (`changes.planning_decide_change_request`, reject closes REJECTED);
+  held order: only resume or cancel (decided, unchanged).
+- Golden (REV-0230 / REV-0231): harness counts `c77_checked` / `c77_disagree` (any disagreement fails),
+  `belt_checked` per belt family (>= 20, belt families inferred or declared with `ALEEKHAN_GOLDEN_BELT_FAMILIES`),
+  `legacy_disputed` reported only; `codes.golden_report` refuses belt-type cases without both segments
+  (`BELT_SEGMENTS_REQUIRED`) and a C-77 disagreement.
+- Engine: external references (`product_identity/external.py`), `remove_line` / `activate_rule_revision`
+  reasons, snapshot image `order_version` = the version it represents; refusal reasons `EXTERNAL_REF_EXISTS`,
+  `SERIAL_ALLOCATED_AT_CONFIRM`, `RULE_REVISION_NOT_ACTIVE`; events `commercial.change_request.planning_rejected`,
+  `identity.external_ref.created` / `.ended`.
+- Migration `0025_phase02_api_numbers` (reversible): number counter + forward-only guard (replaces the 0023
+  sequences), planning-reject columns + CHECKs + one more change-request lifecycle edge. `grants.sql` /
+  `roles_check.sh` updated.
+- Tests: `test_api_phase02_contract.py` (replaces `test_api_contract_planned_phase02.py`), `test_api_phase02_flows.py`,
+  `test_phase02_jalali.py`, harness / engine additions.

@@ -3,7 +3,7 @@ IMPLEMENTED in 0.6.0-draft / 01.4).
 
 Since 01.4 no PHASE_01 path item is planned any more (``x-aleekhan-status`` removed, route parity covers every
 implemented path). 0.7.0-draft (02.1) adds PLANNED PHASE_02 paths; their rules are pinned in
-``test_api_contract_planned_phase02``.
+``test_api_phase02_contract``.
 
 The rules pinned in 01.1 keep applying to the PHASE_01 operations (tags ``auth``, ``me``, ``admin-identity``,
 ``org``, ``workflow``, ``audit``, ``jobs``, ``documents``, ``parameters``), so the implementation cannot

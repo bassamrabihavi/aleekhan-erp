@@ -8,7 +8,8 @@ through the server import only (DEC-005, R-38).
 Numbering (DEC-005, ``coderule``): a new product of a sequential type gets ``max(product_no of the type) + 1``
 and a belt product ``buckle + width``; a new style gets ``count(styles of the product and category) + 1``. The
 counting row (product type, product) is locked ``FOR UPDATE`` first, so two concurrent creations never compute
-the same number; a collision with an existing number is refused, never re-numbered.
+the same number. A product number collision is refused; a style ``count + 1`` that is already used takes the
+first free number after it (DEC-005 amendment 2026-11-14, REV-0232) and the audit row records the collision.
 
 Lifecycle of products and styles (``MASTER_MACHINE``): DRAFT -> ACTIVE -> RETIRED (never deleted). Customers
 and brands: ACTIVE <-> INACTIVE. Style revisions: DRAFT -> ACTIVE (the previous ACTIVE one becomes SUPERSEDED
@@ -417,8 +418,14 @@ def set_product_status(
 
 
 # -------------------------------------------------------------------------------------------------- styles
+def style_number(product: Product, category: ProductClass) -> tuple[str, str | None]:
+    """``(style_no, collided)`` of a new style (``coderule.first_free_style_no``; pure read)."""
+    used = Style.objects.filter(product=product, category=category).values_list("style_no", flat=True)
+    return coderule.first_free_style_no(used)
+
+
 def proposed_style_no(product: Product, category: ProductClass) -> str:
-    return coderule.next_style_no(Style.objects.filter(product=product, category=category).count())
+    return style_number(product, category)[0]
 
 
 def _category_of_type(category_id: uuid.UUID, product: Product) -> ProductClass:
@@ -445,10 +452,7 @@ def create_style(
         if p.status == MasterStatus.RETIRED:
             refuse(Reason.MASTER_NOT_ACTIVE, field="product_id")
         c = _category_of_type(category_id, p)
-        style_no = proposed_style_no(p, c)
-        if Style.objects.filter(product=p, category=c, style_no=style_no).exists():
-            # legacy styles of this product/category are not contiguous: the employer decides (open item)
-            refuse(Reason.STYLE_NO_COLLISION, field="style_no", detail="count + 1 is already used")
+        style_no, collided = style_number(p, c)  # under the product row lock: no concurrent duplicate
         with db_rules():
             s = Style.objects.create(
                 product=p,
@@ -471,6 +475,12 @@ def create_style(
                 "status": s.status,
             },
             payload={"id": str(s.pk), "product_id": str(p.pk), "category_id": str(c.pk), "status": s.status},
+            reason="style count + 1 was taken: first free number after it (DEC-005 amendment 2026-11-14)"
+            if collided
+            else "",
+            scope={"style_no_collision": {"count_plus_one": collided, "assigned": style_no}}
+            if collided
+            else None,
         )
     return s
 

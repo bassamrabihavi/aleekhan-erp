@@ -306,7 +306,10 @@ def staging(sheet: str = "SyntheticSheet") -> tuple[ImportBatch, StagingRow]:
 # --------------------------------------------------------------------------------------------- customers
 def customer(**over: Any) -> Customer:
     n = _n()
-    data: dict[str, Any] = {"customer_no": f"SYN-{n}", "display_name_fa": f"مشتری ساختگی {n} {SYN}"}
+    data: dict[str, Any] = {
+        "customer_no": f"CU-1300-{int(n, 16):010d}",
+        "display_name_fa": f"مشتری ساختگی {n} {SYN}",
+    }
     data.update(over)
     return Customer.objects.create(**data)
 
@@ -320,7 +323,7 @@ def brand(cust: Customer, **over: Any) -> CustomerBrand:
 # ------------------------------------------------------------------------------------------------ orders
 def order(cust: Customer, creator: User, **over: Any) -> CustomerOrder:
     data: dict[str, Any] = {
-        "order_no": f"SYN-O-{_n()}",
+        "order_no": f"SO-1300-{int(_n(), 16):010d}",  # synthetic year 1300 (never a real number)
         "customer": cust,
         "order_type_id": "series_production",
         "order_date": date(2030, 1, 10),

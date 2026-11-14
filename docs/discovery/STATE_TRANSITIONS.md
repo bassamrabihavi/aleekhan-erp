@@ -359,7 +359,8 @@ Engine machines (`engine.state.StateMachine`, tested pair by pair against the li
 | DRAFT | `submit_change_request` | SUBMITTED | the requester | base still current; impact computed |
 | DRAFT, SUBMITTED | `withdraw_change_request` | WITHDRAWN | the requester | reason |
 | SUBMITTED | `decide_change_request` | APPROVED / REJECTED | commercial_manager, owner | BA + fresh MFA; ≠ requester; ≠ planning approver; a rejection needs a note |
-| SUBMITTED, APPROVED (DUE_DATE_CHANGE) | `planning_approve_change_request` | (same) | planning_officer | fresh MFA; ≠ requester and ≠ deciding manager (amendment 2026-11-12; DB CHECKs); once |
+| SUBMITTED, APPROVED (DUE_DATE_CHANGE) | `planning_decide_change_request` approve | (same) | planning_officer | fresh MFA; ≠ requester and ≠ deciding manager (amendment 2026-11-12; DB CHECKs); once |
+| SUBMITTED, APPROVED (DUE_DATE_CHANGE) | `planning_decide_change_request` reject (02.4, amendment 2026-11-14) | REJECTED | planning_officer | fresh MFA; a reason (note >= 3); ≠ requester and ≠ deciding manager; not after a planning approval; the old due date stays (DB edge APPROVED -> REJECTED only with `planning_rejected_by`, migration 0025) |
 | APPROVED | `apply_change_request` | APPLIED | planning_officer | base still current (`STALE_BASE_VERSION`); kind still allowed (the order may have been released or held since); due-date change needs the planning approval; writes order version n+1 and the next snapshot of every touched serial |
 | SUBMITTED, APPROVED | expiry | EXPIRED | — | not written: no period is decided (REV-0203) |
 
@@ -380,8 +381,10 @@ code with style 0000.
 
 **Interpretations made by 02.3 (conservative; the employer may change them):**
 - On a held order, only RESUME and the cancellations are accepted; quantity, due date and new lines are refused
-  (`ORDER_ON_HOLD`) because DEC-059 does not say whether a held order may change.
+  (`ORDER_ON_HOLD`). **DECIDED** by the employer on 2026-11-14 (DEC-059 amendment): only resume or cancel (cancel
+  before release only).
 - Cancelling every live line through CANCEL_LINE is refused (`LAST_LINE_CANCEL`); CANCEL_ORDER is the way.
-- A due-date planning approval can only approve (no planning rejection): the commercial manager rejects.
+- ~~A due-date planning approval can only approve~~ - superseded 2026-11-14 (DEC-059 amendment): planning
+  approves OR rejects (02.4, `decidePlanningChangeRequest`).
 - `apply` has no maker-checker of its own (DEC-059 names the applier role only).
 - Products and styles are created DRAFT; an order line needs the style, its product and the product type ACTIVE.

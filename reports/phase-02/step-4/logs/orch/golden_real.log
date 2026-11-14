@@ -1,0 +1,2 @@
+......golden harness: cases=2313 families=5 per_family_counts=[179, 253, 302, 349, 1215] not_reproduced=0 first_indexes=[] malformed=0 first_indexes=[] family_mismatch=0 families_below_20=0 legacy_only_style_0000=9 legacy_only_per_family_counts=[9] c77_checked=1218 c77_disagree=0 c77_first_indexes=[] belt_families=1 belt_checked=169 belt_checked_per_family_counts=[169] belt_families_below_20=0 legacy_disputed=15
+7 passed in 0.29s

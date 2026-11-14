@@ -246,3 +246,10 @@ the same transaction, DEC-006 L-A). The customer representative name (DEC-058, P
 Open points of v2.0, closed by the employer on 2026-11-12 (v2.1 above): the owner's PHASE_02 read permissions;
 the due-date planning approval (`commercial.change.planning_approve`, a person other than the requester and the
 deciding manager). Still open (02.3): the flags of `commercial.change.planning_approve` (PROPOSED MFA, BA, SoD).
+
+### 02.4 note (2026-11-14)
+`commercial.change.planning_approve` covers BOTH planning outcomes of a due-date change - approve and reject
+(DEC-059 amendment 2026-11-14; operation `decidePlanningChangeRequest`). The id is kept (no rename, no migration)
+so matrix v2.1 is unchanged; its flags stay MFA + BA + SoD as seeded by 0024 (still to be confirmed by the
+employer at the Gate). `identity.serial.allocate` maps to `allocateSerial`, which always answers 409
+`SERIAL_ALLOCATED_AT_CONFIRM` (DEC-006 L-A: serials are drawn by `commercial.order.confirm`).

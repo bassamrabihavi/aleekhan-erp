@@ -332,3 +332,29 @@ Rahkaran code that differs from the Planning code).
   style 0000 count in their family and pass only if the build path refuses them and the legacy parse is exact.
 - DB: `ck_commercial_cr_planner_not_decider` (DEC-059 amendment 2026-11-12) and the ON_HOLD -> CANCELLED edge of
   `commercial_order_guard()` (stored state CONFIRMED only).
+
+### 02.4 result (Backend/API, migration 0025) - employer amendments of 2026-11-14
+- **Technical numbers - DECIDED (DEC-058 amendment 2026-11-14)**, replacing the PROPOSED 02.3 format:
+
+  | Record | Format | Example (synthetic) |
+  |---|---|---|
+  | Customer `customer_no` | `CU-<Jalali year>-` + at least 6 digits | `CU-1405-000042` |
+  | Order `order_no` | `SO-<Jalali year>-` + at least 6 digits | `SO-1405-000137` |
+  | Change request `request_no` | `CR-<Jalali year>-` + at least 6 digits | `CR-1405-000009` |
+
+  The year is the Jalali year of the creating transaction's database clock in Asia/Tehran
+  (`product_identity/jalali.py`, verified against Nowruz dates: 1404/12/29 = 2026-03-20, 1405/01/01 = 2026-03-21).
+  Numbering restarts at 1 every Jalali year. Counter: `platform_number_counter` (PK kind + jalali_year), one
+  atomic `INSERT ... ON CONFLICT DO UPDATE SET last_value = last_value + 1` per number under the row lock (two
+  writers never get the same number; the tables' UNIQUE constraints stay the final guard). Gaps are allowed. A guard
+  trigger lets a row start at 1 and move forward by exactly 1 only; no reset, delete or truncate (runtime role
+  checked by `roles_check.sh`). The 0023 sequences are dropped (reverse re-creates them after the largest plain
+  number already used).
+- **Style collision (DEC-005 amendment, REV-0232):** `count + 1` taken -> the first free number after it
+  (`coderule.first_free_style_no`), the audit row carries `scope.style_no_collision` and a reason; never refused,
+  never a duplicate (product row lock + UNIQUE). Gaps below are never back-filled.
+- **Planning reject (DEC-059 amendment):** `commercial_order_change_request.planning_rejected_by` /
+  `planning_rejected_at` (pair CHECK; due-date only; closes REJECTED; never the requester nor the deciding
+  manager; excludes a planning approval).
+- **External references:** written by `product_identity/external.py` (create / end; raw value kept exactly, never
+  parsed; duplicate per system + type + value + target refused `EXTERNAL_REF_EXISTS`).

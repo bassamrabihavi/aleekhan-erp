@@ -55,6 +55,7 @@ from .models import (
     ProductClass,
     ProductCode,
     ProductCodeStatus,
+    ProductNoScheme,
     Style,
 )
 from .refusals import Reason, refuse
@@ -241,13 +242,35 @@ def add_golden_cases(
     return len(objs)
 
 
+def belt_type_codes() -> frozenset[str]:
+    """Segment values of the product types numbered buckle + width (DEC-005 belt)."""
+    return frozenset(
+        ProductClass.objects.filter(
+            level_key=ClassLevel.PRODUCT_TYPE, product_no_scheme=ProductNoScheme.BELT_BUCKLE_WIDTH
+        ).values_list("segment_value", flat=True)
+    )
+
+
 def golden_report(r: CodeRuleRevision) -> tuple[dict[str, int], list[FieldError]]:
-    """Per-family counts and the problems (insufficient family, out-of-scope case, case not reproduced)."""
+    """Per-family counts and the problems (insufficient family, out-of-scope case, case not reproduced).
+
+    02.4 (REV-0230 / REV-0231): a case of a belt type (``BELT_BUCKLE_WIDTH``) must carry both belt segments
+    (``BELT_SEGMENTS_REQUIRED``); a case whose ``category_code_order_form`` differs from ``category_code``
+    does not reproduce (C-77). A case marked ``legacy_disputed`` is neither checked nor counted (it is
+    reported by the harness, DEC-005 Q-D: planning decides it)."""
     types = scope_types(r)
+    belts = belt_type_codes()
     counts: Counter[str] = Counter()
     problems: list[FieldError] = []
     for g in CodeRuleGoldenCase.objects.filter(rule_revision=r).order_by("id"):
+        if g.inputs.get("legacy_disputed"):
+            continue
         counts[g.product_type_code] += 1
+        if g.product_type_code in belts and not (
+            g.inputs.get("buckle_type_code") and g.inputs.get("belt_width_code")
+        ):
+            problems.append(FieldError(f"golden_case:{g.pk}", Reason.BELT_SEGMENTS_REQUIRED.value))
+            continue
         if g.product_type_code not in types:
             problems.append(FieldError(f"golden_case:{g.pk}", Reason.GOLDEN_CASE_OUT_OF_SCOPE.value))
             continue
@@ -374,9 +397,15 @@ def reject_rule_revision(
 
 
 def activate_rule_revision(
-    caller: Caller, revision_id: uuid.UUID, *, expected_version: int, request_id: uuid.UUID | None = None
+    caller: Caller,
+    revision_id: uuid.UUID,
+    *,
+    expected_version: int,
+    reason: str = "",
+    request_id: uuid.UUID | None = None,
 ) -> CodeRuleRevision:
     decision = authorize(caller, RULE_APPROVE)
+    text = reason.strip()[:500]
     with unit_of_work(caller.context(request_id)) as uow:
         r = lock(CodeRuleRevision, revision_id)
         check_version(r, expected_version)
@@ -402,6 +431,7 @@ def activate_rule_revision(
             "activate",
             r,
             before=before,
+            reason=text,
             scope={"via_role": decision.grant.role_code if decision.grant else ""},
         )
     return r

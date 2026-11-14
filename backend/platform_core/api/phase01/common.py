@@ -24,7 +24,7 @@ import re
 import uuid
 from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from typing import Any, Final
 
 from django.db import models
@@ -61,6 +61,7 @@ from ..request_id import request_id_of
 from ..session_auth import SessionCookieAuthentication
 
 NO_STORE: Final = {"Cache-Control": "no-store"}
+DATE_RE: Final = re.compile(r"[0-9]{4}-[0-9]{2}-[0-9]{2}")
 UUID_RE: Final = re.compile(r"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}")
 
 
@@ -126,7 +127,8 @@ def opt_text(value: str) -> str | None:
 # ------------------------------------------------------------------------------------ body validation
 @dataclass(frozen=True)
 class F:
-    """One request field. ``kind``: str | uuid | ts | bool | int | strlist | obj (nested spec)."""
+    """One request field. ``kind``: str | uuid | ts | date | bool | int | strlist | obj (nested spec) |
+    objlist (list of a nested spec; 02.4)."""
 
     kind: str
     required: bool = False
@@ -140,7 +142,8 @@ class F:
     max_items: int | None = None
     item_pattern: str | None = None
     item_max_len: int | None = None
-    nested: str | None = None  # name of a nested spec in BODIES (kind == "obj")
+    nested: str | None = None  # name of a nested spec in BODIES (kind == "obj" / "objlist")
+    min_items: int = 0
 
 
 REASON: Final = F("str", required=True, min_len=3, max_len=500)
@@ -358,6 +361,25 @@ def _check(spec: F, raw: Any, path: str, errors: list[FieldError]) -> Any:
         except ValidationFailed:
             errors.append(FieldError(path, "INVALID_TIMESTAMP"))
             return None
+    if kind == "date":  # 02.4: ISO 8601 calendar date (Gregorian; Jalali only in the UI)
+        if not isinstance(raw, str) or not DATE_RE.fullmatch(raw):
+            errors.append(FieldError(path, "INVALID_DATE"))
+            return None
+        try:
+            return date.fromisoformat(raw)
+        except ValueError:
+            errors.append(FieldError(path, "INVALID_DATE"))
+            return None
+    if kind == "objlist":
+        assert spec.nested is not None
+        if (
+            not isinstance(raw, list)
+            or len(raw) < spec.min_items
+            or (spec.max_items is not None and len(raw) > spec.max_items)
+        ):
+            errors.append(FieldError(path, "INVALID_TYPE"))
+            return None
+        return [_object(BODIES[spec.nested], item, f"{path}[{i}]", errors) for i, item in enumerate(raw)]
     if kind == "bool":
         if not isinstance(raw, bool):
             errors.append(FieldError(path, "INVALID_TYPE"))
@@ -379,7 +401,11 @@ def _check(spec: F, raw: Any, path: str, errors: list[FieldError]) -> Any:
             return None
         return raw
     if kind == "strlist":
-        if not isinstance(raw, list) or (spec.max_items is not None and len(raw) > spec.max_items):
+        if (
+            not isinstance(raw, list)
+            or len(raw) < spec.min_items
+            or (spec.max_items is not None and len(raw) > spec.max_items)
+        ):
             errors.append(FieldError(path, "INVALID_TYPE"))
             return None
         out: list[str] = []
