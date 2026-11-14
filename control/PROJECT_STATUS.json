@@ -255,12 +255,12 @@
         },
         "02.4": {
           "name": "Backend/API",
-          "state": "TODO",
+          "state": "IN_PROGRESS",
           "commit": null,
           "report": null,
           "review": null,
           "rework_cycles": 0,
-          "started_at": null,
+          "started_at": "2026-11-14T08:15:22+00:00",
           "done_at": null
         },
         "02.5": {
@@ -3431,7 +3431,16 @@
       "status": "APPROVED",
       "by": "بسام ربیهاوی",
       "note": "Amendment 2026-11-14: see DECISION_LOG (number format with Jalali year; held order resume/cancel only; style collision -> next free; planning may reject)"
+    },
+    {
+      "at": "2026-11-14T08:15:22+00:00",
+      "kind": "step",
+      "phase": "PHASE_02",
+      "step": "02.4",
+      "state": "IN_PROGRESS",
+      "note": null,
+      "commit": null
     }
   ],
-  "updated_at": "2026-11-14T08:03:12+00:00"
+  "updated_at": "2026-11-14T08:15:22+00:00"
 }
