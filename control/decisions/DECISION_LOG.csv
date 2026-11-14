@@ -39,3 +39,5 @@ DEC-005,APPROVED,بسام ربیهاوی,2026-11-13,"Amendment 2026-11-13: style
 DEC-005,APPROVED,بسام ربیهاوی,2026-11-14,Amendment 2026-11-14: see DECISION_LOG (number format with Jalali year; held order resume/cancel only; style collision -> next free; planning may reject)
 DEC-058,APPROVED,بسام ربیهاوی,2026-11-14,Amendment 2026-11-14: see DECISION_LOG (number format with Jalali year; held order resume/cancel only; style collision -> next free; planning may reject)
 DEC-059,APPROVED,بسام ربیهاوی,2026-11-14,Amendment 2026-11-14: see DECISION_LOG (number format with Jalali year; held order resume/cancel only; style collision -> next free; planning may reject)
+DEC-005,APPROVED,بسام ربیهاوی,2026-11-14,Amendment 2026-11-14: legacy belt rows - 14-digit code authoritative; belt width entered by user (2 digits)
+DEC-006,APPROVED,بسام ربیهاوی,2026-11-14,Amendment 2026-11-14: allocateSerial operation removed; serial only via order confirm

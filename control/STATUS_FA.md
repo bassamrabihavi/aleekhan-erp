@@ -5,7 +5,7 @@
 ## خلاصه
 
 - **فاز فعال:** PHASE_02 مشتری، محصول، استایل، ثبت سفارش و سریال (فعال)
-- **گام جاری:** 02.4 Backend/API (در صف)
+- **گام جاری:** 02.4 Backend/API (اصلاح)
 - **پیشرفت:** 19/120 گام قبول‌شده
 - **آماده تست شما:** 0 مورد
 - **تصمیم P0 باز (کل پروژه):** 15
@@ -110,6 +110,11 @@ flowchart LR
 
 ## آخرین رویدادها
 
+- `2026-11-14T17:46:41+00:00` decision id=DEC-006 status=APPROVED by=بسام ربیهاوی note=Amendment 2026-11-14: allocateSerial operation removed; serial only via order confirm
+- `2026-11-14T17:46:40+00:00` decision id=DEC-005 status=APPROVED by=بسام ربیهاوی note=Amendment 2026-11-14: legacy belt rows - 14-digit code authoritative; belt width entered by user (2 digits)
+- `2026-11-14T13:07:29+00:00` step phase=PHASE_02 step=02.4 state=REWORK
+- `2026-11-14T10:13:08+00:00` step phase=PHASE_02 step=02.4 state=IN_REVIEW commit=ee9d4e7
+- `2026-11-14T08:15:22+00:00` step phase=PHASE_02 step=02.4 state=IN_PROGRESS
 - `2026-11-14T08:03:12+00:00` decision id=DEC-059 status=APPROVED by=بسام ربیهاوی note=Amendment 2026-11-14: see DECISION_LOG (number format with Jalali year; held order resume/cancel only; style collision -> next free; planning may reject)
 - `2026-11-14T08:03:12+00:00` decision id=DEC-058 status=APPROVED by=بسام ربیهاوی note=Amendment 2026-11-14: see DECISION_LOG (number format with Jalali year; held order resume/cancel only; style collision -> next free; planning may reject)
 - `2026-11-14T08:03:12+00:00` decision id=DEC-005 status=APPROVED by=بسام ربیهاوی note=Amendment 2026-11-14: see DECISION_LOG (number format with Jalali year; held order resume/cancel only; style collision -> next free; planning may reject)
@@ -120,8 +125,3 @@ flowchart LR
 - `2026-11-12T18:34:55+00:00` decision id=DEC-059 status=APPROVED by=بسام ربیهاوی note=Amendment 2026-11-12: due-date approval by planning_officer, a different person from requester and decider; direct cancel from ON_HOLD allowed if previous state is pre-release
 - `2026-11-12T18:34:55+00:00` decision id=DEC-057 status=APPROVED by=بسام ربیهاوی note=Amendment 2026-11-12: owner_admin gets all PHASE_02 read permissions
 - `2026-11-12T17:41:29+00:00` step phase=PHASE_02 step=02.2 state=PASS
-- `2026-11-12T17:29:05+00:00` step phase=PHASE_02 step=02.2 state=IN_REVIEW commit=c8b3dff
-- `2026-11-12T09:30:34+00:00` step phase=PHASE_02 step=02.2 state=IN_PROGRESS
-- `2026-11-12T09:30:08+00:00` decision id=DEC-058 status=APPROVED by=بسام ربیهاوی note=B-A brand table; customer rep NAME recorded (PII, no contact data, masked for viewers); PO no. not unique, warn; 4 external ref types; units shoe=pair others=piece; order types = 4 Planning types; grade text-only default
-- `2026-11-12T09:22:37+00:00` decision id=DEC-059 status=APPROVED by=بسام ربیهاوی note=CR-only changes, new version+snapshot; 7 change types, after release only due date + hold/resume; C-A cancel before release only, serial CANCELLED never reused; qty increase keeps serial; single ON_HOLD returns to previous; commercial_manager decides, planning applies; due-date change also needs planning approval
-- `2026-11-12T09:06:02+00:00` decision id=DEC-057 status=APPROVED by=بسام ربیهاوی note=M-A: 5 business roles per packet table; 4 fresh-MFA actions; order confirm = planning_officer (+serials same tx); scope all customers; owner may decide directly except own requests

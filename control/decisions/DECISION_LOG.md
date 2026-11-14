@@ -234,3 +234,11 @@ Asked with AskUserQuestion, in Persian.
   - A rejection needs a reason.
   - The change request is closed as REJECTED and the old due date stays.
 - **Decided by:** بسام ربیهاوی (کارفرما).
+
+## 2026-11-14 — DEC-005 / DEC-006 follow-ups (02.4 review REV-0241, open item allocateSerial)
+Asked with AskUserQuestion, in Persian. The first question was unclear and was asked again with a synthetic example.
+- **Legacy belt rows whose order "buckle type" differs from the product number (15 rows):** the **14-digit code is authoritative**. The rows are accepted at import without review, and the order's buckle-type column is kept only as a note.
+  - Golden evidence for belts uses only rows where the order's buckle agrees with the code.
+- **Belt width:** for a new belt product, the **user enters the two-digit width in the form** (for example 35 for 3.5 cm), and the system stores it. For legacy codes the width is read from the code (`product_no[2:4]`).
+- **`allocateSerial`:** **removed** from the API. A serial is created only by order confirmation (DEC-006 L-A).
+- **Decided by:** بسام ربیهاوی (کارفرما).
