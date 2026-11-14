@@ -4,7 +4,7 @@
 PROJECT: Aleekhan
 PHASE: PHASE_02
 STEP: 02.4
-COMMIT SHA: ee9d4e7
+COMMIT SHA: 14b49e4 (rework 1; first submission ee9d4e7)
 BRANCH/PR: main
 STATUS: COMPLETE
 TIME OF REPORT (UTC): 2026-11-14
@@ -112,3 +112,31 @@ PASS requested, against R01–R14.
 
 ## 10. Next step
 02.5 UI: pages 1, 2, 4, 29 and 33 in Farsi RTL, responsive, with loading/error/empty/stale states, Playwright screenshots at 1440/1180/768/390 and E2E tests.
+
+## 11. Rework 1 (commit 14b49e4)
+The first review (REVIEW.md) returned REWORK for REV-0240 [P1], with REV-0241 [P2] and REV-0242/0243 [P3]. Employer decisions from 2026-11-14 were added in the same cycle (DECISION_LOG).
+
+**Fixes**
+- **REV-0240:**
+  - harness-only fields (`legacy_disputed`, `belt_width_source`) are refused by the API and the engine with `GOLDEN_FIELD_NOT_ALLOWED`;
+  - the server checks and counts every stored golden case at submit and approve;
+  - the approver sees `golden_summary` (counts only).
+- **REV-0241:** closed by employer decision.
+  - The 14-digit code is authoritative for the 15 legacy belt rows; those rows carry no belt fields in golden v3.
+  - For new belt products the user enters the 2-digit width.
+- **REV-0242:** each tracking block checks its own read permission (`withheld_sections`).
+- **REV-0243:** stale-MFA 401 tests added.
+- **Employer decision:** `allocateSerial` removed; POST `/identity/serials` → 405.
+  - The seeded matrix row `identity.serial.allocate` is now unused. It is kept so the approved matrix does not change; dropping it would be matrix v2.2 (open question).
+- **Contract:** `0.8.2-draft`, 65 PHASE_02 operations.
+
+**Orchestrator re-run** (`logs/orch-rework1/`)
+| Check | Result |
+|---|---|
+| ruff, mypy, makemigrations --check, OpenAPI | PASS / no changes / OK |
+| pytest -m "not perf" | 3064 passed, 2 skipped, 7 deselected (`pytest.log`) |
+| Golden, real Planning v3 | 2313 cases, not_reproduced=0, c77_checked=1218 c77_disagree=0, belt_checked=169, legacy_disputed=0, legacy_only_style_0000=14 (`golden_real.log`) |
+| race ×3 | 38 passed in each run (`race_x3.log`) |
+| db_roundtrip.sh | ROUNDTRIP OK (`db_roundtrip.log`) |
+| roles_check.sh | 78/78 (`roles_check.log`) |
+| secret scan / leak grep | 0 / 0 |

@@ -1,7 +1,7 @@
 {
   "phase": "PHASE_02",
   "step": "02.4",
-  "commit_sha": "ee9d4e7",
+  "commit_sha": "14b49e4",
   "status": "COMPLETE",
   "scope": [
     "66 PHASE_02 API operations routed (contract 0.8.0-draft)",
@@ -31,52 +31,52 @@
     {
       "command": "ruff check . && ruff format --check .",
       "outcome": "PASS",
-      "log_path": "reports/phase-02/step-4/logs/orch/ruff.log"
+      "log_path": "reports/phase-02/step-4/logs/orch-rework1/ruff.log"
     },
     {
       "command": "cd backend && python -m mypy .",
       "outcome": "PASS",
-      "log_path": "reports/phase-02/step-4/logs/orch/mypy.log"
+      "log_path": "reports/phase-02/step-4/logs/orch-rework1/mypy.log"
     },
     {
       "command": "manage.py makemigrations --check --dry-run",
       "outcome": "PASS",
-      "log_path": "reports/phase-02/step-4/logs/orch/makemigrations.log"
+      "log_path": "reports/phase-02/step-4/logs/orch-rework1/makemigrations.log"
     },
     {
       "command": "openapi-spec-validator docs/api/openapi-draft.yaml",
       "outcome": "PASS",
-      "log_path": "reports/phase-02/step-4/logs/orch/openapi_validate.log"
+      "log_path": "reports/phase-02/step-4/logs/orch-rework1/openapi_validate.log"
     },
     {
-      "command": "pytest -m \"not perf\" (3060 passed, 2 skipped)",
+      "command": "pytest -m \"not perf\" (3064 passed, 2 skipped)",
       "outcome": "PASS",
-      "log_path": "reports/phase-02/step-4/logs/orch/pytest.log"
+      "log_path": "reports/phase-02/step-4/logs/orch-rework1/pytest.log"
     },
     {
-      "command": "golden harness, real Planning v2 (2313 cases, 0 not reproduced, c77_disagree=0, belt_checked=169)",
+      "command": "golden harness, real Planning v3 (2313 cases, 0 not reproduced, c77_disagree=0, belt_checked=169, legacy_disputed=0)",
       "outcome": "PASS",
-      "log_path": "reports/phase-02/step-4/logs/orch/golden_real.log"
+      "log_path": "reports/phase-02/step-4/logs/orch-rework1/golden_real.log"
     },
     {
       "command": "race tests x3 (38 passed each)",
       "outcome": "PASS",
-      "log_path": "reports/phase-02/step-4/logs/orch/race_x3.log"
+      "log_path": "reports/phase-02/step-4/logs/orch-rework1/race_x3.log"
     },
     {
       "command": "backend/scripts/db_roundtrip.sh",
       "outcome": "PASS",
-      "log_path": "reports/phase-02/step-4/logs/orch/db_roundtrip.log"
+      "log_path": "reports/phase-02/step-4/logs/orch-rework1/db_roundtrip.log"
     },
     {
       "command": "ops/db/roles_check.sh (78/78)",
       "outcome": "PASS",
-      "log_path": "reports/phase-02/step-4/logs/orch/roles_check.log"
+      "log_path": "reports/phase-02/step-4/logs/orch-rework1/roles_check.log"
     },
     {
       "command": "tools/secret_scan.py",
       "outcome": "PASS",
-      "log_path": "reports/phase-02/step-4/logs/orch/secret_scan.log"
+      "log_path": "reports/phase-02/step-4/logs/orch-rework1/secret_scan.log"
     }
   ],
   "security_evidence": [
@@ -99,6 +99,6 @@
     "docs/api/openapi-draft.yaml",
     "docs/api/API_RUNTIME.md"
   ],
-  "rollback": "manage.py migrate platform_core 0024 (tested), then git revert ee9d4e7",
+  "rollback": "manage.py migrate platform_core 0024 (tested), then git revert 14b49e4 and ee9d4e7",
   "review_request": "PASS"
 }
