@@ -265,22 +265,22 @@
         },
         "02.5": {
           "name": "UI",
-          "state": "IN_REVIEW",
+          "state": "PASS",
           "commit": "5f65fc9",
           "report": "reports/phase-02/step-5/REPORT.md",
-          "review": null,
+          "review": "reports/phase-02/step-5/REVIEW.md",
           "rework_cycles": 0,
           "started_at": "2026-11-15T04:20:43+00:00",
-          "done_at": null
+          "done_at": "2026-11-15T05:42:43+00:00"
         },
         "02.6": {
           "name": "Integration",
-          "state": "TODO",
+          "state": "IN_PROGRESS",
           "commit": null,
           "report": null,
           "review": null,
           "rework_cycles": 0,
-          "started_at": null,
+          "started_at": "2026-11-15T05:42:43+00:00",
           "done_at": null
         },
         "02.7": {
@@ -3535,7 +3535,25 @@
       "state": "IN_REVIEW",
       "note": null,
       "commit": "5f65fc9"
+    },
+    {
+      "at": "2026-11-15T05:42:43+00:00",
+      "kind": "step",
+      "phase": "PHASE_02",
+      "step": "02.5",
+      "state": "PASS",
+      "note": null,
+      "commit": null
+    },
+    {
+      "at": "2026-11-15T05:42:43+00:00",
+      "kind": "step",
+      "phase": "PHASE_02",
+      "step": "02.6",
+      "state": "IN_PROGRESS",
+      "note": null,
+      "commit": null
     }
   ],
-  "updated_at": "2026-11-15T05:38:11+00:00"
+  "updated_at": "2026-11-15T05:42:43+00:00"
 }
