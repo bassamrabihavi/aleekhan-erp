@@ -1,0 +1,112 @@
+{
+  "phase": "PHASE_02",
+  "step": "02.6",
+  "commit_sha": "fe0058c",
+  "status": "COMPLETE",
+  "scope": [
+    "Planning catalogue import (types, categories, legacy code registry) with staging, conflicts, idempotency",
+    "apply_batch compensation, retry/backoff, freshness, outbox events",
+    "load_code_rule_golden and legacy_serial_guard commands",
+    "matrix v2.2 conflict-queue access (0027); integration views session auth (0.8.4-draft)",
+    "02.5 review items REV-0251/0252/0255"
+  ],
+  "changes": [
+    "backend/platform_core/integration/imports.py",
+    "backend/platform_core/product_identity/planning_import.py",
+    "backend/platform_core/management/commands/",
+    "backend/platform_core/migrations/0026_phase02_planning_catalogue_source.py",
+    "backend/platform_core/migrations/0027_dec057_matrix_v22.py",
+    "backend/platform_core/tests/",
+    "frontend/src/",
+    "frontend/e2e/",
+    "docs/",
+    "requirements.txt",
+    "CHANGELOG.md"
+  ],
+  "migrations": [
+    "0026_phase02_planning_catalogue_source",
+    "0027_dec057_matrix_v22"
+  ],
+  "test_evidence": [
+    {
+      "command": "ruff; mypy; makemigrations --check",
+      "outcome": "PASS",
+      "log_path": "reports/phase-02/step-6/logs/orch/mypy.log"
+    },
+    {
+      "command": "openapi-spec-validator (0.8.4-draft)",
+      "outcome": "PASS",
+      "log_path": "reports/phase-02/step-6/logs/orch/openapi_validate.log"
+    },
+    {
+      "command": "pytest -m \"not perf\" (3124 passed, 2 skipped)",
+      "outcome": "PASS",
+      "log_path": "reports/phase-02/step-6/logs/orch/pytest.log"
+    },
+    {
+      "command": "race x3 (38 each)",
+      "outcome": "PASS",
+      "log_path": "reports/phase-02/step-6/logs/orch/race_x3.log"
+    },
+    {
+      "command": "db_roundtrip.sh",
+      "outcome": "PASS",
+      "log_path": "reports/phase-02/step-6/logs/orch/db_roundtrip.log"
+    },
+    {
+      "command": "roles_check.sh (78/78)",
+      "outcome": "PASS",
+      "log_path": "reports/phase-02/step-6/logs/orch/roles_check.log"
+    },
+    {
+      "command": "frontend eslint/tsc/vitest(73)/build",
+      "outcome": "PASS",
+      "log_path": "reports/phase-02/step-6/logs/orch/vitest.log"
+    },
+    {
+      "command": "E2E full Edge (32 + backend-down 1)",
+      "outcome": "PASS",
+      "log_path": "reports/phase-02/step-6/logs/orch/e2e.log"
+    },
+    {
+      "command": "legacy_serial_guard on real baseline (0 values >= 63000)",
+      "outcome": "PASS",
+      "log_path": "reports/phase-02/step-6/logs/orch/real_serial_guard.json"
+    },
+    {
+      "command": "import_planning_catalogue on real baseline, fresh test_ DB (6 types, 111 categories, 2841 codes, 228 conflicts) + idempotent re-run",
+      "outcome": "PASS",
+      "log_path": "reports/phase-02/step-6/logs/orch/real_import_final.json"
+    },
+    {
+      "command": "load_code_rule_golden on real data",
+      "outcome": "SKIPPED",
+      "log_path": "reports/phase-02/step-6/REPORT.md"
+    },
+    {
+      "command": "tools/secret_scan.py",
+      "outcome": "PASS",
+      "log_path": "reports/phase-02/step-6/logs/orch/secret_scan.log"
+    }
+  ],
+  "security_evidence": [
+    "real-data runs on throw-away test_ DBs, dropped; counts-only outputs; no real value or hash in repo",
+    "sha-checked, in-memory, macro-free read; password from env never printed",
+    "conflict queue: steward + owner only; viewer counts only (matrix v2.2)",
+    "integration views now authenticated (were 401 for all)",
+    "pre-commit guard not bypassed; secret scan 0; leak grep 0"
+  ],
+  "decisions": [
+    "DEC-057 amendment 2026-11-15: conflict queue access (matrix v2.2)",
+    "DEC-005 follow-up 2026-11-15: imported catalogue ACTIVE"
+  ],
+  "risks": [
+    "bulk legacy migration remains PHASE_12 (DEC-025/035)",
+    "legacy codes unlinked until styles exist"
+  ],
+  "evidence_paths": [
+    "reports/phase-02/step-6/logs/"
+  ],
+  "rollback": "migrate platform_core 0025, then git revert fe0058c",
+  "review_request": "PASS"
+}
