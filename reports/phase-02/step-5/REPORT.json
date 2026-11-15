@@ -1,0 +1,82 @@
+{
+  "phase": "PHASE_02",
+  "step": "02.5",
+  "commit_sha": "5f65fc9",
+  "status": "COMPLETE",
+  "scope": [
+    "pages 1, 2 (DEC-027 P-A), 4, 29, 33 + customers, code rules",
+    "decision inbox tab + GET /me/decision-inbox (contract 0.8.3-draft)",
+    "loading/error/empty/stale/forbidden states, RTL, 4 sizes, E2E"
+  ],
+  "changes": [
+    "frontend/src/pages/",
+    "frontend/src/api/phase02.ts",
+    "frontend/src/lib/",
+    "frontend/src/components/",
+    "frontend/src/styles/phase02.css",
+    "frontend/e2e/phase02.spec.ts",
+    "frontend/e2e/phase02-helpers.ts",
+    "backend/platform_core/api/phase02/inbox_views.py",
+    "backend/platform_core/tests/test_api_phase02_inbox.py",
+    "docs/api/",
+    "CHANGELOG.md"
+  ],
+  "migrations": [],
+  "test_evidence": [
+    {
+      "command": "eslint; tsc; vite build",
+      "outcome": "PASS",
+      "log_path": "reports/phase-02/step-5/logs/orch/eslint.log"
+    },
+    {
+      "command": "vitest (72 passed)",
+      "outcome": "PASS",
+      "log_path": "reports/phase-02/step-5/logs/orch/vitest.log"
+    },
+    {
+      "command": "scripts/e2e.sh Edge (32 passed + backend-down 1 passed)",
+      "outcome": "PASS",
+      "log_path": "reports/phase-02/step-5/logs/orch/e2e.log"
+    },
+    {
+      "command": "ruff; mypy; makemigrations --check",
+      "outcome": "PASS",
+      "log_path": "reports/phase-02/step-5/logs/orch/mypy.log"
+    },
+    {
+      "command": "openapi-spec-validator (0.8.3-draft)",
+      "outcome": "PASS",
+      "log_path": "reports/phase-02/step-5/logs/orch/openapi_validate.log"
+    },
+    {
+      "command": "pytest -m \"not perf\" (3083 passed, 2 skipped)",
+      "outcome": "PASS",
+      "log_path": "reports/phase-02/step-5/logs/orch/pytest.log"
+    },
+    {
+      "command": "tools/secret_scan.py",
+      "outcome": "PASS",
+      "log_path": "reports/phase-02/step-5/logs/orch/secret_scan.log"
+    }
+  ],
+  "security_evidence": [
+    "menus hidden by permission; employee sees no PHASE_02 page (E2E)",
+    "management_viewer read-only with masked representative (E2E)",
+    "decision inbox never shows the caller's own item (tests)",
+    "synthetic data only; test banner on every page",
+    "secret scan 0; leak grep 0; handoff unchanged"
+  ],
+  "decisions": [
+    "DEC-027 APPROVED P-A (2026-11-15)",
+    "approval inbox shows PHASE_02 decisions (2026-11-15)"
+  ],
+  "risks": [
+    "hands-on employer UAT needs 02.6 import (types/categories, active code rule)"
+  ],
+  "evidence_paths": [
+    "reports/phase-02/step-5/logs/",
+    "reports/phase-02/step-5/screenshots/"
+  ],
+  "rollback": "git revert 5f65fc9 (no migration)",
+  "review_request": "PASS"
+}
