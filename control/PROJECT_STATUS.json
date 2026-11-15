@@ -275,9 +275,9 @@
         },
         "02.6": {
           "name": "Integration",
-          "state": "IN_PROGRESS",
-          "commit": null,
-          "report": null,
+          "state": "IN_REVIEW",
+          "commit": "fe0058c",
+          "report": "reports/phase-02/step-6/REPORT.md",
           "review": null,
           "rework_cycles": 0,
           "started_at": "2026-11-15T05:42:43+00:00",
@@ -3569,7 +3569,16 @@
       "status": "APPROVED",
       "by": "بسام ربیهاوی",
       "note": "Amendment 2026-11-15: imported types/categories from baseline are ACTIVE"
+    },
+    {
+      "at": "2026-11-15T09:30:34+00:00",
+      "kind": "step",
+      "phase": "PHASE_02",
+      "step": "02.6",
+      "state": "IN_REVIEW",
+      "note": null,
+      "commit": "fe0058c"
     }
   ],
-  "updated_at": "2026-11-15T08:32:11+00:00"
+  "updated_at": "2026-11-15T09:30:34+00:00"
 }
