@@ -1,0 +1,73 @@
+{
+  "phase": "PHASE_02",
+  "step": "02.7",
+  "commit_sha": "859b951",
+  "status": "COMPLETE",
+  "scope": [
+    "PHASE_02 security checklist (sign-off blank for the Gate)",
+    "matrix-driven permission/privacy test and representative-name PII test",
+    "performance tests (confirm, concurrent serial allocation, Planning import, list p95)",
+    "backup drill and rollback rehearsal with PHASE_02 data",
+    "job monitoring of PHASE_02 events and import failures",
+    "dependency scan and 14-day pin rule",
+    "review items REV-0223/0244/0261/0262/0264/0265/0266"
+  ],
+  "changes": [
+    "docs/security/PHASE_02_SECURITY_CHECKLIST.md",
+    "backend/platform_core/migrations/0028_phase02_golden_summary.py",
+    "backend/platform_core/migrations/0025_phase02_api_numbers.py",
+    "backend/platform_core/integration/",
+    "backend/platform_core/product_identity/",
+    "backend/platform_core/ops/monitoring.py",
+    "backend/platform_core/management/commands/",
+    "backend/platform_core/tests/",
+    "backend/requirements.txt",
+    "backend/requirements.lock",
+    "backend/scripts/db_roundtrip.sh",
+    "ops/backup/",
+    "frontend/scripts/e2e.sh",
+    "frontend/e2e/env.ts",
+    "docs/",
+    "CHANGELOG.md"
+  ],
+  "migrations": [
+    "0028_phase02_golden_summary",
+    "0025_phase02_api_numbers (forward: counter backfill from issued numbers)"
+  ],
+  "test_evidence": [
+    {"command": "ruff check + format; mypy (248 files); makemigrations --check", "outcome": "PASS", "log_path": "reports/phase-02/step-7/logs/orch/mypy.log"},
+    {"command": "openapi-spec-validator (unchanged 0.8.4-draft)", "outcome": "PASS", "log_path": "reports/phase-02/step-7/logs/orch/openapi_validate.log"},
+    {"command": "pytest -m \"not perf\" (3157 passed, 2 skipped, 11 deselected)", "outcome": "PASS", "log_path": "reports/phase-02/step-7/logs/orch/pytest.log"},
+    {"command": "pytest -m perf (11 passed)", "outcome": "PASS", "log_path": "reports/phase-02/step-7/logs/orch/perf.log"},
+    {"command": "race x3 (38 each)", "outcome": "PASS", "log_path": "reports/phase-02/step-7/logs/orch/race_x3.log"},
+    {"command": "db_roundtrip.sh (schema diff empty, no PHASE_02 function left)", "outcome": "PASS", "log_path": "reports/phase-02/step-7/logs/orch/db_roundtrip.log"},
+    {"command": "roles_check.sh (78/78)", "outcome": "PASS", "log_path": "reports/phase-02/step-7/logs/orch/roles_check.log"},
+    {"command": "ops/backup/drill.sh with PHASE_02 data", "outcome": "PASS", "log_path": "reports/phase-02/step-7/logs/orch/backup_drill.log"},
+    {"command": "ops/backup/rollback_rehearsal.sh scenarios A-D (0 failures)", "outcome": "PASS", "log_path": "reports/phase-02/step-7/logs/orch/rollback_rehearsal.log"},
+    {"command": "pip-audit runtime lock; npm audit --omit=dev", "outcome": "PASS", "log_path": "reports/phase-02/step-7/logs/orch/dependency_audit.log"},
+    {"command": "frontend eslint/tsc/vitest(73)/build", "outcome": "PASS", "log_path": "reports/phase-02/step-7/logs/orch/vitest.log"},
+    {"command": "E2E full Edge, E2E_STEP=phase-02/step-7 (32 + backend-down 1)", "outcome": "PASS", "log_path": "reports/phase-02/step-7/logs/orch/e2e.log"},
+    {"command": "legacy_serial_guard on real baseline (0 values >= 63000)", "outcome": "PASS", "log_path": "reports/phase-02/step-7/logs/orch/real_serial_guard.json"},
+    {"command": "import_planning_catalogue on real baseline with msoffcrypto-tool 6.0.0, fresh test_ DB (224 disputed values / 640 rows) + idempotent re-run", "outcome": "PASS", "log_path": "reports/phase-02/step-7/logs/orch/real_import.json"},
+    {"command": "tools/secret_scan.py tree + --history", "outcome": "PASS", "log_path": "reports/phase-02/step-7/logs/orch/secret_scan.log"}
+  ],
+  "security_evidence": [
+    "16 roles x 69 operations equal to matrix v2.2; fresh MFA enforced for every holder role",
+    "representative name found only in its own column across all platform/identity/commercial rows and logs",
+    "real-data run on a throw-away test_ DB, dropped; counts-only output",
+    "msoffcrypto-tool re-pinned 6.0.0 to satisfy the >= 14-day rule",
+    "secret scan 0 (tree + history); leak grep 0; pip-audit and npm audit 0"
+  ],
+  "decisions": [],
+  "risks": [
+    "0025 forward SQL changed after its review (counter backfill; fresh DB unaffected)",
+    "carried open: break-glass, TLS/CSP/encrypted backups, artifact signing, scheduler, RPO/RTO on staging",
+    "REV-0203 and REV-0254 still need the employer at the Gate"
+  ],
+  "evidence_paths": [
+    "reports/phase-02/step-7/logs/",
+    "reports/phase-02/step-7/screenshots/"
+  ],
+  "rollback": "migrate platform_core 0027, then git revert 859b951",
+  "review_request": "PASS"
+}
