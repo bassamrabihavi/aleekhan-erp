@@ -242,3 +242,14 @@ Asked with AskUserQuestion, in Persian. The first question was unclear and was a
 - **Belt width:** for a new belt product, the **user enters the two-digit width in the form** (for example 35 for 3.5 cm), and the system stores it. For legacy codes the width is read from the code (`product_no[2:4]`).
 - **`allocateSerial`:** **removed** from the API. A serial is created only by order confirmation (DEC-006 L-A).
 - **Decided by:** بسام ربیهاوی (کارفرما).
+
+## 2026-11-15 — DEC-027 APPROVED (P-A) and PHASE_02 approval follow-ups
+Asked with AskUserQuestion, in Persian; the employer chose the recommended option each time.
+- **DEC-027 = P-A, with the proposed structure:** pages 1 and 2 are built in PHASE_02 from the mobile design images, using PHASE_02 data only.
+  - Page 1 is the serial summary.
+  - Page 2 is the order tab.
+  - Sections owned by later phases show «در دست ساخت — به داده واقعی متصل نیست» with no numbers.
+  - The layout is confirmed in the 02.5 UAT.
+- **Approval inbox:** PHASE_02 decisions also appear in the PHASE_01 approval inbox (کارتابل), linking to their page. These are order confirm, change-request decide, planning decision and code-rule approve.
+- **`commercial.change.planning_approve` flags:** fresh MFA, business approval and maker-checker are confirmed. The approver must be neither the requester nor the deciding manager.
+- **Decided by:** بسام ربیهاوی (کارفرما).

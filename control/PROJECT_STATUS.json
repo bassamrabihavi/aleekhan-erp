@@ -1931,13 +1931,13 @@
       "gate": "Phase-0",
       "domain": "UI",
       "issue": "صفحات ۱ و ۲ HTML مستقل ندارند؛ scope approval و Design System",
-      "status": "OPEN",
+      "status": "APPROVED",
       "owner": "کارفرما + UI Lead",
       "phase": "PHASE_01",
       "source": "52 draft catalog manifest",
-      "resolution": null,
-      "decided_by": null,
-      "decided_at": null
+      "resolution": "P-A + proposed structure (page 1 serial summary, page 2 order tab), PHASE_02 data only",
+      "decided_by": "بسام ربیهاوی",
+      "decided_at": "2026-11-15T04:20:37+00:00"
     },
     {
       "id": "DEC-028",
@@ -2355,9 +2355,9 @@
       "owner": "کارفرما + بازرگانی + برنامه‌ریزی",
       "phase": "PHASE_02",
       "source": "گام 02.1 2026-11-11 (C-62)",
-      "resolution": "Amendment 2026-11-12: owner_admin gets all PHASE_02 read permissions",
+      "resolution": "Amendment 2026-11-15: PHASE_02 decisions in approval inbox; planning_approve flags confirmed",
       "decided_by": "بسام ربیهاوی",
-      "decided_at": "2026-11-12T18:34:55+00:00"
+      "decided_at": "2026-11-15T04:20:37+00:00"
     },
     {
       "id": "DEC-058",
@@ -3501,7 +3501,23 @@
       "state": "PASS",
       "note": null,
       "commit": null
+    },
+    {
+      "at": "2026-11-15T04:20:37+00:00",
+      "kind": "decision",
+      "id": "DEC-027",
+      "status": "APPROVED",
+      "by": "بسام ربیهاوی",
+      "note": "P-A + proposed structure (page 1 serial summary, page 2 order tab), PHASE_02 data only"
+    },
+    {
+      "at": "2026-11-15T04:20:37+00:00",
+      "kind": "decision",
+      "id": "DEC-057",
+      "status": "APPROVED",
+      "by": "بسام ربیهاوی",
+      "note": "Amendment 2026-11-15: PHASE_02 decisions in approval inbox; planning_approve flags confirmed"
     }
   ],
-  "updated_at": "2026-11-14T18:38:19+00:00"
+  "updated_at": "2026-11-15T04:20:37+00:00"
 }

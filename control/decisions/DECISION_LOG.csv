@@ -41,3 +41,5 @@ DEC-058,APPROVED,بسام ربیهاوی,2026-11-14,Amendment 2026-11-14: see DE
 DEC-059,APPROVED,بسام ربیهاوی,2026-11-14,Amendment 2026-11-14: see DECISION_LOG (number format with Jalali year; held order resume/cancel only; style collision -> next free; planning may reject)
 DEC-005,APPROVED,بسام ربیهاوی,2026-11-14,Amendment 2026-11-14: legacy belt rows - 14-digit code authoritative; belt width entered by user (2 digits)
 DEC-006,APPROVED,بسام ربیهاوی,2026-11-14,Amendment 2026-11-14: allocateSerial operation removed; serial only via order confirm
+DEC-027,APPROVED,بسام ربیهاوی,2026-11-15,"P-A + proposed structure (page 1 serial summary, page 2 order tab), PHASE_02 data only"
+DEC-057,APPROVED,بسام ربیهاوی,2026-11-15,Amendment 2026-11-15: PHASE_02 decisions in approval inbox; planning_approve flags confirmed
