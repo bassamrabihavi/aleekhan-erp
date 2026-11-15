@@ -384,3 +384,22 @@ Review verdicts are in `reports/phase-00/step-N/REVIEW.md`. No version number is
   `identity.serial.allocate` stays seeded, unused). Belt products take the typed 2-digit width with the buckle
   code (existing columns and guards; missing segment named in `BELT_SEGMENTS_REQUIRED`). DATA_TABLE: the legacy
   belt import rule (14-digit code authoritative, order buckle column kept as a note).
+
+### 02.5 UI (commit SHA added by the orchestrator when committed)
+- Pages (Farsi RTL, responsive 1440/1180/768/390, loading / error / empty / stale / forbidden states, keyboard):
+  1/2 serial control center `#/serials` (DEC-027 P-A: «خلاصه» = page 1, «سفارش» = page 2; later-phase sections
+  show «در دست ساخت — به داده واقعی متصل نیست» without numbers), 4 product / style 360 `#/products`, 29 order
+  wizard + order detail `#/orders` with customers `#/customers` and code rules `#/code-rules`, 33 change
+  requests `#/changes` (PHASE_02 part). Page 39 gets the tab «تصمیم‌های سفارش و کد».
+- Shared: `api/phase02.ts` (types, guards, 14-digit codes as strings), `lib/jalali.ts` (Jalali input/output,
+  ISO on the wire, today in Asia/Tehran), LTR code / serial display, masked representative (DEC-058), duplicate
+  PO / customer-name acknowledgement, belt buckle + 2-digit width fields, fresh MFA via the PHASE_01 step-up,
+  Idempotency-Key (kept across retries of the same wizard body) and If-Match on every edit; 412
+  VERSION_CONFLICT shows «این داده در این فاصله تغییر کرده است» with a reload; page-level error boundary.
+- Backend (contract 0.8.3-draft, additive): `listMyDecisionInbox` `GET /me/decision-inbox` - PHASE_02 decisions
+  waiting for the caller (order confirm, change decide, planning decision, code-rule approve), per deciding
+  permission and maker-checker (employer decision 2026-11-15). No migration.
+- Fixed during E2E: the serial page crashed after the order page (react-query cache key shared by two value
+  shapes; `[..., "one", id]` now always caches the ApiResponse and views use `select`).
+- Tests: `tests/test_api_phase02_inbox.py`; vitest `src/phase02.test.tsx`, `src/lib/jalali.test.ts`; Playwright
+  `e2e/phase02.spec.ts` (synthetic console seed `e2e/phase02-helpers.ts`).

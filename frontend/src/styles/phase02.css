@@ -1,0 +1,207 @@
+/* PHASE_02 / 02.5 page layout (serial center, product 360, orders, changes). Tokens only (tokens.css);
+   breakpoints 900 / 600 px as in base.css. Codes and serials: LTR monospace, never re-formatted. */
+.split {
+  display: grid;
+  grid-template-columns: minmax(260px, 340px) minmax(0, 1fr);
+  gap: var(--space-4);
+  align-items: start;
+}
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+}
+.page > .panel + .panel,
+.page > .panel + .stack,
+.page > .serial-head + .tabs {
+  margin-block-start: var(--space-4);
+}
+.split > .panel,
+.stack > .panel {
+  margin: 0;
+}
+.card--selected {
+  border-color: var(--color-primary);
+  box-shadow: inset -3px 0 0 var(--color-primary);
+}
+.card__link {
+  color: var(--color-ink);
+  text-decoration: none;
+  font-weight: var(--font-weight-medium);
+}
+.card__link:hover {
+  text-decoration: underline;
+}
+.cards--row {
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+}
+.code14 {
+  font-family: var(--font-mono);
+  letter-spacing: 0.02em;
+  unicode-bidi: isolate;
+  direction: ltr;
+  white-space: nowrap;
+}
+.code14-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+.subsection {
+  margin-block-start: var(--space-4);
+  padding-block-start: var(--space-3);
+  border-block-start: 1px solid var(--color-line);
+}
+.form--grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--space-3);
+  align-items: end;
+}
+.form--grid > h3,
+.form--grid > .notice,
+.form--grid > .form__actions,
+.form--grid > [role="alert"] {
+  grid-column: 1 / -1;
+}
+.fieldset {
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+/* later-phase placeholder (DEC-027): never a number */
+.later-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--space-3);
+  margin-block-start: var(--space-3);
+}
+.later {
+  padding: var(--space-3);
+  border: 1px dashed var(--color-line);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-muted);
+}
+.later__title {
+  margin: 0 0 var(--space-1);
+  font-size: var(--font-size-md);
+}
+.later__text {
+  margin: 0;
+  color: var(--color-warning);
+  font-weight: var(--font-weight-medium);
+}
+.later__meta {
+  margin: var(--space-1) 0 0;
+  color: var(--color-muted);
+  font-size: var(--font-size-xs);
+}
+/* wizard steps */
+.steps {
+  list-style: none;
+  margin: 0 0 var(--space-4);
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.steps__item {
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-pill);
+  color: var(--color-muted);
+  font-size: var(--font-size-sm);
+}
+.steps__item--current {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  font-weight: var(--font-weight-bold);
+  background: var(--color-primary-tint);
+}
+.steps__item--done {
+  color: var(--color-success);
+}
+.steps__no {
+  font-weight: var(--font-weight-bold);
+}
+/* timelines and approval gates */
+.timeline,
+.gates {
+  margin: 0;
+  padding-inline-start: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.gates {
+  margin-block: var(--space-3);
+}
+.gates__item--done {
+  color: var(--color-success);
+}
+.meta--inline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  margin-block: var(--space-1) 0;
+}
+.row--current td {
+  background: var(--color-primary-tint);
+}
+/* serial header (pages 1/2) */
+.serial-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-3);
+}
+.serial-head h1 {
+  margin: 0;
+}
+.serial-head__product {
+  margin: 0;
+  font-weight: var(--font-weight-medium);
+}
+.serial-head__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-content: flex-start;
+  justify-content: flex-end;
+}
+.serial-head__facts {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  padding: var(--space-3);
+  background: var(--color-surface-muted);
+  border-radius: var(--radius-md);
+  margin: 0;
+}
+
+@media (max-width: 900px) {
+  .split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 600px) {
+  .serial-head {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .serial-head__chips {
+    justify-content: flex-start;
+  }
+  .form--grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* 02.5: long customer names in the serial header chips wrap instead of overflowing on mobile */
+.serial-head__chips .chip {
+  white-space: normal;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}

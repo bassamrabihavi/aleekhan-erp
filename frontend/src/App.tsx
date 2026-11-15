@@ -4,13 +4,20 @@ import { AuthProvider } from "./auth/AuthContext";
 import { useAuth } from "./auth/context";
 import { BootErrorScreen, LoginScreen, MfaEnrolmentScreen, MfaScreen, PasswordChangeScreen } from "./auth/AuthScreens";
 import { AppShell } from "./components/AppShell";
+import { PageErrorBoundary } from "./components/ErrorBoundary";
 import { LoadingState } from "./components/States";
+import { ChangesPage } from "./pages/ChangesPage";
+import { CodeRulesPage } from "./pages/CodeRulesPage";
+import { CustomersPage } from "./pages/CustomersPage";
 import { DocumentsPage } from "./pages/DocumentsPage";
 import { HomePage, MySessionsPage } from "./pages/HomePage";
 import { OpsPage } from "./pages/OpsPage";
+import { OrdersPage } from "./pages/OrdersPage";
 import { OrgPage } from "./pages/OrgPage";
 import { ParametersPage } from "./pages/ParametersPage";
+import { ProductsPage } from "./pages/ProductsPage";
 import { SecurityPage } from "./pages/SecurityPage";
+import { SerialCenterPage } from "./pages/SerialCenterPage";
 import { SystemStatusPage } from "./pages/SystemStatusPage";
 import { useSystemStatus } from "./pages/useSystemStatus";
 import { WorkPage } from "./pages/WorkPage";
@@ -32,6 +39,12 @@ const TITLES: Record<string, string> = {
   "/ops": "سلامت سامانه و Job",
   "/me/sessions": "جلسه‌های من",
   "/status": "وضعیت سامانه",
+  "/serials": "مرکز کنترل سریال",
+  "/orders": "ثبت سفارش و کدگذاری",
+  "/changes": "تغییرات سفارش",
+  "/products": "ردیابی محصولات و استایل‌ها",
+  "/customers": "مشتریان و برندها",
+  "/code-rules": "قاعده کد ۱۴رقمی",
 };
 
 function Page({ route }: { route: string }) {
@@ -50,6 +63,18 @@ function Page({ route }: { route: string }) {
       return <ParametersPage />;
     case "/ops":
       return <OpsPage />;
+    case "/serials":
+      return <SerialCenterPage />;
+    case "/orders":
+      return <OrdersPage />;
+    case "/changes":
+      return <ChangesPage />;
+    case "/products":
+      return <ProductsPage />;
+    case "/customers":
+      return <CustomersPage />;
+    case "/code-rules":
+      return <CodeRulesPage />;
     case "/":
       return <HomePage />;
     default:
@@ -105,7 +130,11 @@ function Routed() {
       body = <BootErrorScreen />;
       break;
     default:
-      body = <Page route={route} />;
+      body = (
+        <PageErrorBoundary key={route}>
+          <Page route={route} />
+        </PageErrorBoundary>
+      );
   }
   return <AppShell>{body}</AppShell>;
 }

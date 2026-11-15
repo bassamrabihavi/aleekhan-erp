@@ -6,10 +6,13 @@ from django.urls import URLPattern, path
 
 from . import commercial_views as C
 from . import identity_views as I
+from . import inbox_views as B
 
 U = "<uuid:{}>".format
 
 urlpatterns: list[URLPattern] = [
+    # 02.5: PHASE_02 decisions waiting for the caller (page 39 approval inbox; employer decision 2026-11-15)
+    path("me/decision-inbox", B.MyDecisionInboxView.as_view()),
     # identity: customers, brands
     path("identity/customers", I.CustomersView.as_view()),
     path(f"identity/customers/{U('customer_id')}", I.CustomerView.as_view()),

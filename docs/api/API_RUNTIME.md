@@ -308,3 +308,15 @@ every write, employee 403 on every operation, management_viewer 403 on every wri
   400 `BELT_SEGMENTS_REQUIRED` naming the missing field; a segment for a non-belt type 400
   `BELT_SEGMENTS_NOT_ALLOWED`. Storage and DB guards already existed (0019 `ck_identity_product_belt_no`, 0020
   `ck_identity_product_belt_scheme`); no migration.
+
+### 14.3 Step 02.5 (contract 0.8.3-draft, additive)
+- `listMyDecisionInbox` (`GET /me/decision-inbox`, `api/phase02/inbox_views.py`): the PHASE_02 decisions waiting
+  for the caller, shown in the page 39 approval inbox (employer decision 2026-11-15). Session-only and read-only
+  (`SessionOperation`, like `/me/permissions`; tag `me`). Each kind needs the caller's GLOBAL grant of the deciding
+  permission and excludes the caller's own requests (maker-checker): ORDER_CONFIRM (VALIDATED orders, not the
+  creator), CHANGE_DECIDE (SUBMITTED requests, not the requester or the planning approver),
+  CHANGE_PLANNING_DECISION (due-date changes without a planning decision, not the requester or the deciding
+  manager), CODE_RULE_APPROVE (IN_REVIEW revisions, not the maker). At most 100 items per kind (`truncated`).
+  Ids, numbers and times only (no customer or representative name). The owning operation still re-checks
+  permission, fresh MFA, maker-checker, state and version. Tests: `tests/test_api_phase02_inbox.py`.
+- No PHASE_02 approval goes through `ApprovalRequest` in this step: the inbox reads the PHASE_02 records directly.

@@ -1,0 +1,17 @@
+# Run of e2e/phase02.spec.ts only, after the 02.5 cache-key fix (runner = scripts/e2e.sh env, throw-away DB test_aleekhan_e2e_p2 dropped at exit, msedge).
+NOTICE:  database "test_aleekhan_e2e_p2" does not exist, skipping
+
+Running 10 tests using 1 worker
+
+  ok  1 [chromium] › e2e\phase02.spec.ts:46:1 › code rule: approver sees it in the inbox, opens it, approves (fresh MFA) and activates; maker cannot (18.3s)
+  ok  2 [chromium] › e2e\phase02.spec.ts:81:1 › page 4: product (belt fields only for belts), style with colour, activate, code preview + issue (MFA) (10.8s)
+  ok  3 [chromium] › e2e\phase02.spec.ts:138:1 › customers: create (CU- number), duplicate name needs acknowledgement, brand (7.3s)
+  ok  4 [chromium] › e2e\phase02.spec.ts:167:1 › page 29: order wizard (Jalali dates), line with the issued code, validate; the creator cannot confirm (8.1s)
+  ok  5 [chromium] › e2e\phase02.spec.ts:205:1 › duplicate PO: a second order with the same PO must acknowledge the warning (2.6s)
+  ok  6 [chromium] › e2e\phase02.spec.ts:228:1 › planning confirms from the inbox (fresh MFA): the serial is shown; pages 1 and 2 (13.8s)
+  ok  7 [chromium] › e2e\phase02.spec.ts:273:1 › page 33: due-date change -> commercial decision -> planning decision -> apply (version 2) (20.1s)
+  ok  8 [chromium] › e2e\phase02.spec.ts:325:1 › 412: a stale edit shows the data-changed state (4.4s)
+  ok  9 [chromium] › e2e\phase02.spec.ts:350:1 › roles: management viewer read-only with masked representative; employee has no PHASE_02 access (12.6s)
+  ok 10 [chromium] › e2e\phase02.spec.ts:386:1 › empty / error states and the synthetic-data banner on PHASE_02 pages [simulated failure] (2.2s)
+
+  10 passed (2.0m)

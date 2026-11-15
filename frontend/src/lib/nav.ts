@@ -2,6 +2,7 @@
 // server re-checks every call) and the shared /version query.
 import { useQuery } from "@tanstack/react-query";
 
+import { DECIDE_PERMS, PERM } from "../api/phase02";
 import { fetchVersion } from "../api/platform";
 
 export interface NavItem {
@@ -19,8 +20,15 @@ export const NAV: readonly NavItem[] = [
     path: "/work",
     label: "کارها و تأییدها",
     page: 39,
-    anyOf: ["platform.workflow.task.read", "platform.workflow.approval.read"],
+    anyOf: ["platform.workflow.task.read", "platform.workflow.approval.read", ...DECIDE_PERMS],
   },
+  // PHASE_02 (02.5)
+  { path: "/serials", label: "مرکز کنترل سریال", page: 1, anyOf: [PERM.serialRead] },
+  { path: "/orders", label: "ثبت سفارش و کدگذاری", page: 29, anyOf: [PERM.orderRead] },
+  { path: "/changes", label: "تغییرات سفارش", page: 33, anyOf: [PERM.changeRead] },
+  { path: "/products", label: "محصولات و استایل‌ها", page: 4, anyOf: [PERM.productRead] },
+  { path: "/customers", label: "مشتریان و برندها", anyOf: [PERM.customerRead] },
+  { path: "/code-rules", label: "قاعده کد ۱۴رقمی", anyOf: [PERM.ruleRead] },
   { path: "/documents", label: "اسناد", page: 40, anyOf: ["platform.document.read"] },
   { path: "/org", label: "درخت سازمانی", anyOf: ["platform.org.read"] },
   {

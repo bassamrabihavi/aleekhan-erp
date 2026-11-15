@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { read, workGuards, write, type Approval, type Task } from "../api/phase01";
+import { DECIDE_PERMS } from "../api/phase02";
 import { useAuth } from "../auth/context";
 import { ActionError } from "../components/ActionError";
 import { DataView } from "../components/DataView";
@@ -14,6 +15,7 @@ import { formatJalaliDateTime } from "../lib/format";
 import { APPROVAL_ACTION, APPROVAL_STATUS, TASK_STATUS, toneLabel } from "../lib/labels";
 import { QK, useCursor } from "../lib/queries";
 import { useAction } from "../lib/useAction";
+import { DecisionsTab } from "./DecisionInbox";
 import { Pager } from "./SecurityPage";
 
 const P = {
@@ -28,9 +30,11 @@ const P = {
 };
 
 export function WorkPage() {
-  const { can } = useAuth();
+  const { can, canAny } = useAuth();
   const tabs = [
     ...(can(P.apprRead) ? [{ id: "approvals", label: "تأییدها" }] : []),
+    // 02.5 (employer decision 2026-11-15): PHASE_02 decisions waiting for me
+    ...(canAny(DECIDE_PERMS) ? [{ id: "decisions", label: "تصمیم‌های سفارش و کد" }] : []),
     ...(can(P.taskRead) ? [{ id: "tasks", label: "کارهای من" }] : []),
   ];
   const [tab, setTab] = useState(tabs[0]?.id ?? "tasks");
@@ -51,7 +55,7 @@ export function WorkPage() {
       ) : (
         <>
           <Tabs tabs={tabs} active={tab} onChange={setTab} label="کارها و تأییدها" />
-          <TabPanel id={tab}>{tab === "approvals" ? <ApprovalsTab /> : <TasksTab />}</TabPanel>
+          <TabPanel id={tab}>{tab === "approvals" ? <ApprovalsTab /> : tab === "decisions" ? <DecisionsTab /> : <TasksTab />}</TabPanel>
         </>
       )}
     </div>

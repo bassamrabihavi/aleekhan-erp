@@ -2,7 +2,7 @@ openapi: 3.1.0
 jsonSchemaDialect: https://spec.openapis.org/oas/3.1/dialect/base
 info:
   title: Aleekhan Factory Platform API
-  version: 0.8.2-draft
+  version: 0.8.3-draft
   summary: PHASE_00 + PHASE_01 platform contract + PHASE_02 identity/commercial operations (all implemented; 02.4).
   description: |
     Status: DRAFT (PHASE_00 / 00.1 Discovery & Contract, implemented in 00.4). Not approved. This hand-written
@@ -116,6 +116,12 @@ info:
     (POST /identity/serials) is REMOVED - a serial is created only by confirmCustomerOrder (DEC-006 L-A); the
     reason SERIAL_ALLOCATED_AT_CONFIRM goes with it. A new belt product takes the user-typed width
     (`ProductCreateRequest.belt_width_code`, 2 digits) with the buckle-type code; both are required for a belt type.
+
+    0.8.3-draft (02.5, employer decision 2026-11-15, additive): `listMyDecisionInbox` (GET /me/decision-inbox) -
+    the PHASE_02 decisions waiting for the caller (order confirm, change-request decision, planning decision,
+    code-rule approval) for the page 39 approval inbox. Session-only and read-only; each kind is filtered by the
+    caller's own grant of the deciding permission and by maker-checker (never the caller's own request). Ids,
+    numbers and times only. Nothing else changes.
 
     Stack: Django 5.2 LTS + DRF (DEC-001). Base path is versioned: every endpoint lives under `/api/v1`.
     A breaking change requires `/api/v2` (or an explicitly approved deprecation window); additive changes only
@@ -976,6 +982,45 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EffectivePermissions'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /me/decision-inbox:
+    get:
+      tags:
+      - me
+      operationId: listMyDecisionInbox
+      summary: PHASE_02 decisions waiting for me (approval inbox feed, 02.5)
+      description: |
+        Session-only, read-only (like getMyEffectivePermissions). Items: ORDER_CONFIRM (VALIDATED orders, needs
+        `commercial.order.confirm`, never the creator), CHANGE_DECIDE (SUBMITTED change requests, needs
+        `commercial.change.decide`, never the requester or the planning approver), CHANGE_PLANNING_DECISION
+        (due-date changes without a planning decision, needs `commercial.change.planning_approve`, never the
+        requester or the deciding manager), CODE_RULE_APPROVE (code rule revisions IN_REVIEW, needs
+        `identity.code_rule.approve`, never the maker). A caller without a deciding permission gets no item of
+        that kind (never 403). At most 100 items per kind (`truncated` = more exist). The decision itself is
+        the owning operation, which re-checks permission, fresh MFA, maker-checker, state and version.
+      x-aleekhan-decided-by:
+      - DEC-057
+      - DEC-059
+      - DEC-005
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+            Cache-Control:
+              $ref: '#/components/headers/Cache-Control-NoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DecisionInbox'
         '401':
           $ref: '#/components/responses/AuthenticationRequired'
         '403':
@@ -9493,6 +9538,74 @@ components:
           minLength: 3
           maxLength: 500
           description: Mandatory justification, stored in the audit trail; no personal data.
+    DecisionInbox:
+      type: object
+      additionalProperties: false
+      required:
+      - as_of
+      - items
+      - truncated
+      properties:
+        as_of:
+          $ref: '#/components/schemas/UtcTimestamp'
+        truncated:
+          type: boolean
+        items:
+          type: array
+          maxItems: 400
+          items:
+            $ref: '#/components/schemas/DecisionInboxItem'
+    DecisionInboxItem:
+      type: object
+      additionalProperties: false
+      required:
+      - kind
+      - entity_type
+      - entity_id
+      - number
+      - revision_no
+      - requested_by
+      - requested_at
+      - row_version
+      properties:
+        kind:
+          type: string
+          enum:
+          - ORDER_CONFIRM
+          - CHANGE_DECIDE
+          - CHANGE_PLANNING_DECISION
+          - CODE_RULE_APPROVE
+        entity_type:
+          type: string
+          enum:
+          - customer_order
+          - change_request
+          - code_rule_revision
+        entity_id:
+          type: string
+          format: uuid
+        number:
+          description: SO-/CR- number of the order / change request; null for a code rule revision.
+          oneOf:
+          - $ref: '#/components/schemas/TechnicalNumber'
+          - type: 'null'
+        revision_no:
+          description: Revision number of a code rule revision; null otherwise.
+          type:
+          - integer
+          - 'null'
+          minimum: 1
+        requested_by:
+          description: Maker (order creator, change requester, rule maker).
+          type:
+          - string
+          - 'null'
+          format: uuid
+        requested_at:
+          $ref: '#/components/schemas/UtcTimestamp'
+        row_version:
+          type: integer
+          minimum: 1
     EffectivePermissions:
       type: object
       additionalProperties: false

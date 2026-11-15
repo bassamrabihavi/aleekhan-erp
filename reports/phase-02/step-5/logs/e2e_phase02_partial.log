@@ -1,0 +1,62 @@
+# PARTIAL iteration run of e2e/phase02.spec.ts only (scratchpad runner, throw-away DB test_aleekhan_e2e_p2, Edge).
+# Result: 2 passed, 1 failed (test timing bug, fixed afterwards), 7 not run. Run then reaped by the host for low memory; NOT re-run.
+          - <div class="dialog-backdrop">…</div> from <section class="panel" aria-labelledby="customers-title">…</section> subtree intercepts pointer events
+        - retrying click action
+        - waiting 20ms
+        - waiting for element to be visible, enabled and stable
+        - element is visible, enabled and stable
+        - scrolling into view if needed
+        - done scrolling
+        - <div class="dialog-backdrop">…</div> from <section class="panel" aria-labelledby="customers-title">…</section> subtree intercepts pointer events
+      - retrying click action
+        - waiting 100ms
+        - waiting for element to be visible, enabled and stable
+        - element is visible, enabled and stable
+        - scrolling into view if needed
+        - done scrolling
+      - element was detached from the DOM, retrying
+        - locator resolved to <button disabled type="submit" class="btn btn--secondary" data-testid="brand-submit">افزودن برند</button>
+      - attempting click action
+        2 × waiting for element to be visible, enabled and stable
+          - element is not enabled
+        - retrying click action
+        - waiting 20ms
+        2 × waiting for element to be visible, enabled and stable
+          - element is not enabled
+        - retrying click action
+          - waiting 100ms
+        566 × waiting for element to be visible, enabled and stable
+            - element is not enabled
+          - retrying click action
+            - waiting 500ms
+        - waiting for element to be visible, enabled and stable
+
+
+      154 |   }
+      155 |   await co.getByTestId("brand-name").fill(`برند ساختگی ${RUN}`);
+    > 156 |   await co.getByTestId("brand-submit").click();
+          |                                        ^
+      157 |   await expect(co.getByTestId("brands-list")).toContainText(`برند ساختگی ${RUN}`);
+      158 |   await expectNoAxeViolations(co);
+      159 |   await shots(co, "customers", async () => {
+        at F:\aleekhan\aleekhan-erp\frontend\e2e\phase02.spec.ts:156:40
+
+    Error Context: ~\AppData\Local\Temp\claude\3e6f5649318be9fe\b3f5274f-af12-4847-805e-b2ba99a10aa2\scratchpad\out\phase02-customers-create-C-3dcc7-needs-acknowledgement-brand-chromium\error-context.md
+
+    Error Context: ~\AppData\Local\Temp\claude\3e6f5649318be9fe\b3f5274f-af12-4847-805e-b2ba99a10aa2\scratchpad\out\phase02-customers-create-C-3dcc7-needs-acknowledgement-brand-chromium\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ~\AppData\Local\Temp\claude\3e6f5649318be9fe\b3f5274f-af12-4847-805e-b2ba99a10aa2\scratchpad\out\phase02-customers-create-C-3dcc7-needs-acknowledgement-brand-chromium\trace.zip
+    Usage:
+
+        npx playwright show-trace ~\AppData\Local\Temp\claude\3e6f5649318be9fe\b3f5274f-af12-4847-805e-b2ba99a10aa2\scratchpad\out\phase02-customers-create-C-3dcc7-needs-acknowledgement-brand-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  Slow test file: [chromium] › e2e\phase02.spec.ts (5.5m)
+  Consider running tests from slow files in parallel. See: https://playwright.dev/docs/test-parallel
+  1 failed
+    [chromium] › e2e\phase02.spec.ts:138:1 › customers: create (CU- number), duplicate name needs acknowledgement, brand 
+  7 did not run
+  2 passed (5.8m)
+  1 error was not a part of any test, see above for details
