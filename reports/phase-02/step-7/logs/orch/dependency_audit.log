@@ -2,3 +2,4 @@ WARNING:pip_audit._cli:--no-deps is supported, but users are encouraged to fully
 WARNING:pip_audit._cli:Consider using a tool like `pip-compile`: https://pip-tools.readthedocs.io/en/latest/#using-hashes
 No known vulnerabilities found
 found 0 vulnerabilities
+msoffcrypto-tool 6.0.0: PyPI upload 2026-01-12 (per implementer PyPI lookup); pin date 2026-11-15 -> 307 days >= 14 (orchestrator, after re-pin)
