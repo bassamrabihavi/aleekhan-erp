@@ -2,10 +2,12 @@
 resolution,
 which never writes business data.
 
-Deny by default: every view uses :class:`ScopedPermission` with an explicit ``required_action``; production
-has no authentication backend yet (PHASE_01) and the PHASE_00 policy denies everything, so in production these
-endpoints answer 401 (no principal). The behaviour behind the permission is tested through the TEST-ONLY
-harness (``platform_core/tests/api_harness.py``) with a synthetic principal and policy.
+Deny by default: every view uses :class:`ScopedPermission` with an explicit ``required_action``. 02.6 fix3
+(matrix v2.2, DEC-057 amendment 2026-11-15): the views authenticate with the PHASE_01 session cookie and the
+actions are in the permission catalogue (product_data_steward + owner_admin: all; management_viewer: freshness
+with the open-conflict count only); before, no authentication class was set and every call answered 401.
+Per-role HTTP tests: ``tests/test_api_phase02_integration_access.py``; the 00.6 behaviour is also tested
+through the TEST-ONLY harness (``platform_core/tests/api_harness.py``) with a synthetic principal and policy.
 
 * ``GET  /integration/freshness``                         per-source freshness (cursor pagination by code,
   ETag)
@@ -23,6 +25,7 @@ import uuid
 from datetime import UTC, datetime
 from typing import Any, Final
 
+from django.db.models import Count, Q
 from rest_framework.request import Request
 from rest_framework.response import Response
 
@@ -40,6 +43,7 @@ from .concurrency import expected_version, representation_etag, with_row_etag
 from .idempotent import idempotent_response
 from .pagination import AleekhanCursorPagination
 from .permissions import ScopedPermission, require_principal, scoped_queryset
+from .session_auth import SessionCookieAuthentication
 
 READ_FRESHNESS: Final = "platform.integration.freshness.read"
 READ_CONFLICTS: Final = "platform.integration.conflict.read"
@@ -76,15 +80,21 @@ def _freshness_item(source: IntegrationSource, now: datetime) -> dict[str, Any]:
         "staleness_threshold_seconds": int(source.staleness_threshold.total_seconds()),
         "threshold_basis": source.threshold_basis,
         "policy_decision_id": source.policy_decision_id,
+        # 0.8.4-draft (matrix v2.2): a count only - the items need platform.integration.conflict.read
+        "open_conflicts": int(getattr(source, "open_conflicts", 0)),
     }
 
 
 class IntegrationFreshnessView(AleekhanAPIView):
+    # 02.6 fix3: the PHASE_01 session (matrix v2.2 grants these actions; before, no class = always 401)
+    authentication_classes = [SessionCookieAuthentication]
     permission_classes = [ScopedPermission]
     required_action = READ_FRESHNESS
 
     def get(self, request: Request) -> Response:
-        qs = scoped_queryset(request, self, IntegrationSource.objects.all())
+        qs = scoped_queryset(request, self, IntegrationSource.objects.all()).annotate(
+            open_conflicts=Count("conflicts", filter=Q(conflicts__status=ConflictStatus.OPEN))
+        )
         paginator = SourceCodePagination()
         page = paginator.paginate_queryset(qs, request, self)
         assert page is not None
@@ -134,6 +144,8 @@ def _conflict_filters(request: Request) -> dict[str, str]:
 
 
 class ConflictListView(AleekhanAPIView):
+    # 02.6 fix3: the PHASE_01 session (matrix v2.2 grants these actions; before, no class = always 401)
+    authentication_classes = [SessionCookieAuthentication]
     permission_classes = [ScopedPermission]
     required_action = READ_CONFLICTS
 
@@ -160,6 +172,8 @@ def _scoped_conflict(request: Request, view: AleekhanAPIView, conflict_id: uuid.
 
 
 class ConflictDetailView(AleekhanAPIView):
+    # 02.6 fix3: the PHASE_01 session (matrix v2.2 grants these actions; before, no class = always 401)
+    authentication_classes = [SessionCookieAuthentication]
     permission_classes = [ScopedPermission]
     required_action = READ_CONFLICTS
 
@@ -171,6 +185,8 @@ class ConflictDetailView(AleekhanAPIView):
 class ConflictResolveView(AleekhanAPIView):
     """POST: ``{"outcome": "RESOLVED" | "DISMISSED", "note": "..."}`` + ``If-Match`` + ``Idempotency-Key``."""
 
+    # 02.6 fix3: the PHASE_01 session (matrix v2.2 grants these actions; before, no class = always 401)
+    authentication_classes = [SessionCookieAuthentication]
     permission_classes = [ScopedPermission]
     required_action = RESOLVE_CONFLICT
 

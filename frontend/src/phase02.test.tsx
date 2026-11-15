@@ -69,7 +69,7 @@ function stub(routes: Record<string, Route>): Call[] {
   return calls;
 }
 
-const VERSION = { api_version: "v1", contract_version: "0.8.3-draft", build_commit: "abcdef1234567", environment: "dev" };
+const VERSION = { api_version: "v1", contract_version: "0.8.4-draft", build_commit: "abcdef1234567", environment: "dev" };
 function signedIn(actions: string[], extra: Record<string, Route> = {}): Record<string, Route> {
   return {
     "GET /version": () => ok(VERSION),
@@ -192,6 +192,19 @@ describe("pages 1/2 serial control center (DEC-027 P-A)", () => {
     expect(screen.getByTestId("serial-versions")).toHaveTextContent("تأیید سفارش");
     expect(screen.getByTestId("serial-timeline")).toHaveTextContent("سریال تخصیص یافت");
     expect(screen.getByTestId("serial-order-no")).toHaveTextContent("SO-1300-000001");
+  });
+
+  it("order tab: the serial and the order reference panels have distinct titles (REV-0252)", async () => {
+    stub(serialRoutes());
+    renderAt(`#/serials/${SERIAL}`);
+    const tab = await screen.findByTestId("tab-summary");
+    tab.focus();
+    await userEvent.keyboard("{ArrowLeft}");
+    const serialRefs = await screen.findByRole("heading", { level: 2, name: "ارجاع‌های بیرونی سریال" });
+    const orderRefs = await screen.findByRole("heading", { level: 2, name: "ارجاع‌های بیرونی سفارش" });
+    expect(serialRefs).not.toBe(orderRefs);
+    const titles = screen.getAllByRole("heading", { level: 2 }).map((h) => h.textContent);
+    expect(titles.filter((t) => t.startsWith("ارجاع‌های بیرونی"))).toEqual(["ارجاع‌های بیرونی سریال", "ارجاع‌های بیرونی سفارش"]);
   });
 
   it("search: empty state, and error state with request id + retry", async () => {

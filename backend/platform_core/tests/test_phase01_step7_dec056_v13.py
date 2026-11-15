@@ -58,8 +58,8 @@ def test_v13_owner_holds_document_read_and_download_without_a_cap() -> None:
     )
     assert OWNER_V13 <= held
     assert (
-        owner.matrix_version == "2.1"
-    )  # v1.3 here, moved on by DEC-057 (v2.0, 0022) and its amendment (v2.1, 0024)
+        owner.matrix_version == "2.2"
+    )  # v1.3 here, moved on by DEC-057 (v2.0, 0022) and its amendments (v2.1, 0024; v2.2, 0027)
     # not business-approval permissions -> 0017 did not touch the DB guard exception (0022 widened it to
     # exactly the six pairs of authz.policy.OWNER_BA_ACTIONS, DEC-057)
     assert not Permission.objects.filter(

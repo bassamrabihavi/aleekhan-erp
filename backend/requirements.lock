@@ -6,6 +6,10 @@ cryptography==50.0.2
 dj-database-url==3.1.2
 Django==5.2.18
 djangorestframework==3.18.3
+et_xmlfile==2.0.0
+msoffcrypto-tool==6.1.0
+olefile==0.47
+openpyxl==3.1.5
 psycopg==3.3.6
 psycopg-binary==3.3.6
 pycparser==2.23 ; implementation_name != "PyPy"

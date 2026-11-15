@@ -1,0 +1,30 @@
+{
+  "batch_id": "f6b6c4d3-bfb8-4a18-ba84-ffeef21b881d",
+  "status": "APPLIED",
+  "already_applied": false,
+  "attempts": 1,
+  "counts": {
+    "applied": 2958,
+    "categories_created": 111,
+    "category_columns_mapped_by_header": 5,
+    "codding_rows": 2700,
+    "conflict.catalogue_code_invalid": 6,
+    "conflict.catalogue_name_duplicate": 2,
+    "conflict.catalogue_unit_not_decided": 3,
+    "conflict.legacy_code_disputed": 224,
+    "conflict.legacy_code_multiple_product_style": 2,
+    "conflicts": 237,
+    "error_row_count": 1375,
+    "legacy_codes_distinct": 2841,
+    "legacy_codes_linked": 0,
+    "legacy_codes_registered": 2841,
+    "legacy_codes_unlinked": 2841,
+    "legacy_values_disputed": 224,
+    "norder_rows": 3917,
+    "norder_rows_without_code": 3,
+    "row_count": 6669,
+    "sorce_rows": 51,
+    "types_created": 6,
+    "types_not_created_unit": 3
+  }
+}

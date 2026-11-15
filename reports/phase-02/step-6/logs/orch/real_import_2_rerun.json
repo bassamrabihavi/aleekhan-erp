@@ -1,0 +1,9 @@
+{
+  "batch_id": "f6b6c4d3-bfb8-4a18-ba84-ffeef21b881d",
+  "status": "APPLIED",
+  "already_applied": true,
+  "attempts": 0,
+  "counts": {
+    "row_count": 6669
+  }
+}

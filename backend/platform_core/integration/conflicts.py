@@ -30,6 +30,7 @@ from platform_core.engine.errors import (
     EngineContractError,
     FieldError,
     NotFound,
+    SelfApprovalForbidden,
     ValidationFailed,
     VersionConflict,
 )
@@ -200,6 +201,9 @@ def _resolve(
         raise NotFound()
     if item.row_version != expected_version:
         raise VersionConflict("row_version does not match the current version")
+    # maker-checker (DEC-032 pattern, matrix v2.2 SoD flag): the user who raised an item never resolves it
+    if item.raised_by_type == ActorType.USER and item.raised_by_id == ctx.actor.actor_id:
+        raise SelfApprovalForbidden("the user who raised a conflict item cannot resolve it")
     before = item.status
     CONFLICT_MACHINE.assert_transition(before, outcome)
     ConflictItem.objects.using(using).filter(pk=item.pk).update(

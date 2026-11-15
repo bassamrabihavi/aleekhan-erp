@@ -403,3 +403,32 @@ Review verdicts are in `reports/phase-00/step-N/REVIEW.md`. No version number is
   shapes; `[..., "one", id]` now always caches the ApiResponse and views use `select`).
 - Tests: `tests/test_api_phase02_inbox.py`; vitest `src/phase02.test.tsx`, `src/lib/jalali.test.ts`; Playwright
   `e2e/phase02.spec.ts` (synthetic console seed `e2e/phase02-helpers.ts`).
+
+### 02.6 Integration (commit SHA added by the orchestrator when committed)
+- Planning workbook import, server commands only (no UI, no API change, contract stays 0.8.3-draft):
+  `import_planning_catalogue` (product types `Sorce!E`→`O`, categories `Sorce!BE..BI`→`O` per type, units per
+  DEC-058, legacy 14-digit codes from `NOrder!FZ` + optional `Codding` column as LEG `RESERVED / ERP_PENDING`),
+  `load_code_rule_golden` (golden cases from a JSON file outside the repo into a new DRAFT rule revision via the
+  02.3 engine), `legacy_serial_guard` (read-only counts of `NOrder!B` serials >= 63000, DEC-006). Every command
+  refuses paths inside the repository; the workbook commands refuse a file whose SHA-256 is not the operator's
+  `--expected-sha256` (DEC-037); `ALEEKHAN_SRC_PASSWORD` decrypts in memory; macros never run.
+- Integration framework: `SOURCE_APPLY_POLICIES` + `apply_batch(applier=)` (one transaction, compensation =
+  rollback with staging kept), `apply_batch_with_retry` (transient SQLSTATE retry with the outbox backoff),
+  failure record; unknown / unapproved sources still `RULE_NOT_APPROVED`.
+- Migration `0026_phase02_planning_catalogue_source` (seed of source `planning_catalogue_xlsm`, policy DEC-005;
+  reversible). Events (catalogue + golden): `platform.integration.batch_applied`,
+  `platform.integration.batch_apply_failed`, `identity.product_class.imported`,
+  `identity.product_code.legacy_registered`.
+- Dependencies: `openpyxl==3.1.5`, `msoffcrypto-tool==6.1.0` (+ `et_xmlfile`, `olefile` in the lock).
+- 02.5 review items: REV-0251 (serial header collapses to one column <= 900 px, chips column bounded with
+  `fit-content(40%)`; E2E assertion at 768), REV-0252 (distinct titles «ارجاع‌های بیرونی سریال» / «… سفارش» +
+  vitest), REV-0255 (backend test: no deciding permission -> empty inbox).
+- Fixes after the first real runs: fix1 - Planning size limit 128 MiB (TECHNICAL DEFAULT; generic 50 MiB upload
+  limit unchanged), streamed hash then one load; fix2 - `Sorce` has 2 header rows (`--sorce-header-rows`,
+  default 2) and the product types are only the first contiguous block of column E; fix3 - matrix v2.2
+  (migration `0027_dec057_matrix_v22`, DEC-057 amendment 2026-11-15): integration freshness / conflict
+  permissions for product_data_steward + owner_admin (management_viewer freshness + counts only), session
+  authentication on the integration views, `SourceFreshness.open_conflicts` (contract 0.8.4-draft, additive),
+  resolve refuses the user who raised the item; imported types / categories ACTIVE is now DECIDED.
+- Tests: `tests/test_phase02_planning_import.py` (synthetic workbooks generated in tmp; idempotency, conflicts,
+  compensation, retry / backoff, SHA mismatch, path refusal, encryption, golden loader, serial guard).

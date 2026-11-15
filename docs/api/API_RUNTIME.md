@@ -320,3 +320,13 @@ every write, employee 403 on every operation, management_viewer 403 on every wri
   Ids, numbers and times only (no customer or representative name). The owning operation still re-checks
   permission, fresh MFA, maker-checker, state and version. Tests: `tests/test_api_phase02_inbox.py`.
 - No PHASE_02 approval goes through `ApprovalRequest` in this step: the inbox reads the PHASE_02 records directly.
+
+### 14.4 Step 02.6 (contract 0.8.4-draft, additive; matrix v2.2, migration 0027)
+- `listIntegrationFreshness`: every item gains `open_conflicts` (count of OPEN conflict items of the source; a
+  count only). `platform.integration.freshness.read`: product_data_steward, owner_admin, management_viewer.
+- `listIntegrationConflicts` / `getIntegrationConflict` (`platform.integration.conflict.read`) and
+  `resolveIntegrationConflict` (`platform.integration.conflict.resolve`, If-Match + Idempotency-Key):
+  product_data_steward and owner_admin only (employer decision 2026-11-15). management_viewer -> 403.
+- Resolve is maker-checker safe: the user who raised an item can never resolve it (403
+  `SELF_APPROVAL_FORBIDDEN`); Planning import items are raised by the SYSTEM actor. Resolving records the
+  decision only - no official row changes (a re-import applies any correction).

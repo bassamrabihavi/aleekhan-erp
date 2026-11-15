@@ -9,7 +9,9 @@ Batch state machine (``IMPORT_BATCH_MACHINE``, docs/integration/README.md sectio
 ``VALIDATED -> APPLIED``, ``VALIDATED -> SUPERSEDED`` and ``APPLIED -> COMPENSATED`` are business decisions
 per source: the service always calls ``require_approved_rule(source.policy_decision_id)`` first, so in
 PHASE_00 they raise 409 ``RULE_NOT_APPROVED`` (e.g. DEC-016 for Rahkaran snapshot validity / re-import
-policy).
+policy). PHASE_02 / 02.6: a source listed in :data:`SOURCE_APPLY_POLICIES` (in code, reviewed commits only;
+today only ``planning_catalogue_xlsm``, DEC-005) may be applied by its owning module's applier in one
+transaction (:func:`apply_batch`, :func:`apply_batch_with_retry`); supersede / compensate stay gated.
 
 * :func:`receive_file` - provenance only (source, SHA-256, size, basename, actor, request). The bytes are
   hashed while streaming and then discarded: raw content is never stored in the DB or the repository (object
@@ -32,13 +34,15 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+import time
 import unicodedata
 from collections.abc import Callable, Iterable, Mapping, Sequence
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
+from types import MappingProxyType
 from typing import Any, BinaryIO, Final, NoReturn
 
-from django.db import IntegrityError, transaction
+from django.db import IntegrityError, OperationalError, transaction
 from django.db.models.functions import Now
 
 from platform_core.engine.context import RequestContext, db_now
@@ -50,11 +54,12 @@ from platform_core.engine.errors import (
     ValidationFailed,
     VersionConflict,
 )
+from platform_core.engine.outbox import backoff_delay
 from platform_core.engine.redaction import sensitive_paths
 from platform_core.engine.rules import require_approved_rule
 from platform_core.engine.state import StateMachine
-from platform_core.engine.uow import unit_of_work
-from platform_core.models import ActorType
+from platform_core.engine.uow import NothingToDo, UnitOfWork, unit_of_work, unit_of_work_or_nothing
+from platform_core.models import ActorType, AuditOutcome
 
 from .models import BatchStatus, ImportBatch, IntegrationSource, RowStatus, StagingRow
 from .sources import get_source, require_enabled
@@ -511,9 +516,233 @@ def _gated(batch_id: Any, target: str, using: str) -> NoReturn:
     raise EngineContractError(f"no {target} implementation exists for source {batch.source.code}")
 
 
-def apply_batch(ctx: RequestContext, batch_id: Any, *, using: str = "default") -> ImportBatch:
-    """VALIDATED -> APPLIED: blocked (RULE_NOT_APPROVED with the source's policy decision)."""
-    _gated(batch_id, B.APPLIED, using)
+# ---------------------------------------------------------------------------------------------- apply
+@dataclass(frozen=True)
+class SourceApplyPolicy:
+    """A source whose batches an owning module may apply (VALIDATED -> APPLIED), and why.
+
+    ``decisions``: the APPROVED owner decisions the apply implements; the source's ``policy_decision_id`` must
+    be one of them. ``owner``: the module whose use case writes the official rows (the integration framework
+    never writes business tables itself, ARCHITECTURE_OVERVIEW).
+    """
+
+    decisions: frozenset[str]
+    owner: str
+    note: str
+
+
+# In-code registry, edited only in reviewed commits (like ``engine.rules``): no setting, environment variable
+# or DB row can unlock the apply of another source. Every other source stays RULE_NOT_APPROVED (Rahkaran:
+# DEC-016; legacy order/serial migration: DEC-025 / DEC-035, PHASE_12). Supersede and compensate stay gated
+# for every source.
+_SOURCE_APPLY_POLICIES: Final[dict[str, SourceApplyPolicy]] = {
+    "planning_catalogue_xlsm": SourceApplyPolicy(
+        decisions=frozenset({"DEC-005"}),
+        owner="platform_core.product_identity",
+        note=(
+            "PHASE_02 / 02.6: product types and categories (Sorce) and the legacy 14-digit code registry "
+            "(NOrder!FZ, Codding) of the DEC-037 baseline; units per DEC-058. No order, serial, customer or "
+            "person value is applied."
+        ),
+    ),
+}
+SOURCE_APPLY_POLICIES: Final[Mapping[str, SourceApplyPolicy]] = MappingProxyType(_SOURCE_APPLY_POLICIES)
+
+
+@dataclass(frozen=True)
+class ApplyOutcome:
+    """What an owning module's applier reports (counts only: they go into the audit row and the event)."""
+
+    applied_count: int
+    conflict_count: int
+    counts: Mapping[str, int]
+
+
+BatchApplier = Callable[[UnitOfWork, ImportBatch], ApplyOutcome]
+
+
+def _require_apply_policy(batch: ImportBatch) -> SourceApplyPolicy:
+    policy = SOURCE_APPLY_POLICIES.get(batch.source.code)
+    if policy is None or batch.source.policy_decision_id not in policy.decisions:
+        require_approved_rule(
+            batch.source.policy_decision_id, rule=f"platform.integration.applied:{batch.source.code}"
+        )
+        # reachable only once the rule registry approves the decision: still no apply implementation
+        raise EngineContractError(f"no apply implementation is registered for source {batch.source.code}")
+    return policy
+
+
+def apply_batch(
+    ctx: RequestContext,
+    batch_id: Any,
+    *,
+    applier: BatchApplier | None = None,
+    using: str = "default",
+) -> ImportBatch:
+    """VALIDATED -> APPLIED in ONE transaction: the owning module's ``applier`` writes the official rows (its
+    own use case), then the batch is marked APPLIED with audit + ``platform.integration.batch_applied``.
+
+    Only sources of :data:`SOURCE_APPLY_POLICIES` may be applied; every other source raises 409
+    ``RULE_NOT_APPROVED`` with its policy decision (unchanged PHASE_00 behaviour). Compensation by design: if
+    the applier (or anything after it) raises, the whole transaction rolls back - no partial official row, the
+    batch stays VALIDATED and its staging rows are kept, so the same batch can be applied again.
+    """
+    return _apply(ctx, batch_id, applier, using)[0]
+
+
+def _apply(
+    ctx: RequestContext, batch_id: Any, applier: BatchApplier | None, using: str
+) -> tuple[ImportBatch, ApplyOutcome]:
+    with unit_of_work(ctx, using=using) as uow:
+        batch = _lock_batch(batch_id, using)
+        IMPORT_BATCH_MACHINE.assert_transition(batch.status, B.APPLIED)
+        policy = _require_apply_policy(batch)
+        if applier is None:
+            raise EngineContractError("apply_batch needs the owning module's applier")
+        outcome = applier(uow, batch)
+        ImportBatch.objects.using(using).filter(pk=batch.pk).update(status=B.APPLIED, closed_at=Now())
+        batch.refresh_from_db(using=using)
+        uow.audit(
+            action="platform.integration.batch.apply",
+            resource_type="platform.import_batch",
+            resource_id=str(batch.id),
+            resource_version=batch.row_version,
+            before={"status": B.VALIDATED},
+            after={
+                "status": B.APPLIED,
+                "applied_count": outcome.applied_count,
+                "conflict_count": outcome.conflict_count,
+                "counts": dict(outcome.counts),
+            },
+            scope={"source_code": batch.source.code, "owner": policy.owner},
+        )
+        uow.emit(
+            event_type="platform.integration.batch_applied",
+            aggregate_type="platform.import_batch",
+            aggregate_id=str(batch.id),
+            aggregate_version=batch.row_version,
+            payload=_event_payload(
+                batch, applied_count=outcome.applied_count, conflict_count=outcome.conflict_count
+            ),
+        )
+    return batch, outcome
+
+
+# Transient database failures worth another attempt (SQLSTATE): serialization failure, deadlock, lock not
+# available. Everything else is a permanent failure of this run (a bug or bad data): no retry.
+TRANSIENT_SQLSTATES: Final = frozenset({"40001", "40P01", "55P03"})
+
+
+@dataclass(frozen=True)
+class ApplyRetryPolicy:
+    """TECHNICAL DEFAULT (not a business rule): attempts and exponential backoff of an operator apply."""
+
+    max_attempts: int = 4
+    base: timedelta = timedelta(milliseconds=500)
+    factor: int = 2
+    cap: timedelta = timedelta(seconds=8)
+    jitter_permille: int = 250
+
+
+APPLY_RETRY_POLICY: Final = ApplyRetryPolicy()
+
+
+def sqlstate_of(exc: BaseException) -> str | None:
+    for candidate in (exc, exc.__cause__):
+        state = getattr(candidate, "sqlstate", None) or getattr(candidate, "pgcode", None)
+        if isinstance(state, str):
+            return state
+    return None
+
+
+def is_transient(exc: BaseException) -> bool:
+    return isinstance(exc, OperationalError) and sqlstate_of(exc) in TRANSIENT_SQLSTATES
+
+
+@dataclass(frozen=True)
+class ApplyRun:
+    batch: ImportBatch
+    attempts: int
+    outcome: ApplyOutcome
+
+
+def apply_batch_with_retry(
+    ctx: RequestContext,
+    batch_id: Any,
+    *,
+    applier: BatchApplier,
+    policy: ApplyRetryPolicy = APPLY_RETRY_POLICY,
+    sleep: Callable[[float], None] = time.sleep,
+    using: str = "default",
+) -> ApplyRun:
+    """:func:`apply_batch` with retries + exponential backoff (``engine.outbox.backoff_delay``) on transient
+    DB failures.
+
+    Every attempt is a fresh transaction (a failed attempt left nothing behind). When the run gives up (a
+    permanent error, or the last transient one), a separate unit of work records the failure (audit +
+    ``platform.integration.batch_apply_failed``: error code and attempt count only, never a value) and the
+    error is re-raised. The batch stays VALIDATED with its staging rows (compensation = rollback).
+    """
+    if policy.max_attempts < 1:
+        raise ValueError("max_attempts must be >= 1")
+    attempt = 0
+    while True:
+        attempt += 1
+        try:
+            batch, outcome = _apply(ctx, batch_id, applier, using)
+            return ApplyRun(batch, attempt, outcome)
+        except Exception as exc:
+            if is_transient(exc) and attempt < policy.max_attempts:
+                delay = backoff_delay(
+                    attempt,
+                    base=policy.base,
+                    factor=policy.factor,
+                    cap=policy.cap,
+                    jitter_permille=policy.jitter_permille,
+                    jitter_key=str(batch_id),
+                )
+                sleep(delay.total_seconds())
+                continue
+            _record_apply_failure(ctx, batch_id, attempts=attempt, exc=exc, using=using)
+            raise
+
+
+def failure_code(exc: BaseException) -> str:
+    """A safe, value-free code for a failure: the platform error code, else the SQLSTATE, else the class."""
+    code = getattr(getattr(exc, "code", None), "value", None)
+    if isinstance(code, str) and ROW_ERROR_CODE_RE.fullmatch(code):
+        return code
+    state = sqlstate_of(exc)
+    if state is not None and re.fullmatch(r"[0-9A-Z]{5}", state):
+        return f"SQLSTATE_{state}"
+    name = re.sub(r"(?<!^)(?=[A-Z])", "_", type(exc).__name__).upper()[:40]
+    return name if ROW_ERROR_CODE_RE.fullmatch(name) else "APPLY_FAILED"
+
+
+def _record_apply_failure(
+    ctx: RequestContext, batch_id: Any, *, attempts: int, exc: BaseException, using: str
+) -> None:
+    code = failure_code(exc)
+    with unit_of_work_or_nothing(ctx, using=using) as uow:
+        batch = ImportBatch.objects.using(using).select_related("source").filter(pk=batch_id).first()
+        if batch is None:  # unknown batch: nothing to record against; the caller sees the original error
+            raise NothingToDo()
+        uow.audit(
+            action="platform.integration.batch.apply_failed",
+            resource_type="platform.import_batch",
+            resource_id=str(batch.id),
+            resource_version=batch.row_version,
+            outcome=AuditOutcome.FAILED,
+            after={"status": batch.status, "attempts": attempts, "error_code": code},
+            scope={"source_code": batch.source.code},
+        )
+        uow.emit(
+            event_type="platform.integration.batch_apply_failed",
+            aggregate_type="platform.import_batch",
+            aggregate_id=str(batch.id),
+            aggregate_version=batch.row_version,
+            payload=_event_payload(batch, attempts=attempts, error_code=code),
+        )
 
 
 def supersede_batch(ctx: RequestContext, batch_id: Any, *, using: str = "default") -> ImportBatch:

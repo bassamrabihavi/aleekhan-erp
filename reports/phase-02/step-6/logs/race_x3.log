@@ -1,0 +1,13 @@
+== race run 1
+...............                                                          [100%]
+15 passed, 3102 deselected in 83.44s (0:01:23)
+# exit code: 0
+== race run 2
+...............                                                          [100%]
+15 passed, 3102 deselected in 88.64s (0:01:28)
+# exit code: 0
+== race run 3
+...............                                                          [100%]
+15 passed, 3102 deselected in 91.80s (0:01:31)
+# exit code: 0
+RACE_DONE

@@ -658,6 +658,11 @@ function Versions({ o }: { o: CustomerOrder }) {
 }
 
 // ---------------------------------------------------------------------------------- external refs
+// REV-0252: the title names the target, so two panels on one page (serial + order, page 2) are distinct
+const REFS_TITLE: Record<string, string> = {
+  serial: "ارجاع‌های بیرونی سریال",
+  customer_order: "ارجاع‌های بیرونی سفارش",
+};
 export function ExternalRefs({ targetType, targetId }: { targetType: string; targetId: string }) {
   const { can } = useAuth();
   const action = useAction();
@@ -673,7 +678,7 @@ export function ExternalRefs({ targetType, targetId }: { targetType: string; tar
   if (!can(PERM.refRead)) return null;
   return (
     <section className="panel panel--wide" aria-labelledby={`refs-${targetId}`}>
-      <h2 id={`refs-${targetId}`}>ارجاع‌های بیرونی</h2>
+      <h2 id={`refs-${targetId}`}>{REFS_TITLE[targetType] ?? "ارجاع‌های بیرونی"}</h2>
       <DataView query={list} loading="در حال دریافت ارجاع‌ها…" errorTitle="ارجاع‌ها دریافت نشد" isEmpty={(d) => d.items.length === 0} empty={{ title: "ارجاع بیرونی ثبت نشده است." }}>
         {(d) => (
           <ul className="list" data-testid="refs-list">

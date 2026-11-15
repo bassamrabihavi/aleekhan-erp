@@ -155,3 +155,23 @@ def test_no_personal_data_in_the_feed(p: People) -> None:
     validated_order(p.co)
     raw = session_client(p.po.user).get(f"{API}{PATH}").content.decode("utf-8")
     assert "نماینده" not in raw and "مشتری" not in raw
+
+
+def test_caller_without_the_four_deciding_permissions_gets_an_empty_inbox(p: People) -> None:
+    """REV-0255: one item of every kind is waiting; a caller who holds none of order confirm, change decide,
+    planning approve and code-rule approve gets ``items == []`` (not only a hidden page)."""
+    from .phase02_engine import holder
+
+    validated_order(p.co)
+    _due_cr(p)
+    rule = f.code_rule(p.pds.user)
+    CodeRuleRevision.objects.filter(pk=rule.pk).update(status="IN_REVIEW", updated_at=Now())
+    assert set(kinds(session_client(p.owner.user))) == {
+        "ORDER_CONFIRM",
+        "CHANGE_DECIDE",
+        "CODE_RULE_APPROVE",
+    }  # the owner decides directly (DEC-057); planning approval stays with planning_officer
+    assert "CHANGE_PLANNING_DECISION" in kinds(session_client(p.po.user))
+    for who in (p.employee, p.viewer, p.co2, holder("product_data_steward")):
+        feed = inbox(session_client(who.user))
+        assert feed["items"] == [], who.user.pk

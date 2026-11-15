@@ -2,7 +2,7 @@ openapi: 3.1.0
 jsonSchemaDialect: https://spec.openapis.org/oas/3.1/dialect/base
 info:
   title: Aleekhan Factory Platform API
-  version: 0.8.3-draft
+  version: 0.8.4-draft
   summary: PHASE_00 + PHASE_01 platform contract + PHASE_02 identity/commercial operations (all implemented; 02.4).
   description: |
     Status: DRAFT (PHASE_00 / 00.1 Discovery & Contract, implemented in 00.4). Not approved. This hand-written
@@ -122,6 +122,15 @@ info:
     code-rule approval) for the page 39 approval inbox. Session-only and read-only; each kind is filtered by the
     caller's own grant of the deciding permission and by maker-checker (never the caller's own request). Ids,
     numbers and times only. Nothing else changes.
+
+    0.8.4-draft (02.6, matrix v2.2 = DEC-057 amendment 2026-11-15, additive): `SourceFreshness.open_conflicts` -
+    the number of OPEN conflict-queue items of the source (a count only, never an item). The integration
+    permissions `platform.integration.freshness.read` / `conflict.read` / `conflict.resolve` enter the permission
+    catalogue: product_data_steward and owner_admin hold all three, management_viewer `freshness.read` only (data
+    freshness + this count, never the items). `resolveIntegrationConflict` refuses the user who raised the item
+    (403 SELF_APPROVAL_FORBIDDEN, maker-checker); Planning import items are raised by the system. The four
+    integration operations now carry `x-aleekhan-permission` and authenticate with the session cookie (before,
+    no authentication = always 401). Nothing else changes.
 
     Stack: Django 5.2 LTS + DRF (DEC-001). Base path is versioned: every endpoint lives under `/api/v1`.
     A breaking change requires `/api/v2` (or an explicitly approved deprecation window); additive changes only
@@ -371,6 +380,7 @@ paths:
     get:
       tags: [integration]
       operationId: listIntegrationFreshness
+      x-aleekhan-permission: platform.integration.freshness.read
       summary: Freshness of every source in the caller's scope (fresh / stale / never)
       description: |
         Requires permission `platform.integration.freshness.read` (deny by default; record scope = source).
@@ -410,6 +420,7 @@ paths:
                     staleness_threshold_seconds: 86400
                     threshold_basis: TECHNICAL_DEFAULT
                     policy_decision_id: DEC-016
+                    open_conflicts: 0
                 page: {page_size: 25, next_cursor: null}
                 checked_at: '2026-11-04T08:00:00Z'
         '400':
@@ -424,6 +435,7 @@ paths:
     get:
       tags: [integration]
       operationId: listIntegrationConflicts
+      x-aleekhan-permission: platform.integration.conflict.read
       summary: Conflict queue (items needing a human decision)
       description: |
         Requires permission `platform.integration.conflict.read`; only items of sources in the caller's scope
@@ -468,6 +480,7 @@ paths:
     get:
       tags: [integration]
       operationId: getIntegrationConflict
+      x-aleekhan-permission: platform.integration.conflict.read
       summary: One conflict item (ETag = row version)
       description: Requires `platform.integration.conflict.read`. Outside the caller's scope -> 404 (BOLA/IDOR).
       parameters:
@@ -500,6 +513,7 @@ paths:
     post:
       tags: [integration]
       operationId: resolveIntegrationConflict
+      x-aleekhan-permission: platform.integration.conflict.resolve
       summary: Close an OPEN conflict as RESOLVED or DISMISSED (records the human decision only)
       description: |
         Requires permission `platform.integration.conflict.resolve` and an identified user. Writes the item,
@@ -8806,6 +8820,12 @@ components:
         policy_decision_id:
           type: string
           pattern: '^DEC-[0-9]{3}$'
+        open_conflicts:
+          type: integer
+          minimum: 0
+          description: >-
+            0.8.4-draft (additive, always present): number of OPEN conflict-queue items of the source - a count
+            only (management_viewer sees freshness and counts, never the items; matrix v2.2).
     FreshnessPage:
       type: object
       additionalProperties: false

@@ -155,7 +155,7 @@
 /* serial header (pages 1/2) */
 .serial-head {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) fit-content(40%);
   gap: var(--space-3);
 }
 .serial-head h1 {
@@ -182,18 +182,20 @@
   margin: 0;
 }
 
+/* REV-0251: below 900px the chips column (max-content) squeezed the title to one word per line; the header
+   collapses to one column there and the chips wrap under the title */
 @media (max-width: 900px) {
   .split {
     grid-template-columns: minmax(0, 1fr);
   }
-}
-@media (max-width: 600px) {
   .serial-head {
     grid-template-columns: minmax(0, 1fr);
   }
   .serial-head__chips {
     justify-content: flex-start;
   }
+}
+@media (max-width: 600px) {
   .form--grid {
     grid-template-columns: minmax(0, 1fr);
   }

@@ -1,4 +1,4 @@
-# Permission matrix — PHASE_01 platform actions + PHASE_02 order & product identity (APPROVED v2.0, amended v2.1)
+# Permission matrix — PHASE_01 platform actions + PHASE_02 order & product identity (APPROVED v2.0, amended v2.1, v2.2)
 
 **Status: APPROVED v2.0 — DEC-049 (v1.0, employer بسام ربیهاوی, 2026-11-04) + DEC-056 (v1.1, 2026-11-06) + DEC-056
 extensions (v1.2 and v1.3, 2026-11-10) + DEC-057 (v2.0, PHASE_02, 2026-11-12; section 7, migration
@@ -6,6 +6,16 @@ extensions (v1.2 and v1.3, 2026-11-10) + DEC-057 (v2.0, PHASE_02, 2026-11-12; se
 `platform_core.0014_dec056_owner_approval_rights`); v1.2 from PHASE_01 / 01.6 (migration
 `platform_core.0015_dec056_matrix_v12`); v1.3 from PHASE_01 / 01.7 (migration
 `platform_core.0017_dec056_matrix_v13`).**
+
+**Change note v2.2 (employer decision of 2026-11-15, DECISION_LOG "DEC-057 amendment (conflict queue access)";
+PHASE_02 / 02.6, migration `platform_core.0027_dec057_matrix_v22`).** The three integration actions of the 00.6
+framework enter the permission catalogue (section 8): `platform.integration.freshness.read`,
+`platform.integration.conflict.read`, `platform.integration.conflict.resolve`. `product_data_steward` and
+`owner_admin` hold all three (read and resolve the Planning import conflict queue); `management_viewer` holds
+`freshness.read` only (data freshness and the open-conflict **count** per source, never the items). None is a
+business approval (the owner exception stays six pairs); `conflict.resolve` carries SoD (the resolver is never
+the user who raised the item, engine check). `product_data_steward`, `owner_admin` and `management_viewer` carry
+`matrix_version = 2.2`; the new permissions carry 2.2 / DEC-057.
 
 **Change note v2.1 (employer amendments of 2026-11-12 to DEC-057 and DEC-059; PHASE_02 / 02.3, migration
 `platform_core.0024_dec057_dec059_matrix_v21`).** (a) DEC-057 owner read: the `owner_admin` (OA) cells of the nine
@@ -203,6 +213,8 @@ audit events for anyone (append-only, DB triggers since 00.2).
 - v2.1 (DEC-057 / DEC-059 amendments, 2026-11-12): owner_admin ● on the nine PHASE_02 read permissions;
   `commercial.change.planning_approve` ● for planning_officer (flags PROPOSED) (section 7; migration
   `platform_core.0024_dec057_dec059_matrix_v21`).
+- v2.2 (DEC-057 amendment, 2026-11-15): integration freshness / conflict queue (section 8; migration
+  `platform_core.0027_dec057_matrix_v22`).
 
 A change to this matrix = new matrix version + reviewed commit + DEC entry; roles keep `matrix_version`. Seeds
 for dev/test use synthetic users only (`محیط آزمایشی — داده ساختگی`).
@@ -254,3 +266,13 @@ so matrix v2.1 is unchanged; its flags stay MFA + BA + SoD as seeded by 0024 (st
 employer at the Gate). `identity.serial.allocate`: its operation `allocateSerial` was **removed** by the
 employer on 2026-11-14 (DEC-006 L-A: serials are drawn only by `commercial.order.confirm`). The row stays seeded
 (matrix v2.1 unchanged) and reaches no operation; dropping it needs a matrix version (open question).
+
+## 8. Matrix v2.2 — integration conflict queue and freshness (DEC-057 amendment, APPROVED 2026-11-15)
+Source: DECISION_LOG 2026-11-15 "DEC-057 amendment (conflict queue access)". Grant mode SCOPE (all sources), GLOBAL
+assignments. Every other role holds none of these rows.
+
+| Permission | Flags | OA | MGT | PDS | Note |
+|---|---|---|---|---|---|
+| platform.integration.freshness.read | | ● | ● | ● | per-source freshness + `open_conflicts` count (contract 0.8.4-draft) |
+| platform.integration.conflict.read | | ● | — | ● | conflict items (details: sheet, cell, reason, codes) |
+| platform.integration.conflict.resolve | SoD | ● | — | ● | RESOLVED / DISMISSED + note; never by the user who raised it; no official row changes |

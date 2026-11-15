@@ -8,3 +8,9 @@ dj-database-url==3.1.2
 # 2026-09-30 (>= 14 days before the 2026-11-05 pin date). Transitive: cffi 2.0.0 (2025-09-08), pycparser 2.23
 # (2025-09-09) - exact versions in requirements.lock.
 cryptography==50.0.2
+# 02.6: Planning workbook import (server command, read as data only - never executed). openpyxl 3.1.5
+# (2024-06-28, transitive et-xmlfile) opens .xlsm read_only / data_only / keep_vba=False; msoffcrypto-tool decrypts
+# an encrypted workbook in memory only when ALEEKHAN_SRC_PASSWORD is set (transitive olefile; uses cryptography).
+# Both are the versions already installed in the venv; exact versions in requirements.lock.
+openpyxl==3.1.5
+msoffcrypto-tool==6.1.0

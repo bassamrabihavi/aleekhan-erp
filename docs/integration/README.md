@@ -71,6 +71,35 @@ RECEIVED ──stage_rows──▶ STAGED ──validate_batch──▶ VALIDATE
   `require_approved_rule(source.policy_decision_id)` → `RULE_NOT_APPROVED` (`decision_id` DEC-016 / DEC-025).
   There is no apply implementation; staged data never reaches a business table in PHASE_00. Row statuses
   `MATCHED` / `APPROVED` exist in the schema for later phases and are unreachable now.
+- **PHASE_02 / 02.6 — apply with a registered owner.** `SOURCE_APPLY_POLICIES` (in code, reviewed commits only)
+  names the sources whose batches an owning module may apply, the APPROVED decision behind it and the owner.
+  Today exactly one: `planning_catalogue_xlsm` (migration `0026`, policy DEC-005, owner
+  `platform_core.product_identity`: product types / categories from `Sorce` and the legacy 14-digit code
+  registry; units per DEC-058). Every other source (Rahkaran DEC-016, legacy order / serial migration
+  DEC-025 / DEC-035 on `legacy_planning_xlsm`) still answers `RULE_NOT_APPROVED`; supersede and compensate stay
+  gated for all sources.
+  - `apply_batch(ctx, batch_id, applier=)`: VALIDATED → APPLIED in **one** transaction: the owner's applier writes
+    its own tables (and raises conflict items), then the batch row + audit `platform.integration.batch.apply` +
+    event `platform.integration.batch_applied` (ids + counts).
+  - **Compensation** = rollback: an exception anywhere leaves no official row and no conflict item; the batch
+    stays VALIDATED with all its staging rows, and the same batch is applied again on the next run.
+  - **Retries**: `apply_batch_with_retry` retries transient DB failures (SQLSTATE 40001 / 40P01 / 55P03) with the
+    outbox backoff function (`engine/outbox.backoff_delay`; TECHNICAL DEFAULT 4 attempts, 0.5 s × 2ⁿ, cap 8 s,
+    jitter 25 %). A permanent error is not retried. When it gives up, a separate unit of work records audit
+    `platform.integration.batch.apply_failed` (outcome FAILED) + event `platform.integration.batch_apply_failed`
+    (attempts + error code only).
+  - **Freshness**: the batch's `source_as_of` is the file mtime (UTC); `last_success_at` advances at validate
+    (unchanged rule, §5). `GET /integration/freshness` shows it per source.
+  - **Size limit (TECHNICAL DEFAULT, 02.6 fix1)**: the server-side Planning commands accept a workbook up to
+    `MAX_PLANNING_WORKBOOK_BYTES` = 128 MiB (`product_identity/planning_import.py`; the registered baseline is
+    about 70 MB). The generic upload limit `imports.MAX_FILE_BYTES` (50 MiB) is unchanged; the Planning path
+    passes its own `max_bytes` to `receive_file`. The SHA-256 is streamed from disk first (wrong or oversized
+    file refused before loading), then the bytes are read into memory once and re-checked
+    (`FILE_CHANGED_WHILE_READING`).
+  - **Sorce layout (02.6 fix2)**: 2 header rows by default (`--sorce-header-rows`; row 1 drives the category
+    column -> type detection); types = the first contiguous block of column E only (details: DATA_TABLE 02.6).
+  - **Conflict queue**: the applier raises items on `platform_conflict_item` (source `planning_catalogue_xlsm`);
+    `GET /integration/conflicts?source_code=planning_catalogue_xlsm` lists them (§6/§7).
 
 Every transition is one unit of work: state + audit (`platform.integration.batch.*`) + outbox event
 (`platform.integration.batch_received|batch_staged|batch_validated|batch_rejected`; payload = ids, source code,
@@ -167,8 +196,15 @@ server-side code only (the upload page belongs to the owning phase, with SEC-03 
 
 - No worker process (Celery/Redis) is wired: `dispatch_once` / `recover_stale` / `sweep_dead_letters` are library
   calls; scheduling and job monitoring are 00.7 (security & ops) / PHASE_01 (Jobs page).
-- No file storage and no XLSX/XLSM parser: a parser (openpyxl, read-only, no macro evaluation, sandboxed worker;
-  ExcelSourceRecord with cell/formula/cached value) belongs to the owning phases (06 / 12) and DEC-025/DEC-035.
+- No file storage. 02.6 adds one workbook reader for the Planning catalogue only
+  (`product_identity/planning_import.py`: openpyxl `read_only` / `data_only` / `keep_vba=False`, in-memory
+  decryption, cached values, no formula text); a general parser (sandboxed worker, ExcelSourceRecord with
+  cell/formula/cached value) still belongs to the owning phases (06 / 12) and DEC-025/DEC-035.
+- 02.6 fix3 (matrix v2.2, DEC-057 amendment 2026-11-15, migration `0027`): the integration actions are in the
+  permission catalogue and the views authenticate with the session cookie. `product_data_steward` and
+  `owner_admin`: freshness, conflict list / detail / resolve; `management_viewer`: freshness only, with the
+  per-source `open_conflicts` count (contract 0.8.4-draft), never the items. Resolve refuses the user who raised
+  the item (403 `SELF_APPROVAL_FORBIDDEN`).
 - No file quarantine/scan (SEC-03, PHASE_01; tooling 00.7).
 - Denied/failed attempts inside a rolled-back unit of work leave no audit row (known 00.3 limit).
 - Freshness thresholds and the re-import / supersede policy wait for **DEC-016**; legacy workbook mapping for

@@ -904,9 +904,11 @@ def test_matrix_v20_seed_equals_section_7_of_the_matrix_document_cell_by_cell() 
     new = {r.code: r for r in Role.objects.filter(code__in=list(V20_COLUMNS.values())[2:])}
     assert {(r.kind, r.status, r.decision_id) for r in new.values()} == {("BUSINESS", "ACTIVE", "DEC-057")}
     # v2.1 (0024): planning_officer gained the due-date planning approval; the other four stay at 2.0
+    # v2.2 (0027): product_data_steward gained the integration conflict queue
     assert {c: r.matrix_version for c, r in new.items()} == {
         **{c: "2.0" for c in new},
         "planning_officer": "2.1",
+        "product_data_steward": "2.2",
     }
     # nobody else holds a PHASE_02 permission (employee, technical roles, other business roles)
     others = RolePermission.objects.filter(permission__action__regex=r"^(identity|commercial)[.]").exclude(

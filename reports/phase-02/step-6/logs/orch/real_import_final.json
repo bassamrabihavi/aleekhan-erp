@@ -1,0 +1,28 @@
+{
+  "batch_id": "53fee837-245e-4170-8f35-c85547db1fa4",
+  "status": "APPLIED",
+  "already_applied": false,
+  "attempts": 1,
+  "counts": {
+    "applied": 2958,
+    "categories_created": 111,
+    "category_columns_mapped_by_header": 5,
+    "codding_rows": 2700,
+    "conflict.catalogue_name_duplicate": 2,
+    "conflict.legacy_code_disputed": 224,
+    "conflict.legacy_code_multiple_product_style": 2,
+    "conflicts": 228,
+    "error_row_count": 1375,
+    "legacy_codes_distinct": 2841,
+    "legacy_codes_linked": 0,
+    "legacy_codes_registered": 2841,
+    "legacy_codes_unlinked": 2841,
+    "legacy_values_disputed": 224,
+    "norder_rows": 3917,
+    "norder_rows_without_code": 3,
+    "row_count": 6668,
+    "sorce_e_cells_below_type_block_not_staged": 3,
+    "sorce_rows": 50,
+    "types_created": 6
+  }
+}

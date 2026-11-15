@@ -15,7 +15,7 @@ disallow_untyped_defs = false
 disallow_incomplete_defs = false
 
 [[tool.mypy.overrides]]
-module = ["dj_database_url"]
+module = ["dj_database_url", "openpyxl", "openpyxl.*", "msoffcrypto", "msoffcrypto.*"]
 ignore_missing_imports = true
 
 [tool.django-stubs]

@@ -43,7 +43,7 @@ from .errors import EngineContractError
 SOURCE_SYSTEM: Final = "aleekhan-erp"
 # Newest platform_core migration this code was written for (provenance of every outbox row). Pinned to the
 # leaf of the migration graph by test_integration_events.py::test_schema_migration_head_is_the_graph_leaf.
-SCHEMA_MIGRATION_HEAD: Final = "platform_core.0025_phase02_api_numbers"
+SCHEMA_MIGRATION_HEAD: Final = "platform_core.0027_dec057_matrix_v22"
 SYNTHETIC_TEST_PREFIX: Final = "platform.synthetic."
 
 _UUID_RE = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")
@@ -396,6 +396,21 @@ _SPECS: tuple[EventSpec, ...] = (
         "batch rejected",
         {"batch_id": U, "source_code": KEY},
     ),
+    # PHASE_02 / 02.6: apply of a source with a registered apply policy (imports.SOURCE_APPLY_POLICIES)
+    _spec(
+        "platform.integration.batch_applied",
+        INT,
+        "platform.import_batch",
+        "batch applied by its owning module's use case in one transaction (counts only)",
+        {"batch_id": U, "source_code": KEY, "applied_count": N, "conflict_count": N},
+    ),
+    _spec(
+        "platform.integration.batch_apply_failed",
+        INT,
+        "platform.import_batch",
+        "apply gave up (rolled back, batch stays VALIDATED with its staging rows); error code only",
+        {"batch_id": U, "source_code": KEY, "attempts": N, "error_code": CODE},
+    ),
     _spec(
         "platform.integration.conflict_raised",
         INT,
@@ -509,6 +524,22 @@ _SPECS: tuple[EventSpec, ...] = (
         "identity.product_code",
         "reserved code seen in the Rahkaran import -> ACTIVE / ERP_MATCHED (DEC-005 B1)",
         {"id": U, "status": CODE, "erp_status": CODE, "batch_id": U},
+    ),
+    # PHASE_02 / 02.6 Planning catalogue import (DEC-005 / DEC-058): identifiers and counts only, never a
+    # type / category name or a code value
+    _spec(
+        "identity.product_class.imported",
+        PID,
+        "identity.product_class",
+        "product type or category imported from the Planning Sorce sheet (IMP provenance)",
+        {"id": U, "level_key": KEY, "status": CODE, "batch_id": U},
+    ),
+    _spec(
+        "identity.product_code.legacy_registered",
+        PID,
+        "identity.legacy_code_import",
+        "legacy 14-digit codes registered RESERVED / ERP_PENDING from the Planning workbook (LEG, B1)",
+        {"batch_id": U, "registered": N, "linked": N, "unchanged": N},
     ),
     _spec(
         "identity.serial.cancelled",

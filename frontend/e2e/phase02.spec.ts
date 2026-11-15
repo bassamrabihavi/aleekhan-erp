@@ -8,7 +8,7 @@
 import { expect, test, type Page } from "@playwright/test";
 
 import { answerStepUp, expectNoAxeViolations, SYN_LABEL } from "./phase01-helpers";
-import { login, seedPhase02, shots, type Seed, type Session } from "./phase02-helpers";
+import { expectSerialTitleOneLine, login, seedPhase02, shots, type Seed, type Session } from "./phase02-helpers";
 
 test.describe.configure({ mode: "serial" });
 test.setTimeout(300_000);
@@ -257,6 +257,7 @@ test("planning confirms from the inbox (fresh MFA): the serial is shown; pages 1
   await shots(po, "page01-serial-summary", async () => {
     await expect(po.getByTestId("serial-summary")).toBeVisible();
   });
+  await expectSerialTitleOneLine(po); // REV-0251
   // keyboard: RTL tabs (ArrowLeft = next)
   await po.getByTestId("tab-summary").focus();
   await po.keyboard.press("ArrowLeft");
@@ -268,6 +269,10 @@ test("planning confirms from the inbox (fresh MFA): the serial is shown; pages 1
   await shots(po, "page02-serial-order", async () => {
     await expect(po.getByTestId("serial-order")).toBeVisible();
   });
+  await expectSerialTitleOneLine(po); // REV-0251
+  // REV-0252: the serial and the order reference panels have distinct titles
+  await expect(po.getByRole("heading", { name: "ارجاع‌های بیرونی سریال" })).toBeVisible();
+  await expect(po.getByRole("heading", { name: "ارجاع‌های بیرونی سفارش" })).toBeVisible();
 });
 
 test("page 33: due-date change -> commercial decision -> planning decision -> apply (version 2)", async ({ browser }) => {

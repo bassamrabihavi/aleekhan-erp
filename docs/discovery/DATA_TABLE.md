@@ -371,3 +371,41 @@ Rahkaran code that differs from the Planning code).
   evidence for belts uses only rows whose order buckle agrees with the code.
 - **Serials:** `allocateSerial` is removed from the API; a serial is created only by order confirmation (and an
   applied ADD_LINE) in the same transaction (DEC-006 L-A).
+
+### 02.6 result (Integration, migration 0026) - Planning catalogue import
+- Source `planning_catalogue_xlsm` (seed 0026, READ_ONLY, policy DEC-005; TECHNICAL DEFAULT staleness 30 days).
+  The legacy order / serial migration of the same workbook stays on `legacy_planning_xlsm` (DEC-025, blocked).
+- Server command `import_planning_catalogue` (Identity use case `product_identity/planning_import.py`, through
+  `integration.imports`: receive -> stage -> validate -> apply in one transaction):
+  - `identity_product_class` product types from `Sorce!E` -> `Sorce!O` (2-digit text only), status ACTIVE
+    (**DECIDED** by the employer 2026-11-15, DEC-005 follow-up: imported from the approved baseline = ACTIVE; any
+    later change only through a new import + the conflict queue),
+    provenance IMP (batch + staging row + `Sorce!E<row>` + raw value + `planning_catalogue.v1`); unit from the
+    DEC-058 word list (normalised name match only), belt -> `BELT_BUCKLE_WIDTH`, others `SEQUENTIAL_PER_TYPE`.
+  - categories per type from `Sorce!BE..BI` -> `Sorce!O` of the same row; column -> type by the operator's
+    `--category-columns` map or by the header cell equal to a type name.
+  - `identity_product_code` legacy registry: distinct valid 14-digit text codes of `NOrder!FZ` (+ an optional
+    `Codding` column) as provenance LEG, `RESERVED / ERP_PENDING`, no rule revision; linked to a style only when
+    that exact style exists and has no other live code; never more than one (product, style) pair per code.
+  - Conflict kinds (`platform_conflict_item`, source `planning_catalogue_xlsm`): `catalogue_code_invalid`,
+    `catalogue_code_duplicate`, `catalogue_name_duplicate`, `catalogue_unit_not_decided`,
+    `catalogue_category_column_unmapped`, `catalogue_value_changed` (never overwritten),
+    `legacy_code_disputed` (per cell: not text / not 14 digits / not prefix 02; raw kept in the staging row),
+    `legacy_code_multiple_product_style`, `legacy_code_style_has_other_code`. Details: sheet, cell, staging row
+    id, reason, shape mask, codes - never a name.
+- Not imported (unchanged): orders, `identity_historical_order_record`, serials, customers, brands, people,
+  products and styles (PHASE_12 / DEC-025 / DEC-035; DEC-028 / DEC-060).
+- File size: the Planning commands accept up to 128 MiB (`MAX_PLANNING_WORKBOOK_BYTES`, TECHNICAL DEFAULT; the
+  baseline is about 70 MB); the generic 50 MiB upload limit is unchanged. Hash streamed first, bytes loaded once.
+- `Sorce` reading rules (02.6 fix2): **two header rows** (row 1 Persian - its `BE..BI` cells name the types and
+  drive the column -> type detection; row 2 English labels), so data starts at row 3 (`--sorce-header-rows`,
+  default 2; never staged, never a conflict). **Product types are only the first contiguous non-empty block of
+  column `E`** after the header rows; below its first empty cell column `E` holds an unrelated list, which is
+  neither a type candidate nor staged (count `sorce_e_cells_below_type_block_not_staged`). The code column `O`
+  and the category columns `BE..BI` continue down their own columns.
+- Baseline layout confirmed by the orchestrator (02.6 fix1): the 14-digit code of `Codding` is column `Q`
+  (`--codding-code-col Q`); the row-1 headers of `Sorce!BE..BI` are the type names (header detection).
+- `legacy_serial_guard`: read-only counts of `NOrder!B` (plain integers >= `legacy_max_exclusive`, shapes by
+  mask) for DEC-006 P-A; `load_code_rule_golden`: golden JSON outside the repo -> DRAFT revision (02.3 engine).
+- Conflict queue access (02.6 fix3, matrix v2.2, DEC-057 amendment 2026-11-15): `product_data_steward` and
+  `owner_admin` read and resolve; `management_viewer` sees freshness and open-conflict counts only.

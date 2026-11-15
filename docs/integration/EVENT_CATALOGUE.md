@@ -1,4 +1,4 @@
-# Event catalogue — PHASE_00 + PHASE_01 platform events (PHASE_01 / 01.6) + PHASE_02 (02.2 serial allocation, 02.3 domain engine)
+# Event catalogue — PHASE_00 + PHASE_01 platform events (PHASE_01 / 01.6) + PHASE_02 (02.2 serial allocation, 02.3 domain engine, 02.6 Planning import)
 
 Source of truth: `backend/platform_core/engine/events.py` (`CATALOGUE`); reviewed golden copy:
 `backend/platform_core/tests/golden/event_catalogue.golden.json` (JSON Schema per version). This table is
@@ -7,7 +7,7 @@ generated from the code and must be regenerated with it. Status: DRAFT (part of 
 Envelope (every event, `platform_outbox_event`): `event_id` (consumer dedupe key), `event_type`, `schema_version`,
 `aggregate_type`, `aggregate_id`, `aggregate_version`, `occurred_at` (UTC), `actor_type` / `actor_id`, `request_id`,
 `correlation_id`, `causation_id`, `payload`, and the provenance of the producing code (migration `0016`):
-`producer` (owning module), `build_commit` (`ALEEKHAN_BUILD_COMMIT`), `schema_migration` (`platform_core.0025_phase02_api_numbers`
+`producer` (owning module), `build_commit` (`ALEEKHAN_BUILD_COMMIT`), `schema_migration` (`platform_core.0027_dec057_matrix_v22`
 in this build). Source system: `aleekhan-erp`. Rows written before migration 0016 carry `''` (unknown).
 
 Rules: producers emit only catalogued types, the matching aggregate type and the **current** version, with an exact
@@ -53,7 +53,9 @@ Field kinds: `uuid` (canonical lower-case), `ref` (id of another resource, `[A-Z
 | `identity.customer_brand.updated` | 1 | `platform_core.product_identity` | `identity.customer_brand` | `id`:uuid, `customer_id`:uuid, `status`:code | brand of a customer updated (DEC-058 B-A) |
 | `identity.product.created` | 1 | `platform_core.product_identity` | `identity.product` | `id`:uuid, `product_type_id`:uuid, `status`:code | product created; number = max of type + 1, or buckle + width for belts (DEC-005) |
 | `identity.product.status_changed` | 1 | `platform_core.product_identity` | `identity.product` | `id`:uuid, `status`:code | product DRAFT/ACTIVE/RETIRED |
+| `identity.product_class.imported` | 1 | `platform_core.product_identity` | `identity.product_class` | `id`:uuid, `level_key`:key, `status`:code, `batch_id`:uuid | product type or category imported from the Planning Sorce sheet (IMP provenance) |
 | `identity.product_code.erp_matched` | 1 | `platform_core.product_identity` | `identity.product_code` | `id`:uuid, `status`:code, `erp_status`:code, `batch_id`:uuid | reserved code seen in the Rahkaran import -> ACTIVE / ERP_MATCHED (DEC-005 B1) |
+| `identity.product_code.legacy_registered` | 1 | `platform_core.product_identity` | `identity.legacy_code_import` | `batch_id`:uuid, `registered`:count, `linked`:count, `unchanged`:count | legacy 14-digit codes registered RESERVED / ERP_PENDING from the Planning workbook (LEG, B1) |
 | `identity.product_code.reserved` | 1 | `platform_core.product_identity` | `identity.product_code` | `id`:uuid, `style_id`:uuid, `rule_revision_id`:uuid, `status`:code, `erp_status`:code | 14-digit code issued RESERVED / ERP_PENDING under the ACTIVE rule (DEC-005 B1) |
 | `identity.serial.allocated` | 1 | `platform_core.product_identity` | `identity.serial` | `id`:uuid, `snapshot_version`:count, `status`:code | serial allocated at order confirm with its snapshot v1 (gapless counter, DEC-006) |
 | `identity.serial.cancelled` | 1 | `platform_core.product_identity` | `identity.serial` | `id`:uuid, `status`:code | serial cancelled with its line; the number is never re-used (DEC-059) |
@@ -91,6 +93,8 @@ Field kinds: `uuid` (canonical lower-case), `ref` (id of another resource, `[A-Z
 | `platform.identity.user.password_reset` | 1 | `platform_core.identity` | `platform.user` | `id`:uuid, `status`:code | admin password reset |
 | `platform.identity.user.status_changed` | 1 | `platform_core.identity` | `platform.user` | `id`:uuid, `status`:code | lock/unlock/disable/enable |
 | `platform.identity.user.updated` | 1 | `platform_core.identity` | `platform.user` | `id`:uuid, `status`:code | user profile fields changed |
+| `platform.integration.batch_apply_failed` | 1 | `platform_core.integration` | `platform.import_batch` | `batch_id`:uuid, `source_code`:key, `attempts`:count, `error_code`:code | apply gave up (rolled back, batch stays VALIDATED with its staging rows); error code only |
+| `platform.integration.batch_applied` | 1 | `platform_core.integration` | `platform.import_batch` | `batch_id`:uuid, `source_code`:key, `applied_count`:count, `conflict_count`:count | batch applied by its owning module's use case in one transaction (counts only) |
 | `platform.integration.batch_received` | 1 | `platform_core.integration` | `platform.import_batch` | `batch_id`:uuid, `source_code`:key, `sha256`:sha256, `byte_size`:count | file received (hash only, no content) |
 | `platform.integration.batch_rejected` | 1 | `platform_core.integration` | `platform.import_batch` | `batch_id`:uuid, `source_code`:key | batch rejected |
 | `platform.integration.batch_staged` | 1 | `platform_core.integration` | `platform.import_batch` | `batch_id`:uuid, `source_code`:key, `row_count`:count | rows staged |

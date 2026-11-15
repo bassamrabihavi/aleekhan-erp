@@ -1,0 +1,10 @@
+
+ RUN  v5.0.5 F:/aleekhan/aleekhan-erp/frontend
+
+
+ Test Files  1 passed (1)
+      Tests  21 passed (21)
+   Start at  12:25:56
+   Duration  32.84s (environment 58%, tests 15%, setup 12%, import 10%, transform 6%)
+
+# exit code: 0

@@ -116,6 +116,21 @@ export async function login(browser: Browser, p: Person): Promise<Session> {
   return { ctx, page, totp };
 }
 
+/** REV-0251: at tablet width (768) the serial header title (#serial-title) stays on ONE line: its box height is at
+ * most 1.5 x its computed line height (the 02.5 layout broke it into one word per line). */
+export async function expectSerialTitleOneLine(page: Page): Promise<void> {
+  await page.setViewportSize({ width: 768, height: 1024 });
+  const title = page.locator("#serial-title");
+  await expect(title).toBeVisible();
+  const { height, lineHeight } = await title.evaluate((el) => {
+    const cs = getComputedStyle(el);
+    const lh = Number.parseFloat(cs.lineHeight);
+    return { height: el.getBoundingClientRect().height, lineHeight: Number.isNaN(lh) ? Number.parseFloat(cs.fontSize) * 1.2 : lh };
+  });
+  expect(height).toBeLessThanOrEqual(lineHeight * 1.5);
+  await page.setViewportSize({ width: 1440, height: 900 });
+}
+
 /** Full-page screenshots at 1440/1180/768/390 (phase02-<name>-<size>.png), then back to 1440. */
 export async function shots(page: Page, name: string, ready: () => Promise<void>): Promise<void> {
   for (const vp of VIEWPORTS) {
