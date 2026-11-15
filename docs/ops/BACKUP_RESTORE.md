@@ -88,3 +88,19 @@ archiving above and is not demonstrated by one dump. Repeat on staging with prod
   if the volume is newer than the DB (bytes without a row older than 24 h are removed, audited) - never the
   other way round.
 - Rollback rehearsal of the PHASE_01 migrations: docs/ops/ROLLBACK.md section 3a.
+
+## 7. PHASE_02 / 02.7 drill additions
+
+- The seed also writes a labelled PHASE_02 row set through the PHASE_02 engine and the Planning import (synthetic
+  people / catalogue from the test factories): confirmed and released orders (serials from the gapless counter,
+  serial snapshots, order versions), an applied quantity change request, CU- / SO- / CR- numbers
+  (`platform_number_counter`), an APPLIED Planning import of a tiny synthetic workbook (staging rows, legacy
+  codes, conflict items) and one Planning batch whose apply failed. `DRILL_SKIP_PHASE02=1` leaves them out.
+- `ops/backup/drill_verify_phase02.py` (read-only, `[test_]aleekhan_drill_*` only, counts and booleans only)
+  runs before the dump and after the restore: the issued serials are exactly `63001 .. next_value - 1` (no gap,
+  no duplicate), confirmed lines and serials are paired one to one, snapshots are contiguous from version 1,
+  every order has all its versions, every applied change request has its version, every issued year-format
+  number has a counter row at or above it, the Planning batch is APPLIED with staging rows and codes, the failed
+  apply is still visible. The counts must be identical before and after.
+- Extra checks: migrations `0019`-`0028` recorded; `job_status` still reports `IMPORT_APPLY_FAILED`.
+- Rollback rehearsal of the PHASE_02 migrations: docs/ops/ROLLBACK.md section 3b.

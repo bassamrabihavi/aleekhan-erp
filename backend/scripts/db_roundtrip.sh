@@ -63,6 +63,13 @@ manage showmigrations platform_core
 dump_schema "$OUT/schema_zero.sql"
 echo "tables after rollback:"; tables
 echo "platform functions left: $("$PSQL" -d "$DB" -Atc "SELECT count(*) FROM pg_proc WHERE proname LIKE 'platform\_%'")"
+# PHASE_02 / 02.7 (REV-0223): the PHASE_02 trigger functions (identity_*, commercial_*, phase02_*) must be gone
+# too; every application function family is counted and a leftover fails the round trip
+for fam in platform identity commercial phase02; do
+  n="$("$PSQL" -d "$DB" -Atc "SELECT count(*) FROM pg_proc p JOIN pg_namespace s ON s.oid = p.pronamespace WHERE s.nspname = 'public' AND p.proname LIKE '${fam}\_%'" | tr -d '\r')"
+  echo "${fam}_% functions left: $n"
+  if [ "$n" != "0" ]; then echo "FAIL: ${fam}_% functions left after rollback: $n" >&2; exit 1; fi
+done
 remaining="$(tables | grep -v -x 'django_migrations' || true)"
 if [ -n "$remaining" ]; then echo "FAIL: tables left after rollback: $remaining" >&2; exit 1; fi
 # PHASE_01 / 01.2: migration 0008 installs btree_gist (exclusion constraints); its reverse must remove it

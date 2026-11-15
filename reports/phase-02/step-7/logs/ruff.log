@@ -1,0 +1,5 @@
+$ ruff check . && ruff format --check .
+All checks passed!
+rc=0
+370 files already formatted
+rc=0

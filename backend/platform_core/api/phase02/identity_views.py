@@ -640,7 +640,7 @@ class CodeRuleView(Phase02View):
 
     def get(self, request: Request, rule_revision_id: uuid.UUID) -> Response:
         r = object_or_404(self, CodeRuleRevision.objects.all(), rule_revision_id)
-        return etag_response(S.code_rule(r), r.row_version)
+        return etag_response(S.code_rule(r, live_summary=True), r.row_version)  # REV-0244: live here
 
 
 def _refuse_harness_only_fields(raw: Any) -> None:

@@ -390,7 +390,9 @@ Rahkaran code that differs from the Planning code).
   - Conflict kinds (`platform_conflict_item`, source `planning_catalogue_xlsm`): `catalogue_code_invalid`,
     `catalogue_code_duplicate`, `catalogue_name_duplicate`, `catalogue_unit_not_decided`,
     `catalogue_category_column_unmapped`, `catalogue_value_changed` (never overwritten),
-    `legacy_code_disputed` (per cell: not text / not 14 digits / not prefix 02; raw kept in the staging row),
+    `legacy_code_disputed` (02.7, REV-0261: ONE item per sheet + distinct value - not text / not 14 digits / not
+    prefix 02 - with `row_count` and up to 100 `cell_refs`, identical order rows included; the decision applies to
+    every row of the value; raw kept in the staging rows; DECISION_LOG 2026-11-15),
     `legacy_code_multiple_product_style`, `legacy_code_style_has_other_code`. Details: sheet, cell, staging row
     id, reason, shape mask, codes - never a name.
 - Not imported (unchanged): orders, `identity_historical_order_record`, serials, customers, brands, people,

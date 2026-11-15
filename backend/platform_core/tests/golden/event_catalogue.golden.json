@@ -1,7 +1,7 @@
 {
  "_note": "Golden event catalogue (PHASE_01 / 01.6). Generated from platform_core/engine/events.py and reviewed: every outbox event type of PHASE_00 + PHASE_01 (+ PHASE_02 / 02.2: identity.serial.allocated; + PHASE_02 / 02.3: the identity.* / commercial.* engine events; + 02.4: planning rejection, external references; + 02.6: batch applied / apply failed, product class imported, legacy codes registered) with producer module, aggregate type, sensitivity (S1: ids, status codes, counts only), current and accepted schema versions and the JSON Schema of each payload version. A change of this file is a contract change (new version + reviewed commit). Human-readable copy: docs/integration/EVENT_CATALOGUE.md.",
  "source_system": "aleekhan-erp",
- "schema_migration_head": "platform_core.0027_dec057_matrix_v22",
+ "schema_migration_head": "platform_core.0028_phase02_golden_summary",
  "catalogue": {
   "commercial.change_request.applied": {
    "event_type": "commercial.change_request.applied",

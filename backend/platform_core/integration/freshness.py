@@ -1,12 +1,17 @@
 """Per-source freshness (PHASE_00 / 00.6): fresh / stale / never.
 
 ``last_success_at`` is set when a batch of the source is VALIDATED with at least one structurally valid row
-(``imports.validate_batch``). A duplicate import of the same file does not refresh it (it brings no new
-evidence, WH-01). Provenance never moves backwards (REV-0601, ``imports.supersedes_freshness``): an older
-or undated snapshot validated after a newer one does not change ``last_success_at`` / ``last_success_batch``
-/ ``last_as_of``. **Basis:** age is measured from *import time* (``last_success_at``), not from the snapshot
-date (``last_as_of``) - TECHNICAL DEFAULT pending DEC-016; the API always returns ``last_as_of`` next to the
-classification so the UI can show the data date. Classification against the source's ``staleness_threshold``:
+(``imports.validate_batch``) - except for a source whose batches an owning module APPLIES
+(``imports.SOURCE_APPLY_POLICIES``, today ``planning_catalogue_xlsm``): there it is set only when the batch is
+APPLIED, in the apply transaction (02.7, REV-0265). A validated-but-not-applied or failed-apply batch never
+makes such a source look fresh; the failure itself is visible in ``outbox_status`` / ``job_status``
+(``imports.apply_failed``, reason ``IMPORT_APPLY_FAILED``). A duplicate import of the same file does not
+refresh it (it brings no new evidence, WH-01). Provenance never moves backwards (REV-0601,
+``imports.supersedes_freshness``): an older or undated snapshot validated after a newer one does not change
+``last_success_at`` / ``last_success_batch`` / ``last_as_of``. **Basis:** age is measured from *import time*
+(``last_success_at``), not from the snapshot date (``last_as_of``) - TECHNICAL DEFAULT pending DEC-016; the
+API always returns ``last_as_of`` next to the classification so the UI can show the data date. Classification
+against the source's ``staleness_threshold``:
 
 * ``never``  no successful import yet;
 * ``fresh``  ``now - last_success_at <= threshold`` (a timestamp in the future counts as age 0);

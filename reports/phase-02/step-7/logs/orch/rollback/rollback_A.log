@@ -1,0 +1,22 @@
+Operations to perform:
+  Target specific migration: 0010_seed_phase01_catalogue, from platform_core
+Running migrations:
+  Rendering model states... DONE
+  Unapplying platform_core.0028_phase02_golden_summary... OK
+  Unapplying platform_core.0027_dec057_matrix_v22... OK
+  Unapplying platform_core.0026_phase02_planning_catalogue_source... OK
+  Unapplying platform_core.0025_phase02_api_numbers... OK
+  Unapplying platform_core.0024_dec057_dec059_matrix_v21... OK
+  Unapplying platform_core.0023_phase02_engine... OK
+  Unapplying platform_core.0022_dec057_matrix_v20... OK
+  Unapplying platform_core.0021_phase02_seed_catalogue... OK
+  Unapplying platform_core.0020_phase02_db_guards... OK
+  Unapplying platform_core.0019_phase02_identity_commercial_schema... OK
+  Unapplying platform_core.0018_outbox_discard_and_orphan_job... OK
+  Unapplying platform_core.0017_dec056_matrix_v13... OK
+  Unapplying platform_core.0016_outbox_provenance_and_order... OK
+  Unapplying platform_core.0015_dec056_matrix_v12... OK
+  Unapplying platform_core.0014_dec056_owner_approval_rights... OK
+  Unapplying platform_core.0013_dec055_bootstrap_self_approval... OK
+  Unapplying platform_core.0012_phase01_engine_rework... OK
+  Unapplying platform_core.0011_phase01_engine... OK

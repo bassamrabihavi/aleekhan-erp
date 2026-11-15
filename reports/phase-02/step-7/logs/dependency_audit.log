@@ -1,0 +1,21 @@
+== pip-audit runtime lock (backend/requirements.lock) 2026-11-15T12:43:17Z
+pip-audit 2.10.1
+WARNING:pip_audit._cli:--no-deps is supported, but users are encouraged to fully hash their pinned dependencies
+WARNING:pip_audit._cli:Consider using a tool like `pip-compile`: https://pip-tools.readthedocs.io/en/latest/#using-hashes
+No known vulnerabilities found
+rc=0
+== 14-day release rule (PyPI JSON upload_time of the pinned version; pin date 2026-11-15 )
+openpyxl==3.1.5: first upload 2024-06-28T14:03:41.161372Z -> 870 days before the pin date: OK (>= 14)
+msoffcrypto-tool==6.1.0: first upload 2026-11-03T18:19:38.150668Z -> 12 days before the pin date: VIOLATION (< 14)
+et_xmlfile==2.0.0: first upload 2024-10-25T17:25:39.051783Z -> 751 days before the pin date: OK (>= 14)
+olefile==0.47: first upload 2023-12-01T16:22:51.518738Z -> 1080 days before the pin date: OK (>= 14)
+== msoffcrypto-tool releases (latest 4, first upload):
+  5.4.1: 2024-05-24T19:51:15.118683Z
+  5.4.2: 2024-08-08T15:50:27.093707Z
+  6.0.0: 2026-01-12T08:59:55.394788Z
+  6.1.0: 2026-11-03T18:19:38.150668Z
+Version: 6.1.0
+Requires: cryptography, olefile
+== npm audit --omit=dev 2026-11-15T12:43:54Z
+found 0 vulnerabilities
+rc=0

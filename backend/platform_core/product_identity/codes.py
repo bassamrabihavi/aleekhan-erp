@@ -254,7 +254,9 @@ def add_golden_cases(
             )
         with db_rules():
             CodeRuleGoldenCase.objects.bulk_create(objs)
-        CodeRuleRevision.objects.filter(pk=r.pk).update(updated_by_id=caller.user_id)
+        CodeRuleRevision.objects.filter(pk=r.pk).update(
+            updated_by_id=caller.user_id, golden_summary=golden_summary(r)
+        )
         r.refresh_from_db()
         _rule_write(uow, "golden", r, before=None, scope={"added": len(objs)})
     return len(objs)
@@ -305,9 +307,12 @@ def golden_report(r: CodeRuleRevision) -> tuple[dict[str, int], list[FieldError]
     return dict(counts), problems
 
 
-def golden_summary(r: CodeRuleRevision) -> dict[str, Any]:
-    """What the approver sees on the revision (REV-0240): counts only, never a case value."""
-    counts, problems = golden_report(r)
+def golden_summary(
+    r: CodeRuleRevision, report: tuple[dict[str, int], list[FieldError]] | None = None
+) -> dict[str, Any]:
+    """What the approver sees on the revision (REV-0240): counts only, never a case value. ``report``: an
+    already computed :func:`golden_report` of ``r`` (submit / approve reuse theirs)."""
+    counts, problems = report if report is not None else golden_report(r)
     belts = belt_type_codes()
     belt_checked = 0
     legacy_only = 0
@@ -333,6 +338,14 @@ def golden_summary(r: CodeRuleRevision) -> dict[str, Any]:
     }
 
 
+def stored_golden_summary(r: CodeRuleRevision) -> dict[str, Any]:
+    """02.7 (REV-0244): the summary stored at the last write (golden cases added, submit, approve) - lists and
+    write responses read it instead of rebuilding every stored case per row. ``NULL`` (a revision without
+    cases, or written before migration 0028) is computed on read, which is cheap without cases."""
+    stored = r.golden_summary
+    return dict(stored) if isinstance(stored, dict) else golden_summary(r)
+
+
 def _refuse_golden(problems: list[FieldError]) -> None:
     if problems:
         first = Reason(problems[0].code)
@@ -354,6 +367,7 @@ def submit_rule_revision(
             CodeRuleRevision.objects.filter(pk=r.pk).update(
                 status=CodeRuleStatus.IN_REVIEW,
                 golden_case_count=sum(counts.values()),
+                golden_summary=golden_summary(r, (counts, problems)),
                 updated_by_id=caller.user_id,
             )
         r.refresh_from_db()
@@ -384,12 +398,13 @@ def approve_rule_revision(
         check_version(r, expected_version)
         _approver(caller, r)
         CODE_RULE_MACHINE.assert_transition(r.status, CodeRuleStatus.APPROVED)
-        _counts, problems = golden_report(r)  # re-checked: the approver approves what reproduces now
+        counts, problems = golden_report(r)  # re-checked: the approver approves what reproduces now
         _refuse_golden(problems)
         before = _rule_view(r)
         with db_rules():
             CodeRuleRevision.objects.filter(pk=r.pk).update(
                 status=CodeRuleStatus.APPROVED,
+                golden_summary=golden_summary(r, (counts, problems)),
                 approved_by_id=caller.user_id,
                 approved_at=Now(),
                 updated_by_id=caller.user_id,

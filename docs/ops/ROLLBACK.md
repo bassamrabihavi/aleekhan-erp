@@ -51,6 +51,26 @@ fresh 0010, business rows kept, then forward to head with an empty schema diff. 
 the reverse stops at 0011 with `ProtectedError` and leaves a consistent state (schema identical to a fresh 0011,
 rows kept); forward to head works. Evidence: `reports/phase-01/step-7/logs/rollback_rehearsal*`.
 
+## 3b. PHASE_02 migrations 0019-0028 (02.7 rehearsal)
+
+| Migration | Reverse | Data note |
+|---|---|---|
+| 0028 code-rule `golden_summary` (REV-0244) | yes | derived display column dropped; lists recompute on read after a code rollback |
+| 0027 matrix v2.2 (integration queue) | yes | steward / owner / viewer lose freshness / conflict grants; items stay |
+| 0026 Planning source seed | yes while no batch / conflict references it; with batches the row is kept (PROTECT, nothing lost) | import batches, staging rows and conflict items stay |
+| 0025 year numbers (`platform_number_counter`) + planning reject | yes (refused while a planning-rejected request exists) | the counter table is dropped and the 0023 sequences are re-created. **02.7 fix:** the forward re-positions each (kind, Jalali year) counter at the highest CU-/SO-/CR- number already issued, so rollback + forward never re-issues a number (before the fix the counters restarted at 1 and the next number collided with an issued one - found by this rehearsal) |
+| 0023 / 0024 engine, matrix v2.1 | yes | |
+| 0022 matrix v2.0 (PHASE_02 roles) | **refused while a PHASE_02 role is assigned** (PROTECT FK, by design) | rolling back a used matrix needs a compensation plan; on a running system = restore from backup (section 3 step 4) |
+| 0019-0021 schema, guards, seed | only reachable after 0022 | the tables hold orders, serials and snapshots: never drop them on a live system |
+
+Rehearsal: `ops/backup/rollback_rehearsal.sh` scenarios C and D. C (PHASE_01 data, PHASE_02 schema, no PHASE_02
+business rows): head -> 0027 -> 0018 succeeds, schema identical to a fresh 0018, no `identity_*` / `commercial_*`
+table or PHASE_02 function left, forward with an empty schema diff. D (PHASE_02 data): the reverse stops at
+0022 (`IntegrityError` on `platform_role`), 0023-0028 reversed, schema identical to a fresh 0022, every PHASE_02
+row and the serial counter kept; forward to head and `ops/backup/drill_verify_phase02.py` passes (gapless
+serials, versions, snapshots, number counters, import batches). Evidence:
+`reports/phase-02/step-7/logs/rollback_rehearsal.log`, `logs/rollback/rehearsal_report.json`.
+
 ## 4. Frontend rollback
 
 The UI is a static bundle served by the reverse proxy: redeploy the previous `frontend/dist` (its file hashes

@@ -1,0 +1,16 @@
+{
+  "threshold": 63000,
+  "non_empty": 3920,
+  "plain_integer": 3779,
+  "plain_at_or_above_threshold": 0,
+  "plain_from_integral_float": 0,
+  "plain_values_duplicated": 1,
+  "non_plain_total": 141,
+  "non_plain_by_mask": {
+    "9+-9": 85,
+    "9+-A": 15,
+    "A+9+": 1,
+    "A9+": 40
+  },
+  "safe_for_start": true
+}

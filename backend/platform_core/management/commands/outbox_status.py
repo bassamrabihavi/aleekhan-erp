@@ -3,7 +3,9 @@
 Prints counts per delivery state, due backlog, oldest pending age, stale DISPATCHED (lease expired), dead
 letters, last dispatch/ack and open integration conflicts, plus a verdict ``ok|warn|critical``; since 01.6
 also delivery lag / stale flag, aggregates blocked by a dead letter, held events and open compensation
-records.
+records; since 02.7 the import apply health of the applied sources (``imports``: failed / awaiting apply,
+reason ``IMPORT_APPLY_FAILED``) and undelivered / dead-letter counts per event family (``event_families``:
+``identity``, ``commercial``, ``platform.integration``, ...).
 
 ``--json`` prints one JSON object (for scrapers). ``--fail-on warn|critical`` makes the exit code 1 when the
 verdict is at least that level (for cron / systemd timers / a monitoring agent). No payloads, error texts,
@@ -57,6 +59,17 @@ class Command(BaseCommand):
             integ = d.get("integration") or {}
             for key in ("lag_seconds", "stale", "blocked_aggregates", "held_events", "compensation_open"):
                 self.stdout.write(f"integration.{key}: {integ.get(key)}")
+            for imp in d["imports"]:  # 02.7: apply failures of the applied sources (counts only)
+                self.stdout.write(
+                    f"imports.{imp['source_code']}: apply_failed={imp['apply_failed']} "
+                    f"awaiting_apply={imp['awaiting_apply']} open_conflicts={imp['open_conflicts']} "
+                    f"last_apply_failed_at={imp['last_apply_failed_at']} "
+                    f"last_applied_at={imp['last_applied_at']}"
+                )
+            for fam, n in d["event_families"].items():  # 02.7: PHASE_02 events next to the others
+                self.stdout.write(
+                    f"events.{fam}: undelivered={n['undelivered']} dead_letter={n['dead_letter']}"
+                )
             self.stdout.write(f"verdict: {d['verdict']} {' '.join(d['reasons'])}".rstrip())
         fail_on = options["fail_on"]
         if fail_on is not None and VERDICTS.index(snap.verdict) >= VERDICTS.index(fail_on):

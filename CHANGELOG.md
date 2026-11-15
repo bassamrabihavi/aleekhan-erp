@@ -432,3 +432,30 @@ Review verdicts are in `reports/phase-00/step-N/REVIEW.md`. No version number is
   resolve refuses the user who raised the item; imported types / categories ACTIVE is now DECIDED.
 - Tests: `tests/test_phase02_planning_import.py` (synthetic workbooks generated in tmp; idempotency, conflicts,
   compensation, retry / backoff, SHA mismatch, path refusal, encryption, golden loader, serial guard).
+
+### 02.7 Security & Ops (commit SHA added by the orchestrator when committed)
+- Security checklist `docs/security/PHASE_02_SECURITY_CHECKLIST.md` (evidence per item; sign-off rows empty
+  for the Gate).
+- Privacy / permission tests: `tests/test_phase02_step7_privacy.py` (16 seeded roles x 69 PHASE_02 + integration
+  operations, allow / deny exactly per the seeded matrix v2.2; fresh MFA per holder role),
+  `tests/test_phase02_step7_pii.py` (representative name only in its column: all application tables + logs).
+- Performance: `tests/test_perf_phase02.py` (marker `perf`; TECHNICAL DEFAULT budgets).
+- REV-0244: migration `0028_phase02_golden_summary` (reversible) - the counts-only golden summary is stored at
+  golden-add / submit / approve; lists and write responses read it, the single GET recomputes it.
+- REV-0261: one `legacy_code_disputed` item per sheet + distinct value with `row_count` / `cell_refs`
+  (duplicate order rows counted); counters `legacy_rows_disputed`, `legacy_duplicate_rows_counted`.
+- REV-0262 / REV-0266: `load_code_rule_golden` - maker must be an ACTIVE holder of `identity.code_rule.manage`
+  (`MAKER_NOT_FOUND` / `MAKER_NOT_ACTIVE` / `ACCESS_DENIED`), audit row `identity.code_rule.console_load`;
+  `--source-sha256` must be an APPLIED Planning batch (`SOURCE_BATCH_NOT_APPLIED`).
+- REV-0265: freshness of an applied source advances only at APPLIED (audit `freshness_deferred_to_apply`).
+- Job monitoring: `ops.monitoring.import_health` / `event_families`; `outbox_status` and `job_status` gain
+  `imports` (reason `IMPORT_APPLY_FAILED`) and `outbox_status` gains `event_families`.
+- Backup / rollback: drill seeds PHASE_02 rows and checks them with `ops/backup/drill_verify_phase02.py`;
+  rehearsal scenarios C (0028 -> 0027 -> 0018 -> head) and D (PHASE_02 data: refused at 0022 by design,
+  forward + invariants). **Fix found by the rehearsal:** migration 0025's forward re-positions
+  `platform_number_counter` at the highest issued CU- / SO- / CR- number (a rollback past 0025 + forward used to
+  restart the counters at 1).
+- REV-0223: `db_roundtrip.sh` fails on any `platform_%` / `identity_%` / `commercial_%` / `phase02_%` function
+  left after the rollback. REV-0264: `frontend/scripts/e2e.sh` `E2E_STEP=phase-XX/step-Y` -> that step's
+  screenshot folder; a folder with committed screenshots is refused unless `E2E_SCREENSHOT_OVERWRITE=1`.
+- Event envelope `schema_migration` = `platform_core.0028_phase02_golden_summary`.

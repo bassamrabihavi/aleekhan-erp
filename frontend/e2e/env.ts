@@ -7,8 +7,9 @@ export const FRONTEND_URL = "http://127.0.0.1:5173";
 const here = path.dirname(fileURLToPath(import.meta.url));
 /**
  * Screenshots. Default = untracked frontend/test-results/screenshots (REV-0501: a plain run must never overwrite
- * committed evidence). Acceptance evidence is produced by passing the report folder explicitly, e.g.
- * E2E_SCREENSHOT_DIR=../reports/phase-00/step-6/screenshots.
+ * committed evidence). Acceptance evidence is produced for the CURRENT step only: `scripts/e2e.sh` maps
+ * E2E_STEP=phase-02/step-7 to ../reports/phase-02/step-7/screenshots and refuses a folder that already holds
+ * committed screenshots of another run (REV-0264); E2E_SCREENSHOT_DIR may still be passed explicitly.
  */
 export const SCREENSHOT_DIR = process.env.E2E_SCREENSHOT_DIR
   ? path.resolve(process.env.E2E_SCREENSHOT_DIR)

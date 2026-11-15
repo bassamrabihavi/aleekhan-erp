@@ -1,0 +1,6 @@
+$ npm run typecheck (2026-11-15T12:55:49Z)
+
+> aleekhan-frontend@0.0.0 typecheck
+> tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.node.json
+
+rc=0

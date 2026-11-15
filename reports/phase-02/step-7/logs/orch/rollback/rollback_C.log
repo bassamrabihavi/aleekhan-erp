@@ -1,0 +1,13 @@
+Operations to perform:
+  Target specific migration: 0018_outbox_discard_and_orphan_job, from platform_core
+Running migrations:
+  Rendering model states... DONE
+  Unapplying platform_core.0027_dec057_matrix_v22... OK
+  Unapplying platform_core.0026_phase02_planning_catalogue_source... OK
+  Unapplying platform_core.0025_phase02_api_numbers... OK
+  Unapplying platform_core.0024_dec057_dec059_matrix_v21... OK
+  Unapplying platform_core.0023_phase02_engine... OK
+  Unapplying platform_core.0022_dec057_matrix_v20... OK
+  Unapplying platform_core.0021_phase02_seed_catalogue... OK
+  Unapplying platform_core.0020_phase02_db_guards... OK
+  Unapplying platform_core.0019_phase02_identity_commercial_schema... OK

@@ -16,6 +16,16 @@ and a revision
 event in the 0018 state DISCARDED - so the drill proves those tables, their triggers and the audit hash chain
 survive dump and restore.
 
+PHASE_02 / 02.7: also a labelled PHASE_02 row set (migrations 0019-0028), written through the PHASE_02 engine
+and the Planning import (synthetic people and catalogue from the test factories, «ساختگی» / ``9x``
+segments): two confirmed orders (serials from the gapless counter, serial snapshots, order versions), one
+released, one applied quantity change request (new version + snapshot), customer / order / change-request
+numbers (``platform_number_counter``), an APPLIED Planning import of a tiny synthetic workbook (staging rows,
+legacy codes, conflict items) and one Planning batch whose apply FAILED (``batch_apply_failed``, still
+VALIDATED) - so the drill proves the PHASE_02 tables, counters and the commit-time invariants survive dump and
+restore (``ops/backup/drill_verify_phase02.py``). ``DRILL_SKIP_PHASE02=1`` leaves them out (the PHASE_01
+rollback rehearsal down to 0010).
+
 Usage: python ops/backup/drill_seed.py [N]   (N = number of audit/outbox pairs and staging rows, default 200)
 """
 
@@ -93,7 +103,8 @@ def main() -> int:
         ctx, source_code=source.code, kind="synthetic_drill", key="k1", details={"label": LABEL}
     )
     phase01 = seed_phase01()
-    print(f"drill_seed: seeded n={n} source={source.code} phase01_rows={phase01}")
+    phase02 = 0 if os.environ.get("DRILL_SKIP_PHASE02", "") == "1" else seed_phase02()
+    print(f"drill_seed: seeded n={n} source={source.code} phase01_rows={phase01} phase02_rows={phase02}")
     return 0
 
 
@@ -199,6 +210,49 @@ def seed_phase01() -> int:
     )
     OutboxEvent.objects.filter(pk=dead.pk).update(delivery_status="DISCARDED", discarded_at=now)
     return 11 + len(runs)
+
+
+def seed_phase02() -> int:
+    """One labelled PHASE_02 row set (see the module docstring). Returns the number of serials allocated."""
+    import tempfile
+
+    from platform_core.integration.imports import apply_batch_with_retry
+    from platform_core.product_identity import planning_import as pi
+    from platform_core.product_identity.master import create_customer
+    from platform_core.product_identity.models import Serial
+    from platform_core.tests import phase02_engine as e
+    from platform_core.tests.test_phase02_planning_import import base_sheets, sha, write_workbook
+
+    p = e.people()
+    # customers through the engine: their CU- numbers are drawn from platform_number_counter like SO- / CR-
+    customers = [
+        create_customer(p.co.caller, display_name_fa=f"مشتری ساختگی تمرین {i} ({LABEL})") for i in (1, 2)
+    ]
+    first = e.confirmed_order(p.co, p.po, lines=3, customer=customers[0])
+    e.released_order(p.co, p.po2, lines=2, customer=customers[1])
+    line = e.live_lines(first)[0]
+    e.applied(p, first, "QTY_CHANGE", [{"line_id": str(line.pk), "quantity": 12}])
+    with tempfile.TemporaryDirectory() as tmp:  # outside the repository; deleted at once
+        wb = write_workbook(Path(tmp) / "synthetic-drill-planning.xlsm", base_sheets())
+        pi.import_planning_workbook(wb, expected_sha256=sha(wb), layout=pi.Layout(codding_code_col="K"))
+    ctx = RequestContext(Actor.system(), request_id=uuid.uuid4())
+    failing = im.receive_file(
+        ctx,
+        source_code=pi.SOURCE_CODE,
+        content=f"SYNTHETIC drill {uuid.uuid4()}".encode(),
+        original_name="f.xlsm",
+    ).batch
+    im.stage_rows(ctx, failing.id, [im.StagingInput(1, {"part": "synthetic", "label": LABEL}, "SYN")])
+    im.validate_batch(ctx, failing.id)
+
+    def broken(uow: object, batch: object) -> im.ApplyOutcome:
+        raise ValueError("synthetic drill apply failure")
+
+    try:
+        apply_batch_with_retry(ctx, failing.id, applier=broken, sleep=lambda _s: None)
+    except ValueError:
+        pass  # recorded as batch_apply_failed; the batch stays VALIDATED (rollback)
+    return Serial.objects.count()
 
 
 if __name__ == "__main__":

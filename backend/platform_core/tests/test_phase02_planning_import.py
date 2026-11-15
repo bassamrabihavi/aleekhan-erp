@@ -204,8 +204,12 @@ def test_import_applies_types_categories_and_legacy_codes_with_provenance(workbo
             *["legacy_code_disputed"] * 4,
         ]
     )
-    disputed = {c.conflict_key: c.details for c in open_conflicts("legacy_code_disputed")}
+    items = open_conflicts("legacy_code_disputed")
+    disputed = {f"{c.details['sheet']}!{c.details['cell']}": c.details for c in items}
     assert set(disputed) == {"NOrder!FZ7", "NOrder!FZ8", "NOrder!FZ9", "Codding!K4"}
+    for item in items:  # 02.7 (REV-0261): one item per sheet + distinct value, value-free key
+        assert re.fullmatch(r"(NOrder|Codding)!value:[0-9a-f]{24}", item.conflict_key), item.conflict_key
+        assert item.details["row_count"] == 1 and item.details["cell_refs"] == [item.details["cell"]]
     assert disputed["NOrder!FZ8"]["reason"] == "NOT_TEXT"
     assert disputed["NOrder!FZ7"]["reason"] == "NOT_14_DIGITS" and disputed["NOrder!FZ7"]["shape"] == "9+A9+"
     assert disputed["NOrder!FZ9"]["reason"] == "NOT_PRODUCT_PREFIX"
@@ -637,6 +641,17 @@ def golden_cases(n: int = 20, fam: str = "91") -> list[dict[str, str]]:
     return out
 
 
+def applied_sha() -> str:
+    """02.7 (REV-0266): the loader needs the hash of an APPLIED Planning batch (a synthetic one here)."""
+    done = ImportBatch.objects.filter(source__code=pi.SOURCE_CODE, status=BatchStatus.APPLIED).first()
+    if done is not None:
+        return done.file_sha256
+    batch = _validated_batch()
+    im.apply_batch(RequestContext(Actor.system()), batch.id, applier=lambda uow, b: im.ApplyOutcome(0, 0, {}))
+    batch.refresh_from_db()
+    return batch.file_sha256
+
+
 def write_json(path: Path, value: Any) -> Path:
     path.write_text(json.dumps(value, ensure_ascii=False), encoding="utf-8")
     return path
@@ -647,7 +662,13 @@ def test_golden_loader_creates_a_draft_revision(tmp_path: Path) -> None:
     path = write_json(tmp_path / "golden.json", golden_cases())
     out = io.StringIO()
     call_command(
-        "load_code_rule_golden", str(path), "--maker", str(maker.pk), "--source-sha256", "a" * 64, stdout=out
+        "load_code_rule_golden",
+        str(path),
+        "--maker",
+        str(maker.pk),
+        "--source-sha256",
+        applied_sha(),
+        stdout=out,
     )
     body = json.loads(out.getvalue())
     r = CodeRuleRevision.objects.get(pk=body["revision_id"])
@@ -666,7 +687,7 @@ def test_golden_loader_refuses_harness_only_fields_and_unknown_keys(tmp_path: Pa
     path = write_json(tmp_path / "golden.json", cases)
     with pytest.raises(CommandError) as exc:
         call_command(
-            "load_code_rule_golden", str(path), "--maker", str(maker.pk), "--source-sha256", "a" * 64
+            "load_code_rule_golden", str(path), "--maker", str(maker.pk), "--source-sha256", applied_sha()
         )
     msg = str(exc.value)
     assert "cases[3].legacy_disputed:GOLDEN_FIELD_NOT_ALLOWED" in msg and "cases[5].<unknown>" in msg
@@ -681,7 +702,7 @@ def test_golden_loader_needs_source_fields_and_matching_family(tmp_path: Path) -
     path = write_json(tmp_path / "golden.json", cases)
     with pytest.raises(CommandError) as exc:
         call_command(
-            "load_code_rule_golden", str(path), "--maker", str(maker.pk), "--source-sha256", "a" * 64
+            "load_code_rule_golden", str(path), "--maker", str(maker.pk), "--source-sha256", applied_sha()
         )
     assert "cases[0].source_cell_ref:REQUIRED" in str(exc.value)
     assert "cases[1].family:FAMILY_NOT_TYPE_SEGMENT" in str(exc.value)
@@ -692,14 +713,14 @@ def test_golden_loader_permission_and_repo_path(tmp_path: Path) -> None:
     path = write_json(tmp_path / "golden.json", golden_cases())
     with pytest.raises(CommandError, match="ACCESS_DENIED"):
         call_command(
-            "load_code_rule_golden", str(path), "--maker", str(nobody.pk), "--source-sha256", "a" * 64
+            "load_code_rule_golden", str(path), "--maker", str(nobody.pk), "--source-sha256", applied_sha()
         )
     assert not CodeRuleRevision.objects.exists()
     maker = holder("product_data_steward")
     inside = REPO_ROOT / "backend" / "platform_core" / "tests" / "golden" / "backoff.golden.json"
     with pytest.raises(CommandError, match="PATH_INSIDE_REPOSITORY"):
         call_command(
-            "load_code_rule_golden", str(inside), "--maker", str(maker.pk), "--source-sha256", "a" * 64
+            "load_code_rule_golden", str(inside), "--maker", str(maker.pk), "--source-sha256", applied_sha()
         )
 
 
@@ -715,6 +736,6 @@ def test_golden_loader_is_all_or_nothing_across_chunks(
     path = write_json(tmp_path / "golden.json", cases)
     with pytest.raises(CommandError):
         call_command(
-            "load_code_rule_golden", str(path), "--maker", str(maker.pk), "--source-sha256", "a" * 64
+            "load_code_rule_golden", str(path), "--maker", str(maker.pk), "--source-sha256", applied_sha()
         )
     assert not CodeRuleRevision.objects.exists() and not CodeRuleGoldenCase.objects.exists()

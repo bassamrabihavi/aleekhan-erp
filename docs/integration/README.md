@@ -244,3 +244,35 @@ Contract items (not invented here; need a contract change in a later step / phas
   consuming module's phase.
 - **Worker process**: still no Celery/worker (unchanged since 00.6); `dispatch_once` / `recover_stale` /
   `sweep_dead_letters` are library calls; the health component `worker` is reported `unknown` honestly.
+
+## 10. PHASE_02 / 02.7 — Planning import operations
+
+### Console operator rules (REV-0262, REV-0266)
+- The server console commands (`import_planning_catalogue`, `load_code_rule_golden`, `legacy_serial_guard`) are
+  run by an identified operator with **his own account**. `load_code_rule_golden --maker` takes the operator's
+  OWN user id; the command refuses an unknown (`MAKER_NOT_FOUND`) or non-ACTIVE user (`MAKER_NOT_ACTIVE`) and a
+  user without `identity.code_rule.manage` (`ACCESS_DENIED`). Never name another person: the maker of a rule
+  revision can never approve it (maker-checker), so another person's id would both misattribute the draft and
+  bar that person from approving it (DEC-005 Q-A: the employer approves; he therefore never acts as the maker).
+- The same transaction writes an audit row `identity.code_rule.console_load` (actor = the maker; scope `origin:
+  console`, `command`, `source_batch_id`, `operator_rule: own_account_only`; after: status and case count),
+  sharing the request id with the engine's `identity.code_rule.create` / `golden` rows.
+- `--source-sha256` must be the SHA-256 of an **APPLIED** `planning_catalogue_xlsm` batch
+  (`SOURCE_BATCH_NOT_APPLIED` otherwise): golden cases come only from a workbook that was imported and applied.
+  The revision stores that batch's hash.
+
+### Disputed legacy values (REV-0261; DECISION_LOG 2026-11-15)
+- One `legacy_code_disputed` item per sheet and **distinct value** (key `<sheet>!value:<24 hex of SHA-256>`,
+  value-free), with `row_count`, `cell_refs` (at most 100, `cell_refs_truncated`) and the first cell / staging
+  row. Order rows identical to an earlier one (validation `DUPLICATE_PAYLOAD`) are counted on the item of their
+  value. The decision of the steward / owner on the item applies to every row carrying that value. Baseline:
+  224 distinct values over 634 order rows (02.6 real run; the orchestrator re-checks the counts on the next real
+  import - counters `legacy_values_disputed` / `legacy_rows_disputed`).
+- An item that is already OPEN keeps its first details when a later file brings the same value (one OPEN item
+  per key); after it is closed, a later occurrence opens a new item.
+
+### Freshness and failed applies (REV-0265)
+- `planning_catalogue_xlsm` (a source with an apply policy) is fresh only after a successful APPLY, in the apply
+  transaction; validation alone never advances it (audit `freshness_deferred_to_apply`). A failed apply leaves
+  it `never` / `stale` and is reported by `outbox_status` / `job_status` (`IMPORT_APPLY_FAILED`,
+  docs/ops/JOB_MONITORING.md). Sources without an apply policy keep the PHASE_00 rule (fresh at validation).

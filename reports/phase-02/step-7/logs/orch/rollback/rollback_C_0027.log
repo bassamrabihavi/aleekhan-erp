@@ -1,0 +1,5 @@
+Operations to perform:
+  Target specific migration: 0027_dec057_matrix_v22, from platform_core
+Running migrations:
+  Rendering model states... DONE
+  Unapplying platform_core.0028_phase02_golden_summary... OK

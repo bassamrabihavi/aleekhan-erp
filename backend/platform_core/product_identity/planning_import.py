@@ -34,7 +34,10 @@ Rules applied (APPROVED decisions only; anything else becomes a conflict item, n
 * **Legacy codes** (DEC-005 B1 / Q-D, amendments 2026-11-13 / 2026-11-14): distinct ``NOrder!FZ`` and
   ``Codding`` values that are 14-digit text with prefix ``02`` (style ``0000`` accepted as legacy) are
   registered LEG, ``RESERVED / ERP_PENDING`` (``ERP_MATCHED`` only through a Rahkaran import). Every other
-  value -> ``legacy_code_disputed`` (per cell; the raw value stays in its staging row, never corrected). The
+  value -> ``legacy_code_disputed``: ONE item per sheet and distinct value (02.7, REV-0261; DECISION_LOG
+  2026-11-15 "one decision per distinct value"), with ``row_count`` and the cell references of every row that
+  carries it, identical (DUPLICATE_PAYLOAD) order rows included; the raw value stays in its staging rows,
+  never corrected, and the decision on the item covers all of those rows. The
   code is authoritative (belt rows included); a code whose order rows show more than one (product, style)
   pair -> ``legacy_code_multiple_product_style`` and the code is registered without a style link. A code is
   linked to a style only when exactly that style (type, category, product, style segments) exists and has no
@@ -794,29 +797,64 @@ def _style_index() -> dict[str, uuid.UUID]:
     return out
 
 
+# 02.7 (REV-0261): at most this many cell references are listed on one disputed-value item (8 KiB details)
+MAX_DISPUTED_CELL_REFS: Final = 100
+
+
+def disputed_value_key(raw: dict[str, Any] | None) -> str:
+    """A stable, value-free key of one distinct disputed cell value (type + value, SHA-256 prefix): equal
+    values -> one conflict item, whatever their rows (DECISION_LOG 2026-11-15: one decision per distinct
+    value). The value itself stays in its staging rows only."""
+    if raw is None:
+        return "empty"
+    canon = json.dumps(
+        {"t": raw.get("t"), "v": raw.get("v")}, ensure_ascii=False, sort_keys=True, default=str
+    )
+    return hashlib.sha256(canon.encode("utf-8")).hexdigest()[:24]
+
+
+def _raise_disputed(state: ApplyState, disputed: Mapping[tuple[str, str], list[tuple[Cell, str]]]) -> None:
+    """One ``legacy_code_disputed`` item per (sheet, distinct value), carrying the number of rows with that
+    value and their cell references (the decision applies to every one of them)."""
+    for (sheet, vkey), cells in disputed.items():
+        cell, reason = cells[0]
+        refs = [c.ref for c, _r in cells]
+        state.conflict(
+            "legacy_code_disputed",
+            f"{sheet}!value:{vkey}",
+            cell.details(
+                reason,
+                shape=_mask(cell.raw),
+                status=ProductCodeStatus.DISPUTED.value,
+                row_count=len(cells),
+                cell_refs=refs[:MAX_DISPUTED_CELL_REFS],
+                cell_refs_truncated=len(refs) > MAX_DISPUTED_CELL_REFS,
+            ),
+        )
+        state.counts["legacy_values_disputed"] += 1
+        state.counts["legacy_rows_disputed"] += len(cells)
+
+
 def _apply_codes(state: ApplyState, norder: list[StagingRow], codding: list[StagingRow]) -> None:
     lay = state.layout
     first: dict[str, Cell] = {}
     pairs: dict[str, set[tuple[str, str]]] = defaultdict(set)
+    disputed: dict[tuple[str, str], list[tuple[Cell, str]]] = {}
     for rows, col, is_order in ((norder, lay.norder_code_col, True), (codding, lay.codding_code_col, False)):
         if not col:
             continue
-        for r in rows:
+        for r in sorted(rows, key=lambda x: (x.sheet_name, x.row_number)):
             cell = Cell(r, col)
             code, reason = legacy_code(cell.raw)
             if code is None:
-                state.conflict(
-                    "legacy_code_disputed",
-                    f"{r.sheet_name}!{cell.ref}",
-                    cell.details(reason, shape=_mask(cell.raw), status=ProductCodeStatus.DISPUTED.value),
-                )
-                state.counts["legacy_values_disputed"] += 1
+                disputed.setdefault((r.sheet_name, disputed_value_key(cell.raw)), []).append((cell, reason))
                 continue
             first.setdefault(code, cell)
             if is_order:
                 product = Cell(r, lay.norder_product_col).raw_text or ""
                 style = Cell(r, lay.norder_style_col).raw_text or ""
                 pairs[code].add((product.strip(), style.strip()))
+    _raise_disputed(state, disputed)
     multi = {code for code, p in pairs.items() if len(p) > 1}
     for code in sorted(multi):
         state.conflict(
@@ -909,6 +947,16 @@ def apply_planning_batch(uow: UnitOfWork, batch: ImportBatch, *, layout: Layout)
     parts: dict[str, list[StagingRow]] = defaultdict(list)
     for r in rows:
         parts[str(r.payload.get("part"))].append(r)
+    # 02.7 (REV-0261): an order row identical to an earlier one (validation ERROR DUPLICATE_PAYLOAD and
+    # nothing else) is still a row of the legacy register: it is counted on the disputed-value item of its
+    # value (a valid code repeated changes nothing - one code row per distinct code)
+    for r in StagingRow.objects.filter(
+        batch=batch, validation_status=RowStatus.ERROR, error_codes=[im.ROW_DUPLICATE_PAYLOAD]
+    ).order_by("sheet_name", "row_number"):
+        part = str(r.payload.get("part"))
+        if part in (PART_NORDER, PART_CODDING):
+            parts[part].append(r)
+            state.counts["legacy_duplicate_rows_counted"] += 1
     header = next(iter(parts[PART_SORCE_HEADER]), None)
     types = _apply_types(state, parts[PART_SORCE])
     _apply_categories(state, header, parts[PART_SORCE], types)
@@ -1096,6 +1144,44 @@ def read_golden_file(path: Path) -> list[dict[str, Any]]:
     return out
 
 
+CONSOLE_LOAD_ACTION: Final = "identity.code_rule.console_load"
+GOLDEN_LOAD_COMMAND: Final = "load_code_rule_golden"
+
+
+def golden_maker(maker_id: uuid.UUID) -> Caller:
+    """02.7 (REV-0262): the console maker must be an ACTIVE user who holds ``identity.code_rule.manage``
+    himself. The operator runs the command with HIS OWN user id (docs/integration/README.md, "Console
+    operator rules"): the maker can never approve the revision (maker-checker), so naming somebody else
+    would both misattribute the draft and bar that person from approving it."""
+    from platform_core.authz import policy as P
+    from platform_core.engine.errors import AccessDenied
+    from platform_core.identity.models import User, UserStatus
+
+    from .codes import RULE_MANAGE
+
+    status = User.objects.filter(pk=maker_id).values_list("status", flat=True).first()
+    if status is None:
+        raise refuse("MAKER_NOT_FOUND", "maker")
+    if status != UserStatus.ACTIVE:
+        raise refuse("MAKER_NOT_ACTIVE", "maker")
+    caller = Caller(user_id=maker_id)
+    if not P.can(caller, RULE_MANAGE):
+        raise AccessDenied()
+    return caller
+
+
+def applied_planning_batch(source_sha256: str) -> ImportBatch:
+    """02.7 (REV-0266): the golden file must come from a Planning workbook that was imported and APPLIED
+    (same SHA-256 as an APPLIED ``planning_catalogue_xlsm`` batch); any other hash is refused."""
+    sha = expected_hash(source_sha256)
+    batch = ImportBatch.objects.filter(
+        source__code=SOURCE_CODE, file_sha256=sha, status=BatchStatus.APPLIED
+    ).first()
+    if batch is None:
+        raise refuse("SOURCE_BATCH_NOT_APPLIED", "source_sha256", "no APPLIED Planning batch has this hash")
+    return batch
+
+
 def load_golden_cases(
     path: Path,
     *,
@@ -1104,13 +1190,21 @@ def load_golden_cases(
     product_types: Sequence[str] | None = None,
 ) -> dict[str, Any]:
     """A NEW DRAFT code rule revision (02.3 engine, maker = ``maker_id``, permission
-    ``identity.code_rule.manage``) with every case of the file, all or nothing. Returns counts only."""
+    ``identity.code_rule.manage``) with every case of the file, all or nothing. Returns counts only.
+
+    02.7: the maker is an ACTIVE holder of ``identity.code_rule.manage`` (:func:`golden_maker`, REV-0262), the
+    hash names an APPLIED Planning batch (:func:`applied_planning_batch`, REV-0266), and the same transaction
+    writes an audit row :data:`CONSOLE_LOAD_ACTION` that records the console origin (command, batch, case
+    count) next to the engine's own create / golden rows."""
+    from platform_core.engine.uow import unit_of_work
+
     from .codes import MAX_GOLDEN_PER_CALL, add_golden_cases, create_rule_revision, golden_summary
 
+    caller = golden_maker(maker_id)
+    batch = applied_planning_batch(source_sha256)
     cases = read_golden_file(path)
-    sha = expected_hash(source_sha256)
+    sha = batch.file_sha256
     types = sorted(set(product_types)) if product_types else sorted({c["family"] for c in cases})
-    caller = Caller(user_id=maker_id)
     inputs = [
         {
             "inputs": {k: c[k] for k in sorted(set(c) & set(_GOLDEN_INPUTS))},
@@ -1120,16 +1214,36 @@ def load_golden_cases(
         }
         for c in cases
     ]
+    request_id = uuid.uuid4()
     with transaction.atomic():
-        revision = create_rule_revision(caller, product_type_codes=types, source_workbook_sha256=sha)
+        revision = create_rule_revision(
+            caller, product_type_codes=types, source_workbook_sha256=sha, request_id=request_id
+        )
         for start in range(0, len(inputs), MAX_GOLDEN_PER_CALL):
-            add_golden_cases(caller, revision.id, cases=inputs[start : start + MAX_GOLDEN_PER_CALL])
-    revision.refresh_from_db()
+            add_golden_cases(
+                caller, revision.id, cases=inputs[start : start + MAX_GOLDEN_PER_CALL], request_id=request_id
+            )
+        revision.refresh_from_db()
+        with unit_of_work(caller.context(request_id), require_event=False) as uow:
+            uow.audit(
+                action=CONSOLE_LOAD_ACTION,
+                resource_type="identity.code_rule_revision",
+                resource_id=str(revision.id),
+                resource_version=revision.row_version,
+                after={"status": revision.status, "golden_cases": len(inputs)},
+                scope={
+                    "origin": "console",
+                    "command": GOLDEN_LOAD_COMMAND,
+                    "source_batch_id": str(batch.id),
+                    "operator_rule": "own_account_only",
+                },
+            )
     return {
         "revision_id": str(revision.id),
         "revision_no": revision.revision_no,
         "status": revision.status,
         "scope_types": types,
+        "source_batch_id": str(batch.id),
         **golden_summary(revision),
     }
 

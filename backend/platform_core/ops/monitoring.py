@@ -18,6 +18,17 @@ dead letter and nothing behind it is not counted) and the events held behind the
 conflicts and compensation records that still need a human (``MANUAL_REQUIRED`` / ``HOOK_FAILED``).
 Exposed in ``GET /admin/health`` (``integration``) and in ``outbox_snapshot`` (reasons ``DELIVERY_STALE`` /
 ``ORDERING_BLOCKED``).
+
+02.7 (PHASE_02 Security & Ops), command output only (``/admin/health`` is unchanged):
+
+* :func:`import_health` - import batches of the sources an owning module APPLIES
+  (``imports.SOURCE_APPLY_POLICIES``): batches whose apply FAILED and that are still not APPLIED (an audit row
+  ``platform.integration.batch.apply_failed`` exists; event ``platform.integration.batch_apply_failed``),
+  batches VALIDATED and waiting for the operator's apply, open conflict items per source. Reason
+  ``IMPORT_APPLY_FAILED`` (``warn``) in ``outbox_status`` and ``job_status``.
+* :func:`event_families` - undelivered / dead-letter counts per event family (``identity``, ``commercial``,
+  ``platform.integration``, ...), every family of the event catalogue listed (zero when idle), so the PHASE_02
+  events are visible next to the PHASE_00/01 ones.
 """
 
 from __future__ import annotations
@@ -26,12 +37,20 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from typing import Any, Final
 
+from django.db import models
 from django.db.models import Count, Exists, Max, Min, OuterRef, Q
+from django.db.models.functions import Cast
 
 from platform_core.engine.context import db_now
 from platform_core.engine.outbox import INTEGRATION_POLICY, OutboxPolicy
-from platform_core.integration.models import ConflictItem, ConflictStatus
-from platform_core.models import CompensationOutcome, CompensationRecord, DeliveryStatus, OutboxEvent
+from platform_core.integration.models import BatchStatus, ConflictItem, ConflictStatus, ImportBatch
+from platform_core.models import (
+    AuditEvent,
+    CompensationOutcome,
+    CompensationRecord,
+    DeliveryStatus,
+    OutboxEvent,
+)
 
 # TECHNICAL DEFAULT: a due event waiting longer than this = the dispatcher is not keeping up / not running.
 DUE_BACKLOG_WARN: Final = timedelta(minutes=15)
@@ -97,6 +116,107 @@ def integration_health(*, using: str = "default", now: datetime | None = None) -
         .count(),
         last_acked_at=qs.aggregate(a=Max("acked_at"))["a"],
     )
+
+
+# ------------------------------------------------------------------------------------ imports (02.7)
+APPLY_FAILED_AUDIT: Final = "platform.integration.batch.apply_failed"
+
+
+@dataclass(frozen=True)
+class SourceImportHealth:
+    source_code: str
+    apply_failed: int
+    awaiting_apply: int
+    open_conflicts: int
+    last_apply_failed_at: datetime | None
+    last_applied_at: datetime | None
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "source_code": self.source_code,
+            "apply_failed": self.apply_failed,
+            "awaiting_apply": self.awaiting_apply,
+            "open_conflicts": self.open_conflicts,
+            "last_apply_failed_at": _ts(self.last_apply_failed_at),
+            "last_applied_at": _ts(self.last_applied_at),
+        }
+
+
+def import_health(*, using: str = "default") -> list[SourceImportHealth]:
+    """Per source of ``imports.SOURCE_APPLY_POLICIES`` (plain SELECTs; counts and times only, never a value).
+
+    ``apply_failed``: batches not APPLIED whose apply failed (``batch_apply_failed`` recorded) - a re-run of
+    the import resumes them (compensation = rollback, staging kept). ``awaiting_apply``: VALIDATED batches
+    without a recorded failure (the operator's apply has not run yet). Once a batch is APPLIED it no longer
+    counts as failed, whatever happened before."""
+    from platform_core.integration.imports import SOURCE_APPLY_POLICIES
+
+    out: list[SourceImportHealth] = []
+    audits = AuditEvent.objects.using(using).filter(
+        action=APPLY_FAILED_AUDIT, resource_type="platform.import_batch"
+    )
+    for code in sorted(SOURCE_APPLY_POLICIES):
+        batches = ImportBatch.objects.using(using).filter(source__code=code)
+        # a failed apply leaves the batch VALIDATED (rollback); APPLIED / REJECTED batches are settled
+        validated = batches.filter(status=BatchStatus.VALIDATED).annotate(rid=Cast("id", models.CharField()))
+        waiting = set(validated.values_list("rid", flat=True))
+        failures = audits.filter(resource_id__in=validated.values("rid"))
+        failed = set(failures.values_list("resource_id", flat=True))
+        out.append(
+            SourceImportHealth(
+                source_code=code,
+                apply_failed=len(failed),
+                awaiting_apply=len(waiting - failed),
+                open_conflicts=ConflictItem.objects.using(using)
+                .filter(source__code=code, status=ConflictStatus.OPEN)
+                .count(),
+                last_apply_failed_at=failures.aggregate(t=Max("occurred_at"))["t"],
+                last_applied_at=batches.filter(status=BatchStatus.APPLIED).aggregate(t=Max("closed_at"))["t"],
+            )
+        )
+    return out
+
+
+def import_verdict(sources: list[SourceImportHealth]) -> list[str]:
+    """Reasons: ``IMPORT_APPLY_FAILED`` when any source has a failed, not yet applied batch."""
+    return ["IMPORT_APPLY_FAILED"] if any(s.apply_failed for s in sources) else []
+
+
+def event_families(*, using: str = "default") -> dict[str, dict[str, int]]:
+    """``family -> {"undelivered": n, "dead_letter": n}`` for every family of the event catalogue; events of a
+    type outside the catalogue (synthetic test / drill types) are counted under ``other`` (no free text from
+    the table is printed). Family = first segment of the event type, two segments for ``platform.*``
+    (``platform.integration``, ``platform.workflow``, ...)."""
+    from platform_core.engine.events import CATALOGUE
+
+    out: dict[str, dict[str, int]] = {
+        event_family(t): {"undelivered": 0, "dead_letter": 0} for t in CATALOGUE.event_types
+    }
+    out[OTHER_FAMILY] = {"undelivered": 0, "dead_letter": 0}
+    rows = (
+        OutboxEvent.objects.using(using)
+        .filter(delivery_status__in=[*UNDELIVERED, DeliveryStatus.DEAD_LETTER])
+        .values("event_type", "delivery_status")
+        .annotate(n=Count("id"))
+    )
+    for row in rows:
+        known = row["event_type"] in CATALOGUE
+        slot = out[event_family(row["event_type"]) if known else OTHER_FAMILY]
+        key = "dead_letter" if row["delivery_status"] == DeliveryStatus.DEAD_LETTER else "undelivered"
+        slot[key] += row["n"]
+    return dict(sorted(out.items()))
+
+
+OTHER_FAMILY: Final = "other"
+
+
+def event_family(event_type: str) -> str:
+    parts = event_type.split(".")
+    return ".".join(parts[:2]) if parts[0] == "platform" and len(parts) > 2 else parts[0]
+
+
+def _ts(v: datetime | None) -> str | None:
+    return v.isoformat() if v is not None else None
 
 
 # ------------------------------------------------------------------------------- housekeeping jobs (01.7)
@@ -204,6 +324,8 @@ class OutboxSnapshot:
     verdict: str
     reasons: list[str] = field(default_factory=list)
     integration: IntegrationHealth | None = None
+    imports: list[SourceImportHealth] = field(default_factory=list)
+    families: dict[str, dict[str, int]] = field(default_factory=dict)
 
     def as_dict(self) -> dict[str, Any]:
         def ts(v: datetime | None) -> str | None:
@@ -225,6 +347,8 @@ class OutboxSnapshot:
             "verdict": self.verdict,
             "reasons": list(self.reasons),
             "integration": self.integration.as_dict() if self.integration is not None else None,
+            "imports": [i.as_dict() for i in self.imports],
+            "event_families": {k: dict(v) for k, v in self.families.items()},
         }
 
 
@@ -265,6 +389,8 @@ def outbox_snapshot(
         reasons.append("DELIVERY_STALE")
     if health.held_events:
         reasons.append("ORDERING_BLOCKED")
+    imports = import_health(using=using)
+    reasons.extend(import_verdict(imports))
     verdict = "critical" if dead else ("warn" if reasons else "ok")
     return OutboxSnapshot(
         checked_at=now,
@@ -282,4 +408,6 @@ def outbox_snapshot(
         verdict=verdict,
         reasons=reasons,
         integration=health,
+        imports=imports,
+        families=event_families(using=using),
     )

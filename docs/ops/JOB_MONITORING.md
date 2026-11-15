@@ -106,3 +106,28 @@ record of the dead letter stays open for the consuming module. No HTTP operation
 
 `blocked_aggregates` (REV-0130) now counts only aggregates with events really waiting behind a dead letter (=
 the OpenAPI description); a dead letter with nothing behind it shows in `dead_letters` / `DEAD_LETTER_PRESENT`.
+
+## 02.7 additions (PHASE_02 imports and events)
+
+Command output only; `GET /admin/health` and its contract are unchanged.
+
+- **Import apply health** (`ops.monitoring.import_health`): one entry per source an owning module applies
+  (`integration.imports.SOURCE_APPLY_POLICIES`, today `planning_catalogue_xlsm`). `apply_failed` = VALIDATED
+  batches with a recorded failed apply (audit `platform.integration.batch.apply_failed`, event
+  `platform.integration.batch_apply_failed`; the apply rolled back, staging is kept); `awaiting_apply` =
+  VALIDATED batches without a failure; `open_conflicts`; `last_apply_failed_at` / `last_applied_at`. Counts and
+  times only, never a value or an exception text.
+- **Reason `IMPORT_APPLY_FAILED`** (verdict `warn`) in both `manage.py outbox_status` (`imports` block) and
+  `manage.py job_status` (`imports` block): the operator re-runs `import_planning_catalogue` with the same file
+  and hash; the same batch resumes and, once APPLIED, no longer counts as failed.
+- **Freshness of an applied source** (REV-0265): `planning_catalogue_xlsm` counts as fresh only after a
+  successful APPLY (not at validation); after a failed apply it stays `never` / `stale` and the failure is
+  shown by the reason above.
+- **Event families** (`outbox_status` `event_families`, text lines `events.<family>`): undelivered and
+  dead-letter counts per family of the event catalogue - `identity`, `commercial`, `platform.integration`,
+  `platform.workflow`, ... (zero when idle); types outside the catalogue (synthetic test / drill events) are
+  counted under `other`.
+
+| Verdict | Reason code | Meaning / action |
+|---|---|---|
+| warn | `IMPORT_APPLY_FAILED` | a Planning batch failed to apply and is not applied yet: read the error code in the audit row, fix, re-run the import |

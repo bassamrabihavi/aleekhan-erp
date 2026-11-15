@@ -8,7 +8,9 @@
    and only move forward by exactly 1, never change its key, never be deleted or truncated - the runtime role
    cannot reset a counter (``ops/db/roles_check.sh``; ``grants.sql`` also revokes DELETE).
    Reverse: drops the table and re-creates the 0023 sequences, positioned after the largest plain-format
-   number already used (``CU-000123`` style), so the 02.3 code never re-issues one.
+   number already used (``CU-000123`` style), so the 02.3 code never re-issues one. 02.7 (rollback drill):
+   the forward positions each (kind, year) counter at the highest year-format number that already exists, so
+   a rollback past 0025 followed by a forward never re-issues a number (a fresh database inserts nothing).
 2. Planning reject (DEC-059 amendment 2026-11-14): planning may approve OR reject a due-date change; a
    rejection closes the request REJECTED (the old due date stays). New columns ``planning_rejected_by`` /
    ``planning_rejected_at``; ``ck_commercial_cr_decided_has_decider`` accepts a REJECTED request decided by
@@ -72,6 +74,23 @@ CREATE TABLE public.platform_number_counter (
 );
 COMMENT ON TABLE public.platform_number_counter IS
     'PHASE_02 technical numbers CU-/SO-/CR-<jalali year>-<n> (DEC-058 amendment 2026-11-14); forward only';
+-- 02.7 (rollback drill): numbers of the year format that already exist (a forward after a rollback past this
+-- migration) position their counter at the highest one issued, before the guard exists - the next number never
+-- collides with an issued one. A fresh database has none (no row is inserted).
+INSERT INTO public.platform_number_counter (kind, jalali_year, last_value)
+SELECT kind, yr, max(n) FROM (
+    SELECT 'customer' AS kind, (m)[1]::int AS yr, (m)[2]::bigint AS n
+      FROM (SELECT regexp_match(customer_no, '^CU-([0-9]{4})-([0-9]{6,})$') AS m FROM public.identity_customer) c
+    UNION ALL
+    SELECT 'order', (m)[1]::int, (m)[2]::bigint
+      FROM (SELECT regexp_match(order_no, '^SO-([0-9]{4})-([0-9]{6,})$') AS m FROM public.commercial_customer_order) o
+    UNION ALL
+    SELECT 'change_request', (m)[1]::int, (m)[2]::bigint
+      FROM (SELECT regexp_match(request_no, '^CR-([0-9]{4})-([0-9]{6,})$') AS m
+              FROM public.commercial_order_change_request) r
+) issued
+WHERE yr IS NOT NULL AND yr BETWEEN 1300 AND 1999 AND n >= 1
+GROUP BY kind, yr;
 CREATE FUNCTION platform_number_counter_guard() RETURNS trigger
 LANGUAGE plpgsql SET search_path = pg_catalog, pg_temp AS $fn$
 BEGIN

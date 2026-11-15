@@ -31,6 +31,8 @@ Example (Windows work machine):
 untracked `frontend/test-results/screenshots/` by default (REV-0501: a plain run never overwrites committed
 evidence); for acceptance evidence pass the report folder explicitly, e.g.
 `E2E_SCREENSHOT_DIR=../reports/phase-00/step-6/screenshots bash scripts/e2e.sh` (relative to `frontend/`).
+02.7 (REV-0264): prefer `E2E_STEP=phase-02/step-7 bash scripts/e2e.sh` - the screenshots go to that step's report
+folder; a folder that already holds committed screenshots is refused unless `E2E_SCREENSHOT_OVERWRITE=1`.
 
 Tests named `[simulated failure] …` intercept network traffic to produce error/stale states; every other E2E
 test reads real backend responses. The `@backend-down` test runs with Django stopped (real failure).

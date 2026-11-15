@@ -7,7 +7,7 @@ generated from the code and must be regenerated with it. Status: DRAFT (part of 
 Envelope (every event, `platform_outbox_event`): `event_id` (consumer dedupe key), `event_type`, `schema_version`,
 `aggregate_type`, `aggregate_id`, `aggregate_version`, `occurred_at` (UTC), `actor_type` / `actor_id`, `request_id`,
 `correlation_id`, `causation_id`, `payload`, and the provenance of the producing code (migration `0016`):
-`producer` (owning module), `build_commit` (`ALEEKHAN_BUILD_COMMIT`), `schema_migration` (`platform_core.0027_dec057_matrix_v22`
+`producer` (owning module), `build_commit` (`ALEEKHAN_BUILD_COMMIT`), `schema_migration` (`platform_core.0028_phase02_golden_summary`
 in this build). Source system: `aleekhan-erp`. Rows written before migration 0016 carry `''` (unknown).
 
 Rules: producers emit only catalogued types, the matching aggregate type and the **current** version, with an exact

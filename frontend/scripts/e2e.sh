@@ -38,6 +38,24 @@ for p in 8000 5173; do
   if port_busy "$p"; then echo "port $p is already in use - stop that server first" >&2; exit 2; fi
 done
 
+# REV-0264 (02.7): evidence screenshots go to the CURRENT step's report folder only. E2E_STEP=phase-XX/step-Y
+# maps to reports/phase-XX/step-Y/screenshots; a folder that already holds committed screenshots (the evidence
+# of an earlier, reviewed run) is refused unless E2E_SCREENSHOT_OVERWRITE=1 (a deliberate refresh, to be noted
+# in that step's report). Without either variable the screenshots stay in untracked frontend/test-results.
+if [ -n "${E2E_STEP:-}" ]; then
+  case "$E2E_STEP" in phase-[0-9][0-9]/step-[0-9]|phase-[0-9][0-9]/step-[0-9][0-9]) ;; *) echo "E2E_STEP must look like phase-02/step-7" >&2; exit 2 ;; esac
+  if [ -n "${E2E_SCREENSHOT_DIR:-}" ]; then echo "set E2E_STEP or E2E_SCREENSHOT_DIR, not both" >&2; exit 2; fi
+  E2E_SCREENSHOT_DIR="$ROOT/reports/$E2E_STEP/screenshots"
+  export E2E_SCREENSHOT_DIR
+fi
+if [ -n "${E2E_SCREENSHOT_DIR:-}" ] && [ "${E2E_SCREENSHOT_OVERWRITE:-0}" != "1" ] && [ -d "$E2E_SCREENSHOT_DIR" ]; then
+  committed="$(cd "$E2E_SCREENSHOT_DIR" && git ls-files -- '*.png' | wc -l | tr -d ' ')"
+  if [ "${committed:-0}" != "0" ]; then
+    echo "E2E_SCREENSHOT_DIR already holds $committed committed screenshots (evidence of another run): use the current step (E2E_STEP=phase-XX/step-Y) or E2E_SCREENSHOT_OVERWRITE=1 for a deliberate refresh" >&2
+    exit 2
+  fi
+fi
+
 # REV-0603: record the reproduction environment (names / yes-no only; no passwords, no home paths) and fail
 # early with a clear message if the Playwright browser is not available.
 echo "== e2e environment"

@@ -10,6 +10,12 @@
 #   6. verify: fingerprint identical, `migrate --check` clean, audit append-only trigger still enforced
 #   7. drop everything (trap), write drill_report.json + drill_report.md into <output-dir>
 #
+# PHASE_02 / 02.7: the seed also writes PHASE_02 rows (orders, serials, snapshots, versions, an applied change
+# request, number counters, an APPLIED Planning import and a failed apply); ops/backup/drill_verify_phase02.py
+# runs before the dump and after the restore - same counts, and the gapless serial counter / version /
+# snapshot / number-counter invariants hold; migrations 0019-0028 are recorded; job_status still reports the
+# failed apply (IMPORT_APPLY_FAILED).
+#
 # Connection: libpq env (PGHOST/PGPORT/PGUSER/PGPASSWORD or ~/.pgpass); the password is never printed. The
 # dump holds only synthetic rows and is written to a temporary work dir that is deleted at the end (it is
 # never placed in the repository); only its sha256 and size are reported.
@@ -90,6 +96,10 @@ admin -d postgres -c "CREATE DATABASE $SRC ENCODING 'UTF8' TEMPLATE template0" >
 manage "$SRC" migrate --noinput >/dev/null || { echo "FAIL: migrate" >&2; exit 1; }
 (cd "$ROOT" && PGDATABASE="$SRC" "$PYTHON" ops/backup/drill_seed.py "$ROWS") || { echo "FAIL: seed" >&2; exit 1; }
 
+echo "== [1b] PHASE_02 invariants before the dump"
+(cd "$ROOT" && PGDATABASE="$SRC" "$PYTHON" ops/backup/drill_verify_phase02.py) > "$OUT/phase02_before.json" 2>"$WORK/verify_before.err"   || { echo "FAIL: PHASE_02 invariants of the source"; cat "$OUT/phase02_before.json"; }
+cat "$OUT/phase02_before.json"
+
 echo "== [2] fingerprint before"
 fingerprint "$SRC" > "$OUT/fingerprint_before.txt" || { echo "FAIL: fingerprint of $SRC" >&2; exit 1; }
 cat "$OUT/fingerprint_before.txt"
@@ -151,6 +161,18 @@ m01="$(admin -d "$DST" -c "SELECT count(*) FROM django_migrations WHERE app = 'p
 if [ "$m01" = "8" ]; then check "migrations 0011-0018 recorded in the restored DB" PASS; else check "migrations 0011-0018 recorded in the restored DB" FAIL "found $m01"; fi
 if manage "$DST" shell -c "import sys; from platform_core.engine import audit_chain as ac; r = ac.check_chain(); sys.exit(0 if r.first_broken is None and r.checked > 0 else 1)" >/dev/null 2>&1; then check "audit hash chain verifies after restore" PASS; else check "audit hash chain verifies after restore" FAIL; fi
 if manage "$DST" job_status --json > "$WORK/jobs.json" 2>/dev/null; then check "application reads restored DB (job_status)" PASS; else check "application reads restored DB (job_status)" FAIL; fi
+# PHASE_02 / 02.7: tables, counters and commit-time invariants survive dump + restore
+if (cd "$ROOT" && PGDATABASE="$DST" "$PYTHON" ops/backup/drill_verify_phase02.py) > "$OUT/phase02_after.json" 2>"$WORK/verify_after.err"; then
+  check "PHASE_02 invariants after restore (serials gapless from 63001, line/serial pairing, snapshots, versions, number counters, import batches)" PASS
+else
+  check "PHASE_02 invariants after restore" FAIL "see phase02_after.json"
+fi
+b_counts="$("$PYTHON" -c 'import json,sys; print(json.dumps(json.load(open(sys.argv[1]))["counts"], sort_keys=True))' "$OUT/phase02_before.json" 2>/dev/null)"
+a_counts="$("$PYTHON" -c 'import json,sys; print(json.dumps(json.load(open(sys.argv[1]))["counts"], sort_keys=True))' "$OUT/phase02_after.json" 2>/dev/null)"
+if [ -n "$b_counts" ] && [ "$b_counts" = "$a_counts" ]; then check "PHASE_02 row and counter counts identical before dump / after restore" PASS; else check "PHASE_02 counts identical" FAIL; fi
+m02="$(admin -d "$DST" -c "SELECT count(*) FROM django_migrations WHERE app = 'platform_core' AND name ~ '^00(19|2[0-8])_'")"
+if [ "$m02" = "10" ]; then check "migrations 0019-0028 recorded in the restored DB" PASS; else check "migrations 0019-0028 recorded in the restored DB" FAIL "found $m02"; fi
+if grep -q '"IMPORT_APPLY_FAILED"' "$WORK/jobs.json" 2>/dev/null; then check "failed Planning apply still reported by job_status after restore (IMPORT_APPLY_FAILED)" PASS; else check "failed Planning apply reported by job_status after restore" FAIL; fi
 T5="$(ms)"
 
 [ "$FAILS" -eq 0 ] && STATUS="PASS"

@@ -397,7 +397,10 @@ def validate_batch(
         )
         batch.refresh_from_db(using=using)
         valid_rows = batch.row_count - error_rows
-        freshness_advanced = valid_rows > 0 and _advance_freshness(batch, now, using)
+        # 02.7 (REV-0265): a source whose batches are APPLIED by an owning module counts as fresh only once
+        # the apply succeeded (no official row exists after a mere validation, nor after a failed apply)
+        deferred = batch.source.code in SOURCE_APPLY_POLICIES
+        freshness_advanced = valid_rows > 0 and not deferred and _advance_freshness(batch, now, using)
         uow.audit(
             action="platform.integration.batch.validate",
             resource_type="platform.import_batch",
@@ -409,6 +412,7 @@ def validate_batch(
                 "row_count": batch.row_count,
                 "error_row_count": error_rows,
                 "freshness_advanced": freshness_advanced,
+                "freshness_deferred_to_apply": deferred,
             },
             scope={"source_code": batch.source.code},
         )
@@ -602,6 +606,11 @@ def _apply(
         outcome = applier(uow, batch)
         ImportBatch.objects.using(using).filter(pk=batch.pk).update(status=B.APPLIED, closed_at=Now())
         batch.refresh_from_db(using=using)
+        # 02.7 (REV-0265): freshness of an applied source advances here, in the same transaction (monotonic,
+        # REV-0601); a failed apply rolls it back with everything else
+        freshness_advanced = batch.row_count - batch.error_row_count > 0 and _advance_freshness(
+            batch, db_now(using), using
+        )
         uow.audit(
             action="platform.integration.batch.apply",
             resource_type="platform.import_batch",
@@ -613,6 +622,7 @@ def _apply(
                 "applied_count": outcome.applied_count,
                 "conflict_count": outcome.conflict_count,
                 "counts": dict(outcome.counts),
+                "freshness_advanced": freshness_advanced,
             },
             scope={"source_code": batch.source.code, "owner": policy.owner},
         )

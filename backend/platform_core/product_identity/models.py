@@ -443,6 +443,10 @@ class CodeRuleRevision(AuditColumns):
     source_workbook_sha256 = models.CharField(max_length=64)  # DEC-037 baseline hash
     evidence_document = _fk("platform_core.Document", null=True)
     golden_case_count = models.IntegerField(db_default=0)
+    # 02.7 (REV-0244): the counts-only golden summary as of the last write of the revision (lists and write
+    # responses read it; the single GET recomputes it live). Derived display data, not a frozen content
+    # column.
+    golden_summary = models.JSONField(null=True, blank=True)
     status = models.CharField(max_length=12, choices=CodeRuleStatus.choices, db_default=CodeRuleStatus.DRAFT)
     decision_id = models.CharField(max_length=7)
     approval = _fk("platform_core.ApprovalRequest", null=True)
@@ -472,6 +476,10 @@ class CodeRuleRevision(AuditColumns):
             ),
             CheckConstraint(
                 condition=Q(golden_case_count__gte=0), name="ck_identity_code_rule_golden_nonneg"
+            ),
+            CheckConstraint(
+                condition=Q(golden_summary__isnull=True) | Q(_json_is_object("golden_summary")),
+                name="ck_identity_code_rule_golden_summary_object",
             ),
             CheckConstraint(
                 condition=in_values("status", CodeRuleStatus.values), name="ck_identity_code_rule_status"

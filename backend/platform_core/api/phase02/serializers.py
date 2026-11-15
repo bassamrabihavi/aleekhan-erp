@@ -183,7 +183,9 @@ def product_code(pc: ProductCode) -> dict[str, Any]:
     }
 
 
-def code_rule(r: CodeRuleRevision) -> dict[str, Any]:
+def code_rule(r: CodeRuleRevision, *, live_summary: bool = False) -> dict[str, Any]:
+    """``live_summary``: recompute the golden summary (single GET); lists and write responses read the value
+    stored at the last write (02.7, REV-0244)."""
     return {
         "rule_revision_id": str(r.pk),
         "code_namespace": r.code_namespace,
@@ -198,7 +200,8 @@ def code_rule(r: CodeRuleRevision) -> dict[str, Any]:
         "created_by": sid(r.created_by_id),
         "approved_by": sid(r.approved_by_id),
         "approved_at": utc(r.approved_at),
-        "golden_summary": codes.golden_summary(r),  # REV-0240: what the approver approves (counts only)
+        # REV-0240: what the approver approves (counts only); REV-0244: live only on the single GET
+        "golden_summary": codes.golden_summary(r) if live_summary else codes.stored_golden_summary(r),
         "row_version": r.row_version,
     }
 
