@@ -110,6 +110,8 @@ flowchart LR
 
 ## آخرین رویدادها
 
+- `2026-11-15T08:32:11+00:00` decision id=DEC-005 status=APPROVED by=بسام ربیهاوی note=Amendment 2026-11-15: imported types/categories from baseline are ACTIVE
+- `2026-11-15T08:32:11+00:00` decision id=DEC-057 status=APPROVED by=بسام ربیهاوی note=Amendment 2026-11-15: conflict queue read/resolve for product_data_steward + owner; management_viewer counts/freshness only (matrix v2.2)
 - `2026-11-15T05:42:43+00:00` step phase=PHASE_02 step=02.6 state=IN_PROGRESS
 - `2026-11-15T05:42:43+00:00` step phase=PHASE_02 step=02.5 state=PASS
 - `2026-11-15T05:38:11+00:00` step phase=PHASE_02 step=02.5 state=IN_REVIEW commit=5f65fc9
@@ -123,5 +125,3 @@ flowchart LR
 - `2026-11-14T17:46:40+00:00` decision id=DEC-005 status=APPROVED by=بسام ربیهاوی note=Amendment 2026-11-14: legacy belt rows - 14-digit code authoritative; belt width entered by user (2 digits)
 - `2026-11-14T13:07:29+00:00` step phase=PHASE_02 step=02.4 state=REWORK
 - `2026-11-14T10:13:08+00:00` step phase=PHASE_02 step=02.4 state=IN_REVIEW commit=ee9d4e7
-- `2026-11-14T08:15:22+00:00` step phase=PHASE_02 step=02.4 state=IN_PROGRESS
-- `2026-11-14T08:03:12+00:00` decision id=DEC-059 status=APPROVED by=بسام ربیهاوی note=Amendment 2026-11-14: see DECISION_LOG (number format with Jalali year; held order resume/cancel only; style collision -> next free; planning may reject)

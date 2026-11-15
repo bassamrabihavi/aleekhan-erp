@@ -1627,9 +1627,9 @@
       "owner": "برنامه‌ریزی + بازرگانی",
       "phase": "PHASE_02",
       "source": "Planning--.xlsm",
-      "resolution": "Amendment 2026-11-14: legacy belt rows - 14-digit code authoritative; belt width entered by user (2 digits)",
+      "resolution": "Amendment 2026-11-15: imported types/categories from baseline are ACTIVE",
       "decided_by": "بسام ربیهاوی",
-      "decided_at": "2026-11-14T17:46:40+00:00"
+      "decided_at": "2026-11-15T08:32:11+00:00"
     },
     {
       "id": "DEC-006",
@@ -2355,9 +2355,9 @@
       "owner": "کارفرما + بازرگانی + برنامه‌ریزی",
       "phase": "PHASE_02",
       "source": "گام 02.1 2026-11-11 (C-62)",
-      "resolution": "Amendment 2026-11-15: PHASE_02 decisions in approval inbox; planning_approve flags confirmed",
+      "resolution": "Amendment 2026-11-15: conflict queue read/resolve for product_data_steward + owner; management_viewer counts/freshness only (matrix v2.2)",
       "decided_by": "بسام ربیهاوی",
-      "decided_at": "2026-11-15T04:20:37+00:00"
+      "decided_at": "2026-11-15T08:32:11+00:00"
     },
     {
       "id": "DEC-058",
@@ -3553,7 +3553,23 @@
       "state": "IN_PROGRESS",
       "note": null,
       "commit": null
+    },
+    {
+      "at": "2026-11-15T08:32:11+00:00",
+      "kind": "decision",
+      "id": "DEC-057",
+      "status": "APPROVED",
+      "by": "بسام ربیهاوی",
+      "note": "Amendment 2026-11-15: conflict queue read/resolve for product_data_steward + owner; management_viewer counts/freshness only (matrix v2.2)"
+    },
+    {
+      "at": "2026-11-15T08:32:11+00:00",
+      "kind": "decision",
+      "id": "DEC-005",
+      "status": "APPROVED",
+      "by": "بسام ربیهاوی",
+      "note": "Amendment 2026-11-15: imported types/categories from baseline are ACTIVE"
     }
   ],
-  "updated_at": "2026-11-15T05:42:43+00:00"
+  "updated_at": "2026-11-15T08:32:11+00:00"
 }

@@ -43,3 +43,5 @@ DEC-005,APPROVED,بسام ربیهاوی,2026-11-14,Amendment 2026-11-14: legacy
 DEC-006,APPROVED,بسام ربیهاوی,2026-11-14,Amendment 2026-11-14: allocateSerial operation removed; serial only via order confirm
 DEC-027,APPROVED,بسام ربیهاوی,2026-11-15,"P-A + proposed structure (page 1 serial summary, page 2 order tab), PHASE_02 data only"
 DEC-057,APPROVED,بسام ربیهاوی,2026-11-15,Amendment 2026-11-15: PHASE_02 decisions in approval inbox; planning_approve flags confirmed
+DEC-057,APPROVED,بسام ربیهاوی,2026-11-15,Amendment 2026-11-15: conflict queue read/resolve for product_data_steward + owner; management_viewer counts/freshness only (matrix v2.2)
+DEC-005,APPROVED,بسام ربیهاوی,2026-11-15,Amendment 2026-11-15: imported types/categories from baseline are ACTIVE

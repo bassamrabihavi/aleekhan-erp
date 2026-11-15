@@ -253,3 +253,9 @@ Asked with AskUserQuestion, in Persian; the employer chose the recommended optio
 - **Approval inbox:** PHASE_02 decisions also appear in the PHASE_01 approval inbox (کارتابل), linking to their page. These are order confirm, change-request decide, planning decision and code-rule approve.
 - **`commercial.change.planning_approve` flags:** fresh MFA, business approval and maker-checker are confirmed. The approver must be neither the requester nor the deciding manager.
 - **Decided by:** بسام ربیهاوی (کارفرما).
+
+## 2026-11-15 — DEC-057 amendment (conflict queue access) and DEC-005 follow-up (imported catalogue status)
+Raised by step 02.6. Asked with AskUserQuestion, in Persian; the employer chose the recommended option each time.
+- **Conflict queue (Planning imports):** `product_data_steward` and the owner may read the conflict queue and resolve items. `management_viewer` sees counts and data freshness only. This is matrix v2.2.
+- **Imported catalogue status:** product types and categories imported from the approved Planning baseline are created **ACTIVE**. Any later change comes only from a new import plus the conflict queue.
+- **Decided by:** بسام ربیهاوی (کارفرما).
