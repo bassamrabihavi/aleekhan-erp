@@ -45,3 +45,4 @@ DEC-027,APPROVED,بسام ربیهاوی,2026-11-15,"P-A + proposed structure (p
 DEC-057,APPROVED,بسام ربیهاوی,2026-11-15,Amendment 2026-11-15: PHASE_02 decisions in approval inbox; planning_approve flags confirmed
 DEC-057,APPROVED,بسام ربیهاوی,2026-11-15,Amendment 2026-11-15: conflict queue read/resolve for product_data_steward + owner; management_viewer counts/freshness only (matrix v2.2)
 DEC-005,APPROVED,بسام ربیهاوی,2026-11-15,Amendment 2026-11-15: imported types/categories from baseline are ACTIVE
+DEC-005,APPROVED,بسام ربیهاوی,2026-11-15,"Amendment 2026-11-15: disputed legacy codes decided by steward + owner, one decision per distinct value; raiser cannot resolve"

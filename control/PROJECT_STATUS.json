@@ -285,12 +285,12 @@
         },
         "02.7": {
           "name": "Security & Ops",
-          "state": "TODO",
+          "state": "IN_PROGRESS",
           "commit": null,
           "report": null,
           "review": null,
           "rework_cycles": 0,
-          "started_at": null,
+          "started_at": "2026-11-15T10:06:33+00:00",
           "done_at": null
         },
         "02.8": {
@@ -1627,9 +1627,9 @@
       "owner": "برنامه‌ریزی + بازرگانی",
       "phase": "PHASE_02",
       "source": "Planning--.xlsm",
-      "resolution": "Amendment 2026-11-15: imported types/categories from baseline are ACTIVE",
+      "resolution": "Amendment 2026-11-15: disputed legacy codes decided by steward + owner, one decision per distinct value; raiser cannot resolve",
       "decided_by": "بسام ربیهاوی",
-      "decided_at": "2026-11-15T08:32:11+00:00"
+      "decided_at": "2026-11-15T10:06:33+00:00"
     },
     {
       "id": "DEC-006",
@@ -3587,7 +3587,24 @@
       "state": "PASS",
       "note": null,
       "commit": null
+    },
+    {
+      "at": "2026-11-15T10:06:33+00:00",
+      "kind": "decision",
+      "id": "DEC-005",
+      "status": "APPROVED",
+      "by": "بسام ربیهاوی",
+      "note": "Amendment 2026-11-15: disputed legacy codes decided by steward + owner, one decision per distinct value; raiser cannot resolve"
+    },
+    {
+      "at": "2026-11-15T10:06:33+00:00",
+      "kind": "step",
+      "phase": "PHASE_02",
+      "step": "02.7",
+      "state": "IN_PROGRESS",
+      "note": null,
+      "commit": null
     }
   ],
-  "updated_at": "2026-11-15T09:39:08+00:00"
+  "updated_at": "2026-11-15T10:06:33+00:00"
 }

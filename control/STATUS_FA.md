@@ -5,7 +5,7 @@
 ## خلاصه
 
 - **فاز فعال:** PHASE_02 مشتری، محصول، استایل، ثبت سفارش و سریال (فعال)
-- **گام جاری:** 02.7 Security & Ops (در صف)
+- **گام جاری:** 02.7 Security & Ops (در حال انجام)
 - **پیشرفت:** 22/120 گام قبول‌شده
 - **آماده تست شما:** 0 مورد
 - **تصمیم P0 باز (کل پروژه):** 15
@@ -110,6 +110,8 @@ flowchart LR
 
 ## آخرین رویدادها
 
+- `2026-11-15T10:06:33+00:00` step phase=PHASE_02 step=02.7 state=IN_PROGRESS
+- `2026-11-15T10:06:33+00:00` decision id=DEC-005 status=APPROVED by=بسام ربیهاوی note=Amendment 2026-11-15: disputed legacy codes decided by steward + owner, one decision per distinct value; raiser cannot resolve
 - `2026-11-15T09:39:08+00:00` step phase=PHASE_02 step=02.6 state=PASS
 - `2026-11-15T09:30:34+00:00` step phase=PHASE_02 step=02.6 state=IN_REVIEW commit=fe0058c
 - `2026-11-15T08:32:11+00:00` decision id=DEC-005 status=APPROVED by=بسام ربیهاوی note=Amendment 2026-11-15: imported types/categories from baseline are ACTIVE
@@ -123,5 +125,3 @@ flowchart LR
 - `2026-11-14T18:38:19+00:00` step phase=PHASE_02 step=02.4 state=PASS
 - `2026-11-14T18:34:11+00:00` step phase=PHASE_02 step=02.4 state=IN_REVIEW commit=14b49e4
 - `2026-11-14T18:34:11+00:00` step phase=PHASE_02 step=02.4 state=IN_PROGRESS
-- `2026-11-14T17:46:41+00:00` decision id=DEC-006 status=APPROVED by=بسام ربیهاوی note=Amendment 2026-11-14: allocateSerial operation removed; serial only via order confirm
-- `2026-11-14T17:46:40+00:00` decision id=DEC-005 status=APPROVED by=بسام ربیهاوی note=Amendment 2026-11-14: legacy belt rows - 14-digit code authoritative; belt width entered by user (2 digits)

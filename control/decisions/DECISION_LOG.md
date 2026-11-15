@@ -259,3 +259,10 @@ Raised by step 02.6. Asked with AskUserQuestion, in Persian; the employer chose 
 - **Conflict queue (Planning imports):** `product_data_steward` and the owner may read the conflict queue and resolve items. `management_viewer` sees counts and data freshness only. This is matrix v2.2.
 - **Imported catalogue status:** product types and categories imported from the approved Planning baseline are created **ACTIVE**. Any later change comes only from a new import plus the conflict queue.
 - **Decided by:** بسام ربیهاوی (کارفرما).
+
+## 2026-11-15 — DEC-005 Q-D clarification and conflict-queue rules (02.6 review REV-0261/0263)
+Asked with AskUserQuestion, in Persian; the employer chose the recommended option each time.
+- **Who decides disputed legacy codes:** `product_data_steward` and the owner, through the conflict queue. This replaces the "planning decides" wording of DEC-005 Q-D. Planning takes part only if the owner gives a planner the steward role.
+- **Granularity:** one decision per **distinct value**. There are 224 values in the Planning baseline, covering 634 order rows. The decision applies to every row carrying that value, and the item shows the row count.
+- **Raiser cannot resolve:** confirmed. Whoever raised a conflict item cannot resolve it (maker-checker). System-raised import items are not affected.
+- **Decided by:** بسام ربیهاوی (کارفرما).
