@@ -1,0 +1,498 @@
+================================================================ [10] perf
+# stage perf | 2026-11-16T06:13:37Z | machine work-windows | MINGW64_NT-10.0-22000
+# command (bash tools/ci_local.sh <out> perf runs this function):
+#   stage_perf () 
+#   { 
+#       need_pg || return $?;
+#       ( cd backend && ALEEKHAN_PERF_OUT="$OUT/perf.json" "$PYTHON" -m pytest -q -m perf platform_core/tests/test_perf_smoke.py && cat "$OUT/perf.json" && ALEEKHAN_PERF_OUT="$OUT/perf_phase01.json" "$PYTHON" -m pytest -q -m perf platform_core/tests/test_perf_phase01.py && cat "$OUT/perf_phase01.json" && ALEEKHAN_PERF_OUT="$OUT/perf_phase02.json" "$PYTHON" -m pytest -q -s -m perf platform_core/tests/test_perf_phase02.py && { 
+#           [ ! -f "$OUT/perf_phase02.json" ] || cat "$OUT/perf_phase02.json"
+#       } )
+#   }
+# ---- output
+.                                                                        [100%]
+1 passed in 52.65s
+{
+  "iterations": 200,
+  "warmup": 10,
+  "p95_budget_ms": 250.0,
+  "budget_basis": "TECHNICAL_DEFAULT (gross-regression guard, in-process test client, not an SLA)",
+  "results": {
+    "health_live": {
+      "n": 200.0,
+      "p50_ms": 0.591,
+      "p95_ms": 1.218,
+      "max_ms": 2.69
+    },
+    "health_ready": {
+      "n": 200.0,
+      "p50_ms": 0.988,
+      "p95_ms": 2.04,
+      "max_ms": 3.541
+    },
+    "version": {
+      "n": 200.0,
+      "p50_ms": 0.708,
+      "p95_ms": 1.641,
+      "max_ms": 5.645
+    },
+    "integration_freshness_page25": {
+      "n": 200.0,
+      "p50_ms": 5.188,
+      "p95_ms": 10.835,
+      "max_ms": 15.358
+    }
+  }
+}......                                                                   [100%]
+6 passed in 137.08s (0:02:17)
+{
+  "inboxes": {
+    "machine": "work-windows",
+    "python": "3.12.10",
+    "postgres_server_version": 170009,
+    "budget_basis": "TECHNICAL_DEFAULT (gross-regression guard, in-process, synthetic data, not an SLA)",
+    "rows": 1000,
+    "p95_budget_ms": 5000.0,
+    "results": {
+      "approvals_to_decide_1000_scanned": {
+        "n": 15.0,
+        "p50_ms": 2795.2,
+        "p95_ms": 3239.6,
+        "max_ms": 3679.3
+      },
+      "tasks_mine_1000_scanned": {
+        "n": 15.0,
+        "p50_ms": 1763.9,
+        "p95_ms": 2293.8,
+        "max_ms": 2529.7
+      }
+    }
+  },
+  "audit_chain_writers_1": {
+    "machine": "work-windows",
+    "python": "3.12.10",
+    "postgres_server_version": 170009,
+    "budget_basis": "TECHNICAL_DEFAULT (gross-regression guard, in-process, synthetic data, not an SLA)",
+    "writers": 1,
+    "units_of_work": 50,
+    "elapsed_s": 0.321,
+    "rows_per_s": 155.6,
+    "min_rows_per_s_budget": 20.0,
+    "chain_contiguous": true
+  },
+  "audit_chain_writers_4": {
+    "machine": "work-windows",
+    "python": "3.12.10",
+    "postgres_server_version": 170009,
+    "budget_basis": "TECHNICAL_DEFAULT (gross-regression guard, in-process, synthetic data, not an SLA)",
+    "writers": 4,
+    "units_of_work": 200,
+    "elapsed_s": 0.626,
+    "rows_per_s": 319.5,
+    "min_rows_per_s_budget": 20.0,
+    "chain_contiguous": true
+  },
+  "audit_chain_writers_8": {
+    "machine": "work-windows",
+    "python": "3.12.10",
+    "postgres_server_version": 170009,
+    "budget_basis": "TECHNICAL_DEFAULT (gross-regression guard, in-process, synthetic data, not an SLA)",
+    "writers": 8,
+    "units_of_work": 400,
+    "elapsed_s": 1.275,
+    "rows_per_s": 313.6,
+    "min_rows_per_s_budget": 20.0,
+    "chain_contiguous": true
+  },
+  "outbox_dispatch_1": {
+    "machine": "work-windows",
+    "python": "3.12.10",
+    "postgres_server_version": 170009,
+    "budget_basis": "TECHNICAL_DEFAULT (gross-regression guard, in-process, synthetic data, not an SLA)",
+    "events": 2000,
+    "aggregates": 50,
+    "dispatchers": 1,
+    "batch_size": 100,
+    "elapsed_s": 5.133,
+    "events_per_s": 389.6,
+    "lag_p50_s": 3.051,
+    "lag_p95_s": 5.02,
+    "lag_max_s": 5.253,
+    "min_events_per_s_budget": 50.0,
+    "note": "lag includes the backlog wait: every event was enqueued before dispatch started"
+  },
+  "outbox_dispatch_4": {
+    "machine": "work-windows",
+    "python": "3.12.10",
+    "postgres_server_version": 170009,
+    "budget_basis": "TECHNICAL_DEFAULT (gross-regression guard, in-process, synthetic data, not an SLA)",
+    "events": 2000,
+    "aggregates": 50,
+    "dispatchers": 4,
+    "batch_size": 100,
+    "elapsed_s": 2.894,
+    "events_per_s": 691.1,
+    "lag_p50_s": 1.782,
+    "lag_p95_s": 2.841,
+    "lag_max_s": 2.986,
+    "min_events_per_s_budget": 50.0,
+    "note": "lag includes the backlog wait: every event was enqueued before dispatch started"
+  }
+}{
+  "order_confirm_lines": {
+    "machine": "work-windows",
+    "python": "3.12.10",
+    "postgres_server_version": 170009,
+    "budget_basis": "TECHNICAL_DEFAULT (gross-regression guard, in-process, synthetic data, not an SLA)",
+    "lines": 100,
+    "confirm_ms": 1433.6,
+    "budget_ms": 30000.0
+  }
+}
+.{"ts": "2026-11-16T06:17:56.309+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "ce1f3b22-fd92-4723-a7c1-de5da1dfe538", "event": "http_request", "method": "GET", "path": "/api/v1/identity/product-codes", "status": 200, "duration_ms": 114.5}
+{"ts": "2026-11-16T06:17:56.332+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "d7302577-14b3-4683-bb58-3389cebfb812", "event": "http_request", "method": "GET", "path": "/api/v1/identity/product-codes", "status": 200, "duration_ms": 22.1}
+{"ts": "2026-11-16T06:17:56.356+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "0ca5163d-3e3f-4fea-95a8-0f495a1e6aca", "event": "http_request", "method": "GET", "path": "/api/v1/identity/product-codes", "status": 200, "duration_ms": 22.4}
+{"ts": "2026-11-16T06:17:56.379+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "a04a9dc1-8371-45d9-bac4-504b2df320eb", "event": "http_request", "method": "GET", "path": "/api/v1/identity/product-codes", "status": 200, "duration_ms": 22.7}
+{"ts": "2026-11-16T06:17:56.404+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "8618ec08-c9dd-4724-8cd7-7049935fdb16", "event": "http_request", "method": "GET", "path": "/api/v1/identity/product-codes", "status": 200, "duration_ms": 23.2}
+{"ts": "2026-11-16T06:17:56.429+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "4786b889-fccb-4a72-b753-4f6789d876ed", "event": "http_request", "method": "GET", "path": "/api/v1/identity/product-codes", "status": 200, "duration_ms": 24.0}
+{"ts": "2026-11-16T06:17:56.453+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "b491086c-1242-4f1c-ac7c-5f4c9d963f5e", "event": "http_request", "method": "GET", "path": "/api/v1/identity/product-codes", "status": 200, "duration_ms": 23.4}
+{"ts": "2026-11-16T06:17:56.476+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "558aaac8-0550-4150-98f2-54fbd0f1df74", "event": "http_request", "method": "GET", "path": "/api/v1/identity/product-codes", "status": 200, "duration_ms": 23.2}
+{"ts": "2026-11-16T06:17:56.500+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "4bd400cd-74c9-495e-89df-4353bc4e13ff", "event": "http_request", "method": "GET", "path": "/api/v1/identity/product-codes", "status": 200, "duration_ms": 23.2}
+{"ts": "2026-11-16T06:17:56.525+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "3dd33756-9047-442e-b707-140eba5716af", "event": "http_request", "method": "GET", "path": "/api/v1/identity/product-codes", "status": 200, "duration_ms": 23.3}
+{"ts": "2026-11-16T06:17:56.547+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "b6442bbd-b88d-48c1-be55-8941876b808c", "event": "http_request", "method": "GET", "path": "/api/v1/identity/product-codes", "status": 200, "duration_ms": 22.0}
+{"ts": "2026-11-16T06:17:56.571+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "741a9587-a982-4da0-b25c-4bc05721ea8e", "event": "http_request", "method": "GET", "path": "/api/v1/identity/product-codes", "status": 200, "duration_ms": 23.0}
+{"ts": "2026-11-16T06:17:56.596+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "c3523427-c45d-48a2-a8a8-b8bb329e8c5b", "event": "http_request", "method": "GET", "path": "/api/v1/identity/product-codes", "status": 200, "duration_ms": 24.9}
+{"ts": "2026-11-16T06:17:56.622+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "e155df86-a0bf-43e4-91be-628dc6c2f591", "event": "http_request", "method": "GET", "path": "/api/v1/identity/product-codes", "status": 200, "duration_ms": 24.5}
+{"ts": "2026-11-16T06:17:56.645+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "e2133e80-8e2d-45d2-82a4-b524606842a6", "event": "http_request", "method": "GET", "path": "/api/v1/identity/product-codes", "status": 200, "duration_ms": 22.7}
+{"ts": "2026-11-16T06:17:56.669+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "ed60c3d0-fe88-450d-bbca-a38e9c9425f4", "event": "http_request", "method": "GET", "path": "/api/v1/identity/product-codes", "status": 200, "duration_ms": 22.8}
+{"ts": "2026-11-16T06:17:56.693+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "ec742898-2670-4061-a57d-0c27b8d6e23a", "event": "http_request", "method": "GET", "path": "/api/v1/identity/product-codes", "status": 200, "duration_ms": 22.6}
+{"ts": "2026-11-16T06:17:56.716+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "735946ed-a9b0-4b87-9119-0b96a988212a", "event": "http_request", "method": "GET", "path": "/api/v1/identity/product-codes", "status": 200, "duration_ms": 22.8}
+{"ts": "2026-11-16T06:17:56.740+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "09c44ac3-efb2-4a11-9e74-b600d571a1f6", "event": "http_request", "method": "GET", "path": "/api/v1/identity/product-codes", "status": 200, "duration_ms": 22.2}
+{"ts": "2026-11-16T06:17:56.765+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "4e4a151f-a528-4434-9ce1-7287ffe0b642", "event": "http_request", "method": "GET", "path": "/api/v1/identity/product-codes", "status": 200, "duration_ms": 25.3}
+{"ts": "2026-11-16T06:17:56.789+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "dac65776-76cb-4d0e-9d48-a89630984f43", "event": "http_request", "method": "GET", "path": "/api/v1/identity/product-codes", "status": 200, "duration_ms": 23.1}
+{"ts": "2026-11-16T06:17:56.910+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "9d3170da-e454-447b-9a52-bc8595764657", "event": "http_request", "method": "GET", "path": "/api/v1/commercial/customer-orders", "status": 200, "duration_ms": 120.1}
+{"ts": "2026-11-16T06:17:57.023+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "46ae97ac-1897-4208-b634-acac4f1a6da4", "event": "http_request", "method": "GET", "path": "/api/v1/commercial/customer-orders", "status": 200, "duration_ms": 111.8}
+{"ts": "2026-11-16T06:17:57.133+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "3e3c62cb-ef08-4003-9db4-eed347bf64c4", "event": "http_request", "method": "GET", "path": "/api/v1/commercial/customer-orders", "status": 200, "duration_ms": 109.6}
+{"ts": "2026-11-16T06:17:57.239+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "c06ebc04-8f4f-4362-85b9-469559a10d71", "event": "http_request", "method": "GET", "path": "/api/v1/commercial/customer-orders", "status": 200, "duration_ms": 104.9}
+{"ts": "2026-11-16T06:17:57.340+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "fb9ee14d-57e8-487b-b917-abacb0a8bac3", "event": "http_request", "method": "GET", "path": "/api/v1/commercial/customer-orders", "status": 200, "duration_ms": 100.6}
+{"ts": "2026-11-16T06:17:57.446+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "2fbe9735-e56b-4747-aa78-e89bec2e7ce9", "event": "http_request", "method": "GET", "path": "/api/v1/commercial/customer-orders", "status": 200, "duration_ms": 104.6}
+{"ts": "2026-11-16T06:17:57.571+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "712b1489-ed3f-45b6-83e4-12cac44126df", "event": "http_request", "method": "GET", "path": "/api/v1/commercial/customer-orders", "status": 200, "duration_ms": 124.3}
+{"ts": "2026-11-16T06:17:57.688+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "de037b38-707a-43f6-9a1b-1e13d0eccc28", "event": "http_request", "method": "GET", "path": "/api/v1/commercial/customer-orders", "status": 200, "duration_ms": 116.8}
+{"ts": "2026-11-16T06:17:57.836+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "2f7aff08-7003-48b4-9564-505be406ee65", "event": "http_request", "method": "GET", "path": "/api/v1/commercial/customer-orders", "status": 200, "duration_ms": 146.5}
+{"ts": "2026-11-16T06:17:58.026+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "5f7f57cc-4523-4975-8d8c-9a56db38bea4", "event": "http_request", "method": "GET", "path": "/api/v1/commercial/customer-orders", "status": 200, "duration_ms": 189.9}
+{"ts": "2026-11-16T06:17:58.172+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "a79db3e7-6b30-461e-a091-1c78dc604d5f", "event": "http_request", "method": "GET", "path": "/api/v1/commercial/customer-orders", "status": 200, "duration_ms": 144.5}
+{"ts": "2026-11-16T06:17:58.321+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "cdeedaf5-4307-48de-940a-4093e4ae27d0", "event": "http_request", "method": "GET", "path": "/api/v1/commercial/customer-orders", "status": 200, "duration_ms": 148.7}
+{"ts": "2026-11-16T06:17:58.444+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "b8f3ef8f-4f3f-4c0c-8f28-8fc0227090df", "event": "http_request", "method": "GET", "path": "/api/v1/commercial/customer-orders", "status": 200, "duration_ms": 121.8}
+{"ts": "2026-11-16T06:17:58.575+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "1ab9dd6f-5aae-467a-acb6-d0451826af77", "event": "http_request", "method": "GET", "path": "/api/v1/commercial/customer-orders", "status": 200, "duration_ms": 130.0}
+{"ts": "2026-11-16T06:17:58.681+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "ce4ccf47-1df6-4b89-a6b8-37c580d5a221", "event": "http_request", "method": "GET", "path": "/api/v1/commercial/customer-orders", "status": 200, "duration_ms": 106.2}
+{"ts": "2026-11-16T06:17:58.859+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "2aca3dca-00d9-475c-98b4-bd60ddac90af", "event": "http_request", "method": "GET", "path": "/api/v1/commercial/customer-orders", "status": 200, "duration_ms": 176.6}
+{"ts": "2026-11-16T06:17:59.044+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "98d9f700-e68b-4865-813e-ac6d81a0c090", "event": "http_request", "method": "GET", "path": "/api/v1/commercial/customer-orders", "status": 200, "duration_ms": 184.1}
+{"ts": "2026-11-16T06:17:59.277+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "773e1281-e2c5-4b4f-bd69-5ca46d8bf356", "event": "http_request", "method": "GET", "path": "/api/v1/commercial/customer-orders", "status": 200, "duration_ms": 231.6}
+{"ts": "2026-11-16T06:17:59.538+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "dad4117d-626c-4bb3-ba51-c00b881850ae", "event": "http_request", "method": "GET", "path": "/api/v1/commercial/customer-orders", "status": 200, "duration_ms": 257.0}
+{"ts": "2026-11-16T06:17:59.799+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "fd75b670-9fcc-470e-aa3a-290ceac292e3", "event": "http_request", "method": "GET", "path": "/api/v1/commercial/customer-orders", "status": 200, "duration_ms": 259.7}
+{"ts": "2026-11-16T06:18:00.034+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "56589038-1331-465f-b1c8-8d4eadcbe7e7", "event": "http_request", "method": "GET", "path": "/api/v1/commercial/customer-orders", "status": 200, "duration_ms": 233.9}
+{"ts": "2026-11-16T06:18:00.094+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "1113b7f7-32fa-4e1e-b7ed-0433cffd8d0a", "event": "http_request", "method": "GET", "path": "/api/v1/integration/conflicts", "status": 200, "duration_ms": 59.1}
+{"ts": "2026-11-16T06:18:00.147+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "314d3439-ac55-43d0-9a33-fc95c5ef7c18", "event": "http_request", "method": "GET", "path": "/api/v1/integration/conflicts", "status": 200, "duration_ms": 50.3}
+{"ts": "2026-11-16T06:18:00.208+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "210944e3-66ef-4f4d-8f7d-0a7560955b6e", "event": "http_request", "method": "GET", "path": "/api/v1/integration/conflicts", "status": 200, "duration_ms": 59.9}
+{"ts": "2026-11-16T06:18:00.274+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "bd560848-aaf5-4d59-b793-e554eb309f85", "event": "http_request", "method": "GET", "path": "/api/v1/integration/conflicts", "status": 200, "duration_ms": 64.9}
+{"ts": "2026-11-16T06:18:00.323+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "4e3151ad-342d-43ad-bac6-adc1301a2ee9", "event": "http_request", "method": "GET", "path": "/api/v1/integration/conflicts", "status": 200, "duration_ms": 46.7}
+{"ts": "2026-11-16T06:18:00.377+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "fe891880-1d16-4642-ab4e-e8af79ff1c74", "event": "http_request", "method": "GET", "path": "/api/v1/integration/conflicts", "status": 200, "duration_ms": 52.8}
+{"ts": "2026-11-16T06:18:00.434+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "b78d6a3f-fdd8-4226-8f6e-e8a5ca983ec1", "event": "http_request", "method": "GET", "path": "/api/v1/integration/conflicts", "status": 200, "duration_ms": 53.5}
+{"ts": "2026-11-16T06:18:00.491+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "2f1b6dd8-a74a-4440-9956-f15692ab5450", "event": "http_request", "method": "GET", "path": "/api/v1/integration/conflicts", "status": 200, "duration_ms": 55.3}
+{"ts": "2026-11-16T06:18:00.549+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "ed11b468-4c0e-4cba-9d1a-6b70df646039", "event": "http_request", "method": "GET", "path": "/api/v1/integration/conflicts", "status": 200, "duration_ms": 57.4}
+{"ts": "2026-11-16T06:18:00.603+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "4d117a95-23b6-4034-80ee-256a61c4fedf", "event": "http_request", "method": "GET", "path": "/api/v1/integration/conflicts", "status": 200, "duration_ms": 53.1}
+{"ts": "2026-11-16T06:18:00.655+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "943a1abb-650c-4aa7-a4e8-860e8ba27cac", "event": "http_request", "method": "GET", "path": "/api/v1/integration/conflicts", "status": 200, "duration_ms": 50.6}
+{"ts": "2026-11-16T06:18:00.706+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "497cddaa-6b2c-4f95-b07d-39c3d0c980ac", "event": "http_request", "method": "GET", "path": "/api/v1/integration/conflicts", "status": 200, "duration_ms": 48.7}
+{"ts": "2026-11-16T06:18:00.753+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "6cd91ea8-c1ea-4f6c-8b01-e05fae88dd88", "event": "http_request", "method": "GET", "path": "/api/v1/integration/conflicts", "status": 200, "duration_ms": 46.6}
+{"ts": "2026-11-16T06:18:00.806+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "23520c44-57d9-48f7-93b6-5b5c9bb8cb5d", "event": "http_request", "method": "GET", "path": "/api/v1/integration/conflicts", "status": 200, "duration_ms": 51.2}
+{"ts": "2026-11-16T06:18:00.880+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "7a3ff37d-b46b-4c97-aeb6-c68ea0036ff1", "event": "http_request", "method": "GET", "path": "/api/v1/integration/conflicts", "status": 200, "duration_ms": 73.2}
+{"ts": "2026-11-16T06:18:00.942+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "40fc7fdb-9009-4bb5-91a7-927a5a3f332d", "event": "http_request", "method": "GET", "path": "/api/v1/integration/conflicts", "status": 200, "duration_ms": 59.0}
+{"ts": "2026-11-16T06:18:00.998+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "98ff1358-294f-42fe-a540-3b2761686f1f", "event": "http_request", "method": "GET", "path": "/api/v1/integration/conflicts", "status": 200, "duration_ms": 54.6}
+{"ts": "2026-11-16T06:18:01.042+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "05d7dcee-0431-4c23-83e3-fff768062e74", "event": "http_request", "method": "GET", "path": "/api/v1/integration/conflicts", "status": 200, "duration_ms": 42.1}
+{"ts": "2026-11-16T06:18:01.070+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "1f3b7dd8-026c-48af-a379-4f3604b5b670", "event": "http_request", "method": "GET", "path": "/api/v1/integration/conflicts", "status": 200, "duration_ms": 27.5}
+{"ts": "2026-11-16T06:18:01.097+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "c3a53df2-1161-4907-9e1b-bfb45096b5e0", "event": "http_request", "method": "GET", "path": "/api/v1/identity/customers", "status": 200, "duration_ms": 24.7}
+{"ts": "2026-11-16T06:18:01.125+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "c9985c70-8a3c-4d41-94cb-3eed6d1ec2e1", "event": "http_request", "method": "GET", "path": "/api/v1/identity/customers", "status": 200, "duration_ms": 28.1}
+{"ts": "2026-11-16T06:18:01.155+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "1971fb67-00ec-4262-bb64-6a87f0d5c3ec", "event": "http_request", "method": "GET", "path": "/api/v1/identity/customers", "status": 200, "duration_ms": 28.4}
+{"ts": "2026-11-16T06:18:01.191+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "0c326d87-0c77-48e3-ae19-86af71d0eeb1", "event": "http_request", "method": "GET", "path": "/api/v1/identity/customers", "status": 200, "duration_ms": 35.8}
+{"ts": "2026-11-16T06:18:01.218+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "12e93607-1c32-45b3-9b47-d80db837acb6", "event": "http_request", "method": "GET", "path": "/api/v1/identity/customers", "status": 200, "duration_ms": 26.2}
+{"ts": "2026-11-16T06:18:01.246+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "f986eafd-1a37-447b-8a20-5771f3949f3d", "event": "http_request", "method": "GET", "path": "/api/v1/identity/customers", "status": 200, "duration_ms": 26.4}
+{"ts": "2026-11-16T06:18:01.277+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "ec755b3b-fd50-40b2-97ff-4bf6aa148e3c", "event": "http_request", "method": "GET", "path": "/api/v1/identity/customers", "status": 200, "duration_ms": 29.7}
+{"ts": "2026-11-16T06:18:01.303+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "5e424b05-7cb0-4354-a15a-6eafe6297bc2", "event": "http_request", "method": "GET", "path": "/api/v1/identity/customers", "status": 200, "duration_ms": 24.5}
+{"ts": "2026-11-16T06:18:01.342+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "7aec80fc-ee48-4253-8870-d72f9a0d2f28", "event": "http_request", "method": "GET", "path": "/api/v1/identity/customers", "status": 200, "duration_ms": 38.0}
+{"ts": "2026-11-16T06:18:01.373+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "de218495-ed84-4098-aa78-a5678afc104b", "event": "http_request", "method": "GET", "path": "/api/v1/identity/customers", "status": 200, "duration_ms": 30.8}
+{"ts": "2026-11-16T06:18:01.403+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "c46a353b-d215-429c-9049-ecb1575cc5db", "event": "http_request", "method": "GET", "path": "/api/v1/identity/customers", "status": 200, "duration_ms": 28.7}
+{"ts": "2026-11-16T06:18:01.441+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "85c0e9cd-975a-44ef-ac60-9786a68d6313", "event": "http_request", "method": "GET", "path": "/api/v1/identity/customers", "status": 200, "duration_ms": 36.9}
+{"ts": "2026-11-16T06:18:01.473+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "05e6cec7-25fc-4007-927a-5c65c7f5b8bb", "event": "http_request", "method": "GET", "path": "/api/v1/identity/customers", "status": 200, "duration_ms": 30.6}
+{"ts": "2026-11-16T06:18:01.501+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "4ac46e92-5520-40ea-8de1-bec24a695f9a", "event": "http_request", "method": "GET", "path": "/api/v1/identity/customers", "status": 200, "duration_ms": 25.8}
+{"ts": "2026-11-16T06:18:01.540+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "1e1d4b36-c111-42ba-8a3a-3029b1eaff16", "event": "http_request", "method": "GET", "path": "/api/v1/identity/customers", "status": 200, "duration_ms": 38.9}
+{"ts": "2026-11-16T06:18:01.565+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "cc233771-b313-4a7e-af9e-95d4305de2b7", "event": "http_request", "method": "GET", "path": "/api/v1/identity/customers", "status": 200, "duration_ms": 23.3}
+{"ts": "2026-11-16T06:18:01.598+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "8074e0be-ae52-43c7-b9af-9021e82b3e72", "event": "http_request", "method": "GET", "path": "/api/v1/identity/customers", "status": 200, "duration_ms": 30.3}
+{
+  "planning_import_baseline_like": {
+    "machine": "work-windows",
+    "python": "3.12.10",
+    "postgres_server_version": 170009,
+    "budget_basis": "TECHNICAL_DEFAULT (gross-regression guard, in-process, synthetic data, not an SLA)",
+    "file_bytes": 79805,
+    "norder_rows": 3917,
+    "categories_slots": 111,
+    "codes_registered": 2841,
+    "disputed_items": 224,
+    "disputed_rows": 634,
+    "import_seconds": 8.79,
+    "budget_s": 300.0
+  }
+}
+{
+  "paginated_lists": {
+    "machine": "work-windows",
+    "python": "3.12.10",
+    "postgres_server_version": 170009,
+    "budget_basis": "TECHNICAL_DEFAULT (gross-regression guard, in-process, synthetic data, not an SLA)",
+    "page_size": 100,
+    "volume": {
+      "product_codes": 2841,
+      "customer_orders": 1000,
+      "conflicts": 224,
+      "customers": 50
+    },
+    "results": {
+      "product_codes": {
+        "n": 15.0,
+        "p50_ms": 23.8,
+        "p95_ms": 25.2,
+        "max_ms": 25.7,
+        "five_pages_ms": 120.2
+      },
+      "customer_orders": {
+        "n": 15.0,
+        "p50_ms": 122.5,
+        "p95_ms": 177.4,
+        "max_ms": 190.6,
+        "five_pages_ms": 1175.3
+      },
+      "conflicts": {
+        "n": 15.0,
+        "p50_ms": 55.1,
+        "p95_ms": 66.7,
+        "max_ms": 75.0,
+        "five_pages_ms": 128.0
+      },
+      "customers": {
+        "n": 15.0,
+        "p50_ms": 29.7,
+        "p95_ms": 38.9,
+        "max_ms": 39.7,
+        "five_pages_ms": 31.5
+      }
+    },
+    "budget_p95_ms": 5000.0
+  }
+}
+.{"ts": "2026-11-16T06:18:04.857+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "d50e6c06-54d6-419e-a1c6-298f87235456", "event": "http_request", "method": "GET", "path": "/api/v1/identity/code-rule-revisions", "status": 200, "duration_ms": 17.2}
+{"ts": "2026-11-16T06:18:04.877+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "fbcf4d6f-9954-45c6-b2d6-a204c7bc8e85", "event": "http_request", "method": "GET", "path": "/api/v1/identity/code-rule-revisions", "status": 200, "duration_ms": 18.7}
+{"ts": "2026-11-16T06:18:04.895+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "e17ea8d2-4ed0-4e04-8f40-2551bd83be91", "event": "http_request", "method": "GET", "path": "/api/v1/identity/code-rule-revisions", "status": 200, "duration_ms": 18.0}
+{"ts": "2026-11-16T06:18:04.916+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "6974bc85-da77-4579-9d52-8773aa432f78", "event": "http_request", "method": "GET", "path": "/api/v1/identity/code-rule-revisions", "status": 200, "duration_ms": 19.6}
+{"ts": "2026-11-16T06:18:04.934+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "db4fc17b-63c4-4eca-ab57-ee872037ecd9", "event": "http_request", "method": "GET", "path": "/api/v1/identity/code-rule-revisions", "status": 200, "duration_ms": 18.3}
+{"ts": "2026-11-16T06:18:04.955+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "20fbfb54-ae4b-4d81-9945-cd29210b2545", "event": "http_request", "method": "GET", "path": "/api/v1/identity/code-rule-revisions", "status": 200, "duration_ms": 19.5}
+{"ts": "2026-11-16T06:18:04.973+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "4c4a7370-7de1-40d9-9d25-74b25f475ec4", "event": "http_request", "method": "GET", "path": "/api/v1/identity/code-rule-revisions", "status": 200, "duration_ms": 17.8}
+{"ts": "2026-11-16T06:18:04.991+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "c247d33e-0a99-4ff0-9796-f028a98555a7", "event": "http_request", "method": "GET", "path": "/api/v1/identity/code-rule-revisions", "status": 200, "duration_ms": 17.8}
+{"ts": "2026-11-16T06:18:05.010+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "dd1c98b7-2f91-4d25-aa14-9891d9281636", "event": "http_request", "method": "GET", "path": "/api/v1/identity/code-rule-revisions", "status": 200, "duration_ms": 18.5}
+{"ts": "2026-11-16T06:18:05.028+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "54795845-71af-4fe4-af8f-6c2c30c75c50", "event": "http_request", "method": "GET", "path": "/api/v1/identity/code-rule-revisions", "status": 200, "duration_ms": 17.7}
+{"ts": "2026-11-16T06:18:05.049+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "09f92ffa-d8fa-4cc5-bdda-783904e6eb8d", "event": "http_request", "method": "GET", "path": "/api/v1/identity/code-rule-revisions", "status": 200, "duration_ms": 21.0}
+{"ts": "2026-11-16T06:18:05.067+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "850be30b-8192-4e04-9781-4ab5b5589e51", "event": "http_request", "method": "GET", "path": "/api/v1/identity/code-rule-revisions", "status": 200, "duration_ms": 17.1}
+{"ts": "2026-11-16T06:18:05.085+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "a3dde09a-76da-4d90-a9b1-59936c90a662", "event": "http_request", "method": "GET", "path": "/api/v1/identity/code-rule-revisions", "status": 200, "duration_ms": 16.9}
+{"ts": "2026-11-16T06:18:05.103+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "084279bf-bb48-47f4-8c16-0f2ddabace51", "event": "http_request", "method": "GET", "path": "/api/v1/identity/code-rule-revisions", "status": 200, "duration_ms": 18.0}
+{"ts": "2026-11-16T06:18:05.122+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "866d6d50-81d9-4ddb-b2a3-9f698d18d6ce", "event": "http_request", "method": "GET", "path": "/api/v1/identity/code-rule-revisions", "status": 200, "duration_ms": 17.9}
+{"ts": "2026-11-16T06:18:05.139+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "2714fdca-ebd7-475e-9347-6f7fa31662b6", "event": "http_request", "method": "GET", "path": "/api/v1/identity/code-rule-revisions", "status": 200, "duration_ms": 17.1}
+{"ts": "2026-11-16T06:18:06.675+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "24447a22-9ac9-463b-a370-f9b98b582a0f", "event": "http_request", "method": "GET", "path": "/api/v1/identity/code-rule-revisions/493a0827-9b71-4799-b12a-d1774d266569", "status": 200, "duration_ms": 105.6}
+{"ts": "2026-11-16T06:18:06.826+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "fd54828c-feb9-43f7-bedb-e227aa14ddb2", "event": "http_request", "method": "GET", "path": "/api/v1/identity/code-rule-revisions/493a0827-9b71-4799-b12a-d1774d266569", "status": 200, "duration_ms": 150.8}
+{"ts": "2026-11-16T06:18:06.925+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "2d93cdf9-f8ab-46e4-b2cd-26c21b69b21a", "event": "http_request", "method": "GET", "path": "/api/v1/identity/code-rule-revisions/493a0827-9b71-4799-b12a-d1774d266569", "status": 200, "duration_ms": 97.9}
+{"ts": "2026-11-16T06:18:07.020+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "d6fd04b2-4554-424b-b4b1-e91f0541eb5c", "event": "http_request", "method": "GET", "path": "/api/v1/identity/code-rule-revisions/493a0827-9b71-4799-b12a-d1774d266569", "status": 200, "duration_ms": 94.2}
+{
+  "code_rule_list_golden_summary": {
+    "machine": "work-windows",
+    "python": "3.12.10",
+    "postgres_server_version": 170009,
+    "budget_basis": "TECHNICAL_DEFAULT (gross-regression guard, in-process, synthetic data, not an SLA)",
+    "revisions": 4,
+    "golden_cases_per_revision": 2000,
+    "list_stored_summary": {
+      "n": 15.0,
+      "p50_ms": 18.5,
+      "p95_ms": 20.1,
+      "max_ms": 21.4
+    },
+    "old_live_summary_for_the_same_page": {
+      "n": 3.0,
+      "p50_ms": 365.5,
+      "p95_ms": 365.5,
+      "max_ms": 400.4
+    },
+    "single_get_live": {
+      "n": 3.0,
+      "p50_ms": 98.4,
+      "p95_ms": 98.4,
+      "max_ms": 151.3
+    },
+    "budget_list_p95_ms": 1500.0
+  }
+}
+.{
+  "serial_allocation_concurrency": {
+    "machine": "work-windows",
+    "python": "3.12.10",
+    "postgres_server_version": 170009,
+    "budget_basis": "TECHNICAL_DEFAULT (gross-regression guard, in-process, synthetic data, not an SLA)",
+    "workers": 8,
+    "orders": 40,
+    "serials": 200,
+    "seconds": 4.34,
+    "serials_per_s": 46.1,
+    "orders_per_s": 9.22,
+    "gapless": true,
+    "min_serials_per_s": 5.0
+  }
+}
+.
+4 passed in 86.04s (0:01:26)
+{
+  "order_confirm_lines": {
+    "machine": "work-windows",
+    "python": "3.12.10",
+    "postgres_server_version": 170009,
+    "budget_basis": "TECHNICAL_DEFAULT (gross-regression guard, in-process, synthetic data, not an SLA)",
+    "lines": 100,
+    "confirm_ms": 1433.6,
+    "budget_ms": 30000.0
+  },
+  "planning_import_baseline_like": {
+    "machine": "work-windows",
+    "python": "3.12.10",
+    "postgres_server_version": 170009,
+    "budget_basis": "TECHNICAL_DEFAULT (gross-regression guard, in-process, synthetic data, not an SLA)",
+    "file_bytes": 79805,
+    "norder_rows": 3917,
+    "categories_slots": 111,
+    "codes_registered": 2841,
+    "disputed_items": 224,
+    "disputed_rows": 634,
+    "import_seconds": 8.79,
+    "budget_s": 300.0
+  },
+  "paginated_lists": {
+    "machine": "work-windows",
+    "python": "3.12.10",
+    "postgres_server_version": 170009,
+    "budget_basis": "TECHNICAL_DEFAULT (gross-regression guard, in-process, synthetic data, not an SLA)",
+    "page_size": 100,
+    "volume": {
+      "product_codes": 2841,
+      "customer_orders": 1000,
+      "conflicts": 224,
+      "customers": 50
+    },
+    "results": {
+      "product_codes": {
+        "n": 15.0,
+        "p50_ms": 23.8,
+        "p95_ms": 25.2,
+        "max_ms": 25.7,
+        "five_pages_ms": 120.2
+      },
+      "customer_orders": {
+        "n": 15.0,
+        "p50_ms": 122.5,
+        "p95_ms": 177.4,
+        "max_ms": 190.6,
+        "five_pages_ms": 1175.3
+      },
+      "conflicts": {
+        "n": 15.0,
+        "p50_ms": 55.1,
+        "p95_ms": 66.7,
+        "max_ms": 75.0,
+        "five_pages_ms": 128.0
+      },
+      "customers": {
+        "n": 15.0,
+        "p50_ms": 29.7,
+        "p95_ms": 38.9,
+        "max_ms": 39.7,
+        "five_pages_ms": 31.5
+      }
+    },
+    "budget_p95_ms": 5000.0
+  },
+  "code_rule_list_golden_summary": {
+    "machine": "work-windows",
+    "python": "3.12.10",
+    "postgres_server_version": 170009,
+    "budget_basis": "TECHNICAL_DEFAULT (gross-regression guard, in-process, synthetic data, not an SLA)",
+    "revisions": 4,
+    "golden_cases_per_revision": 2000,
+    "list_stored_summary": {
+      "n": 15.0,
+      "p50_ms": 18.5,
+      "p95_ms": 20.1,
+      "max_ms": 21.4
+    },
+    "old_live_summary_for_the_same_page": {
+      "n": 3.0,
+      "p50_ms": 365.5,
+      "p95_ms": 365.5,
+      "max_ms": 400.4
+    },
+    "single_get_live": {
+      "n": 3.0,
+      "p50_ms": 98.4,
+      "p95_ms": 98.4,
+      "max_ms": 151.3
+    },
+    "budget_list_p95_ms": 1500.0
+  },
+  "serial_allocation_concurrency": {
+    "machine": "work-windows",
+    "python": "3.12.10",
+    "postgres_server_version": 170009,
+    "budget_basis": "TECHNICAL_DEFAULT (gross-regression guard, in-process, synthetic data, not an SLA)",
+    "workers": 8,
+    "orders": 40,
+    "serials": 200,
+    "seconds": 4.34,
+    "serials_per_s": 46.1,
+    "orders_per_s": 9.22,
+    "gapless": true,
+    "min_serials_per_s": 5.0
+  }
+}# exit code: 0
+---------------------------------------------------------------- [10] perf: PASS (284s)
+# CI summary
+
+Commit `91b921ab3d23603abb93ce9916196a00e3e85631` | machine work-windows | 2026-11-16T06:18:21Z
+
+Worktree at the end of the run: 1 modified tracked file(s), 5 untracked path(s) (0/0 = exactly the commit above).
+
+Tested code (git tree id of the worktree per directory; compare with `git rev-parse <commit>:<dir>`):
+
+- `backend` 7d603803a804837d81477323e7739c39ec3ac91d
+- `frontend` ae7a29f51d9de1b7dc4d59e45e5c0c5060f46f10
+- `tools` 08bc3f04c9af60cd94167287d72e59d2a04ae3f1
+- `ops` 0da067a1e36f7a26f0109a1ed10de74da9d99d8b
+- `docs` e6bccd211fc0c53369cbb78fd1205819ebf696de
+- `.github` 798f6bcddc477151f91f7800ebad754161f6d610
+
+| Stage | Result | Exit code | Seconds | Log | Skip reason |
+|---|---|---|---|---|---|
+| lint | PASS | 0 | 2 | 01_lint.log |  |
+| type | PASS | 0 | 3 | 02_type.log |  |
+| tools | PASS | 0 | 3 | 03_tools.log |  |
+| unit | PASS | 0 | 586 | 04_unit.log |  |
+| migration | PASS | 0 | 346 | 05_migration.log |  |
+| contract | PASS | 0 | 62 | 06_contract.log |  |
+| authz | PASS | 0 | 62 | 07_authz.log |  |
+| security | PASS | 0 | 125 | 11_security.log |  |
+| ops | PASS | 0 | 804 | 12_ops.log |  |
+| artifacts | PASS | 0 | 9 | 13_artifacts.log |  |
+| frontend | PASS | 0 | 167 | 08_frontend.log |  |
+| e2e | PASS | 0 | 399 | 09_e2e.log |  |
+| perf | PASS | 0 | 284 | 10_perf.log |  |

@@ -1,0 +1,32 @@
+{
+  "iterations": 200,
+  "warmup": 10,
+  "p95_budget_ms": 250.0,
+  "budget_basis": "TECHNICAL_DEFAULT (gross-regression guard, in-process test client, not an SLA)",
+  "results": {
+    "health_live": {
+      "n": 200.0,
+      "p50_ms": 0.591,
+      "p95_ms": 1.218,
+      "max_ms": 2.69
+    },
+    "health_ready": {
+      "n": 200.0,
+      "p50_ms": 0.988,
+      "p95_ms": 2.04,
+      "max_ms": 3.541
+    },
+    "version": {
+      "n": 200.0,
+      "p50_ms": 0.708,
+      "p95_ms": 1.641,
+      "max_ms": 5.645
+    },
+    "integration_freshness_page25": {
+      "n": 200.0,
+      "p50_ms": 5.188,
+      "p95_ms": 10.835,
+      "max_ms": 15.358
+    }
+  }
+}

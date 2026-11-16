@@ -1,0 +1,258 @@
+# stage ops | 2026-11-16T05:49:29Z | machine work-windows | MINGW64_NT-10.0-22000
+# command (bash tools/ci_local.sh <out> ops runs this function):
+#   stage_ops () 
+#   { 
+#       need_pg || return $?;
+#       local rc=0;
+#       echo "== least-privilege DB roles";
+#       bash ops/db/roles_check.sh "$OUT/roles" || rc=1;
+#       echo "== backup / restore drill";
+#       bash ops/backup/drill.sh "$OUT/drill" || rc=1;
+#       echo "== rollback rehearsal (01.7: down to the PHASE_01 baseline 0010 with data, forward to head)";
+#       bash ops/backup/rollback_rehearsal.sh "$OUT/rollback" || rc=1;
+#       echo "== outbox monitoring command (on a throw-away migrated DB is covered by the drill; here: help)";
+#       ( cd backend && "$PYTHON" manage.py outbox_status --help > /dev/null && echo "outbox_status: available" ) || rc=1;
+#       return $rc
+#   }
+# ---- output
+== least-privilege DB roles
+== server: 17.9
+== throw-away database aleekhan_roles_check, roles owner/app/ro with suffix 08666253 (NOLOGIN, no password)
+NOTICE:  database "aleekhan_roles_check" does not exist, skipping
+== migrate as the owner role
+PASS all tables owned by the owner role
+== app role: allowed runtime path
+PASS app: INSERT audit row
+PASS app: SELECT audit
+PASS app: UPDATE integration source (DML)
+PASS app: unit of work (audit + outbox) via Django
+PASS app: manage.py outbox_status
+PASS app: audit hash chain verified + integrity run recorded (01.3)
+== app role: audit bypass and DDL must be refused
+PASS app: DELETE audit rows  (ERROR:  permission denied for table platform_audit_event)
+PASS app: UPDATE audit rows  (ERROR:  permission denied for table platform_audit_event)
+PASS app: TRUNCATE audit  (ERROR:  permission denied for table platform_audit_event)
+PASS app: DISABLE audit trigger  (ERROR:  must be owner of table platform_audit_event)
+PASS app: DISABLE TRIGGER ALL  (ERROR:  must be owner of table platform_audit_event)
+PASS app: DROP audit trigger  (ERROR:  must be owner of relation platform_audit_event)
+PASS app: session_replication_role=replica (skips triggers)  (ERROR:  permission denied to set parameter "session_replication_role")
+PASS app: DELETE compensation rows  (ERROR:  permission denied for table platform_compensation_record)
+PASS app: write django_migrations  (ERROR:  permission denied for table django_migrations)
+PASS app: CREATE TABLE  (ERROR:  permission denied for schema public)
+PASS app: CREATE FUNCTION  (ERROR:  permission denied for schema public)
+PASS app: DROP TABLE  (ERROR:  must be owner of table platform_outbox_event)
+PASS app: ALTER TABLE ADD COLUMN  (ERROR:  must be owner of table platform_outbox_event)
+== app role: PHASE_01 tables (01.2)
+PASS app: INSERT synthetic org unit (tree trigger reads parameter; history via SECURITY DEFINER)
+PASS app: SELECT permission catalogue
+PASS app: INSERT permission (catalogue is migration-only)  (ERROR:  permission denied for table platform_permission)
+PASS app: UPDATE permission flags  (ERROR:  permission denied for table platform_permission)
+PASS app: INSERT upload type  (ERROR:  permission denied for table platform_upload_type)
+PASS app: UPDATE protected job type  (ERROR:  permission denied for table platform_job_definition)
+PASS app: DELETE user  (ERROR:  permission denied for table platform_user)
+PASS app: DELETE role assignment  (ERROR:  permission denied for table platform_role_assignment)
+PASS app: DELETE org unit  (ERROR:  permission denied for table platform_org_unit)
+PASS app: DELETE document revision  (ERROR:  permission denied for table platform_document_revision)
+PASS app: UPDATE password history  (ERROR:  permission denied for table platform_password_history)
+PASS app: DELETE password history  (ERROR:  permission denied for table platform_password_history)
+PASS app: UPDATE login attempt  (ERROR:  permission denied for table platform_login_attempt)
+PASS app: INSERT org unit history directly  (ERROR:  permission denied for table platform_org_unit_history)
+PASS app: UPDATE org unit history  (ERROR:  permission denied for table platform_org_unit_history)
+PASS app: DISABLE TECHNICAL/BA guard trigger  (ERROR:  must be owner of table platform_role_permission)
+PASS app: DISABLE org tree trigger  (ERROR:  must be owner of table platform_org_unit)
+PASS app: DROP exclusion constraint  (ERROR:  must be owner of table platform_position_assignment)
+PASS app: TRUNCATE login attempts  (ERROR:  permission denied for table platform_login_attempt)
+PASS history row written by trigger for the app role's insert
+== app role: PHASE_02 tables (02.2)
+PASS app: SELECT serial counter
+PASS app: UPDATE serial counter (allocation step)
+PASS app: INSERT external reference type (steward-extensible, DEC-058)
+PASS app: INSERT serial counter (seed is migration-only)  (ERROR:  permission denied for table identity_serial_counter)
+PASS app: DELETE serial counter  (ERROR:  permission denied for table identity_serial_counter)
+PASS app: DELETE serial  (ERROR:  permission denied for table identity_serial)
+PASS app: UPDATE serial snapshot  (ERROR:  permission denied for table identity_serial_snapshot)
+PASS app: DELETE serial snapshot  (ERROR:  permission denied for table identity_serial_snapshot)
+PASS app: UPDATE order version  (ERROR:  permission denied for table commercial_customer_order_version)
+PASS app: DELETE order line  (ERROR:  permission denied for table commercial_customer_order_line)
+PASS app: DELETE product code  (ERROR:  permission denied for table identity_product_code)
+PASS app: INSERT unit of measure (catalogue)  (ERROR:  permission denied for table identity_unit_of_measure)
+PASS app: INSERT order type (catalogue)  (ERROR:  permission denied for table commercial_order_type)
+PASS app: DISABLE gapless counter trigger  (ERROR:  must be owner of table identity_serial_counter)
+PASS app: DISABLE serial guard trigger  (ERROR:  must be owner of table identity_serial)
+PASS app: draw a technical number (insert year row)
+PASS app: draw the next technical number (+1)
+PASS app: reset a number counter  (ck_number_counter_forward_only)
+PASS app: move a number counter by more than one  (ck_number_counter_forward_only)
+PASS app: insert a counter row above 1  (ck_number_counter_starts_at_one)
+PASS app: DELETE number counter  (ERROR:  permission denied for table platform_number_counter)
+PASS app: TRUNCATE number counter  (ERROR:  permission denied for table platform_number_counter)
+PASS app: DISABLE number counter guard  (ERROR:  must be owner of table platform_number_counter)
+PASS 0023 sequence identity_customer_no_seq replaced by the counter (0025)
+PASS 0023 sequence commercial_order_no_seq replaced by the counter (0025)
+PASS 0023 sequence commercial_change_request_no_seq replaced by the counter (0025)
+PASS app: DISABLE order guard trigger  (ERROR:  must be owner of table commercial_customer_order)
+PASS serial counter seeded at 63001 (DEC-006)
+== readonly role
+PASS ro: SELECT audit
+PASS ro: SELECT outbox
+PASS ro: INSERT audit  (ERROR:  permission denied for table platform_audit_event)
+PASS ro: UPDATE integration source  (ERROR:  permission denied for table platform_integration_source)
+PASS ro: DELETE outbox  (ERROR:  permission denied for table platform_outbox_event)
+PASS ro: SELECT role grants
+PASS ro: UPDATE user  (ERROR:  permission denied for table platform_user)
+== audit trigger still enabled and rows intact
+PASS all platform triggers enabled
+PASS audit triggers enabled  (trg_audit_event_append_only=O,trg_audit_event_no_truncate=O)
+PASS audit rows written by app are intact (2)
+== roles check: passed=78 failed=0
+== cleanup: drop aleekhan_roles_check and roles *_08666253
+== backup / restore drill
+== server 17.9 | pg_dump (PostgreSQL) 17.9 | machine work-windows | rows 500
+== [1] create + migrate + seed aleekhan_drill_src
+drill_seed: seeded n=500 source=synthetic_drill_7bacc297 phase01_rows=13 phase02_rows=5
+== [1b] PHASE_02 invariants before the dump
+{"checks": {"applied_change_requests_have_their_version": true, "confirmed_lines_have_a_serial": true, "failed_apply_still_visible": true, "number_counters_cover_issued_numbers": true, "order_versions_complete": true, "planning_batch_applied_with_staging_and_codes": true, "serial_belongs_to_one_line": true, "serial_snapshots_contiguous_from_1": true, "serials_gapless_from_start": true}, "counts": {"change_requests_applied": 1, "conflict_items": 9, "import_batches": 3, "legacy_codes": 5, "number_counters": 3, "order_versions": 3, "orders": 2, "serial_counter_issued": 5, "serial_snapshots": 6, "serials": 5, "staging_rows": 520}, "counts_nonzero": true, "status": "PASS"}
+== [2] fingerprint before
+commercial_customer_order 2 1c3039b5e5ab7482b286bb74217c0624
+commercial_customer_order_line 5 782365c2c8f92ad451c3b60c140785a7
+commercial_customer_order_version 3 87b6140f06ce50b95e9b0b1dec6e4614
+commercial_order_change_request 1 3abbdacba31a258d6d85d55ef360f5c0
+commercial_order_type 4 ab5b718daf80e45b45262168c5521a15
+django_migrations 28 38aa320553b13a26bd7c7eb4792bd95a
+identity_code_rule_golden_case 0 d41d8cd98f00b204e9800998ecf8427e
+identity_code_rule_revision 0 d41d8cd98f00b204e9800998ecf8427e
+identity_customer 2 b64c4a2975e0bb4a67c988e20df07101
+identity_customer_brand 0 d41d8cd98f00b204e9800998ecf8427e
+identity_external_ref 0 d41d8cd98f00b204e9800998ecf8427e
+identity_external_ref_type 4 70227a9a946b0b900e473781eedb7c67
+identity_historical_order_record 0 d41d8cd98f00b204e9800998ecf8427e
+identity_product 2 b1d9c68183f0063af78dbdeb3e16ca82
+identity_product_class 11 dab032e7a0deea8cfd2095ece8c5490c
+identity_product_code 5 4cc1f2acd9a69450f43c10f5233351ce
+identity_serial 5 805733f9bb419c13a241bf1c108e2d14
+identity_serial_counter 1 71d78b895ebacf83974e1865b40e5c7a
+identity_serial_snapshot 6 8bfbe5cfa4005171903941a05368ea74
+identity_style 2 c99e07332dbc8127173b75436a08ad95
+identity_style_revision 2 a6261562175abac27f9a11acff54a6c5
+identity_unit_of_measure 2 db69664f39b99c589193cbc580395387
+platform_approval_request 7 3739128338792ca4e3693839f08a1012
+platform_audit_event 559 1e5ba8cde18278f67b370ce1a51ac0d6
+platform_audit_integrity_run 1 9d2d24e65d7f5bc66595fb5cefa89573
+platform_break_glass_usage 0 d41d8cd98f00b204e9800998ecf8427e
+platform_compensation_record 0 d41d8cd98f00b204e9800998ecf8427e
+platform_conflict_item 9 50f5d21c0af50a597e943fff7b442df6
+platform_credential 12 67a5ffb87629b08801b47e50d9cecd79
+platform_document 1 bca0a0c545e315ca4c14e174b02f4ff7
+platform_document_revision 1 1de82caf2f6dd64de6cb1644cad716b4
+platform_dynamic_field_definition 0 d41d8cd98f00b204e9800998ecf8427e
+platform_idempotency_record 0 d41d8cd98f00b204e9800998ecf8427e
+platform_import_batch 3 084bb3c47e80b43ea9496d05b2d63cb0
+platform_import_staging_row 520 499de5dddbfdb9252a918adfed210a08
+platform_inbox_event 0 d41d8cd98f00b204e9800998ecf8427e
+platform_integration_source 5 b222c974d7cfd4be59c4f1e5710d9ff6
+platform_job_definition 11 52851160b64456ab9f23ff92e58d3b4c
+platform_job_run 2 b0f3ff74c0b10830169b0fd992c3a2b4
+platform_login_attempt 0 d41d8cd98f00b204e9800998ecf8427e
+platform_mfa_factor 0 d41d8cd98f00b204e9800998ecf8427e
+platform_number_counter 3 10f41c59472b6b95e6f08d5be7744ecb
+platform_org_unit 1 aca9892ccc80194e6661bf90a283a711
+platform_org_unit_history 1 057eadf38db95a6681869a06ef4129b7
+platform_org_unit_type 4 01a12e6cbea222a2109e5eb272ed6803
+platform_outbox_event 560 1ec2decb5933a2858e3051ccd2c9b206
+platform_parameter_definition 32 ce5ecd14864739c3fb65fd5418f03dac
+platform_parameter_value 32 3c22c14f2e2a9c7005dc61f7f35d1f71
+platform_password_history 0 d41d8cd98f00b204e9800998ecf8427e
+platform_permission 69 9bb14177bc7a66241b222c5fdf6f9f27
+platform_position 1 6e324531ec02e356d977dc00e3f80185
+platform_position_assignment 1 292fd153a4d712c9e59a996a7bd0e334
+platform_position_history 1 fce0a9ed87881c5a6a455eaf6384e82f
+platform_recovery_code 0 d41d8cd98f00b204e9800998ecf8427e
+platform_role 16 24114f9ed2cf8001ee52f0b1a0620d32
+platform_role_assignment 12 77946218eba544565eab142103c20b33
+platform_role_permission 197 f47ae0eeeaaa225b7b4576b2e2e54013
+platform_schema_meta 1 15322918e309ef171c8d51bf7ae2854a
+platform_session 0 d41d8cd98f00b204e9800998ecf8427e
+platform_stored_object 1 aa22c6c79153fe9c13e76a39e1ba0135
+platform_upload_type 6 c208ca0cec4032328880ba6437111e6f
+platform_user 29 707b0206a3172d70553c8b16da823be0
+platform_work_task 1 6163f206c92474b247861bc183f9fca5
+platform_workflow_definition 0 d41d8cd98f00b204e9800998ecf8427e
+platform_workflow_instance 0 d41d8cd98f00b204e9800998ecf8427e
+platform_workflow_step_event 0 d41d8cd98f00b204e9800998ecf8427e
+triggers commercial_customer_order.trg_commercial_customer_order_a_terminal=O,commercial_customer_order.trg_commercial_customer_order_b_immutable=O,commercial_customer_order.trg_commercial_customer_order_committed=O,commercial_customer_order.trg_commercial_customer_order_guard=O,commercial_customer_order.trg_commercial_customer_order_no_delete=O,commercial_customer_order.trg_commercial_customer_order_touch=O,commercial_customer_order_line.trg_commercial_customer_order_line_a_terminal=O,commercial_customer_order_line.trg_commercial_customer_order_line_b_immutable=O,commercial_customer_order_line.trg_commercial_customer_order_line_cancel_paired=O,commercial_customer_order_line.trg_commercial_customer_order_line_guard=O,commercial_customer_order_line.trg_commercial_customer_order_line_no_delete=O,commercial_customer_order_line.trg_commercial_customer_order_line_touch=O,commercial_customer_order_version.trg_commercial_customer_order_version_append_only=O,commercial_customer_order_version.trg_commercial_customer_order_version_guard=O,commercial_order_change_request.trg_commercial_order_change_request_a_terminal=O,commercial_order_change_request.trg_commercial_order_change_request_applied=O,commercial_order_change_request.trg_commercial_order_change_request_b_immutable=O,commercial_order_change_request.trg_commercial_order_change_request_guard=O,commercial_order_change_request.trg_commercial_order_change_request_no_delete=O,commercial_order_change_request.trg_commercial_order_change_request_touch=O,identity_code_rule_golden_case.trg_identity_code_rule_golden_case_close_once=O,identity_code_rule_golden_case.trg_identity_code_rule_golden_case_no_delete=O,identity_code_rule_revision.trg_identity_code_rule_revision_a_terminal=O,identity_code_rule_revision.trg_identity_code_rule_revision_b_immutable=O,identity_code_rule_revision.trg_identity_code_rule_revision_guard=O,identity_code_rule_revision.trg_identity_code_rule_revision_no_delete=O,identity_code_rule_revision.trg_identity_code_rule_revision_touch=O,identity_customer.trg_identity_customer_b_immutable=O,identity_customer.trg_identity_customer_no_delete=O,identity_customer.trg_identity_customer_touch=O,identity_customer_brand.trg_identity_customer_brand_b_immutable=O,identity_customer_brand.trg_identity_customer_brand_no_delete=O,identity_customer_brand.trg_identity_customer_brand_touch=O,identity_external_ref.trg_identity_external_ref_b_immutable=O,identity_external_ref.trg_identity_external_ref_no_delete=O,identity_external_ref.trg_identity_external_ref_touch=O,identity_external_ref_type.trg_identity_external_ref_type_b_immutable=O,identity_external_ref_type.trg_identity_external_ref_type_no_delete=O,identity_external_ref_type.trg_identity_external_ref_type_touch=O,identity_historical_order_record.trg_identity_historical_order_record_guard=O,identity_historical_order_record.trg_identity_historical_order_record_no_delete=O,identity_historical_order_record.trg_identity_historical_order_record_touch=O,identity_product.trg_identity_product_b_immutable=O,identity_product.trg_identity_product_guard=O,identity_product.trg_identity_product_no_delete=O,identity_product.trg_identity_product_touch=O,identity_product_class.trg_identity_product_class_b_immutable=O,identity_product_class.trg_identity_product_class_guard=O,identity_product_class.trg_identity_product_class_no_delete=O,identity_product_class.trg_identity_product_class_touch=O,identity_product_code.trg_identity_product_code_b_immutable=O,identity_product_code.trg_identity_product_code_guard=O,identity_product_code.trg_identity_product_code_no_delete=O,identity_product_code.trg_identity_product_code_touch=O,identity_serial.trg_identity_serial_a_terminal=O,identity_serial.trg_identity_serial_b_immutable=O,identity_serial.trg_identity_serial_cancel_paired=O,identity_serial.trg_identity_serial_committed=O,identity_serial.trg_identity_serial_guard=O,identity_serial.trg_identity_serial_no_delete=O,identity_serial.trg_identity_serial_touch=O,identity_serial_counter.trg_identity_serial_counter_b_immutable=O,identity_serial_counter.trg_identity_serial_counter_gapless=O,identity_serial_counter.trg_identity_serial_counter_guard=O,identity_serial_counter.trg_identity_serial_counter_no_delete=O,identity_serial_counter.trg_identity_serial_counter_touch=O,identity_serial_snapshot.trg_identity_serial_snapshot_append_only=O,identity_serial_snapshot.trg_identity_serial_snapshot_guard=O,identity_style.trg_identity_style_b_immutable=O,identity_style.trg_identity_style_guard=O,identity_style.trg_identity_style_no_delete=O,identity_style.trg_identity_style_touch=O,identity_style_revision.trg_identity_style_revision_a_terminal=O,identity_style_revision.trg_identity_style_revision_b_immutable=O,identity_style_revision.trg_identity_style_revision_guard=O,identity_style_revision.trg_identity_style_revision_no_delete=O,identity_style_revision.trg_identity_style_revision_touch=O,platform_approval_request.trg_approval_request_a_terminal=O,platform_approval_request.trg_approval_request_bootstrap_guard=O,platform_approval_request.trg_approval_request_immutable=O,platform_approval_request.trg_approval_request_touch=O,platform_audit_event.trg_audit_event_append_only=O,platform_audit_event.trg_audit_event_no_truncate=O,platform_audit_integrity_run.trg_audit_integrity_run_append_only=O,platform_break_glass_usage.trg_break_glass_usage_account=O,platform_break_glass_usage.trg_break_glass_usage_append_only=O,platform_compensation_record.trg_compensation_record_append_only=O,platform_conflict_item.trg_conflict_item_touch=O,platform_credential.trg_credential_immutable=O,platform_credential.trg_credential_touch=O,platform_document.trg_document_guard=O,platform_document.trg_document_touch=O,platform_document_revision.trg_document_revision_a_terminal=O,platform_document_revision.trg_document_revision_guard=O,platform_document_revision.trg_document_revision_touch=O,platform_dynamic_field_definition.trg_dynamic_field_definition_immutable=O,platform_dynamic_field_definition.trg_dynamic_field_definition_touch=O,platform_idempotency_record.trg_idempotency_record_touch=O,platform_import_batch.trg_import_batch_provenance=O,platform_import_batch.trg_import_batch_touch=O,platform_import_staging_row.trg_staging_row_payload=O,platform_import_staging_row.trg_staging_row_touch=O,platform_inbox_event.trg_inbox_event_no_update=O,platform_integration_source.trg_integration_source_touch=O,platform_job_definition.trg_job_definition_immutable=O,platform_job_definition.trg_job_definition_touch=O,platform_job_run.trg_job_run_a_terminal=O,platform_job_run.trg_job_run_guard=O,platform_job_run.trg_job_run_touch=O,platform_login_attempt.trg_login_attempt_guard=O,platform_mfa_factor.trg_mfa_factor_a_terminal=O,platform_mfa_factor.trg_mfa_factor_guard=O,platform_mfa_factor.trg_mfa_factor_touch=O,platform_number_counter.trg_platform_number_counter_guard=O,platform_number_counter.trg_platform_number_counter_no_truncate=O,platform_org_unit.trg_org_unit_effective=O,platform_org_unit.trg_org_unit_history=O,platform_org_unit.trg_org_unit_touch=O,platform_org_unit.trg_org_unit_tree_guard=O,platform_org_unit_history.trg_org_unit_history_append_only=O,platform_org_unit_type.trg_org_unit_type_touch=O,platform_outbox_event.trg_outbox_event_touch=O,platform_parameter_definition.trg_parameter_definition_immutable=O,platform_parameter_definition.trg_parameter_definition_touch=O,platform_parameter_value.trg_parameter_value_a_terminal=O,platform_parameter_value.trg_parameter_value_guard=O,platform_parameter_value.trg_parameter_value_touch=O,platform_password_history.trg_password_history_append_only=O,platform_permission.trg_permission_ba_guard=O,platform_position.trg_position_effective=O,platform_position.trg_position_guard=O,platform_position.trg_position_history=O,platform_position.trg_position_touch=O,platform_position_assignment.trg_position_assignment_a_not_backdated=O,platform_position_assignment.trg_position_assignment_guard=O,platform_position_assignment.trg_position_assignment_touch=O,platform_position_history.trg_position_history_append_only=O,platform_recovery_code.trg_recovery_code_use_once=O,platform_role.trg_role_a_terminal=O,platform_role.trg_role_kind_guard=O,platform_role.trg_role_touch=O,platform_role_assignment.trg_role_assignment_a_terminal=O,platform_role_assignment.trg_role_assignment_guard=O,platform_role_assignment.trg_role_assignment_touch=O,platform_role_permission.trg_role_permission_guard=O,platform_session.trg_session_a_terminal=O,platform_session.trg_session_immutable=O,platform_session.trg_session_touch=O,platform_stored_object.trg_stored_object_append_only=O,platform_user.trg_user_immutable=O,platform_user.trg_user_touch=O,platform_work_task.trg_work_task_a_terminal=O,platform_work_task.trg_work_task_immutable=O,platform_work_task.trg_work_task_touch=O,platform_workflow_definition.trg_workflow_definition_guard=O,platform_workflow_definition.trg_workflow_definition_touch=O,platform_workflow_instance.trg_workflow_instance_a_terminal=O,platform_workflow_instance.trg_workflow_instance_guard=O,platform_workflow_instance.trg_workflow_instance_touch=O,platform_workflow_step_event.trg_workflow_step_event_append_only=O
+functions 244
+== [3] pg_dump -Fc
+dump sha256=15b255e569a38e57862c3fa9ecbc5ea0ce6c26349e7b77e36b4e0384aa2a71e7 bytes=763664
+== [4] drop source database (simulated loss)
+PASS source database dropped before restore
+== [5] verify dump checksum, restore into aleekhan_drill_restored
+PASS dump sha256 unchanged before restore
+PASS pg_restore --single-transaction --exit-on-error
+== [6] verify restored database
+PASS fingerprint of restored database readable
+PASS fingerprint covers all public tables (66)
+PASS row counts + table checksums + triggers + functions identical  (66 tables)
+PASS migrations state: 28 applied, migrate --check clean
+PASS audit append-only trigger enforced after restore
+PASS synthetic labelled outbox rows restored (500)
+PASS application reads restored DB (outbox_status)
+PASS PHASE_01 rows restored (user, org unit, role assignment, task, approval, document revision, job runs, DISCARDED event)
+PASS migrations 0011-0018 recorded in the restored DB
+PASS audit hash chain verifies after restore
+PASS application reads restored DB (job_status)
+PASS PHASE_02 invariants after restore (serials gapless from 63001, line/serial pairing, snapshots, versions, number counters, import batches)
+PASS PHASE_02 row and counter counts identical before dump / after restore
+PASS migrations 0019-0028 recorded in the restored DB
+PASS failed Planning apply still reported by job_status after restore (IMPORT_APPLY_FAILED)
+== drill PASS: dump 462 ms, restore 1930 ms, verify 18867 ms, total 95331 ms, dump 763664 bytes sha256 15b255e569a38e57862c3fa9ecbc5ea0ce6c26349e7b77e36b4e0384aa2a71e7
+== cleanup: drop aleekhan_drill_src, aleekhan_drill_restored; delete work dir
+== rollback rehearsal (01.7: down to the PHASE_01 baseline 0010 with data, forward to head)
+== server 17.9 | machine work-windows | rows 50
+== [0] reference schemas: fresh 0010, fresh 0011, fresh head
+== [A] data without housekeeping job runs: migrate to head, seed, roll back to 0010, forward
+drill_seed: seeded n=50 source=synthetic_drill_ebd1bd73 phase01_rows=11 phase02_rows=0
+A before: users=1 units=1 tasks=1 approvals=1 revisions=1 audit=54 outbox=55 | owner 2.2/47 | discarded 1
+PASS A: migrate down 0018 -> 0010 with synthetic data
+PASS A: schema after rollback == fresh 0010 schema  (5926 lines)
+PASS A: business rows kept by the rollback (users=1 units=1 tasks=1 approvals=1 revisions=1 audit=54 outbox=55)
+PASS A: DISCARDED events are DEAD_LETTER again (0018 reverse)
+PASS A: owner_admin back to matrix 1.0 (0017/0015/0014 reversed)
+PASS A: migrations 0011-0018 unrecorded
+PASS A: migrate forward to head again, migrate --check clean
+PASS A: schema after forward == fresh head schema
+PASS A: application reads the rolled-forward DB (outbox_status, job_status)
+PASS A: owner_admin matrix/grants restored by forward (2.2/47)
+== [B] data with housekeeping job runs: the 0011 reverse must refuse (PROTECT), DB stays consistent
+drill_seed: seeded n=50 source=synthetic_drill_3cedeea8 phase01_rows=13 phase02_rows=0
+PASS B: rollback below 0011 is refused while job runs exist (PROTECT, by design)
+PASS B: stopped at a consistent state (0011 applied, 0012-0018 reversed)
+PASS B: schema == fresh 0011 schema
+PASS B: business rows kept (users=1 units=1 tasks=1 approvals=1 revisions=1 audit=60 outbox=61)
+PASS B: migrate forward to head again, migrate --check clean
+PASS B: schema after forward == fresh head schema
+PASS B: application reads the rolled-forward DB (outbox_status, job_status)
+== [C] PHASE_01 data, no PHASE_02 business rows: roll back head -> 0027 -> 0018, forward
+drill_seed: seeded n=50 source=synthetic_drill_a8af1ab0 phase01_rows=11 phase02_rows=0
+PASS C: migrate down 0028 -> 0027 -> 0018 (PHASE_02 schema without business rows)
+PASS C: schema after rollback == fresh 0018 schema  (6073 lines)
+PASS C: PHASE_01 rows kept by the rollback (users=1 units=1 tasks=1 approvals=1 revisions=1 audit=54 outbox=55)
+PASS C: no PHASE_02 table or function left at 0018
+PASS C: migrate forward to head again, migrate --check clean
+PASS C: schema after forward == fresh head schema
+PASS C: application reads the rolled-forward DB (outbox_status, job_status)
+== [D] PHASE_02 data: the 0022 reverse must refuse (PROTECT), DB stays consistent, forward + invariants
+drill_seed: seeded n=50 source=synthetic_drill_8b399e33 phase01_rows=13 phase02_rows=5
+D before: customers=2 orders=2 lines=5 serials=5 snapshots=6 versions=3 codes=5 batches=3 conflicts=9 serial_next=63006
+PASS D: rollback below 0022 is refused while PHASE_02 roles are assigned (PROTECT, by design)
+PASS D: stopped at a consistent state (0022 applied, 0023-0028 reversed)
+PASS D: schema == fresh 0022 schema
+PASS D: PHASE_02 rows and serial counter kept (customers=2 orders=2 lines=5 serials=5 snapshots=6 versions=3 codes=5 batches=3 conflicts=9 serial_next=63006)
+PASS D: migrate forward to head again, migrate --check clean
+PASS D: schema after forward == fresh head schema
+PASS D: application reads the rolled-forward DB (outbox_status, job_status)
+PASS D: PHASE_02 invariants after forward (gapless serials, versions, snapshots, number counters, imports)
+== rehearsal PASS (failures: 0)
+== cleanup: drop test_aleekhan_drill_rb_ref10 test_aleekhan_drill_rb_ref11 test_aleekhan_drill_rb_ref18 test_aleekhan_drill_rb_ref22 test_aleekhan_drill_rb_head test_aleekhan_drill_rb_a test_aleekhan_drill_rb_b test_aleekhan_drill_rb_c test_aleekhan_drill_rb_d
+== outbox monitoring command (on a throw-away migrated DB is covered by the drill; here: help)
+outbox_status: available
+# exit code: 0

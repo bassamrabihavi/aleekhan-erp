@@ -1,0 +1,110 @@
+{
+  "order_confirm_lines": {
+    "machine": "work-windows",
+    "python": "3.12.10",
+    "postgres_server_version": 170009,
+    "budget_basis": "TECHNICAL_DEFAULT (gross-regression guard, in-process, synthetic data, not an SLA)",
+    "lines": 100,
+    "confirm_ms": 1433.6,
+    "budget_ms": 30000.0
+  },
+  "planning_import_baseline_like": {
+    "machine": "work-windows",
+    "python": "3.12.10",
+    "postgres_server_version": 170009,
+    "budget_basis": "TECHNICAL_DEFAULT (gross-regression guard, in-process, synthetic data, not an SLA)",
+    "file_bytes": 79805,
+    "norder_rows": 3917,
+    "categories_slots": 111,
+    "codes_registered": 2841,
+    "disputed_items": 224,
+    "disputed_rows": 634,
+    "import_seconds": 8.79,
+    "budget_s": 300.0
+  },
+  "paginated_lists": {
+    "machine": "work-windows",
+    "python": "3.12.10",
+    "postgres_server_version": 170009,
+    "budget_basis": "TECHNICAL_DEFAULT (gross-regression guard, in-process, synthetic data, not an SLA)",
+    "page_size": 100,
+    "volume": {
+      "product_codes": 2841,
+      "customer_orders": 1000,
+      "conflicts": 224,
+      "customers": 50
+    },
+    "results": {
+      "product_codes": {
+        "n": 15.0,
+        "p50_ms": 23.8,
+        "p95_ms": 25.2,
+        "max_ms": 25.7,
+        "five_pages_ms": 120.2
+      },
+      "customer_orders": {
+        "n": 15.0,
+        "p50_ms": 122.5,
+        "p95_ms": 177.4,
+        "max_ms": 190.6,
+        "five_pages_ms": 1175.3
+      },
+      "conflicts": {
+        "n": 15.0,
+        "p50_ms": 55.1,
+        "p95_ms": 66.7,
+        "max_ms": 75.0,
+        "five_pages_ms": 128.0
+      },
+      "customers": {
+        "n": 15.0,
+        "p50_ms": 29.7,
+        "p95_ms": 38.9,
+        "max_ms": 39.7,
+        "five_pages_ms": 31.5
+      }
+    },
+    "budget_p95_ms": 5000.0
+  },
+  "code_rule_list_golden_summary": {
+    "machine": "work-windows",
+    "python": "3.12.10",
+    "postgres_server_version": 170009,
+    "budget_basis": "TECHNICAL_DEFAULT (gross-regression guard, in-process, synthetic data, not an SLA)",
+    "revisions": 4,
+    "golden_cases_per_revision": 2000,
+    "list_stored_summary": {
+      "n": 15.0,
+      "p50_ms": 18.5,
+      "p95_ms": 20.1,
+      "max_ms": 21.4
+    },
+    "old_live_summary_for_the_same_page": {
+      "n": 3.0,
+      "p50_ms": 365.5,
+      "p95_ms": 365.5,
+      "max_ms": 400.4
+    },
+    "single_get_live": {
+      "n": 3.0,
+      "p50_ms": 98.4,
+      "p95_ms": 98.4,
+      "max_ms": 151.3
+    },
+    "budget_list_p95_ms": 1500.0
+  },
+  "serial_allocation_concurrency": {
+    "machine": "work-windows",
+    "python": "3.12.10",
+    "postgres_server_version": 170009,
+    "budget_basis": "TECHNICAL_DEFAULT (gross-regression guard, in-process, synthetic data, not an SLA)",
+    "workers": 8,
+    "orders": 40,
+    "serials": 200,
+    "seconds": 4.34,
+    "serials_per_s": 46.1,
+    "orders_per_s": 9.22,
+    "gapless": true,
+    "min_serials_per_s": 5.0
+  }
+}

@@ -459,3 +459,17 @@ Review verdicts are in `reports/phase-00/step-N/REVIEW.md`. No version number is
   left after the rollback. REV-0264: `frontend/scripts/e2e.sh` `E2E_STEP=phase-XX/step-Y` -> that step's
   screenshot folder; a folder with committed screenshots is refused unless `E2E_SCREENSHOT_OVERWRITE=1`.
 - Event envelope `schema_migration` = `platform_core.0028_phase02_golden_summary`.
+- msoffcrypto-tool re-pinned 6.0.0 by the orchestrator (6.1.0 broke the >= 14-day rule).
+- Implementation `859b95178512b473f44b336ffd0d1076d8525746`; report `c55b1316b3c2e14c971592dafc7e9bfdefc6e597`;
+  review PASS (advisory) `e6355c8fb2e76d65047768af235bdad3aa549153`.
+
+### 02.8 Report & Review
+- Employer decision 2026-11-16 (DEC-005 Q-D follow-up): a resolved disputed legacy value carries over to later
+  Planning imports (`d1d2f577aa117a2ae9fddaae24c958e6de22cc11`).
+- Pre-gate review fixes `68b33622f92f1486c8a317e5d4f7394da59bc377`: REV-0271 carry-over (new counts
+  `legacy_values_disputed_reused` / `legacy_rows_disputed_reused`, audit `identity.product_code.legacy_disputed_reused`);
+  REV-0272 one disputed item per value across NOrder and Codding (key `value:<sha256[:24]>`, sheet-qualified
+  cell refs); REV-0273 0028 docstring; REV-0275 synthetic factories moved to `platform_core/devtools/`.
+- E2E seed import follow-up `91b921ab3d23603abb93ce9916196a00e3e85631`; CI perf stage runs the PHASE_02 perf
+  tests `b3597158ecb4e5bb56759d7a082210e3cdaf1fae`.
+- Phase report, Trace Map, Gate packet, UAT how-to; full local CI on `b3597158` (13/13 stages PASS).

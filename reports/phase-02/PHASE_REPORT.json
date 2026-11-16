@@ -1,0 +1,116 @@
+{
+ "phase": "PHASE_02",
+ "step": "02.8",
+ "commit_sha": "b359715",
+ "status": "COMPLETE",
+ "scope": [
+  "PHASE_02 phase report over steps 02.1-02.8, Trace Map, Gate packet (Persian), UAT how-to T-004",
+  "Pre-gate review fixes REV-0271 (employer decision 2026-11-16), REV-0272, REV-0273, REV-0275",
+  "Full local CI on the candidate commit (13 stages) and screenshot review of all 16 PHASE_02 sets (REV-0253)",
+  "Acceptance cases ID-01..ID-04; pages 1, 2, 4, 29, 33"
+ ],
+ "changes": [
+  "Step commits: 02.1 1c69e99, 02.2 c8b3dff, 02.3 3fb0162, 02.4 14b49e4, 02.5 5f65fc9, 02.6 fe0058c, 02.7 859b951, 02.8 68b3362 / 91b921a / b359715",
+  "backend/platform_core/product_identity/planning_import.py (carry-over, value key)",
+  "backend/platform_core/devtools/ (synthetic factories moved out of tests)",
+  "frontend/e2e/phase02-helpers.ts, tools/ci_local.sh (PHASE_02 perf in CI)",
+  "CHANGELOG.md, control/UI_POLISH_BACKLOG.md (UIP-003)",
+  "reports/phase-02/PHASE_REPORT.md, TRACE_MAP.md, GATE_PACKET_FA.md, UAT_HOWTO_FA.md"
+ ],
+ "migrations": [
+  "platform_core.0019_phase02_identity_commercial_schema",
+  "platform_core.0020_phase02_db_guards",
+  "platform_core.0021_phase02_seed_catalogue",
+  "platform_core.0022_dec057_matrix_v20",
+  "platform_core.0023_phase02_engine",
+  "platform_core.0024_dec057_dec059_matrix_v21",
+  "platform_core.0025_phase02_api_numbers",
+  "platform_core.0026_phase02_planning_catalogue_source",
+  "platform_core.0027_dec057_matrix_v22",
+  "platform_core.0028_phase02_golden_summary"
+ ],
+ "test_evidence": [
+  {
+   "command": "tools/ci_local.sh (13 stages) on b359715",
+   "outcome": "PASS",
+   "log_path": "reports/phase-02/step-8/logs/ci/summary.md"
+  },
+  {
+   "command": "pytest unit+integration (1759 passed, 2 skipped)",
+   "outcome": "PASS",
+   "log_path": "reports/phase-02/step-8/logs/ci/04_unit.log"
+  },
+  {
+   "command": "migration roundtrip (schema diff empty)",
+   "outcome": "PASS",
+   "log_path": "reports/phase-02/step-8/logs/ci/05_migration.log"
+  },
+  {
+   "command": "OpenAPI 0.8.4-draft + contract tests",
+   "outcome": "PASS",
+   "log_path": "reports/phase-02/step-8/logs/ci/06_contract.log"
+  },
+  {
+   "command": "authz suite (1481 passed)",
+   "outcome": "PASS",
+   "log_path": "reports/phase-02/step-8/logs/ci/07_authz.log"
+  },
+  {
+   "command": "E2E Edge (32 + backend-down 1)",
+   "outcome": "PASS",
+   "log_path": "reports/phase-02/step-8/logs/ci/09_e2e.log"
+  },
+  {
+   "command": "perf (PHASE_00 1, PHASE_01 6, PHASE_02 4)",
+   "outcome": "PASS",
+   "log_path": "reports/phase-02/step-8/logs/ci/10_perf.log"
+  },
+  {
+   "command": "secret scan, pip-audit, npm audit",
+   "outcome": "PASS",
+   "log_path": "reports/phase-02/step-8/logs/ci/11_security.log"
+  },
+  {
+   "command": "roles 78/78, backup drill, rollback rehearsal A-D",
+   "outcome": "PASS",
+   "log_path": "reports/phase-02/step-8/logs/ci/12_ops.log"
+  },
+  {
+   "command": "orchestrator full pytest (3160 passed, 2 skipped), perf 11, race x3",
+   "outcome": "PASS",
+   "log_path": "reports/phase-02/step-8/logs/orch/pytest.log"
+  },
+  {
+   "command": "real Planning import, throw-away DB (222 disputed values / 640 rows)",
+   "outcome": "PASS",
+   "log_path": "reports/phase-02/step-8/logs/orch/real_import.json"
+  },
+  {
+   "command": "real golden v3 (2313 cases, not_reproduced 0)",
+   "outcome": "PASS",
+   "log_path": "reports/phase-02/step-4/logs/orch-rework1/golden_real.log"
+  }
+ ],
+ "security_evidence": [
+  "16 roles x 69 operations equal matrix v2.2; fresh MFA per holder role",
+  "representative name only in its own column; masked for management_viewer",
+  "no real Planning value in Git; real runs on dropped test_ DBs, counts only",
+  "secret scan tree+history 0; pip-audit runtime 0; npm audit 0",
+  "security checklist PHASE_02, sign-off blank for the employer"
+ ],
+ "decisions": [
+  "DEC-005 Q-D follow-up 2026-11-16: resolved disputed value carries over to later imports"
+ ],
+ "risks": [
+  "employer questions at Gate: REV-0203, REV-0254, unused identity.serial.allocate row, checklist signature",
+  "carried to staging: break-glass, TLS/CSP/encrypted backups, artifact signing, scheduler, RPO/RTO",
+  "family 06 has no real golden cases: codes blocked until >= 20 approved cases"
+ ],
+ "evidence_paths": [
+  "reports/phase-02/TRACE_MAP.md",
+  "reports/phase-02/step-8/logs/",
+  "reports/phase-02/step-8/screenshots/"
+ ],
+ "rollback": "migrate platform_core 0018 before production data (rehearsal C); with PHASE_02 data restore from backup (docs/ops/ROLLBACK.md 3b); git revert the PHASE_02 commits",
+ "review_request": "PASS"
+}
