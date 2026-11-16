@@ -2,6 +2,9 @@
 
 * REV-0261 - one ``legacy_code_disputed`` item per distinct value, carrying the row count (identical order
   rows included); resolving the item settles every row of that value.
+* 02.8 REV-0272 - the item is per value across sheets (NOrder!FZ + Codding): one item, sheet-qualified refs.
+* 02.8 REV-0271 (DECISION_LOG 2026-11-16) - a RESOLVED value carries over: a later file with the same value
+  opens no new item, the resolution is reused, counted and audited with the item reference.
 * REV-0262 - ``load_code_rule_golden --maker``: an ACTIVE holder of ``identity.code_rule.manage`` only, and
   the console origin is in the audit trail.
 * REV-0266 - ``--source-sha256`` must name an APPLIED Planning batch.
@@ -23,6 +26,8 @@ from typing import Any
 import pytest
 from django.core.management import CommandError, call_command
 
+from platform_core.devtools.phase02_engine import holder
+from platform_core.devtools.planning_workbook import base_sheets, write_workbook
 from platform_core.engine.context import Actor, RequestContext
 from platform_core.identity.models import User
 from platform_core.integration import imports as im
@@ -40,15 +45,12 @@ from platform_core.product_identity import codes
 from platform_core.product_identity import planning_import as pi
 from platform_core.product_identity.models import CodeRuleRevision
 
-from .phase02_engine import holder
 from .test_phase02_planning_import import (
     _validated_batch,
     applied_sha,
-    base_sheets,
     golden_cases,
     run_import,
     write_json,
-    write_workbook,
 )
 
 pytestmark = pytest.mark.django_db
@@ -87,12 +89,21 @@ def test_disputed_value_is_one_item_with_the_count_of_every_row(tmp_path: Path) 
     ]
     assert len(items) == 1
     item = items[0]
-    assert item.details["row_count"] == 3 and item.details["cell_refs"] == ["FZ12", "FZ13", "FZ14"]
+    assert item.details["row_count"] == 3
+    assert item.details["cell_refs"] == ["NOrder!FZ12", "NOrder!FZ13", "NOrder!FZ14"]
     assert item.details["cell_refs_truncated"] is False
     assert DISPUTED not in json.dumps(item.details, ensure_ascii=False) + item.conflict_key  # value-free
     assert report.counts["legacy_duplicate_rows_counted"] >= 1
     assert report.counts["legacy_rows_disputed"] == report.counts["legacy_values_disputed"] + 2
 
+    _resolve(item)
+    left = ConflictItem.objects.filter(
+        kind="legacy_code_disputed", status=ConflictStatus.OPEN, conflict_key=item.conflict_key
+    )
+    assert not left.exists()  # one decision covered all three rows
+
+
+def _resolve(item: ConflictItem, outcome: str = "RESOLVED") -> ConflictItem:
     steward = holder("product_data_steward")
     ctx = RequestContext(Actor.user(steward.pk), request_id=uuid.uuid4())
     done = resolve_conflict(
@@ -100,24 +111,91 @@ def test_disputed_value_is_one_item_with_the_count_of_every_row(tmp_path: Path) 
         ConflictItem.objects.all(),
         item.conflict_id,
         expected_version=item.row_version,
-        outcome="RESOLVED",
+        outcome=outcome,
         note="تصمیم ساختگی برای همه ردیف‌ها",  # noqa: RUF001 - Persian text
     )
-    assert done.status == ConflictStatus.RESOLVED
-    left = ConflictItem.objects.filter(
-        kind="legacy_code_disputed", status=ConflictStatus.OPEN, conflict_key=item.conflict_key
-    )
-    assert not left.exists()  # one decision covered all three rows
+    assert done.status == outcome
+    return done
 
-    # the same value in a later file (rows moved) maps to the same key: a new item only because the old
-    # one is closed, never one per row
-    moved = write_workbook(
-        tmp_path / "moved.xlsm",
-        base_sheets(NOrder={"FZ20": DISPUTED, "FZ21": DISPUTED, "C21": "9003"}),
+
+def _disputed_item_of(cell: str) -> ConflictItem:
+    return ConflictItem.objects.get(
+        source__code=pi.SOURCE_CODE,
+        kind="legacy_code_disputed",
+        status=ConflictStatus.OPEN,
+        details__cell=cell,
     )
-    run_import(moved)
-    again = ConflictItem.objects.filter(conflict_key=item.conflict_key, status=ConflictStatus.OPEN)
-    assert again.count() == 1 and again.get().details["row_count"] == 2
+
+
+# ----------------------------------------------------------------------------------- 02.8 REV-0272
+def test_same_disputed_value_in_norder_and_codding_is_one_item(tmp_path: Path) -> None:
+    path = write_workbook(
+        tmp_path / "both.xlsm",
+        base_sheets(NOrder={"FZ12": DISPUTED, "C12": "9002"}, Codding={"K5": DISPUTED, "K6": DISPUTED}),
+    )
+    report = run_import(path)
+    assert report.status == BatchStatus.APPLIED
+    item = _disputed_item_of("FZ12")  # NOrder is read first: the item points at its first cell
+    assert item.details["sheet"] == "NOrder" and item.details["row_count"] == 3
+    assert item.details["cell_refs"] == ["NOrder!FZ12", "Codding!K5", "Codding!K6"]
+    assert item.conflict_key.startswith("value:") and "NOrder" not in item.conflict_key
+    assert DISPUTED not in json.dumps(item.details, ensure_ascii=False) + item.conflict_key  # value-free
+    same = ConflictItem.objects.filter(kind="legacy_code_disputed", conflict_key=item.conflict_key)
+    assert same.count() == 1
+    # base workbook: 4 distinct disputed values (FZ7, FZ8, FZ9, Codding!K4) + this one
+    assert report.counts["legacy_values_disputed"] == 5 and report.counts["legacy_rows_disputed"] == 4 + 3
+
+
+# ----------------------------------------------------------------------------------- 02.8 REV-0271
+def test_resolved_disputed_value_carries_over_to_a_later_import(tmp_path: Path) -> None:
+    first = run_import(
+        write_workbook(tmp_path / "first.xlsm", base_sheets(NOrder={"FZ12": DISPUTED, "C12": "9002"}))
+    )
+    item = _disputed_item_of("FZ12")
+    done = _resolve(item)
+    items_before = ConflictItem.objects.filter(kind="legacy_code_disputed").count()
+
+    # a changed later file: the value moved to other rows and also appears in Codding
+    later = write_workbook(
+        tmp_path / "later.xlsm",
+        base_sheets(NOrder={"FZ20": DISPUTED, "FZ21": DISPUTED, "C21": "9003"}, Codding={"K7": DISPUTED}),
+    )
+    report = run_import(later)
+    assert report.status == BatchStatus.APPLIED and report.batch_id != first.batch_id
+    assert not ConflictItem.objects.filter(
+        conflict_key=item.conflict_key, status=ConflictStatus.OPEN
+    ).exists()
+    assert ConflictItem.objects.filter(kind="legacy_code_disputed").count() == items_before  # no new item
+    assert report.counts["legacy_values_disputed_reused"] == 1
+    assert report.counts["legacy_rows_disputed_reused"] == 3
+    # the 4 base values are still OPEN from the first file: counted, not duplicated
+    assert report.counts["conflict.legacy_code_disputed"] == 4
+    assert report.counts["legacy_values_disputed"] == 5
+
+    audit = AuditEvent.objects.get(action="identity.product_code.legacy_disputed_reused")
+    assert audit.resource_type == "platform.conflict_item" and audit.resource_id == str(done.conflict_id)
+    assert audit.scope["batch_id"] == str(report.batch_id)
+    assert audit.after is not None and audit.after["row_count"] == 3
+    assert audit.after["cell_refs"] == ["NOrder!FZ20", "NOrder!FZ21", "Codding!K7"]
+    assert DISPUTED not in json.dumps(audit.after, ensure_ascii=False)
+    reg = AuditEvent.objects.get(
+        action="identity.product_code.legacy_register", resource_id=str(report.batch_id)
+    )
+    assert reg.after is not None and reg.after["disputed_reused"] == 1
+
+
+def test_dismissed_disputed_value_is_raised_again(tmp_path: Path) -> None:
+    """DISMISSED is not a decision on the value (only RESOLVED carries over): a later file opens a new
+    item."""
+    run_import(write_workbook(tmp_path / "a.xlsm", base_sheets(NOrder={"FZ12": DISPUTED, "C12": "9002"})))
+    item = _disputed_item_of("FZ12")
+    _resolve(item, outcome="DISMISSED")
+    report = run_import(
+        write_workbook(tmp_path / "b.xlsm", base_sheets(NOrder={"FZ20": DISPUTED, "C20": "9003"}))
+    )
+    again = ConflictItem.objects.get(conflict_key=item.conflict_key, status=ConflictStatus.OPEN)
+    assert again.conflict_id != item.conflict_id and again.details["cell_refs"] == ["NOrder!FZ20"]
+    assert report.counts.get("legacy_values_disputed_reused", 0) == 0
 
 
 # ------------------------------------------------------------------------------- REV-0262 / REV-0266

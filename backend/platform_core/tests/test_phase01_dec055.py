@@ -11,6 +11,8 @@ from django.db import connection
 from django.utils import timezone
 
 from platform_core.authz.policy import Caller
+from platform_core.devtools.engine_fixtures import caller, ensure_catalogue, give_role, person, with_role
+from platform_core.devtools.phase01_factories import db_refuses
 from platform_core.engine.errors import MfaRequired, SelfApprovalForbidden, ValidationFailed
 from platform_core.identity import roles
 from platform_core.identity.models import Role, RoleAssignment, User
@@ -18,8 +20,6 @@ from platform_core.models import AuditEvent
 from platform_core.workflow import approvals
 from platform_core.workflow.models import ApprovalRequest
 
-from .engine_fixtures import caller, ensure_catalogue, give_role, person, with_role
-from .phase01_factories import db_refuses
 from .threads import run_concurrently
 
 

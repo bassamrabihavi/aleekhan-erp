@@ -34,6 +34,7 @@ from django.db import connection
 from django.test import override_settings
 from django.utils import timezone
 
+from platform_core.devtools.engine_fixtures import network as set_network
 from platform_core.engine import audit_chain as ac
 from platform_core.engine import consumers as cs
 from platform_core.engine import outbox as ob
@@ -42,7 +43,6 @@ from platform_core.engine.uow import unit_of_work
 from platform_core.models import AuditEvent, DeliveryStatus, OutboxEvent
 from platform_core.workflow.models import ApprovalRequest, WorkTask
 
-from .engine_fixtures import network as set_network
 from .phase01_api import get, session_client, with_roles
 from .threads import run_concurrently
 

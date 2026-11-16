@@ -10,6 +10,7 @@ import pytest
 from hypothesis import given
 from hypothesis import strategies as st
 
+from platform_core.devtools.engine_fixtures import SYN_PW_ZERO, person
 from platform_core.engine.errors import PasswordPolicyViolation
 from platform_core.identity import totp
 from platform_core.identity.passwords import (
@@ -18,8 +19,6 @@ from platform_core.identity.passwords import (
     validate_new_password,
     write_credential,
 )
-
-from .engine_fixtures import SYN_PW_ZERO, person
 
 GOLDEN = json.loads(
     (Path(__file__).parent / "golden" / "totp_rfc6238.golden.json").read_text(encoding="utf-8")

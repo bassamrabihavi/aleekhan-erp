@@ -14,13 +14,12 @@ from hypothesis import strategies as st
 
 from platform_core.api import permissions as api_permissions
 from platform_core.authz import policy as P
+from platform_core.devtools.engine_fixtures import caller, give_role, person
+from platform_core.devtools.phase01_factories import org_unit, position, position_assignment
 from platform_core.engine.context import db_now
 from platform_core.engine.errors import AccessDenied, MfaRequired, NotFound
 from platform_core.engine.redaction import REDACTED
 from platform_core.identity.models import User
-
-from .engine_fixtures import caller, give_role, person
-from .phase01_factories import org_unit, position, position_assignment
 
 GOLDEN = Path(__file__).parent / "golden" / "permission_decisions.golden.json"
 
@@ -340,9 +339,8 @@ def test_rbac_policy_adapter_matches_engine() -> None:
 @pytest.mark.django_db
 def test_scope_q_filters_lists_like_the_record_check() -> None:
     """List scoping (01.4 building block): ORG_UNIT scope + own records, nothing else."""
+    from platform_core.devtools.phase01_factories import approval
     from platform_core.workflow.models import ApprovalRequest
-
-    from .phase01_factories import approval
 
     unit, other = org_unit(), org_unit()
     reader = person()

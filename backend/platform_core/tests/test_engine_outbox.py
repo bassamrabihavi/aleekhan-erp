@@ -13,13 +13,13 @@ from django.test import override_settings
 from hypothesis import given
 from hypothesis import strategies as st
 
+from platform_core.devtools.factories import outbox_event
 from platform_core.engine import outbox as ob
 from platform_core.engine.context import Actor, RequestContext
 from platform_core.engine.errors import EngineContractError, NotFound, StateTransitionNotAllowed
 from platform_core.engine.testing import InMemoryTestPublisher
 from platform_core.models import AuditEvent, DeliveryStatus, OutboxEvent
 
-from .factories import outbox_event
 from .threads import run_concurrently
 
 GOLDEN = Path(__file__).parent / "golden" / "backoff.golden.json"

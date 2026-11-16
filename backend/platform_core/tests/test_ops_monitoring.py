@@ -10,12 +10,11 @@ import pytest
 from django.core.management import call_command
 from django.core.management.base import CommandError
 
+from platform_core.devtools import factories
 from platform_core.engine.context import db_now
 from platform_core.engine.outbox import INTEGRATION_POLICY
 from platform_core.models import DeliveryStatus, OutboxEvent
 from platform_core.ops.monitoring import DUE_BACKLOG_WARN, outbox_snapshot
-
-from . import factories
 
 pytestmark = pytest.mark.django_db
 

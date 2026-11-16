@@ -8,6 +8,7 @@ import uuid
 
 import pytest
 
+from platform_core.devtools import factories
 from platform_core.engine.context import Actor, RequestContext
 from platform_core.engine.errors import EngineContractError, ValidationFailed
 from platform_core.engine.redaction import REDACTED, is_sensitive_key, normalize_key, redact
@@ -15,8 +16,6 @@ from platform_core.engine.uow import unit_of_work
 from platform_core.integration import imports as im
 from platform_core.integration.models import BatchStatus, StagingRow
 from platform_core.models import AuditEvent
-
-from . import factories
 
 MARKER = "<synthetic-not-a-secret>"
 ZWNJ = "‌"

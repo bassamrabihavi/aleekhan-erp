@@ -24,9 +24,8 @@ from django.db import connection
 from django.test.utils import CaptureQueriesContext
 
 from platform_core.authz import policy as P
+from platform_core.devtools.engine_fixtures import caller, give_role, person
 from platform_core.identity.models import RoleAssignment
-
-from .engine_fixtures import caller, give_role, person
 
 ACTION = "platform.ops.job.read"  # matrix: owner_admin, it_ops (TECHNICAL, not a business approval)
 

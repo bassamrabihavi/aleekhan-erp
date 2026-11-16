@@ -21,13 +21,13 @@ from django.db import connection
 
 from platform_core.commercial import changes
 from platform_core.commercial.models import CustomerOrder, CustomerOrderLine
+from platform_core.devtools import phase02_factories as f
+from platform_core.devtools.phase02_engine import holder
 from platform_core.models import AuditEvent, IdempotencyRecord, OutboxEvent
 from platform_core.product_identity.models import SerialSnapshot
 
 from . import openapi_contract as oc
-from . import phase02_factories as f
 from .phase01_api import body, get, idem, if_match, patch, post, session_client
-from .phase02_engine import holder
 
 pytestmark = [pytest.mark.django_db(transaction=True), pytest.mark.usefixtures("api_db", "clear_cache")]
 _LETTERS = "ابپتثجچحخدذرزژسشصضطظعغفقکگلمنوهی"

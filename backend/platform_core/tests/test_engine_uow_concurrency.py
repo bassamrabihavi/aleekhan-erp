@@ -9,6 +9,7 @@ from django.db import transaction
 from hypothesis import given
 from hypothesis import strategies as st
 
+from platform_core.devtools.factories import idempotency_record, outbox_event
 from platform_core.engine.concurrency import (
     MAX_ROW_VERSION,
     lock_versioned,
@@ -28,7 +29,6 @@ from platform_core.engine.redaction import REDACTED
 from platform_core.engine.uow import unit_of_work
 from platform_core.models import ActorType, AuditEvent, IdempotencyRecord, OutboxEvent
 
-from .factories import idempotency_record, outbox_event
 from .threads import run_concurrently
 
 USER = uuid.UUID("00000000-0000-4000-8000-000000000001")  # synthetic

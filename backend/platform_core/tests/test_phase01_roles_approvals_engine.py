@@ -9,6 +9,8 @@ from datetime import timedelta
 import pytest
 
 from platform_core.authz.policy import Caller
+from platform_core.devtools.engine_fixtures import caller, ensure_catalogue, give_role, person, with_role
+from platform_core.devtools.phase01_factories import org_unit
 from platform_core.engine import commands
 from platform_core.engine.errors import (
     AccessDenied,
@@ -26,8 +28,6 @@ from platform_core.models import AuditEvent
 from platform_core.workflow import approvals
 from platform_core.workflow.models import ApprovalRequest
 
-from .engine_fixtures import caller, ensure_catalogue, give_role, person, with_role
-from .phase01_factories import org_unit
 from .threads import run_concurrently
 
 

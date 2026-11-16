@@ -20,6 +20,9 @@ from typing import Any
 import pytest
 
 from platform_core.api.phase01.common import utc_req
+from platform_core.devtools import phase01_factories as f
+from platform_core.devtools.engine_fixtures import give_role, person
+from platform_core.devtools.engine_fixtures import network as set_network
 from platform_core.documents import scanner
 from platform_core.documents import service as docs
 from platform_core.engine.context import Actor, RequestContext, db_now
@@ -29,9 +32,6 @@ from platform_core.models import AuditEvent
 from platform_core.workflow.models import WorkTask
 
 from . import openapi_contract as oc
-from . import phase01_factories as f
-from .engine_fixtures import give_role, person
-from .engine_fixtures import network as set_network
 from .phase01_api import (
     API,
     body,

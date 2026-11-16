@@ -14,6 +14,7 @@ from datetime import timedelta
 import pytest
 
 from platform_core.authz.policy import Caller
+from platform_core.devtools.engine_fixtures import caller, give_role, person
 from platform_core.documents import filetypes, scanner, service, storage
 from platform_core.documents.models import DocumentRevision, StoredObject
 from platform_core.engine.context import db_now
@@ -28,8 +29,6 @@ from platform_core.engine.errors import (
     SelfApprovalForbidden,
 )
 from platform_core.identity.models import User
-
-from .engine_fixtures import caller, give_role, person
 
 # The standard anti-malware test string (not malware; https://www.eicar.org), split so this file itself is not
 # flagged by scanners that inspect the repository.

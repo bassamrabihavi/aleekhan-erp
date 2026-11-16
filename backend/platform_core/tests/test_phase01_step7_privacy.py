@@ -34,6 +34,8 @@ from django.db import connection
 from django.test import Client
 
 from platform_core.authz import policy as P
+from platform_core.devtools.engine_fixtures import INTERNAL_IP, PASSWORD, SYN_PW_NEW, with_role
+from platform_core.devtools.engine_fixtures import network as set_network
 from platform_core.documents import scanner
 from platform_core.documents import service as docs
 from platform_core.identity import totp
@@ -41,8 +43,6 @@ from platform_core.identity.models import Credential, MfaFactor, RecoveryCode, S
 from platform_core.identity.roles import approved_matrix_grants
 
 from . import openapi_contract as oc
-from .engine_fixtures import INTERNAL_IP, PASSWORD, SYN_PW_NEW, with_role
-from .engine_fixtures import network as set_network
 from .phase01_api import body, code, get, idem, if_match, post, session_client, superuser, with_roles
 from .test_api_contract_planned import PHASE01_TAGS
 

@@ -12,6 +12,8 @@ from typing import Any
 
 import pytest
 
+from platform_core.devtools import phase02_engine as e
+from platform_core.devtools import phase02_factories as f
 from platform_core.engine.context import Actor, RequestContext
 from platform_core.engine.errors import (
     AccessDenied,
@@ -36,8 +38,6 @@ from platform_core.product_identity.models import (
     StyleRevision,
 )
 
-from . import phase02_engine as e
-from . import phase02_factories as f
 from .phase02_engine import deferred_checks  # noqa: F401 - fixture
 
 pytestmark = [pytest.mark.django_db, pytest.mark.usefixtures("deferred_checks")]
@@ -480,7 +480,7 @@ def test_erp_match_turns_a_reserved_code_active(p: e.People) -> None:
 
 # ------------------------------------------------------------- legacy style 0000 (DEC-005 amendment 11-13)
 def test_legacy_style_0000_is_stored_and_matched_but_never_issued(p: e.People) -> None:
-    from .phase01_factories import db_refuses
+    from platform_core.devtools.phase01_factories import db_refuses
 
     _active_rule(p, ["91"])
     t = f.product_type("91")

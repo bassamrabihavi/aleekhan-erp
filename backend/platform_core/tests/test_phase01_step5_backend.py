@@ -13,6 +13,10 @@ import pytest
 from django.db import connection
 from django.test import Client
 
+from platform_core.devtools import phase01_factories as f
+from platform_core.devtools.engine_fixtures import INTERNAL_IP, PASSWORD, caller, person, with_role
+from platform_core.devtools.engine_fixtures import network as set_network
+from platform_core.devtools.phase01_factories import db_refuses
 from platform_core.engine.errors import SelfApprovalForbidden
 from platform_core.identity import roles, users
 from platform_core.identity.models import Role, RoleAssignment, RolePermission
@@ -21,9 +25,6 @@ from platform_core.workflow import approvals
 from platform_core.workflow.models import ApprovalRequest
 
 from . import openapi_contract as oc
-from . import phase01_factories as f
-from .engine_fixtures import INTERNAL_IP, PASSWORD, caller, person, with_role
-from .engine_fixtures import network as set_network
 from .phase01_api import (
     API,
     body,
@@ -37,7 +38,6 @@ from .phase01_api import (
     superuser,
     with_roles,
 )
-from .phase01_factories import db_refuses
 from .threads import run_concurrently
 
 PDF = b"%PDF-1.7\n% synthetic test document\n1 0 obj << >> endobj\ntrailer << >>\n%%EOF\n"

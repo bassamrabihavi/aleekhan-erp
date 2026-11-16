@@ -6,14 +6,20 @@ from datetime import timedelta
 
 import pytest
 
+from platform_core.devtools.engine_fixtures import caller, person, with_role
+from platform_core.devtools.phase01_factories import (
+    SYN,
+    db_refuses,
+    org_unit,
+    position,
+    position_assignment,
+    user,
+)
 from platform_core.engine.context import db_now
 from platform_core.engine.errors import AccessDenied, MfaRequired, StateTransitionNotAllowed, ValidationFailed
 from platform_core.models import AuditEvent
 from platform_core.org import service as org
 from platform_core.org.models import OrgUnitHistory, PositionAssignment
-
-from .engine_fixtures import caller, person, with_role
-from .phase01_factories import SYN, db_refuses, org_unit, position, position_assignment, user
 
 pytestmark = pytest.mark.django_db
 
@@ -68,7 +74,7 @@ def test_org_services_require_manage_permission_and_step_up() -> None:
             emp, code="syn_u_denied", name_fa=f"و {SYN}", unit_type="COMPANY", parent_id=None, reason="test"
         )
     owner = person()
-    from .engine_fixtures import give_role
+    from platform_core.devtools.engine_fixtures import give_role
 
     give_role(owner, "owner_admin")
     with pytest.raises(MfaRequired):

@@ -7,9 +7,8 @@ import uuid
 import pytest
 from django.db import IntegrityError, connection, transaction
 
+from platform_core.devtools.factories import audit_event
 from platform_core.models import ActorType, AuditAppendOnlyError, AuditEvent
-
-from .factories import audit_event
 
 pytestmark = pytest.mark.django_db
 

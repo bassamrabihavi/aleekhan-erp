@@ -19,6 +19,9 @@ import pytest
 
 from platform_core.commercial import changes, orders
 from platform_core.commercial.models import CustomerOrder, OrderChangeRequest
+from platform_core.devtools import phase02_engine as e
+from platform_core.devtools import phase02_factories as f
+from platform_core.devtools.engine_fixtures import ensure_catalogue
 from platform_core.engine import commands
 from platform_core.engine.errors import (
     AleekhanError,
@@ -30,9 +33,6 @@ from platform_core.models import OutboxEvent
 from platform_core.product_identity import codes, master
 from platform_core.product_identity.models import ProductCode, Serial, SerialCounter
 
-from . import phase02_engine as e
-from . import phase02_factories as f
-from .engine_fixtures import ensure_catalogue
 from .threads import run_concurrently
 
 N = 6

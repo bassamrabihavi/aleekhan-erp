@@ -9,12 +9,10 @@ decision's generic terms, not workbook values.
 
 from __future__ import annotations
 
-import hashlib
 import io
 import json
 import re
 import uuid
-from collections.abc import Mapping
 from datetime import timedelta
 from pathlib import Path
 from typing import Any
@@ -23,6 +21,9 @@ import pytest
 from django.core.management import CommandError, call_command
 from django.db import OperationalError
 
+from platform_core.devtools import phase02_factories as f
+from platform_core.devtools.phase02_engine import holder
+from platform_core.devtools.planning_workbook import SYN, base_sheets, sha, write_workbook
 from platform_core.engine.context import Actor, RequestContext
 from platform_core.engine.errors import PayloadTooLarge, RuleNotApproved, ValidationFailed
 from platform_core.integration import imports as im
@@ -44,92 +45,8 @@ from platform_core.product_identity.models import (
     ProductCode,
 )
 
-from . import phase02_factories as f
-from .phase02_engine import holder
-
 pytestmark = pytest.mark.django_db
 REPO_ROOT = Path(__file__).resolve().parents[3]
-SYN = "ساختگی"
-
-# ------------------------------------------------------------------------------------ synthetic workbook
-SORCE: dict[str, Any] = {
-    # header row 1 (Persian): the category column of a type carries the type's name (header detection)
-    "BE1": "کفش",
-    "BF1": "کمربند",
-    "BG1": f"ستون {SYN}",
-    # header row 2 (English labels, 02.6 fix2): never data, never a conflict
-    "E2": "Product type",
-    "O2": "Code",
-    "BE2": "Shoe category",
-    "BF2": "Belt category",
-    "BG2": "Other",
-    # data from row 3; the type list is the contiguous E block E3..E7
-    "E3": "کفش",
-    "O3": "91",
-    "BE3": f"دسته {SYN} الف",
-    "BF3": f"دسته {SYN} کمربند",
-    "E4": "كمربند",  # Arabic kaf: normalised to the Persian word (DEC-058 belt)
-    "O4": "92",
-    "BE4": f"دسته {SYN} ب",
-    "E5": "کیف",
-    "O5": "93",
-    "E6": f"نوع {SYN} بی‌واحد",  # not in the DEC-058 unit list -> conflict, not created
-    "O6": "94",
-    "E7": "جیبی",
-    "O7": 95,  # a number, not 2-digit text -> conflict
-    # E8 empty: end of the type block. The category columns continue below it.
-    "O8": "07",
-    "BE8": f"دسته {SYN} ج",
-    "BG8": f"دسته {SYN} بی‌ستون",  # column without a type -> conflict
-    # an unrelated list further down column E (below the gap): never a type (02.6 fix2)
-    "E10": f"برچسب {SYN}",
-    "E11": 5,
-    "E12": 7.5,
-    "A1": f"شخص {SYN}",  # a column the importer never reads
-}
-NORDER: dict[str, Any] = {
-    "A1": "نوع",
-    "FZ1": "کد",
-    **{f"A{r}": "کفش" for r in range(2, 11)},
-    "C2": "9001", "D2": "0001", "FZ2": "02910790010001",
-    "C3": "9001", "D3": "0001", "FZ3": "02910790010001",  # same code, same pair (an order repeat)
-    "C4": "9001", "D4": "0002", "FZ4": "02910790010002",
-    "C5": "9001", "D5": "0003", "FZ5": "02910790010003",
-    "C6": "9001", "D6": "0004", "FZ6": "02910790010003",  # same code, another pair -> conflict
-    "FZ7": "0291079001A001",  # not 14 digits -> disputed
-    "FZ8": 2910790010005,  # a number (leading zero lost) -> disputed
-    "FZ9": "03910790010001",  # not the product prefix -> disputed
-    "FZ10": "02920790010000",  # style 0000: legacy only, registered
-    "E2": f"مشتری {SYN}",  # a column the importer never reads
-    # serials (NOrder!B) for the guard report
-    "B2": 100, "B3": "101", "B4": "S102", "B5": "103-1", "B6": 63000, "B7": "0104", "B8": 100,
-    "B9": 62999.0, "B10": "BG105",
-}  # fmt: skip
-CODDING: dict[str, Any] = {"K1": "کد", "K2": "02930790020001", "K3": "02910790010001", "K4": f"x{SYN}"}
-
-
-def write_workbook(path: Path, sheets: Mapping[str, Mapping[str, Any]]) -> Path:
-    import openpyxl
-
-    wb = openpyxl.Workbook()
-    wb.remove(wb.active)
-    for name, cells in sheets.items():
-        ws = wb.create_sheet(name)
-        for ref, value in cells.items():
-            ws[ref] = value
-    wb.save(path)
-    return path
-
-
-def sha(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
-
-
-def base_sheets(**over: Mapping[str, Any]) -> dict[str, dict[str, Any]]:
-    sheets = {"Sorce": dict(SORCE), "NOrder": dict(NORDER), "Codding": dict(CODDING)}
-    for name, cells in over.items():
-        sheets[name].update(cells)
-    return sheets
 
 
 @pytest.fixture
@@ -207,9 +124,10 @@ def test_import_applies_types_categories_and_legacy_codes_with_provenance(workbo
     items = open_conflicts("legacy_code_disputed")
     disputed = {f"{c.details['sheet']}!{c.details['cell']}": c.details for c in items}
     assert set(disputed) == {"NOrder!FZ7", "NOrder!FZ8", "NOrder!FZ9", "Codding!K4"}
-    for item in items:  # 02.7 (REV-0261): one item per sheet + distinct value, value-free key
-        assert re.fullmatch(r"(NOrder|Codding)!value:[0-9a-f]{24}", item.conflict_key), item.conflict_key
-        assert item.details["row_count"] == 1 and item.details["cell_refs"] == [item.details["cell"]]
+    for item in items:  # 02.7 (REV-0261) / 02.8 (REV-0272): one item per distinct value, value-free key
+        assert re.fullmatch(r"value:[0-9a-f]{24}", item.conflict_key), item.conflict_key
+        assert item.details["row_count"] == 1
+        assert item.details["cell_refs"] == [f"{item.details['sheet']}!{item.details['cell']}"]
     assert disputed["NOrder!FZ8"]["reason"] == "NOT_TEXT"
     assert disputed["NOrder!FZ7"]["reason"] == "NOT_14_DIGITS" and disputed["NOrder!FZ7"]["shape"] == "9+A9+"
     assert disputed["NOrder!FZ9"]["reason"] == "NOT_PRODUCT_PREFIX"

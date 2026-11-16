@@ -8,6 +8,22 @@ from datetime import timedelta
 
 import pytest
 
+from platform_core.devtools.engine_fixtures import (
+    EXTERNAL_IP,
+    INTERNAL_IP,
+    PASSWORD,
+    SYN_PW_NEW,
+    SYN_PW_WEAK,
+    VPN_IP,
+    caller,
+    ensure_catalogue,
+    give_role,
+    person,
+    with_role,
+)
+from platform_core.devtools.engine_fixtures import (
+    network as set_network,
+)
 from platform_core.engine.context import db_now
 from platform_core.engine.errors import (
     AccessDenied,
@@ -23,22 +39,6 @@ from platform_core.identity import auth, mfa, network, sessions, totp, users
 from platform_core.identity.models import LoginAttempt, MfaFactor, RecoveryCode, Session, User
 from platform_core.models import AuditEvent
 
-from .engine_fixtures import (
-    EXTERNAL_IP,
-    INTERNAL_IP,
-    PASSWORD,
-    SYN_PW_NEW,
-    SYN_PW_WEAK,
-    VPN_IP,
-    caller,
-    ensure_catalogue,
-    give_role,
-    person,
-    with_role,
-)
-from .engine_fixtures import (
-    network as set_network,
-)
 from .threads import run_concurrently
 
 

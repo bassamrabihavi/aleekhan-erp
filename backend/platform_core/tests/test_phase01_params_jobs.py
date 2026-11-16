@@ -10,10 +10,9 @@ from django.db import connection
 from django.db.models.functions import Now
 from django.utils import timezone
 
+from platform_core.devtools.phase01_factories import db_refuses, user
 from platform_core.jobs.models import AuditIntegrityRun, JobDefinition, JobRun
 from platform_core.params.models import DynamicFieldDefinition, ParameterDefinition, ParameterValue
-
-from .phase01_factories import db_refuses, user
 
 pytestmark = pytest.mark.django_db
 
@@ -224,7 +223,7 @@ def test_audit_integrity_runs_are_append_only() -> None:
 
 # ---------------------------------------------------------------------------------------- Q-0103
 def _owner_admin() -> object:
-    from .phase01_factories import assignment
+    from platform_core.devtools.phase01_factories import assignment
 
     owner = user()
     assignment(owner, "owner_admin", None)  # console bootstrap of the owner (TECHNICAL role)

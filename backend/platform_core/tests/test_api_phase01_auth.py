@@ -11,12 +11,19 @@ from urllib.parse import parse_qs, urlparse
 import pytest
 from django.test import Client, override_settings
 
+from platform_core.devtools.engine_fixtures import (
+    INTERNAL_IP,
+    PASSWORD,
+    SYN_PW_NEW,
+    SYN_PW_WRONG,
+    give_role,
+    person,
+)
+from platform_core.devtools.engine_fixtures import network as set_network
 from platform_core.identity import totp
 from platform_core.models import AuditEvent, IdempotencyRecord, OutboxEvent
 
 from . import openapi_contract as oc
-from .engine_fixtures import INTERNAL_IP, PASSWORD, SYN_PW_NEW, SYN_PW_WRONG, give_role, person
-from .engine_fixtures import network as set_network
 from .phase01_api import API, body, code, get, idem, post, session_client, with_roles
 
 pytestmark = [pytest.mark.django_db(transaction=True), pytest.mark.usefixtures("api_db", "clear_cache")]

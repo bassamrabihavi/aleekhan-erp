@@ -8,9 +8,8 @@ import pytest
 from django.db import IntegrityError, connection, transaction
 from django.utils import timezone
 
+from platform_core.devtools.factories import outbox_event
 from platform_core.models import DeliveryStatus, OutboxEvent
-
-from .factories import outbox_event
 
 pytestmark = pytest.mark.django_db
 

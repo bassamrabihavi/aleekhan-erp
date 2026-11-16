@@ -64,9 +64,8 @@ def api_db(audit_cleanup: None) -> Iterator[None]:
     (permissions, roles, parameters, job types) is re-created after the previous test's flush."""
     from importlib import import_module
 
+    from platform_core.devtools.engine_fixtures import ensure_catalogue
     from platform_core.documents.models import UploadType
-
-    from .engine_fixtures import ensure_catalogue
 
     ensure_catalogue()
     seed = import_module("platform_core.migrations.0010_seed_phase01_catalogue")

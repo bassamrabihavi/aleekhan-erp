@@ -26,9 +26,8 @@ import pytest
 from django.test import Client, override_settings
 
 from platform_core.api import integration_views as iv
+from platform_core.devtools import factories
 from platform_core.integration.models import IntegrationSource
-
-from . import factories
 
 pytestmark = [pytest.mark.perf, pytest.mark.usefixtures("clear_cache"), pytest.mark.django_db]
 

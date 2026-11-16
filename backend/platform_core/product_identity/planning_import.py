@@ -34,11 +34,17 @@ Rules applied (APPROVED decisions only; anything else becomes a conflict item, n
 * **Legacy codes** (DEC-005 B1 / Q-D, amendments 2026-11-13 / 2026-11-14): distinct ``NOrder!FZ`` and
   ``Codding`` values that are 14-digit text with prefix ``02`` (style ``0000`` accepted as legacy) are
   registered LEG, ``RESERVED / ERP_PENDING`` (``ERP_MATCHED`` only through a Rahkaran import). Every other
-  value -> ``legacy_code_disputed``: ONE item per sheet and distinct value (02.7, REV-0261; DECISION_LOG
-  2026-11-15 "one decision per distinct value"), with ``row_count`` and the cell references of every row that
-  carries it, identical (DUPLICATE_PAYLOAD) order rows included; the raw value stays in its staging rows,
-  never corrected, and the decision on the item covers all of those rows. The
-  code is authoritative (belt rows included); a code whose order rows show more than one (product, style)
+  value -> ``legacy_code_disputed``: ONE item per distinct value across ``NOrder!FZ`` and ``Codding``
+  (02.7 REV-0261, 02.8 REV-0272; DECISION_LOG 2026-11-15 "one decision per distinct value"), with
+  ``row_count`` and the sheet-qualified cell references (``NOrder!FZ12``) of every row that carries it,
+  identical (DUPLICATE_PAYLOAD) order rows included; the raw value stays in its staging rows, never
+  corrected, and the decision on the item covers all of those rows. **Carry-over** (02.8 REV-0271;
+  DECISION_LOG 2026-11-16): a value whose item was RESOLVED earlier opens no new item - the earlier
+  resolution is reused (counted ``legacy_values_disputed_reused`` / ``legacy_rows_disputed_reused``, one
+  ``identity.product_code.legacy_disputed_reused`` audit per value with the item reference). A value whose
+  item is still OPEN is counted (``conflicts_already_open``); the open item keeps the ``row_count`` /
+  ``cell_refs`` of the batch that raised it. A DISMISSED item is not a decision: the value opens a new item.
+  The code is authoritative (belt rows included); a code whose order rows show more than one (product, style)
   pair -> ``legacy_code_multiple_product_style`` and the code is registered without a style link. A code is
   linked to a style only when exactly that style (type, category, product, style segments) exists and has no
   other live code; otherwise it stays unlinked.
@@ -79,6 +85,8 @@ from platform_core.integration import imports as im
 from platform_core.integration.conflicts import raise_conflict
 from platform_core.integration.models import (
     BatchStatus,
+    ConflictItem,
+    ConflictStatus,
     ImportBatch,
     IntegrationSource,
     RowStatus,
@@ -803,8 +811,8 @@ MAX_DISPUTED_CELL_REFS: Final = 100
 
 def disputed_value_key(raw: dict[str, Any] | None) -> str:
     """A stable, value-free key of one distinct disputed cell value (type + value, SHA-256 prefix): equal
-    values -> one conflict item, whatever their rows (DECISION_LOG 2026-11-15: one decision per distinct
-    value). The value itself stays in its staging rows only."""
+    values -> one conflict item, whatever their sheet or rows (DECISION_LOG 2026-11-15: one decision per
+    distinct value). The value itself stays in its staging rows only."""
     if raw is None:
         return "empty"
     canon = json.dumps(
@@ -813,15 +821,57 @@ def disputed_value_key(raw: dict[str, Any] | None) -> str:
     return hashlib.sha256(canon.encode("utf-8")).hexdigest()[:24]
 
 
-def _raise_disputed(state: ApplyState, disputed: Mapping[tuple[str, str], list[tuple[Cell, str]]]) -> None:
-    """One ``legacy_code_disputed`` item per (sheet, distinct value), carrying the number of rows with that
-    value and their cell references (the decision applies to every one of them)."""
-    for (sheet, vkey), cells in disputed.items():
+def disputed_conflict_key(vkey: str) -> str:
+    """The conflict key of one disputed value: sheet-free (02.8 REV-0272), value-free (hash prefix)."""
+    return f"value:{vkey}"
+
+
+def _resolved_disputed(keys: Iterable[str]) -> dict[str, ConflictItem]:
+    """The latest RESOLVED ``legacy_code_disputed`` item of each key (02.8 REV-0271, carry-over)."""
+    out: dict[str, ConflictItem] = {}
+    for item in ConflictItem.objects.filter(
+        source__code=SOURCE_CODE,
+        kind="legacy_code_disputed",
+        status=ConflictStatus.RESOLVED,
+        conflict_key__in=list(keys),
+    ).order_by("conflict_key", "-resolved_at", "-id"):
+        out.setdefault(item.conflict_key, item)
+    return out
+
+
+def _raise_disputed(state: ApplyState, disputed: Mapping[str, list[tuple[Cell, str]]]) -> None:
+    """One ``legacy_code_disputed`` item per distinct value (all sheets), carrying the number of rows with
+    that value and their sheet-qualified cell references (the decision applies to every one of them). A value
+    already RESOLVED reuses that resolution: no new item, counted and audited with the item reference."""
+    keys = {vkey: disputed_conflict_key(vkey) for vkey in disputed}
+    resolved = _resolved_disputed(keys.values())
+    for vkey, cells in disputed.items():
         cell, reason = cells[0]
-        refs = [c.ref for c, _r in cells]
+        refs = [f"{c.row.sheet_name}!{c.ref}" for c, _r in cells]
+        state.counts["legacy_values_disputed"] += 1
+        state.counts["legacy_rows_disputed"] += len(cells)
+        earlier = resolved.get(keys[vkey])
+        if earlier is not None:
+            state.counts["legacy_values_disputed_reused"] += 1
+            state.counts["legacy_rows_disputed_reused"] += len(cells)
+            state.uow.audit(
+                action="identity.product_code.legacy_disputed_reused",
+                resource_type="platform.conflict_item",
+                resource_id=str(earlier.conflict_id),
+                resource_version=earlier.row_version,
+                after={
+                    "conflict_id": str(earlier.conflict_id),
+                    "status": earlier.status,
+                    "row_count": len(cells),
+                    "cell_refs": refs[:MAX_DISPUTED_CELL_REFS],
+                    "cell_refs_truncated": len(refs) > MAX_DISPUTED_CELL_REFS,
+                },
+                scope={"batch_id": str(state.batch.id), "source_code": SOURCE_CODE},
+            )
+            continue
         state.conflict(
             "legacy_code_disputed",
-            f"{sheet}!value:{vkey}",
+            keys[vkey],
             cell.details(
                 reason,
                 shape=_mask(cell.raw),
@@ -831,15 +881,13 @@ def _raise_disputed(state: ApplyState, disputed: Mapping[tuple[str, str], list[t
                 cell_refs_truncated=len(refs) > MAX_DISPUTED_CELL_REFS,
             ),
         )
-        state.counts["legacy_values_disputed"] += 1
-        state.counts["legacy_rows_disputed"] += len(cells)
 
 
 def _apply_codes(state: ApplyState, norder: list[StagingRow], codding: list[StagingRow]) -> None:
     lay = state.layout
     first: dict[str, Cell] = {}
     pairs: dict[str, set[tuple[str, str]]] = defaultdict(set)
-    disputed: dict[tuple[str, str], list[tuple[Cell, str]]] = {}
+    disputed: dict[str, list[tuple[Cell, str]]] = {}  # value key -> cells of every sheet (REV-0272)
     for rows, col, is_order in ((norder, lay.norder_code_col, True), (codding, lay.codding_code_col, False)):
         if not col:
             continue
@@ -847,7 +895,7 @@ def _apply_codes(state: ApplyState, norder: list[StagingRow], codding: list[Stag
             cell = Cell(r, col)
             code, reason = legacy_code(cell.raw)
             if code is None:
-                disputed.setdefault((r.sheet_name, disputed_value_key(cell.raw)), []).append((cell, reason))
+                disputed.setdefault(disputed_value_key(cell.raw), []).append((cell, reason))
                 continue
             first.setdefault(code, cell)
             if is_order:
@@ -918,6 +966,7 @@ def _apply_codes(state: ApplyState, norder: list[StagingRow], codding: list[Stag
             "linked": linked,
             "unchanged": state.counts["legacy_codes_unchanged"],
             "disputed": state.counts["legacy_values_disputed"],
+            "disputed_reused": state.counts["legacy_values_disputed_reused"],
             "multiple_product_style": len(multi),
         },
         scope={"batch_id": str(state.batch.id), "status": "RESERVED", "erp_status": "ERP_PENDING"},

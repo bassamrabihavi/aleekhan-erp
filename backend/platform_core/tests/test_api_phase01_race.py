@@ -8,13 +8,13 @@ from typing import Any
 
 import pytest
 
+from platform_core.devtools import phase01_factories as f
+from platform_core.devtools.engine_fixtures import INTERNAL_IP
+from platform_core.devtools.engine_fixtures import network as set_network
 from platform_core.identity.models import User
 from platform_core.models import IdempotencyRecord
 from platform_core.org.models import OrgUnit
 
-from . import phase01_factories as f
-from .engine_fixtures import INTERNAL_IP
-from .engine_fixtures import network as set_network
 from .phase01_api import body, code, open_token, post, session_client, with_roles
 from .threads import run_concurrently
 
@@ -94,9 +94,8 @@ def test_parallel_updates_with_the_same_if_match_one_wins() -> None:
 def test_parallel_decisions_on_one_approval_exactly_one() -> None:
     owner = with_roles("owner_admin")
     target = with_roles("employee")
+    from platform_core.devtools.engine_fixtures import caller
     from platform_core.identity import roles
-
-    from .engine_fixtures import caller
 
     ra = roles.grant_role(caller(owner), user_id=target.pk, role_code="document_approver", reason="race")
     assert ra.approval_request_id is not None

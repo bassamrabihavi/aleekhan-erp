@@ -16,6 +16,8 @@ import pytest
 from django.db.models.functions import Now
 from django.test import Client
 
+from platform_core.devtools.engine_fixtures import caller, give_role, person, with_role
+from platform_core.devtools.engine_fixtures import network as set_network
 from platform_core.documents import scanner
 from platform_core.documents import service as docs
 from platform_core.engine import rules
@@ -27,8 +29,6 @@ from platform_core.workflow import approvals
 from platform_core.workflow.models import ApprovalRequest
 
 from . import openapi_contract as oc
-from .engine_fixtures import caller, give_role, person, with_role
-from .engine_fixtures import network as set_network
 from .phase01_api import API, body, code, etag_version, get, if_match, post, session_client, with_roles
 
 PDF = b"%PDF-1.7\n% synthetic test document\n1 0 obj << >> endobj\ntrailer << >>\n%%EOF\n"

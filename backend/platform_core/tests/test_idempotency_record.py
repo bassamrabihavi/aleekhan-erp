@@ -10,9 +10,8 @@ import pytest
 from django.db import IntegrityError, connection, connections, transaction
 from django.utils import timezone
 
+from platform_core.devtools.factories import idempotency_record
 from platform_core.models import IdempotencyRecord, IdempotencyState
-
-from .factories import idempotency_record
 
 
 @pytest.mark.django_db

@@ -20,6 +20,7 @@ from django.db import IntegrityError, transaction
 from hypothesis import given
 from hypothesis import strategies as st
 
+from platform_core.devtools import factories
 from platform_core.engine.context import Actor, RequestContext
 from platform_core.engine.errors import (
     EngineContractError,
@@ -43,7 +44,6 @@ from platform_core.integration.models import (
 from platform_core.integration.sources import get_source, require_writable
 from platform_core.models import AuditEvent, OutboxEvent
 
-from . import factories
 from .threads import run_concurrently
 
 GOLDEN = Path(__file__).parent / "golden" / "import_batch_machine.golden.json"

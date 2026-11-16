@@ -10,12 +10,12 @@ from datetime import UTC, datetime, timedelta
 
 import pytest
 
+from platform_core.devtools import factories
 from platform_core.engine.context import Actor, RequestContext
 from platform_core.integration import imports as im
 from platform_core.integration.models import ImportBatch, IntegrationSource
 from platform_core.models import AuditEvent
 
-from . import factories
 from .threads import run_concurrently
 
 T = datetime(2026, 10, 1, 8, 0, tzinfo=UTC)

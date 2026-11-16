@@ -21,6 +21,10 @@ from django.conf import settings as dj_settings
 from django.db.migrations.loader import MigrationLoader
 from openapi_schema_validator import OAS31Validator
 
+from platform_core.devtools.engine_fixtures import PASSWORD, person, with_role
+from platform_core.devtools.engine_fixtures import network as set_network
+from platform_core.devtools.factories import outbox_event
+from platform_core.devtools.phase01_factories import SYN
 from platform_core.engine import consumers as cs
 from platform_core.engine import events as ev
 from platform_core.engine import outbox as ob
@@ -35,11 +39,7 @@ from platform_core.org import service as org
 from platform_core.params import service as params
 
 from . import openapi_contract as oc
-from .engine_fixtures import PASSWORD, person, with_role
-from .engine_fixtures import network as set_network
-from .factories import outbox_event
 from .phase01_api import get, session_client, with_roles
-from .phase01_factories import SYN
 from .threads import run_concurrently
 
 S = DeliveryStatus

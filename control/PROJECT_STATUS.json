@@ -295,12 +295,12 @@
         },
         "02.8": {
           "name": "Report & Review",
-          "state": "TODO",
+          "state": "IN_PROGRESS",
           "commit": null,
           "report": null,
           "review": null,
           "rework_cycles": 0,
-          "started_at": null,
+          "started_at": "2026-11-16T04:22:39+00:00",
           "done_at": null
         }
       }
@@ -3630,7 +3630,16 @@
       "status": "APPROVED",
       "by": "بسام ربیهاوی",
       "note": "2026-11-16 Q-D follow-up: a resolved disputed value carries over to later Planning imports (REV-0271)"
+    },
+    {
+      "at": "2026-11-16T04:22:39+00:00",
+      "kind": "step",
+      "phase": "PHASE_02",
+      "step": "02.8",
+      "state": "IN_PROGRESS",
+      "note": null,
+      "commit": null
     }
   ],
-  "updated_at": "2026-11-16T04:22:03+00:00"
+  "updated_at": "2026-11-16T04:22:39+00:00"
 }

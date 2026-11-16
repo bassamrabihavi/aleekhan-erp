@@ -12,9 +12,8 @@ from typing import Any
 import pytest
 from django.test import Client
 
+from platform_core.devtools import factories
 from platform_core.models import AuditEvent, IdempotencyRecord, IdempotencyState, OutboxEvent
-
-from . import factories
 
 pytestmark = [pytest.mark.urls("platform_core.tests.api_harness"), pytest.mark.usefixtures("clear_cache")]
 

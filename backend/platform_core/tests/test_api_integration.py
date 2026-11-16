@@ -18,12 +18,12 @@ import pytest
 from django.test import Client
 
 from platform_core.api import integration_views as iv
+from platform_core.devtools import factories
 from platform_core.engine.context import Actor, RequestContext
 from platform_core.integration import conflicts as cf
 from platform_core.integration.models import ConflictItem, IntegrationSource
 from platform_core.models import AuditEvent, OutboxEvent
 
-from . import factories
 from . import openapi_contract as oc
 
 pytestmark = pytest.mark.usefixtures("clear_cache")

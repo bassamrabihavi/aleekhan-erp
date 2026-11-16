@@ -10,7 +10,7 @@ strict = true
 plugins = ["mypy_django_plugin.main"]
 
 [[tool.mypy.overrides]]
-module = ["platform_core.tests.*", "conftest"]
+module = ["platform_core.tests.*", "platform_core.devtools.*", "conftest"]
 disallow_untyped_defs = false
 disallow_incomplete_defs = false
 

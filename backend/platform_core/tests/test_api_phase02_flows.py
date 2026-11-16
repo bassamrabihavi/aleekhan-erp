@@ -18,6 +18,8 @@ from typing import Any
 import pytest
 from django.test import Client, override_settings
 
+from platform_core.devtools import phase02_factories as f
+from platform_core.devtools.engine_fixtures import INTERNAL_IP, give_role, person
 from platform_core.engine.context import db_now
 from platform_core.identity.models import User
 from platform_core.models import AuditEvent
@@ -26,8 +28,6 @@ from platform_core.product_identity.models import ProductClass, Serial, SerialCo
 from platform_core.product_identity.usecase import NUMBER_PATTERN
 
 from . import openapi_contract as oc
-from . import phase02_factories as f
-from .engine_fixtures import INTERNAL_IP, give_role, person
 from .phase01_api import API, body, code, etag_version, get, idem, if_match, patch, post, session_client
 from .threads import run_concurrently
 
@@ -1060,7 +1060,7 @@ def test_a_role_without_the_permission_is_refused(role: str, method: str, path: 
 
 def test_a_non_global_assignment_sees_no_phase02_record() -> None:
     """DEC-057 answer 3: PHASE_02 grants are GLOBAL; an ORG_UNIT assignment reaches no unit-less record."""
-    from .phase01_factories import org_unit
+    from platform_core.devtools.phase01_factories import org_unit
 
     unit = org_unit()
     u = person()

@@ -15,6 +15,8 @@ import pytest
 from django.db import connection
 
 from platform_core.authz import policy as P
+from platform_core.devtools.engine_fixtures import network as set_network
+from platform_core.devtools.engine_fixtures import with_role
 from platform_core.documents import scanner
 from platform_core.documents import service as docs
 from platform_core.engine.errors import AccessDenied, FileNotReleased
@@ -22,8 +24,6 @@ from platform_core.identity.models import Permission, Role, RolePermission
 from platform_core.models import AuditEvent
 
 from . import openapi_contract as oc
-from .engine_fixtures import network as set_network
-from .engine_fixtures import with_role
 from .phase01_api import API, body, code, get, session_client, with_roles
 
 PDF = b"%PDF-1.7\n% synthetic test document v13\n1 0 obj << >> endobj\ntrailer << >>\n%%EOF\n"

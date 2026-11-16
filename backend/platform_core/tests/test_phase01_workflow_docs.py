@@ -9,16 +9,7 @@ from django.db import connection
 from django.db.models.functions import Now
 from django.utils import timezone
 
-from platform_core.documents.models import Document, DocumentRevision, StoredObject, UploadType
-from platform_core.workflow.models import (
-    ApprovalRequest,
-    WorkflowDefinition,
-    WorkflowInstance,
-    WorkflowStepEvent,
-    WorkTask,
-)
-
-from .phase01_factories import (
+from platform_core.devtools.phase01_factories import (
     approval,
     db_refuses,
     document,
@@ -27,6 +18,14 @@ from .phase01_factories import (
     revision,
     stored_object,
     user,
+)
+from platform_core.documents.models import Document, DocumentRevision, StoredObject, UploadType
+from platform_core.workflow.models import (
+    ApprovalRequest,
+    WorkflowDefinition,
+    WorkflowInstance,
+    WorkflowStepEvent,
+    WorkTask,
 )
 
 pytestmark = pytest.mark.django_db

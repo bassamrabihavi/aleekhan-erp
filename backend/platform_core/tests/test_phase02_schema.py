@@ -29,6 +29,8 @@ from platform_core.commercial.models import (
     OrderChangeRequest,
     OrderType,
 )
+from platform_core.devtools import phase02_factories as f
+from platform_core.devtools.phase01_factories import user
 from platform_core.product_identity.models import (
     CodeRuleRevision,
     Customer,
@@ -46,9 +48,6 @@ from platform_core.product_identity.models import (
     UnitOfMeasure,
 )
 from platform_core.workflow.models import ApprovalRequest
-
-from . import phase02_factories as f
-from .phase01_factories import user
 
 pytestmark = pytest.mark.django_db
 SEED21 = __import__("importlib").import_module("platform_core.migrations.0021_phase02_seed_catalogue")

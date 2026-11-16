@@ -17,9 +17,10 @@ event in the 0018 state DISCARDED - so the drill proves those tables, their trig
 survive dump and restore.
 
 PHASE_02 / 02.7: also a labelled PHASE_02 row set (migrations 0019-0028), written through the PHASE_02 engine
-and the Planning import (synthetic people and catalogue from the test factories, «ساختگی» / ``9x``
-segments): two confirmed orders (serials from the gapless counter, serial snapshots, order versions), one
-released, one applied quantity change request (new version + snapshot), customer / order / change-request
+and the Planning import (synthetic people and catalogue from ``platform_core.devtools``, not the test package
+since 02.8 REV-0275; «ساختگی» / ``9x`` segments): two confirmed orders (serials from the gapless counter,
+serial snapshots, order versions), one released, one applied quantity change request (new version +
+snapshot), customer / order / change-request
 numbers (``platform_number_counter``), an APPLIED Planning import of a tiny synthetic workbook (staging rows,
 legacy codes, conflict items) and one Planning batch whose apply FAILED (``batch_apply_failed``, still
 VALIDATED) - so the drill proves the PHASE_02 tables, counters and the commit-time invariants survive dump and
@@ -216,12 +217,12 @@ def seed_phase02() -> int:
     """One labelled PHASE_02 row set (see the module docstring). Returns the number of serials allocated."""
     import tempfile
 
+    from platform_core.devtools import phase02_engine as e
+    from platform_core.devtools.planning_workbook import base_sheets, sha, write_workbook
     from platform_core.integration.imports import apply_batch_with_retry
     from platform_core.product_identity import planning_import as pi
     from platform_core.product_identity.master import create_customer
     from platform_core.product_identity.models import Serial
-    from platform_core.tests import phase02_engine as e
-    from platform_core.tests.test_phase02_planning_import import base_sheets, sha, write_workbook
 
     p = e.people()
     # customers through the engine: their CU- numbers are drawn from platform_number_counter like SO- / CR-

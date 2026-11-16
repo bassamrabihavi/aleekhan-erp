@@ -16,6 +16,16 @@ from django.db import transaction
 
 from platform_core.authz import policy as P
 from platform_core.authz.policy import Caller
+from platform_core.devtools.engine_fixtures import (
+    EXTERNAL_IP,
+    PASSWORD,
+    caller,
+    give_role,
+    network,
+    person,
+    with_role,
+)
+from platform_core.devtools.phase01_factories import approval, org_unit, position, position_assignment
 from platform_core.documents import scanner, service, storage
 from platform_core.documents.models import Document, DocumentRevision, StoredObject
 from platform_core.engine.context import db_now
@@ -28,9 +38,6 @@ from platform_core.params import service as params
 from platform_core.params.models import ParameterDefinition
 from platform_core.params.values import effective_at, effective_int
 from platform_core.workflow.models import ApprovalRequest, WorkTask
-
-from .engine_fixtures import EXTERNAL_IP, PASSWORD, caller, give_role, network, person, with_role
-from .phase01_factories import approval, org_unit, position, position_assignment
 
 PDF = b"%PDF-1.7\n% synthetic test document\n1 0 obj << >> endobj\ntrailer << >>\n%%EOF\n"
 EICAR = b"X5O!P%@AP[4\\PZX54(P^)7CC)7}$" + b"EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*"

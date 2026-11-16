@@ -1,10 +1,13 @@
 """PHASE_02 / 02.7 (REV-0244): store the counts-only golden summary of a code rule revision.
 
 ``identity_code_rule_revision.golden_summary`` (jsonb, nullable, CHECK object-or-null) holds the
-``codes.golden_summary`` counts as of the last write of the revision (create, golden cases added, submit,
-approve, reject, activate). The code-rule list and the write responses read the stored value instead of
-rebuilding the code of every stored golden case for every row (the 02.4 review's list-cost finding); the
-single GET recomputes it live, so the approver always sees what the server gate sees now.
+``codes.golden_summary`` counts as of the last golden-relevant write of the revision: golden cases added,
+submit and approve (``codes.add_golden_cases`` / ``submit_rule_revision`` / ``approve_rule_revision``).
+Create, reject and activate do not store it (a new revision has no cases yet -> ``NULL``, computed on read;
+content is frozen after DRAFT, so reject / activate cannot change the counts). 02.8 REV-0273: docstring only.
+The code-rule list and the write responses read the stored value instead of rebuilding the code of every
+stored golden case for every row (the 02.4 review's list-cost finding); the single GET recomputes it live, so
+the approver always sees what the server gate sees now.
 
 Derived display data only: it is not one of the content columns frozen after DRAFT by
 ``identity_code_rule_guard`` (0020), and the approve / submit gates still run the full ``golden_report``.

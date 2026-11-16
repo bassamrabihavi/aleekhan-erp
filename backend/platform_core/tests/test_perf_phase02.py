@@ -31,15 +31,15 @@ from django.test import override_settings
 from platform_core.api.phase02 import serializers as S
 from platform_core.commercial import orders
 from platform_core.commercial.models import CustomerOrder
+from platform_core.devtools import phase02_engine as e
+from platform_core.devtools import phase02_factories as f
+from platform_core.devtools.engine_fixtures import ensure_catalogue
+from platform_core.devtools.engine_fixtures import network as set_network
 from platform_core.integration.models import ConflictItem
 from platform_core.product_identity import codes
 from platform_core.product_identity import planning_import as pi
 from platform_core.product_identity.models import CodeRuleRevision, ProductCode, Serial, SerialCounter
 
-from . import phase02_engine as e
-from . import phase02_factories as f
-from .engine_fixtures import ensure_catalogue
-from .engine_fixtures import network as set_network
 from .phase01_api import get, session_client, with_roles
 from .test_perf_phase01 import RATES, _latency, _record
 from .threads import run_concurrently
@@ -182,7 +182,7 @@ def _baseline_like_workbook(path: Path) -> tuple[Path, int]:
         else:
             norder[f"FZ{n}"] = item
         norder[f"A{n}"] = TYPE_NAMES[0]
-    from .test_phase02_planning_import import write_workbook
+    from platform_core.devtools.planning_workbook import write_workbook
 
     write_workbook(path, {"Sorce": sorce, "NOrder": norder, "Codding": {"K1": "کد"}})
     return path, len(rows)
@@ -194,7 +194,7 @@ def _baseline_like_workbook(path: Path) -> tuple[Path, int]:
 def test_perf_planning_import_and_paginated_lists(settings: Any, tmp_path: Path) -> None:
     set_network(settings)
     path, norder_rows = _baseline_like_workbook(tmp_path / "baseline-like-synthetic.xlsm")
-    from .test_phase02_planning_import import sha
+    from platform_core.devtools.planning_workbook import sha
 
     t0 = time.perf_counter()
     report = pi.import_planning_workbook(

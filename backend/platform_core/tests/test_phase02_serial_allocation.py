@@ -28,15 +28,15 @@ import pytest
 from django.db import IntegrityError, connection
 
 from platform_core.commercial.models import CustomerOrder, CustomerOrderLine
+from platform_core.devtools import phase02_factories as f
+from platform_core.devtools.engine_fixtures import ensure_catalogue
+from platform_core.devtools.phase01_factories import user
 from platform_core.engine.context import Actor, RequestContext
 from platform_core.engine.uow import unit_of_work
 from platform_core.models import AuditEvent, OutboxEvent
 from platform_core.product_identity.models import Serial, SerialCounter, SerialSnapshot
 from platform_core.product_identity.serials import EVENT_TYPE, AllocationRequest, allocate_serial
 
-from . import phase02_factories as f
-from .engine_fixtures import ensure_catalogue
-from .phase01_factories import user
 from .threads import run_concurrently
 
 REQUESTS = 100

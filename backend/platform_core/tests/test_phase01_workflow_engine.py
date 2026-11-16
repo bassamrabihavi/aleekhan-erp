@@ -5,6 +5,8 @@ from __future__ import annotations
 import pytest
 
 from platform_core.authz.policy import Caller
+from platform_core.devtools.engine_fixtures import caller, give_role, person
+from platform_core.devtools.phase01_factories import approval, org_unit, position, position_assignment
 from platform_core.engine.context import Actor, RequestContext
 from platform_core.engine.errors import (
     AccessDenied,
@@ -17,9 +19,6 @@ from platform_core.engine.errors import (
 from platform_core.org.models import OrgUnit
 from platform_core.workflow import instances, tasks
 from platform_core.workflow.models import ApprovalRequest, WorkflowDefinition, WorkflowStepEvent, WorkTask
-
-from .engine_fixtures import caller, give_role, person
-from .phase01_factories import approval, org_unit, position, position_assignment
 
 pytestmark = pytest.mark.django_db
 

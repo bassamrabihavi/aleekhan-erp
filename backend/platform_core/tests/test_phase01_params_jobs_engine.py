@@ -9,6 +9,14 @@ from datetime import timedelta
 import pytest
 from django.core.management import CommandError, call_command
 
+from platform_core.devtools.engine_fixtures import (
+    SYN_PW_OWNER,
+    SYN_PW_WEAK,
+    caller,
+    give_role,
+    person,
+    with_role,
+)
 from platform_core.engine.context import Actor, RequestContext, db_now
 from platform_core.engine.errors import (
     AccessDenied,
@@ -26,8 +34,6 @@ from platform_core.models import AuditEvent
 from platform_core.params import service as params
 from platform_core.params.models import ParameterDefinition, ParameterValue
 from platform_core.params.values import effective, effective_int
-
-from .engine_fixtures import SYN_PW_OWNER, SYN_PW_WEAK, caller, give_role, person, with_role
 
 pytestmark = pytest.mark.django_db
 SYS = RequestContext(Actor.system())

@@ -10,6 +10,7 @@ from django.db import connection
 from django.db.models.functions import Now
 from django.utils import timezone
 
+from platform_core.devtools.phase01_factories import db_refuses, user
 from platform_core.identity.models import (
     BreakGlassUsage,
     Credential,
@@ -20,8 +21,6 @@ from platform_core.identity.models import (
     Session,
     User,
 )
-
-from .phase01_factories import db_refuses, user
 
 pytestmark = pytest.mark.django_db
 HASH = "argon2$argon2id$v=19$m=65536,t=3,p=4$c3lu$c3ludGhldGlj"  # synthetic, not a real password hash

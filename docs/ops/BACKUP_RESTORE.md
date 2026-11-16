@@ -92,7 +92,7 @@ archiving above and is not demonstrated by one dump. Repeat on staging with prod
 ## 7. PHASE_02 / 02.7 drill additions
 
 - The seed also writes a labelled PHASE_02 row set through the PHASE_02 engine and the Planning import (synthetic
-  people / catalogue from the test factories): confirmed and released orders (serials from the gapless counter,
+  people / catalogue from `platform_core.devtools`, not the test package since 02.8 REV-0275): confirmed and released orders (serials from the gapless counter,
   serial snapshots, order versions), an applied quantity change request, CU- / SO- / CR- numbers
   (`platform_number_counter`), an APPLIED Planning import of a tiny synthetic workbook (staging rows, legacy
   codes, conflict items) and one Planning batch whose apply failed. `DRILL_SKIP_PHASE02=1` leaves them out.

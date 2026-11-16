@@ -10,6 +10,7 @@ from django.db import IntegrityError, transaction
 from hypothesis import given
 from hypothesis import strategies as st
 
+from platform_core.devtools import factories
 from platform_core.engine.context import Actor, RequestContext
 from platform_core.engine.errors import (
     EngineContractError,
@@ -25,7 +26,6 @@ from platform_core.integration.freshness import Freshness, age_seconds, classify
 from platform_core.integration.models import ConflictItem, ConflictStatus, IntegrationSource
 from platform_core.models import AuditEvent, OutboxEvent
 
-from . import factories
 from .threads import run_concurrently
 
 NOW = datetime(2026, 11, 4, 8, 0, tzinfo=UTC)

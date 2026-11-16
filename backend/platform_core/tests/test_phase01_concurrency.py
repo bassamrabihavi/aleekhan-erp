@@ -10,11 +10,18 @@ from __future__ import annotations
 import pytest
 from django.db import IntegrityError, transaction
 
+from platform_core.devtools.phase01_factories import (
+    approval,
+    ensure_parameters,
+    org_unit,
+    position,
+    position_assignment,
+    user,
+)
 from platform_core.identity.models import Role, RoleAssignment
 from platform_core.org.models import OrgUnit, PositionAssignment
 from platform_core.workflow.models import ApprovalRequest
 
-from .phase01_factories import approval, ensure_parameters, org_unit, position, position_assignment, user
 from .threads import run_concurrently
 
 pytestmark = pytest.mark.django_db(transaction=True)

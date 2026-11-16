@@ -13,6 +13,7 @@ from typing import Any
 import pytest
 from django.test import Client
 
+from platform_core.devtools.phase02_engine import holder
 from platform_core.engine.context import Actor, RequestContext
 from platform_core.identity.models import Permission, RolePermission
 from platform_core.integration.conflicts import raise_conflict
@@ -20,7 +21,6 @@ from platform_core.integration.models import ConflictItem, IntegrationSource
 
 from . import openapi_contract as oc
 from .phase01_api import API, body, code, get, if_match, post, session_client
-from .phase02_engine import holder
 
 pytestmark = [pytest.mark.django_db(transaction=True), pytest.mark.usefixtures("api_db", "clear_cache")]
 SOURCE = "planning_catalogue_xlsm"

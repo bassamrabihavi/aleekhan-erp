@@ -8,10 +8,16 @@ import pytest
 from django.db import connection
 from django.utils import timezone
 
+from platform_core.devtools.phase01_factories import (
+    chain,
+    db_refuses,
+    org_unit,
+    position,
+    position_assignment,
+    user,
+)
 from platform_core.org.models import OrgUnit, OrgUnitHistory, Position, PositionAssignment, PositionHistory
 from platform_core.params.models import ParameterValue
-
-from .phase01_factories import chain, db_refuses, org_unit, position, position_assignment, user
 
 pytestmark = pytest.mark.django_db
 

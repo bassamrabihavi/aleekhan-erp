@@ -19,6 +19,7 @@ from django.db import IntegrityError, transaction
 from hypothesis import given
 from hypothesis import strategies as st
 
+from platform_core.devtools.factories import outbox_event
 from platform_core.engine import consumers as cs
 from platform_core.engine import outbox as ob
 from platform_core.engine.errors import EngineContractError
@@ -32,7 +33,6 @@ from platform_core.models import (
     OutboxEvent,
 )
 
-from .factories import outbox_event
 from .threads import run_concurrently
 
 S = DeliveryStatus

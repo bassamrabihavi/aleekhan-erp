@@ -10,10 +10,9 @@ import pytest
 from django.db import connection
 from django.utils import timezone
 
+from platform_core.devtools.phase01_factories import approval, assignment, db_refuses, org_unit, role, user
 from platform_core.identity.models import Permission, Role, RoleAssignment, RolePermission
 from platform_core.workflow.models import ApprovalRequest
-
-from .phase01_factories import approval, assignment, db_refuses, org_unit, role, user
 
 pytestmark = pytest.mark.django_db
 BA_PERMISSIONS = (

@@ -16,12 +16,11 @@ from typing import Any
 
 from django.test import Client
 
+from platform_core.devtools.engine_fixtures import INTERNAL_IP, give_role, person
 from platform_core.engine.context import Actor, RequestContext, db_now
 from platform_core.engine.uow import unit_of_work
 from platform_core.identity import sessions
 from platform_core.identity.models import Permission, Role, RolePermission, User
-
-from .engine_fixtures import INTERNAL_IP, give_role, person
 
 API = "/api/v1"
 

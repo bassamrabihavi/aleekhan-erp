@@ -33,6 +33,8 @@ ignore = ["RUF012", "S101"]
 
 # Tests use synthetic secret-like literals on purpose (redaction / log tests).
 "backend/platform_core/tests/*.py" = ["S105", "S106", "S603"]
+# Synthetic builders shared by tests and the ops drill (02.8 REV-0275): same synthetic literals as the tests.
+"backend/platform_core/devtools/*.py" = ["S105", "S106"]
 "tools/tests/*.py" = ["S105", "S106", "S603", "S607"]
 # Repository tools call the `git` CLI with fixed argument lists (no shell, no untrusted input).
 "tools/secret_scan.py" = ["S603", "S607"]

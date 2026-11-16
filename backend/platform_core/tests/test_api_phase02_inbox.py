@@ -14,12 +14,12 @@ from django.db.models.functions import Now
 from django.test import Client
 
 from platform_core.commercial import changes
+from platform_core.devtools import phase02_factories as f
+from platform_core.devtools.phase02_engine import People, confirmed_order, people, validated_order
 from platform_core.product_identity.models import CodeRuleRevision
 
 from . import openapi_contract as oc
-from . import phase02_factories as f
 from .phase01_api import API, body, code, session_client
-from .phase02_engine import People, confirmed_order, people, validated_order
 
 pytestmark = [pytest.mark.django_db(transaction=True), pytest.mark.usefixtures("api_db", "clear_cache")]
 PATH = "/me/decision-inbox"
@@ -77,7 +77,7 @@ def test_order_confirm_item_for_planning_and_owner_never_for_the_creator(p: Peop
 
 
 def test_owner_never_sees_his_own_validated_order() -> None:
-    from .phase02_engine import holder
+    from platform_core.devtools.phase02_engine import holder
 
     owner = holder("owner_admin", "commercial_officer")
     o = validated_order(owner)
@@ -109,7 +109,7 @@ def test_change_decide_and_planning_items_follow_maker_checker(p: People) -> Non
 
 
 def test_planning_approver_is_not_offered_the_manager_decision(p: People) -> None:
-    from .phase02_engine import holder
+    from platform_core.devtools.phase02_engine import holder
 
     both = holder("commercial_manager", "planning_officer")
     cr = _due_cr(p)
@@ -121,7 +121,7 @@ def test_planning_approver_is_not_offered_the_manager_decision(p: People) -> Non
 def test_qty_change_never_asks_planning(p: People) -> None:
     o = confirmed_order(p.co, p.po)
     o.refresh_from_db()
-    from .phase02_engine import live_lines
+    from platform_core.devtools.phase02_engine import live_lines
 
     ln = live_lines(o)[0]
     cr = changes.create_change_request(
@@ -160,7 +160,7 @@ def test_no_personal_data_in_the_feed(p: People) -> None:
 def test_caller_without_the_four_deciding_permissions_gets_an_empty_inbox(p: People) -> None:
     """REV-0255: one item of every kind is waiting; a caller who holds none of order confirm, change decide,
     planning approve and code-rule approve gets ``items == []`` (not only a hidden page)."""
-    from .phase02_engine import holder
+    from platform_core.devtools.phase02_engine import holder
 
     validated_order(p.co)
     _due_cr(p)

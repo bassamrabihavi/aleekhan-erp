@@ -24,6 +24,8 @@ from platform_core.commercial.models import (
     CustomerOrderVersion,
     OrderChangeRequest,
 )
+from platform_core.devtools import phase02_engine as e
+from platform_core.devtools.phase01_factories import db_refuses
 from platform_core.engine.errors import (
     AccessDenied,
     AleekhanError,
@@ -36,8 +38,6 @@ from platform_core.engine.errors import (
 from platform_core.models import AuditEvent, OutboxEvent
 from platform_core.product_identity.models import Serial, SerialCounter, SerialSnapshot
 
-from . import phase02_engine as e
-from .phase01_factories import db_refuses
 from .phase02_engine import deferred_checks  # noqa: F401 - fixture
 
 pytestmark = [pytest.mark.django_db, pytest.mark.usefixtures("deferred_checks")]
