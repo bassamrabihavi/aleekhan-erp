@@ -121,11 +121,13 @@ stage_e2e() {
 }
 stage_perf() {
   need_pg || return $?
-  # PHASE_00 smoke + PHASE_01 perf (01.7), each with its own numbers file
+  # PHASE_00 smoke + PHASE_01 perf (01.7) + PHASE_02 perf (02.7), each with its own numbers file
   (cd backend && ALEEKHAN_PERF_OUT="$OUT/perf.json" "$PYTHON" -m pytest -q -m perf platform_core/tests/test_perf_smoke.py \
     && cat "$OUT/perf.json" \
     && ALEEKHAN_PERF_OUT="$OUT/perf_phase01.json" "$PYTHON" -m pytest -q -m perf platform_core/tests/test_perf_phase01.py \
-    && cat "$OUT/perf_phase01.json")
+    && cat "$OUT/perf_phase01.json" \
+    && ALEEKHAN_PERF_OUT="$OUT/perf_phase02.json" "$PYTHON" -m pytest -q -s -m perf platform_core/tests/test_perf_phase02.py \
+    && { [ ! -f "$OUT/perf_phase02.json" ] || cat "$OUT/perf_phase02.json"; })
 }
 stage_security() {
   local rc=0
