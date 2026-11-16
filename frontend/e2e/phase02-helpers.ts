@@ -31,8 +31,8 @@ import base64, json, time
 from urllib.parse import parse_qs, urlparse
 from platform_core.identity import mfa, totp
 from platform_core.product_identity import codes
-from platform_core.tests import phase02_factories as f
-from platform_core.tests.engine_fixtures import caller, give_role, person
+from platform_core.devtools import phase02_factories as f
+from platform_core.devtools.engine_fixtures import caller, give_role, person
 
 SYN = "(محیط آزمایشی — داده ساختگی)"
 RUN = "${run}"
