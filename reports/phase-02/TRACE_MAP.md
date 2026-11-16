@@ -19,7 +19,7 @@ Counts are copied from the cited logs; nothing is estimated.
 ## Evidence sets
 **C8 = full local CI**, run with `bash tools/ci_local.sh reports/phase-02/step-8/logs/ci` on machine work-windows, against test PostgreSQL 17.9.
 - **Where:** `reports/phase-02/step-8/logs/ci/`. `summary.md` shows 13/13 stages PASS.
-- **Commit:** `commit.txt` = `b3597158ecb4e5bb56759d7a082210e3cdaf1fae`. The six recorded git tree ids (backend, frontend, tools, ops, docs, .github) equal `git rev-parse b3597158:<dir>`.
+- **Commit:** a combined run over three worktree states (68b3362 → 91b921a → b3597158), mapped stage by stage in `EVIDENCE_NOTE.md`; `commit.txt` (68b3362) is the unedited CI artifact. The six recorded git tree ids (backend, frontend, tools, ops, docs, .github) equal `git rev-parse b3597158:<dir>`.
 - **First run, on 68b3362:** 12 stages passed. E2E failed because the E2E seed still imported the moved factories, and the perf stage did not include the PHASE_02 perf tests. Both were fixed (91b921a, b359715), and the e2e, frontend and perf stages were re-run on the final tree. The first-run logs are kept as `*_attempt1*.log`.
 - **Backend tree:** identical between 68b3362 and b359715, so the unit, migration, contract, authz, security and ops stages ran on the same backend code.
 
@@ -110,7 +110,7 @@ All reviewer verdicts are advisory until DEC-036 is approved.
 | G6 | No mandatory test FAIL / unexplained SKIP | 2 skips with reasons (ClamAV; real golden file not on the CI path; the real run is in S4) | DONE |
 | G7 | Migrations reversible or approved compensation | roundtrip + rehearsal A–D; with data, restore from backup | DONE (**EMPLOYER** acknowledges) |
 | G8 | Permission matrix approved | v2.2, recorded 2026-11-15 | DONE |
-| G9 | CI report linked to the commit | C8 `commit.txt` = b359715; tree ids match | DONE |
+| G9 | CI report linked to the commit | C8 tree ids equal b3597158 for every stage (`EVIDENCE_NOTE.md`, REV-0280) | DONE |
 | G10 | Real, non-demo UI | every PHASE_02 page bound to the real API; later-phase blocks labelled «در دست ساخت» with no numbers | DONE |
 | G11 | Whole scope traceable | this file | DONE |
 | G12 | Employer and auditor acceptance; checklist signed | sign-off rows blank on purpose | **EMPLOYER** |
@@ -170,3 +170,7 @@ All are recorded via `status.py decide`. Two employer questions remain open for 
 | Signed checklist | **EMPLOYER** (blank sign-off rows) |
 | New decisions | `control/decisions/DECISION_LOG.md` 2026-11-11..16 |
 | Rollback | `docs/ops/ROLLBACK.md` §3b, each step's REPORT §8 |
+
+## 10. Notes from the 02.8 review
+- REV-0283: the disputed-item key changed in 02.8 from `<sheet>!value:` to `value:`. No production or staging DB exists, so nothing needs migrating; any later key change needs a data migration.
+- A DISMISSED disputed value is raised again on the next import; only RESOLVED values carry over (to confirm with the employer).

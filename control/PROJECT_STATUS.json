@@ -217,9 +217,9 @@
         "PHASE_01"
       ],
       "est_weeks": 3,
-      "state": "ACTIVE",
+      "state": "GATE_PENDING",
       "started_at": "2026-11-11T14:39:40+00:00",
-      "gate_pending_at": null,
+      "gate_pending_at": "2026-11-16T06:37:42+00:00",
       "accepted_at": null,
       "accepted_by": null,
       "steps": {
@@ -295,13 +295,13 @@
         },
         "02.8": {
           "name": "Report & Review",
-          "state": "IN_REVIEW",
+          "state": "PASS",
           "commit": "b359715",
           "report": "reports/phase-02/step-8/REPORT.md",
-          "review": null,
+          "review": "reports/phase-02/step-8/REVIEW.md",
           "rework_cycles": 0,
           "started_at": "2026-11-16T04:22:39+00:00",
-          "done_at": null
+          "done_at": "2026-11-16T06:37:42+00:00"
         }
       }
     },
@@ -2429,6 +2429,15 @@
       "since": "2026-11-10T03:59:29+00:00",
       "result": "PASS",
       "note": "Employer ran login/MFA, org tree, users/roles, approvals (DEC-055), parameters in browser (2026-11-11); remaining items verified by orchestrator on the UAT DB (audit chain OK 54/54, housekeeping 8/8 OK) + E2E 22 passed (step-8 09_e2e.log). Visual remarks UIP-001/002 in control/UI_POLISH_BACKLOG.md."
+    },
+    {
+      "id": "T-004",
+      "phase": "PHASE_02",
+      "what": "UAT فاز ۲: از ساخت کاربر و تأیید قاعده کد تا ثبت سفارش و ساخت سریال 63001 (کاتالوگ واقعی Planning)",
+      "how": "reports/phase-02/UAT_HOWTO_FA.md — هماهنگ‌کننده محیط را آماده می‌کند؛ نشانی http://127.0.0.1:5173/ ؛ حساب uat.owner",
+      "since": "2026-11-16T06:37:42+00:00",
+      "result": null,
+      "note": null
     }
   ],
   "events": [
@@ -3648,7 +3657,27 @@
       "state": "IN_REVIEW",
       "note": null,
       "commit": "b359715"
+    },
+    {
+      "at": "2026-11-16T06:37:42+00:00",
+      "kind": "gate_pending",
+      "phase": "PHASE_02"
+    },
+    {
+      "at": "2026-11-16T06:37:42+00:00",
+      "kind": "step",
+      "phase": "PHASE_02",
+      "step": "02.8",
+      "state": "PASS",
+      "note": null,
+      "commit": null
+    },
+    {
+      "at": "2026-11-16T06:37:42+00:00",
+      "kind": "test_ready",
+      "id": "T-004",
+      "phase": "PHASE_02"
     }
   ],
-  "updated_at": "2026-11-16T06:25:29+00:00"
+  "updated_at": "2026-11-16T06:37:42+00:00"
 }

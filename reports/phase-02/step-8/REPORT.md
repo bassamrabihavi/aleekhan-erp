@@ -66,7 +66,7 @@ The disputed count was 224 per sheet. It is now 222 per value, because 2 values 
 | Implementer targeted runs | 52 + 24 passed; drill PASS | `logs/impl_*.log` |
 
 ## 6. Demo
-T-004 is added for the employer: `reports/phase-02/UAT_HOWTO_FA.md`. The orchestrator prepares the environment when the employer is ready.
+T-004 is added for the employer (`status.py test-add` after the 02.8 PASS, REV-0282): `reports/phase-02/UAT_HOWTO_FA.md`. The orchestrator prepares the environment when the employer is ready.
 
 ## 7. Issues / decisions
 Employer items at the Gate (`GATE_PACKET_FA.md` §4):
