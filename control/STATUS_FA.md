@@ -5,7 +5,7 @@
 ## خلاصه
 
 - **فاز فعال:** PHASE_02 مشتری، محصول، استایل، ثبت سفارش و سریال (فعال)
-- **گام جاری:** 02.8 Report & Review (در صف)
+- **گام جاری:** 02.8 Report & Review (در ممیزی)
 - **پیشرفت:** 23/120 گام قبول‌شده
 - **آماده تست شما:** 0 مورد
 - **تصمیم P0 باز (کل پروژه):** 15
@@ -110,6 +110,8 @@ flowchart LR
 
 ## آخرین رویدادها
 
+- `2026-11-16T06:25:29+00:00` step phase=PHASE_02 step=02.8 state=IN_REVIEW commit=b359715
+- `2026-11-16T04:22:39+00:00` step phase=PHASE_02 step=02.8 state=IN_PROGRESS
 - `2026-11-16T04:22:03+00:00` decision id=DEC-005 status=APPROVED by=بسام ربیهاوی note=2026-11-16 Q-D follow-up: a resolved disputed value carries over to later Planning imports (REV-0271)
 - `2026-11-15T18:23:50+00:00` step phase=PHASE_02 step=02.7 state=PASS
 - `2026-11-15T18:07:56+00:00` step phase=PHASE_02 step=02.7 state=IN_REVIEW commit=859b951
@@ -123,5 +125,3 @@ flowchart LR
 - `2026-11-15T05:42:43+00:00` step phase=PHASE_02 step=02.5 state=PASS
 - `2026-11-15T05:38:11+00:00` step phase=PHASE_02 step=02.5 state=IN_REVIEW commit=5f65fc9
 - `2026-11-15T04:20:43+00:00` step phase=PHASE_02 step=02.5 state=IN_PROGRESS
-- `2026-11-15T04:20:37+00:00` decision id=DEC-057 status=APPROVED by=بسام ربیهاوی note=Amendment 2026-11-15: PHASE_02 decisions in approval inbox; planning_approve flags confirmed
-- `2026-11-15T04:20:37+00:00` decision id=DEC-027 status=APPROVED by=بسام ربیهاوی note=P-A + proposed structure (page 1 serial summary, page 2 order tab), PHASE_02 data only
