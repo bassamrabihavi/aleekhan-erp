@@ -1627,9 +1627,9 @@
       "owner": "برنامه‌ریزی + بازرگانی",
       "phase": "PHASE_02",
       "source": "Planning--.xlsm",
-      "resolution": "Amendment 2026-11-15: disputed legacy codes decided by steward + owner, one decision per distinct value; raiser cannot resolve",
+      "resolution": "2026-11-16 Q-D follow-up: a resolved disputed value carries over to later Planning imports (REV-0271)",
       "decided_by": "بسام ربیهاوی",
-      "decided_at": "2026-11-15T10:06:33+00:00"
+      "decided_at": "2026-11-16T04:22:03+00:00"
     },
     {
       "id": "DEC-006",
@@ -3622,7 +3622,15 @@
       "state": "PASS",
       "note": null,
       "commit": null
+    },
+    {
+      "at": "2026-11-16T04:22:03+00:00",
+      "kind": "decision",
+      "id": "DEC-005",
+      "status": "APPROVED",
+      "by": "بسام ربیهاوی",
+      "note": "2026-11-16 Q-D follow-up: a resolved disputed value carries over to later Planning imports (REV-0271)"
     }
   ],
-  "updated_at": "2026-11-15T18:23:50+00:00"
+  "updated_at": "2026-11-16T04:22:03+00:00"
 }
