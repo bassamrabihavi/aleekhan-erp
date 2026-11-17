@@ -110,6 +110,6 @@ decides.
 
 | Role | Name | Decision (accept / reject / accept with conditions) | Date | Signature |
 |---|---|---|---|---|
-| Employer (کارفرما) | | | | |
+| Employer (کارفرما) | بسام ربیهاوی | accept with conditions (پذیرش با شرط): the known open items (1.11 break-glass, 2.8 TLS / CSP / encrypted backups, 5.5 artifact signing, 6.3 scheduler, 6.6 RPO/RTO) are closed when the staging/production server is set up, before the Pilot | 2026-11-17 | given by the employer in the Claude Code session (answer to Gate packet item 4-b); recorded by the orchestrator |
 | Security reviewer / auditor | | | | |
 | IT (operations) | | | | |
