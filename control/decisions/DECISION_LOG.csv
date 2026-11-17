@@ -48,3 +48,4 @@ DEC-005,APPROVED,بسام ربیهاوی,2026-11-15,Amendment 2026-11-15: import
 DEC-005,APPROVED,بسام ربیهاوی,2026-11-15,"Amendment 2026-11-15: disputed legacy codes decided by steward + owner, one decision per distinct value; raiser cannot resolve"
 DEC-005,APPROVED,بسام ربیهاوی,2026-11-16,2026-11-16 Q-D follow-up: a resolved disputed value carries over to later Planning imports (REV-0271)
 DEC-059,APPROVED,بسام ربیهاوی,2026-11-17,Amendment 2026-11-17 (REV-0203): at most one open (SUBMITTED/APPROVED) change request per order; an unanswered SUBMITTED/APPROVED change request expires after 30 days
+DEC-032,APPROVED,بسام ربیهاوی,2026-11-17,Amendment 2026-11-17 (REV-0254): the approval inbox and page 33 show the requester's display name (internal user display name only) next to the short id

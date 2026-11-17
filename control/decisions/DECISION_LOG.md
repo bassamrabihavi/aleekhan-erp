@@ -279,3 +279,9 @@ Asked with AskUserQuestion, in Persian; the employer chose the recommended optio
 - **Expiry:** a change request that stays SUBMITTED or APPROVED (not applied) for 30 days moves to EXPIRED, the same period as platform approval requests (DEC-032).
 - **Status:** decided; not yet enforced in code (STATE_TRANSITIONS §5.5 still marks them PROPOSED). Implementation follows as a separate reviewed change.
 - **Decided by:** بسام ربیهاوی (کارفرما).
+
+## 2026-11-17 — DEC-032 amendment: requester name in the approval inbox (Gate PHASE_02 item c-2, REV-0254)
+Asked with AskUserQuestion, in Persian; the employer chose the recommended option.
+- **Display:** the approval inbox and page 33 show the requester's display name (internal user display name only, no other personal data) instead of only the short id.
+- **Status:** decided; not yet implemented. Implementation follows as a separate reviewed change.
+- **Decided by:** بسام ربیهاوی (کارفرما).

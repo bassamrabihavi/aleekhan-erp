@@ -2005,9 +2005,9 @@
       "owner": "IT + کارفرما",
       "phase": "PHASE_01",
       "source": "security policy",
-      "resolution": "پاسخ کارفرما ۲۰۲۶-۱۱-۰۴: بخش ۱ = B (متوسط): maker≠checker برای approveDocumentRevision، publishParameterValue پارامترهای BUSINESS_RULE، و createRoleAssignment نقش‌های دارای حق تأیید کسب‌وکار؛ تا تعریف نفر دوم این موارد «در انتظار» می‌مانند. بن‌بست یک‌نفره = D1 (هرگز خودتأیید؛ تأیید اضطراری فقط با تصمیم بعدی). انقضای درخواست تأیید ۳۰ روز. بخش ۲ = R-A: Audit کسب‌وکار و دسترسی هرگز حذف نشود (بایگانی سالانه)؛ رخدادهای ورود ۲ سال؛ مدت الزام قانونی را مشاور حقوقی/مالی تأیید کند.",
+      "resolution": "Amendment 2026-11-17 (REV-0254): the approval inbox and page 33 show the requester's display name (internal user display name only) next to the short id",
       "decided_by": "بسام ربیهاوی",
-      "decided_at": "2026-11-04T15:48:21+00:00"
+      "decided_at": "2026-11-17T17:28:48+00:00"
     },
     {
       "id": "DEC-033",
@@ -3691,7 +3691,15 @@
       "status": "APPROVED",
       "by": "بسام ربیهاوی",
       "note": "Amendment 2026-11-17 (REV-0203): at most one open (SUBMITTED/APPROVED) change request per order; an unanswered SUBMITTED/APPROVED change request expires after 30 days"
+    },
+    {
+      "at": "2026-11-17T17:28:48+00:00",
+      "kind": "decision",
+      "id": "DEC-032",
+      "status": "APPROVED",
+      "by": "بسام ربیهاوی",
+      "note": "Amendment 2026-11-17 (REV-0254): the approval inbox and page 33 show the requester's display name (internal user display name only) next to the short id"
     }
   ],
-  "updated_at": "2026-11-17T17:27:48+00:00"
+  "updated_at": "2026-11-17T17:28:48+00:00"
 }

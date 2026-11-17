@@ -110,6 +110,7 @@ flowchart LR
 
 ## آخرین رویدادها
 
+- `2026-11-17T17:28:48+00:00` decision id=DEC-032 status=APPROVED by=بسام ربیهاوی note=Amendment 2026-11-17 (REV-0254): the approval inbox and page 33 show the requester's display name (internal user display name only) next to the short id
 - `2026-11-17T17:27:48+00:00` decision id=DEC-059 status=APPROVED by=بسام ربیهاوی note=Amendment 2026-11-17 (REV-0203): at most one open (SUBMITTED/APPROVED) change request per order; an unanswered SUBMITTED/APPROVED change request expires after 30 days
 - `2026-11-17T17:24:27+00:00` test_result id=T-004 result=PASS
 - `2026-11-16T06:37:42+00:00` test_ready id=T-004 phase=PHASE_02
@@ -124,4 +125,3 @@ flowchart LR
 - `2026-11-15T10:06:33+00:00` decision id=DEC-005 status=APPROVED by=بسام ربیهاوی note=Amendment 2026-11-15: disputed legacy codes decided by steward + owner, one decision per distinct value; raiser cannot resolve
 - `2026-11-15T09:39:08+00:00` step phase=PHASE_02 step=02.6 state=PASS
 - `2026-11-15T09:30:34+00:00` step phase=PHASE_02 step=02.6 state=IN_REVIEW commit=fe0058c
-- `2026-11-15T08:32:11+00:00` decision id=DEC-005 status=APPROVED by=بسام ربیهاوی note=Amendment 2026-11-15: imported types/categories from baseline are ACTIVE
