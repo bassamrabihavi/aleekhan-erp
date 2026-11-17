@@ -285,3 +285,10 @@ Asked with AskUserQuestion, in Persian; the employer chose the recommended optio
 - **Display:** the approval inbox and page 33 show the requester's display name (internal user display name only, no other personal data) instead of only the short id.
 - **Status:** decided; not yet implemented. Implementation follows as a separate reviewed change.
 - **Decided by:** بسام ربیهاوی (کارفرما).
+
+## 2026-11-17 — DEC-005 amendment: a dismissed disputed value is not raised again (Gate PHASE_02 item g)
+Asked with AskUserQuestion, in Persian; the employer chose **against** the implementer's recommendation.
+- **Rule:** a disputed legacy value that the steward + owner DISMISSED carries over to later Planning imports exactly like a RESOLVED one: no new conflict item; the import records that it reused the earlier decision.
+- **Replaces:** the 02.8 interpretation "DISMISSED re-raises" (`test_dismissed_disputed_value_is_raised_again`). Not yet changed in code; follows as a separate reviewed change.
+- **Also recorded at the Gate (acknowledgements, no rule change):** item d — rollback boundary accepted (after real orders/serials exist, rollback is restore-from-backup only); item e — keep the unused `identity.serial.allocate` permission row for possible future manual allocation.
+- **Decided by:** بسام ربیهاوی (کارفرما).
