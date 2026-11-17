@@ -292,3 +292,12 @@ Asked with AskUserQuestion, in Persian; the employer chose **against** the imple
 - **Replaces:** the 02.8 interpretation "DISMISSED re-raises" (`test_dismissed_disputed_value_is_raised_again`). Not yet changed in code; follows as a separate reviewed change.
 - **Also recorded at the Gate (acknowledgements, no rule change):** item d — rollback boundary accepted (after real orders/serials exist, rollback is restore-from-backup only); item e — keep the unused `identity.serial.allocate` permission row for possible future manual allocation.
 - **Decided by:** بسام ربیهاوی (کارفرما).
+
+## 2026-11-17 — DEC-061: ≥95% visual fidelity to the design-catalogue mockups (new employer requirement)
+Given by the employer in chat, in Persian, after the orchestrator compared page 4 (mockup) with the built page and found the built page much simpler.
+- **Acceptance rule:** a page is accepted only when the orchestrator's fidelity test shows ≥95% match with its mockup in `handoff/08_UI_AND_UX/DESIGN_CATALOG_52` (all four widths 1440/1180/768/390). Reaching it is the orchestrator's responsibility.
+- **Mockup review first:** before each phase starts, the employer reviews and approves (or amends) that phase's mockup pages; the approved/amended mockup is the target.
+- **Frame from the start:** the mockup's layout frame (KPI cards, full tables, icon side menu, sections in the same place) is built in the step itself; only final polish waits for the polish phase (narrows the earlier UI-polish-backlog approach).
+- **PHASE_02:** pages 1, 2, 4, 29, 33 are brought to ≥95% before the PHASE_02 Gate.
+- **Unchanged guardrail:** demo numbers in a mockup are never shown as real; an element whose data comes from a later phase sits in the same place with an honest "در دست ساخت" / empty state.
+- **Decided by:** بسام ربیهاوی (کارفرما).

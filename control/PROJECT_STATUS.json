@@ -2400,6 +2400,20 @@
       "resolution": "amended 2026-11-12: X-A, repo stays public (DEC-046); real handoff names remain, accepted; handoff untouched; R-38 in force",
       "decided_by": "بسام ربیهاوی",
       "decided_at": "2026-11-12T06:10:55+00:00"
+    },
+    {
+      "id": "DEC-061",
+      "priority": "P1",
+      "gate": "Phase-2",
+      "domain": "UI",
+      "issue": "تطابق دست‌کم ۹۵٪ هر صفحه با موکاپ کاتالوگ طراحی به‌عنوان شرط پذیرش صفحه؛ بازبینی موکاپ‌ها پیش از هر فاز",
+      "status": "APPROVED",
+      "owner": "کارفرما",
+      "phase": "PHASE_02",
+      "source": "درخواست کارفرما در گفت‌وگو 2026-11-17",
+      "resolution": "UI fidelity: every built page must match its design-catalogue mockup at >=95% (orchestrator's fidelity test, 4 widths) before acceptance; each phase's mockups reviewed/approved by the employer before the phase starts; mockup layout frame built from the start, only polish at the end; PHASE_02 pages 1,2,4,29,33 brought to >=95% before the PHASE_02 Gate",
+      "decided_by": "بسام ربیهاوی",
+      "decided_at": "2026-11-17T17:42:47+00:00"
     }
   ],
   "ready_for_test": [
@@ -3725,7 +3739,21 @@
       "state": "IN_PROGRESS",
       "note": null,
       "commit": null
+    },
+    {
+      "at": "2026-11-17T17:42:47+00:00",
+      "kind": "decision_added",
+      "id": "DEC-061",
+      "status": "OPEN"
+    },
+    {
+      "at": "2026-11-17T17:42:47+00:00",
+      "kind": "decision",
+      "id": "DEC-061",
+      "status": "APPROVED",
+      "by": "بسام ربیهاوی",
+      "note": "UI fidelity: every built page must match its design-catalogue mockup at >=95% (orchestrator's fidelity test, 4 widths) before acceptance; each phase's mockups reviewed/approved by the employer before the phase starts; mockup layout frame built from the start, only polish at the end; PHASE_02 pages 1,2,4,29,33 brought to >=95% before the PHASE_02 Gate"
     }
   ],
-  "updated_at": "2026-11-17T17:32:07+00:00"
+  "updated_at": "2026-11-17T17:42:47+00:00"
 }

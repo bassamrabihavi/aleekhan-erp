@@ -110,6 +110,8 @@ flowchart LR
 
 ## آخرین رویدادها
 
+- `2026-11-17T17:42:47+00:00` decision id=DEC-061 status=APPROVED by=بسام ربیهاوی note=UI fidelity: every built page must match its design-catalogue mockup at >=95% (orchestrator's fidelity test, 4 widths) before acceptance; each phase's mockups reviewed/approved by the employer before the phase starts; mockup layout frame built from the start, only polish at the end; PHASE_02 pages 1,2,4,29,33 brought to >=95% before the PHASE_02 Gate
+- `2026-11-17T17:42:47+00:00` decision_added id=DEC-061 status=OPEN
 - `2026-11-17T17:32:07+00:00` step phase=PHASE_02 step=02.8 state=IN_PROGRESS
 - `2026-11-17T17:32:07+00:00` step phase=PHASE_02 step=02.8 state=REWORK note=Gate follow-up: REV-0290..0294 (reports/phase-02/step-8/GATE_FOLLOWUP_REVS.md)
 - `2026-11-17T17:30:47+00:00` decision id=DEC-005 status=APPROVED by=بسام ربیهاوی note=Amendment 2026-11-17 (Gate PHASE_02 item g): a DISMISSED disputed legacy value also carries over to later Planning imports and is not raised again (overrides the 02.8 re-raise interpretation)
@@ -123,5 +125,3 @@ flowchart LR
 - `2026-11-16T04:22:39+00:00` step phase=PHASE_02 step=02.8 state=IN_PROGRESS
 - `2026-11-16T04:22:03+00:00` decision id=DEC-005 status=APPROVED by=بسام ربیهاوی note=2026-11-16 Q-D follow-up: a resolved disputed value carries over to later Planning imports (REV-0271)
 - `2026-11-15T18:23:50+00:00` step phase=PHASE_02 step=02.7 state=PASS
-- `2026-11-15T18:07:56+00:00` step phase=PHASE_02 step=02.7 state=IN_REVIEW commit=859b951
-- `2026-11-15T10:06:33+00:00` step phase=PHASE_02 step=02.7 state=IN_PROGRESS
