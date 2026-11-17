@@ -2383,9 +2383,9 @@
       "owner": "بازرگانی + برنامه‌ریزی",
       "phase": "PHASE_02",
       "source": "گام 02.1 2026-11-11 (C-60/C-61)",
-      "resolution": "Amendment 2026-11-14: see DECISION_LOG (number format with Jalali year; held order resume/cancel only; style collision -> next free; planning may reject)",
+      "resolution": "Amendment 2026-11-17 (REV-0203): at most one open (SUBMITTED/APPROVED) change request per order; an unanswered SUBMITTED/APPROVED change request expires after 30 days",
       "decided_by": "بسام ربیهاوی",
-      "decided_at": "2026-11-14T08:03:12+00:00"
+      "decided_at": "2026-11-17T17:27:48+00:00"
     },
     {
       "id": "DEC-060",
@@ -3683,7 +3683,15 @@
       "kind": "test_result",
       "id": "T-004",
       "result": "PASS"
+    },
+    {
+      "at": "2026-11-17T17:27:48+00:00",
+      "kind": "decision",
+      "id": "DEC-059",
+      "status": "APPROVED",
+      "by": "بسام ربیهاوی",
+      "note": "Amendment 2026-11-17 (REV-0203): at most one open (SUBMITTED/APPROVED) change request per order; an unanswered SUBMITTED/APPROVED change request expires after 30 days"
     }
   ],
-  "updated_at": "2026-11-17T17:24:27+00:00"
+  "updated_at": "2026-11-17T17:27:48+00:00"
 }

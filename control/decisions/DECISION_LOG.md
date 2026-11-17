@@ -272,3 +272,10 @@ Asked with AskUserQuestion, in Persian; the employer chose the recommended optio
 - **Carry-over:** once the steward + owner have resolved a disputed legacy value, a later Planning file that carries the same value does **not** open a new conflict item. The earlier resolution is applied, and the import records that it reused it (item reference in its counts and audit).
 - **Count note:** the 02.7 counting includes identical repeated rows, so the baseline is 224 values over 640 rows (634 above counted distinct rows).
 - **Decided by:** بسام ربیهاوی (کارفرما).
+
+## 2026-11-17 — DEC-059 amendment: order change-request limits (Gate PHASE_02 item c-1, REV-0203)
+Asked with AskUserQuestion, in Persian; the employer chose the recommended option (both rules).
+- **One open request:** an order may have at most one change request in SUBMITTED or APPROVED at a time; a second submit is refused until the first is applied, rejected, withdrawn or expired.
+- **Expiry:** a change request that stays SUBMITTED or APPROVED (not applied) for 30 days moves to EXPIRED, the same period as platform approval requests (DEC-032).
+- **Status:** decided; not yet enforced in code (STATE_TRANSITIONS §5.5 still marks them PROPOSED). Implementation follows as a separate reviewed change.
+- **Decided by:** بسام ربیهاوی (کارفرما).
