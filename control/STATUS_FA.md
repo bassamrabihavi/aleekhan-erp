@@ -5,8 +5,8 @@
 ## خلاصه
 
 - **فاز فعال:** PHASE_02 مشتری، محصول، استایل، ثبت سفارش و سریال (منتظر تأیید Gate)
-- **گام جاری:** —
-- **پیشرفت:** 24/120 گام قبول‌شده
+- **گام جاری:** 02.8 Report & Review (در حال انجام)
+- **پیشرفت:** 23/120 گام قبول‌شده
 - **آماده تست شما:** 0 مورد
 - **تصمیم P0 باز (کل پروژه):** 15
 - **شروع پایلوت (PHASE_13):** خوش‌بینانه ۲۵ دی ۱۴۰۵ · مبنا **۱۶ بهمن ۱۴۰۵** · بدبینانه ۲۸ اسفند ۱۴۰۵
@@ -94,7 +94,7 @@ flowchart LR
 |---|---|---|---|---|---|---|---|
 | PHASE_00 | تثبیت قراردادهای مبنا و راه‌اندازی مخزن امن | — | پذیرفته‌شده | 8/8 | 2 | ۱۴۰۵/۰۸/۱۲ | ۱۴۰۵/۰۸/۱۳ |
 | PHASE_01 | هسته سازمانی، امنیت، اسناد و گردش کار | 00 | پذیرفته‌شده | 8/8 | 3 | ۱۴۰۵/۰۸/۱۳ | ۱۴۰۵/۰۸/۲۰ |
-| PHASE_02 | مشتری، محصول، استایل، ثبت سفارش و سریال | 01 | منتظر تأیید Gate | 8/8 | 3 | ۱۴۰۵/۰۸/۲۰ | ۱۴۰۵/۰۸/۲۹ |
+| PHASE_02 | مشتری، محصول، استایل، ثبت سفارش و سریال | 01 | منتظر تأیید Gate | 7/8 | 3 | ۱۴۰۵/۰۸/۲۰ | ۱۴۰۵/۰۸/۲۹ |
 | PHASE_03 | تیغه، کلیشه، مقر، لیویس و بسته فنی | 01, 02 | شروع‌نشده | 0/8 | 4 | ۱۴۰۵/۰۸/۲۹ | ۱۴۰۵/۰۹/۱۰ |
 | PHASE_04 | ساختار مواد، قطعه، مسیر عملیات، استاندارد زمان | 02, 03 | شروع‌نشده | 0/8 | 4 | ۱۴۰۵/۰۹/۱۰ | ۱۴۰۵/۰۹/۲۱ |
 | PHASE_05 | تقاضا، تعهد، سناریوی ظرفیت و زمان‌بندی | 02, 04 | شروع‌نشده | 0/8 | 4 | ۱۴۰۵/۰۹/۲۱ | ۱۴۰۵/۱۰/۰۲ |
@@ -110,6 +110,8 @@ flowchart LR
 
 ## آخرین رویدادها
 
+- `2026-11-17T17:32:07+00:00` step phase=PHASE_02 step=02.8 state=IN_PROGRESS
+- `2026-11-17T17:32:07+00:00` step phase=PHASE_02 step=02.8 state=REWORK note=Gate follow-up: REV-0290..0294 (reports/phase-02/step-8/GATE_FOLLOWUP_REVS.md)
 - `2026-11-17T17:30:47+00:00` decision id=DEC-005 status=APPROVED by=بسام ربیهاوی note=Amendment 2026-11-17 (Gate PHASE_02 item g): a DISMISSED disputed legacy value also carries over to later Planning imports and is not raised again (overrides the 02.8 re-raise interpretation)
 - `2026-11-17T17:28:48+00:00` decision id=DEC-032 status=APPROVED by=بسام ربیهاوی note=Amendment 2026-11-17 (REV-0254): the approval inbox and page 33 show the requester's display name (internal user display name only) next to the short id
 - `2026-11-17T17:27:48+00:00` decision id=DEC-059 status=APPROVED by=بسام ربیهاوی note=Amendment 2026-11-17 (REV-0203): at most one open (SUBMITTED/APPROVED) change request per order; an unanswered SUBMITTED/APPROVED change request expires after 30 days
@@ -123,5 +125,3 @@ flowchart LR
 - `2026-11-15T18:23:50+00:00` step phase=PHASE_02 step=02.7 state=PASS
 - `2026-11-15T18:07:56+00:00` step phase=PHASE_02 step=02.7 state=IN_REVIEW commit=859b951
 - `2026-11-15T10:06:33+00:00` step phase=PHASE_02 step=02.7 state=IN_PROGRESS
-- `2026-11-15T10:06:33+00:00` decision id=DEC-005 status=APPROVED by=بسام ربیهاوی note=Amendment 2026-11-15: disputed legacy codes decided by steward + owner, one decision per distinct value; raiser cannot resolve
-- `2026-11-15T09:39:08+00:00` step phase=PHASE_02 step=02.6 state=PASS
