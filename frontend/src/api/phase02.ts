@@ -316,7 +316,11 @@ export interface ChangeRequest {
   reason: string;
   status: ChangeStatus;
   requested_by: string | null;
+  /** DEC-032 amendment 2026-11-17: internal display name of the requester. */
+  requested_by_name?: string | null;
   submitted_at: string | null;
+  /** DEC-059 amendment 2026-11-17: an open request expires 30 days after submit. */
+  expires_at?: string | null;
   decided_by: string | null;
   decided_at: string | null;
   planning_required: boolean;
@@ -345,6 +349,7 @@ export interface DecisionItem {
   number: string | null;
   revision_no: number | null;
   requested_by: string | null;
+  requested_by_name?: string | null;
   requested_at: string;
   row_version: number;
 }

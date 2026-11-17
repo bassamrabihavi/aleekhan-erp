@@ -12,7 +12,7 @@ import { useAuth } from "../auth/context";
 import { ActionError } from "../components/ActionError";
 import { DataView, ForbiddenState } from "../components/DataView";
 import { Dialog } from "../components/Dialog";
-import { Field, ShortId } from "../components/Form";
+import { Field, Requester, ShortId } from "../components/Form";
 import { JalaliDateField, LaterSections, Num, PageHead } from "../components/Phase02";
 import { StatusChip } from "../components/StatusChip";
 import { formatJalaliDateTime, toFaDigits } from "../lib/format";
@@ -291,7 +291,8 @@ function ChangeView({ cr, version }: { cr: ChangeRequest; version: number }) {
           <div><dt>سفارش</dt><dd><a href={`#/orders/${cr.order_id}`}>{order.data ? <Num value={order.data.order_no} /> : <ShortId id={cr.order_id} />}</a></dd></div>
           <div><dt>بر پایه نسخه</dt><dd>{toFaDigits(cr.base_order_version)}</dd></div>
           <div><dt>دلیل</dt><dd>{cr.reason}</dd></div>
-          <div><dt>درخواست‌کننده</dt><dd>{mine ? "شما" : <ShortId id={cr.requested_by} />} · {cr.submitted_at ? formatJalaliDateTime(cr.submitted_at) : "ارسال نشده"}</dd></div>
+          <div><dt>درخواست‌کننده</dt><dd>{mine ? "شما" : <Requester id={cr.requested_by} name={cr.requested_by_name} />} · {cr.submitted_at ? formatJalaliDateTime(cr.submitted_at) : "ارسال نشده"}</dd></div>
+          {cr.expires_at && (cr.status === "SUBMITTED" || cr.status === "APPROVED") ? <div><dt>مهلت پاسخ</dt><dd data-testid="cr-expires-at">{formatJalaliDateTime(cr.expires_at)}</dd></div> : null}
           {cr.applied_version ? <div><dt>نسخه اعمال‌شده</dt><dd data-testid="cr-applied-version">{toFaDigits(cr.applied_version)}</dd></div> : null}
         </dl>
         <BeforeAfter cr={cr} order={order.data} />

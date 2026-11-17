@@ -39,11 +39,12 @@ Rules applied (APPROVED decisions only; anything else becomes a conflict item, n
   ``row_count`` and the sheet-qualified cell references (``NOrder!FZ12``) of every row that carries it,
   identical (DUPLICATE_PAYLOAD) order rows included; the raw value stays in its staging rows, never
   corrected, and the decision on the item covers all of those rows. **Carry-over** (02.8 REV-0271;
-  DECISION_LOG 2026-11-16): a value whose item was RESOLVED earlier opens no new item - the earlier
-  resolution is reused (counted ``legacy_values_disputed_reused`` / ``legacy_rows_disputed_reused``, one
-  ``identity.product_code.legacy_disputed_reused`` audit per value with the item reference). A value whose
-  item is still OPEN is counted (``conflicts_already_open``); the open item keeps the ``row_count`` /
-  ``cell_refs`` of the batch that raised it. A DISMISSED item is not a decision: the value opens a new item.
+  DECISION_LOG 2026-11-16; DEC-005 amendment 2026-11-17, REV-0292): a value whose item was closed earlier -
+  RESOLVED **or DISMISSED** - opens no new item; the earlier decision is reused (counted
+  ``legacy_values_disputed_reused`` / ``legacy_rows_disputed_reused``, one
+  ``identity.product_code.legacy_disputed_reused`` audit per value with the item reference and its status). A
+  value whose item is still OPEN is counted (``conflicts_already_open``); the open item keeps the
+  ``row_count`` / ``cell_refs`` of the batch that raised it.
   The code is authoritative (belt rows included); a code whose order rows show more than one (product, style)
   pair -> ``legacy_code_multiple_product_style`` and the code is registered without a style link. A code is
   linked to a style only when exactly that style (type, category, product, style segments) exists and has no
@@ -826,13 +827,18 @@ def disputed_conflict_key(vkey: str) -> str:
     return f"value:{vkey}"
 
 
+# DEC-005 amendment 2026-11-17 (REV-0292): a DISMISSED value carries over exactly like a RESOLVED one
+CARRY_OVER_STATUSES: Final = (ConflictStatus.RESOLVED, ConflictStatus.DISMISSED)
+
+
 def _resolved_disputed(keys: Iterable[str]) -> dict[str, ConflictItem]:
-    """The latest RESOLVED ``legacy_code_disputed`` item of each key (02.8 REV-0271, carry-over)."""
+    """The latest closed (RESOLVED or DISMISSED) ``legacy_code_disputed`` item of each key (02.8 REV-0271
+    carry-over; DEC-005 amendment 2026-11-17 adds DISMISSED)."""
     out: dict[str, ConflictItem] = {}
     for item in ConflictItem.objects.filter(
         source__code=SOURCE_CODE,
         kind="legacy_code_disputed",
-        status=ConflictStatus.RESOLVED,
+        status__in=CARRY_OVER_STATUSES,
         conflict_key__in=list(keys),
     ).order_by("conflict_key", "-resolved_at", "-id"):
         out.setdefault(item.conflict_key, item)
@@ -842,7 +848,8 @@ def _resolved_disputed(keys: Iterable[str]) -> dict[str, ConflictItem]:
 def _raise_disputed(state: ApplyState, disputed: Mapping[str, list[tuple[Cell, str]]]) -> None:
     """One ``legacy_code_disputed`` item per distinct value (all sheets), carrying the number of rows with
     that value and their sheet-qualified cell references (the decision applies to every one of them). A value
-    already RESOLVED reuses that resolution: no new item, counted and audited with the item reference."""
+    already RESOLVED or DISMISSED reuses that decision: no new item, counted and audited with the item
+    reference."""
     keys = {vkey: disputed_conflict_key(vkey) for vkey in disputed}
     resolved = _resolved_disputed(keys.values())
     for vkey, cells in disputed.items():

@@ -168,7 +168,9 @@ until then the UI must show `last_as_of` next to `fresh`.
 
 ## 6. Conflict queue (`integration/conflicts.py`)
 
-`OPEN → RESOLVED | DISMISSED` (terminal; a recurrence opens a new item).
+`OPEN → RESOLVED | DISMISSED` (terminal; a recurrence opens a new item - except the Planning
+`legacy_code_disputed` items, whose RESOLVED / DISMISSED decision carries over to later imports, see the
+Planning import section below).
 - `raise_conflict(ctx, source_code=, kind=, key=, details=, batch_id=)`: idempotent while OPEN (partial unique
   index; race test: 6 raisers → 1 item). `details` redacted (`[REDACTED]` for sensitive keys), ≤ 8 KiB,
   identifiers only. Event `platform.integration.conflict_raised` (catalog `DataConflictRaised`).
@@ -269,7 +271,10 @@ Contract items (not invented here; need a contract change in a later step / phas
   224 distinct values over 634 order rows (02.6 real run; the orchestrator re-checks the counts on the next real
   import - counters `legacy_values_disputed` / `legacy_rows_disputed`).
 - An item that is already OPEN keeps its first details when a later file brings the same value (one OPEN item
-  per key); after it is closed, a later occurrence opens a new item.
+  per key). After it is closed - RESOLVED (02.8 REV-0271, DECISION_LOG 2026-11-16) or DISMISSED (DEC-005
+  amendment 2026-11-17, REV-0292) - a later file with the same value opens **no** new item: the earlier decision
+  is reused (counters `legacy_values_disputed_reused` / `legacy_rows_disputed_reused`, audit
+  `identity.product_code.legacy_disputed_reused` with the item reference and its status).
 
 ### Freshness and failed applies (REV-0265)
 - `planning_catalogue_xlsm` (a source with an apply policy) is fresh only after a successful APPLY, in the apply

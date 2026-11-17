@@ -220,7 +220,7 @@ class ApprovalsView(Phase01View):
         caller = self.caller()
         inbox = query_choice(request, "inbox", ("to_decide", "requested_by_me"))
         status = query_choice(request, "status", APPROVAL_STATUSES)
-        qs = ApprovalRequest.objects.filter(_approval_q(caller))
+        qs = ApprovalRequest.objects.filter(_approval_q(caller)).select_related("requested_by")
         if status:
             qs = qs.filter(status=status)
         if inbox == "requested_by_me":

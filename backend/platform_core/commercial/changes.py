@@ -21,9 +21,22 @@ new line with a new serial), CANCEL_LINE / CANCEL_ORDER (before release only, C-
 CANCELLED and is never re-used), HOLD (single ON_HOLD with the stored previous state) and RESUME.
 After release only DUE_DATE_CHANGE / HOLD / RESUME. A held order whose stored state is CONFIRMED may be
 cancelled directly (CANCEL_ORDER / CANCEL_LINE, amendment 2026-11-12); quantity, due date and new lines on a
-held order are not decided and are refused (``ORDER_ON_HOLD``). Not decided and therefore NOT enforced
-(REV-0203): one open CR per order, a CR expiry period. Concurrent CRs on the same base are safe: the first
-applied one moves the version, every other one is then ``STALE_BASE_VERSION`` (re-submit).
+held order are not decided and are refused (``ORDER_ON_HOLD``). Concurrent CRs on the same base are safe: the
+first applied one moves the version, every other one is then ``STALE_BASE_VERSION`` (re-submit).
+
+DEC-059 amendment 2026-11-17 (REV-0203 / REV-0290):
+
+* **One open request per order**: at most one CR in SUBMITTED or APPROVED per order. A second submit (create
+  with ``submit`` or ``submit`` of a DRAFT) is refused with ``OPEN_CHANGE_REQUEST_EXISTS`` (409) until the
+  first is applied, rejected, withdrawn or expired. DRAFTs do not count. Both paths hold the order row lock,
+  and the partial UNIQUE ``uq_commercial_cr_one_open_per_order`` (migration 0029) is the DB backstop: two
+  concurrent submits never both succeed.
+* **Expiry**: submit writes ``expires_at`` = submit time + ``approval_request_expiry_days`` (the DEC-032
+  period, 30 days). An open CR past ``expires_at`` cannot be decided / planning-decided / applied
+  (``CHANGE_REQUEST_EXPIRED``); the housekeeping job ``change_request_expiry_sweep`` (job-run lifecycle as
+  ``approval_expiry_sweep``, :func:`expire_due`) moves it to EXPIRED (system actor, audit + outbox). A new
+  submit on the same order first expires an overdue open CR (nested system unit of work, durable together with
+  the submit) when that CR is not locked by someone else at that moment; otherwise the submit is refused.
 """
 
 from __future__ import annotations
@@ -33,13 +46,16 @@ from collections.abc import Mapping, Sequence
 from datetime import date
 from typing import Any, Final
 
+from django.db.models import DateTimeField, ExpressionWrapper, Value
 from django.db.models.functions import Now
 
 from platform_core.authz.policy import Caller
+from platform_core.engine.context import Actor, RequestContext, db_now
 from platform_core.engine.dbrules import db_rules
-from platform_core.engine.errors import NotFound
+from platform_core.engine.errors import NotFound, StateTransitionNotAllowed
 from platform_core.engine.state import StateMachine
-from platform_core.engine.uow import UnitOfWork, unit_of_work
+from platform_core.engine.uow import NothingToDo, UnitOfWork, unit_of_work, unit_of_work_or_nothing
+from platform_core.params.values import effective_days
 from platform_core.product_identity.refusals import Reason, refuse
 from platform_core.product_identity.serials import add_snapshot, cancel_serial
 from platform_core.product_identity.usecase import (
@@ -54,6 +70,7 @@ from platform_core.product_identity.usecase import (
 from . import orders as ord_
 from .models import (
     AFTER_RELEASE_KINDS,
+    OPEN_CHANGE_STATUSES,
     ChangeKind,
     ChangeStatus,
     CustomerOrder,
@@ -75,13 +92,16 @@ K, C, O, L = ChangeKind, ChangeStatus, OrderStatus, LineStatus  # noqa: E741 - s
 ORDER_LEVEL_KINDS: Final = frozenset({K.CANCEL_ORDER, K.HOLD, K.RESUME})
 HELD_ALLOWED_KINDS: Final = frozenset({K.RESUME, K.CANCEL_ORDER, K.CANCEL_LINE})
 MAX_ITEMS: Final = 200
+EXPIRY_PARAM: Final = "approval_request_expiry_days"  # DEC-059 amendment 2026-11-17: the DEC-032 period
+ONE_OPEN_RULE: Final = "UQ_COMMERCIAL_CR_ONE_OPEN_PER_ORDER"
+EXPIRY_NOTE: Final = "expired (DEC-059 amendment 2026-11-17: approval_request_expiry_days)"
 
 CHANGE_MACHINE: Final = StateMachine(
     name="commercial.change_request",
     states=frozenset(ChangeStatus.values),
     transitions={
         C.DRAFT: frozenset({C.SUBMITTED, C.WITHDRAWN}),
-        # EXPIRED is reserved: no expiry period is decided (REV-0203), the engine never writes it
+        # EXPIRED: 30 days unanswered (DEC-059 amendment 2026-11-17), written by the expiry sweep
         C.SUBMITTED: frozenset({C.APPROVED, C.REJECTED, C.WITHDRAWN, C.EXPIRED}),
         # APPROVED -> REJECTED: only a planning rejection of a due-date change (amendment 2026-11-14)
         C.APPROVED: frozenset({C.APPLIED, C.EXPIRED, C.REJECTED}),
@@ -144,6 +164,79 @@ def _iso(value: Any, field: str) -> date:
         except ValueError:
             pass
     refuse(Reason.INVALID, field=field)
+
+
+def _expires_expr() -> Any:
+    """``expires_at`` written together with ``submitted_at = Now()`` (same statement time)."""
+    return ExpressionWrapper(Now() + Value(effective_days(EXPIRY_PARAM)), output_field=DateTimeField())
+
+
+def _is_overdue(cr: OrderChangeRequest) -> bool:
+    return cr.status in OPEN_CHANGE_STATUSES and cr.expires_at is not None and cr.expires_at <= db_now()
+
+
+def _refuse_if_overdue(cr: OrderChangeRequest) -> None:
+    if _is_overdue(cr):
+        refuse(Reason.CHANGE_REQUEST_EXPIRED, field="change_request", detail="the change request has expired")
+
+
+def _expire_locked(uow: UnitOfWork, cr: OrderChangeRequest) -> None:
+    """SUBMITTED / APPROVED -> EXPIRED; the caller holds the row lock."""
+    CHANGE_MACHINE.assert_transition(cr.status, C.EXPIRED)
+    before = _view(cr)
+    with db_rules():
+        OrderChangeRequest.objects.filter(pk=cr.pk).update(status=C.EXPIRED, updated_at=Now())
+    cr.refresh_from_db()
+    _event(uow, "expire", "expired", cr, before=before, reason=EXPIRY_NOTE)
+
+
+def _expire_one(cr_id: uuid.UUID, request_id: uuid.UUID | None) -> bool:
+    """Expire one overdue open request in its own system unit of work (skips a row locked by someone else)."""
+    done = False
+    with unit_of_work_or_nothing(RequestContext(Actor.system(), request_id=request_id)) as uow:
+        cr = (
+            OrderChangeRequest.objects.select_for_update(skip_locked=True)
+            .filter(pk=cr_id, status__in=OPEN_CHANGE_STATUSES, expires_at__lte=db_now())
+            .first()
+        )
+        if cr is None:
+            raise NothingToDo()
+        _expire_locked(uow, cr)
+        done = True
+    return done
+
+
+def expire_due(*, limit: int = 500, request_id: uuid.UUID | None = None) -> int:
+    """Housekeeping job function ``change_request_expiry_sweep`` (DEC-059 amendment 2026-11-17, the DEC-032
+    mechanism): open requests past ``expires_at`` -> EXPIRED. Returns the number expired in this batch."""
+    ids = list(
+        OrderChangeRequest.objects.filter(status__in=OPEN_CHANGE_STATUSES, expires_at__lte=db_now())
+        .order_by("expires_at", "id")
+        .values_list("pk", flat=True)[:limit]
+    )
+    return sum(1 for cr_id in ids if _expire_one(cr_id, request_id))
+
+
+def _check_no_open_request(o: CustomerOrder, request_id: uuid.UUID | None) -> None:
+    """DEC-059 amendment 2026-11-17: refuse a second open request; the caller holds the order row lock.
+    An overdue open request is expired first (nested system unit of work, skip-locked)."""
+    other = OrderChangeRequest.objects.filter(order=o, status__in=OPEN_CHANGE_STATUSES).first()
+    if other is None:
+        return
+    if _is_overdue(other) and _expire_one(other.pk, request_id):
+        return
+    refuse(
+        Reason.OPEN_CHANGE_REQUEST_EXISTS,
+        field="order",
+        detail="the order already has an open change request (submitted or approved)",
+    )
+
+
+def _one_open_backstop(exc: StateTransitionNotAllowed) -> None:
+    """Map the DB backstop (partial UNIQUE, migration 0029) to the engine refusal."""
+    if any(e.code == ONE_OPEN_RULE for e in exc.errors):
+        refuse(Reason.OPEN_CHANGE_REQUEST_EXISTS, field="order")
+    raise exc
 
 
 def check_kind_allowed(o: CustomerOrder, kind: str) -> None:
@@ -293,19 +386,25 @@ def create_change_request(
         check_version(o, expected_version)
         check_kind_allowed(o, kind)
         norm = normalise_items(o, kind, items)
-        with db_rules():
-            cr = OrderChangeRequest.objects.create(
-                request_no=next_number("change_request"),
-                order=o,
-                base_order_version=o.current_version,
-                kind=kind,
-                items=norm,
-                reason=text,
-                status=C.SUBMITTED if submit else C.DRAFT,
-                submitted_at=Now() if submit else None,
-                impact=impact_of(o, kind, norm) if submit else None,
-                requested_by_id=caller.user_id,
-            )
+        if submit:
+            _check_no_open_request(o, request_id)
+        try:
+            with db_rules():
+                cr = OrderChangeRequest.objects.create(
+                    request_no=next_number("change_request"),
+                    order=o,
+                    base_order_version=o.current_version,
+                    kind=kind,
+                    items=norm,
+                    reason=text,
+                    status=C.SUBMITTED if submit else C.DRAFT,
+                    submitted_at=Now() if submit else None,
+                    expires_at=_expires_expr() if submit else None,
+                    impact=impact_of(o, kind, norm) if submit else None,
+                    requested_by_id=caller.user_id,
+                )
+        except StateTransitionNotAllowed as exc:
+            _one_open_backstop(exc)
         cr.refresh_from_db()
         _event(uow, "create", "created", cr, before=None, reason=text)
         if submit:
@@ -327,15 +426,22 @@ def submit_change_request(
         _requester_only(caller, cr)
         check_version(cr, expected_version)
         CHANGE_MACHINE.assert_transition(cr.status, C.SUBMITTED)
-        o = CustomerOrder.objects.get(pk=cr.order_id)
+        o = lock(CustomerOrder, cr.order_id)  # serialises submits of the same order (one open request)
         if o.current_version != cr.base_order_version:
             refuse(Reason.STALE_BASE_VERSION, field="base_order_version")
         check_kind_allowed(o, cr.kind)
+        _check_no_open_request(o, request_id)
         before = _view(cr)
-        with db_rules():
-            OrderChangeRequest.objects.filter(pk=cr.pk).update(
-                status=C.SUBMITTED, submitted_at=Now(), impact=impact_of(o, cr.kind, cr.items)
-            )
+        try:
+            with db_rules():
+                OrderChangeRequest.objects.filter(pk=cr.pk).update(
+                    status=C.SUBMITTED,
+                    submitted_at=Now(),
+                    expires_at=_expires_expr(),
+                    impact=impact_of(o, cr.kind, cr.items),
+                )
+        except StateTransitionNotAllowed as exc:
+            _one_open_backstop(exc)
         cr.refresh_from_db()
         _event(uow, "submit", "submitted", cr, before=before)
     return cr
@@ -384,6 +490,7 @@ def decide_change_request(
         target = C.APPROVED if approve else C.REJECTED
         if cr.status != C.SUBMITTED:  # the manager decides a submitted request once
             refuse(Reason.STATE_NOT_ALLOWED, field="status")
+        _refuse_if_overdue(cr)
         CHANGE_MACHINE.assert_transition(cr.status, target)
         before = _view(cr)
         with db_rules():
@@ -431,6 +538,7 @@ def planning_decide_change_request(
             refuse(Reason.STATE_NOT_ALLOWED, field="status")
         if cr.planning_approved_by_id is not None:
             refuse(Reason.PLANNING_ALREADY_APPROVED, field="change_request")
+        _refuse_if_overdue(cr)
         before = _view(cr)
         with db_rules():
             if approve:
@@ -494,6 +602,7 @@ def apply_change_request(
         cr = lock(OrderChangeRequest, cr_id)
         check_version(cr, expected_version)
         CHANGE_MACHINE.assert_transition(cr.status, C.APPLIED)
+        _refuse_if_overdue(cr)
         if cr.kind == K.DUE_DATE_CHANGE and cr.planning_approved_by_id is None:
             refuse(Reason.PLANNING_APPROVAL_REQUIRED, field="change_request")
         o = lock(CustomerOrder, cr.order_id)
@@ -676,5 +785,6 @@ def get_change_request(caller: Caller, cr_id: uuid.UUID) -> dict[str, Any]:
         "planning_approved_by": str(cr.planning_approved_by_id) if cr.planning_approved_by_id else None,
         "planning_rejected_by": str(cr.planning_rejected_by_id) if cr.planning_rejected_by_id else None,
         "applied_version": cr.applied_version,
+        "expires_at": cr.expires_at.isoformat() if cr.expires_at else None,
         "row_version": cr.row_version,
     }

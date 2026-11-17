@@ -15,7 +15,8 @@ Read-only and session-only (like ``/me/permissions``): the feed itself needs no 
 is filtered by the caller's own GLOBAL grant of the deciding permission (a caller without it sees nothing of
 that kind). It lists what the caller MAY decide; the decision itself is still the owning operation, which
 re-checks permission, fresh MFA, maker-checker, state and version. Nothing is written here and no personal
-data (customer names, representative names) is returned - only ids, numbers and times.
+data (customer names, representative names) is returned - only ids, numbers, times and (DEC-032 amendment
+2026-11-17, REV-0291) the requester's internal user display name (``requested_by_name``).
 """
 
 from __future__ import annotations
@@ -37,7 +38,7 @@ from platform_core.commercial.models import (
 from platform_core.engine.context import db_now
 from platform_core.product_identity.models import CodeRuleRevision, CodeRuleStatus
 
-from ..phase01.common import NO_STORE, SessionView, sid, utc_req
+from ..phase01.common import NO_STORE, SessionView, sid, user_name, utc_req
 from .common import GLOBAL
 
 PER_KIND: Final = 100
@@ -54,6 +55,7 @@ def _item(
     number: str | None,
     revision_no: int | None,
     by: Any,
+    by_user: Any,
     at: Any,
     rv: int,
 ) -> dict[str, Any]:
@@ -64,6 +66,7 @@ def _item(
         "number": number,
         "revision_no": revision_no,
         "requested_by": sid(by),
+        "requested_by_name": user_name(by_user),
         "requested_at": utc_req(at),
         "row_version": rv,
     }
@@ -83,7 +86,11 @@ class MyDecisionInboxView(SessionView):
             return rows[:PER_KIND]
 
         if P.can(caller, ORDER_CONFIRM, GLOBAL):
-            orders = CustomerOrder.objects.filter(status=OrderStatus.VALIDATED).exclude(created_by_id=me)
+            orders = (
+                CustomerOrder.objects.filter(status=OrderStatus.VALIDATED)
+                .exclude(created_by_id=me)
+                .select_related("created_by")
+            )
             for o in take(list(orders.order_by("-updated_at", "id")[: PER_KIND + 1])):
                 items.append(
                     _item(
@@ -93,6 +100,7 @@ class MyDecisionInboxView(SessionView):
                         o.order_no,
                         None,
                         o.created_by_id,
+                        o.created_by,
                         o.updated_at,
                         o.row_version,
                     )
@@ -102,6 +110,7 @@ class MyDecisionInboxView(SessionView):
                 OrderChangeRequest.objects.filter(status=ChangeStatus.SUBMITTED)
                 .exclude(requested_by_id=me)
                 .exclude(planning_approved_by_id=me)
+                .select_related("requested_by")
             )
             for cr in take(list(decide.order_by("-submitted_at", "id")[: PER_KIND + 1])):
                 items.append(
@@ -112,6 +121,7 @@ class MyDecisionInboxView(SessionView):
                         cr.request_no,
                         None,
                         cr.requested_by_id,
+                        cr.requested_by,
                         cr.submitted_at or cr.created_at,
                         cr.row_version,
                     )
@@ -126,6 +136,7 @@ class MyDecisionInboxView(SessionView):
                 )
                 .exclude(requested_by_id=me)
                 .exclude(Q(decided_by_id=me))
+                .select_related("requested_by")
             )
             for cr in take(list(planning.order_by("-submitted_at", "id")[: PER_KIND + 1])):
                 items.append(
@@ -136,12 +147,17 @@ class MyDecisionInboxView(SessionView):
                         cr.request_no,
                         None,
                         cr.requested_by_id,
+                        cr.requested_by,
                         cr.submitted_at or cr.created_at,
                         cr.row_version,
                     )
                 )
         if P.can(caller, RULE_APPROVE, GLOBAL):
-            rules = CodeRuleRevision.objects.filter(status=CodeRuleStatus.IN_REVIEW).exclude(created_by_id=me)
+            rules = (
+                CodeRuleRevision.objects.filter(status=CodeRuleStatus.IN_REVIEW)
+                .exclude(created_by_id=me)
+                .select_related("created_by")
+            )
             for r in take(list(rules.order_by("-updated_at", "id")[: PER_KIND + 1])):
                 items.append(
                     _item(
@@ -151,6 +167,7 @@ class MyDecisionInboxView(SessionView):
                         None,
                         r.revision_no,
                         r.created_by_id,
+                        r.created_by,
                         r.updated_at,
                         r.row_version,
                     )

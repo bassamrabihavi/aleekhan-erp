@@ -120,6 +120,12 @@ def sid(value: uuid.UUID | None) -> str | None:
     return str(value) if value is not None else None
 
 
+def user_name(user: Any) -> str | None:
+    """Internal display name of a platform user (DEC-032 amendment 2026-11-17: shown next to the short id in
+    the approval inbox / page 33). Nothing else of the user (no username, no contact data)."""
+    return str(user.display_name)[:200] if user is not None else None
+
+
 def opt_text(value: str) -> str | None:
     return value or None
 

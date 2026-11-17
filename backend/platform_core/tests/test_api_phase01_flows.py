@@ -303,6 +303,10 @@ def test_roles_and_assignments_with_dec049_and_dec032() -> None:
     assert p["approval_id"] in {x["approval_id"] for x in inbox["items"]}
     r = get(dc, f"/workflow/approvals/{p['approval_id']}")
     ok(r, "/workflow/approvals/{approval_id}", "get")
+    # DEC-032 amendment 2026-11-17 (REV-0291): the requester's internal display name next to the id
+    assert body(r)["requested_by"] == str(owner.pk) and body(r)["requested_by_name"] == owner.display_name
+    mine = next(x for x in inbox["items"] if x["approval_id"] == p["approval_id"])
+    assert mine["requested_by_name"] == owner.display_name
     out = ok(
         post(
             dc,

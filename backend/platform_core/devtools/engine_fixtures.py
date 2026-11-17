@@ -170,7 +170,9 @@ def ensure_catalogue() -> None:
                 [job_type, name_fa],
             )
     ops18 = import_module("platform_core.migrations.0018_outbox_discard_and_orphan_job")
-    for job_type, name_fa in {**eng.HOUSEKEEPING_JOBS, **ops18.ADDED_HOUSEKEEPING_JOBS}.items():
+    cr29 = import_module("platform_core.migrations.0029_dec059_cr_open_expiry")  # 02.8 Gate follow-up
+    jobs = {**eng.HOUSEKEEPING_JOBS, **ops18.ADDED_HOUSEKEEPING_JOBS, **cr29.ADDED_HOUSEKEEPING_JOBS}
+    for job_type, name_fa in jobs.items():
         JobDefinition.objects.get_or_create(
             job_type=job_type, defaults={"name_fa": name_fa, "cancellable": True, "protected": False}
         )

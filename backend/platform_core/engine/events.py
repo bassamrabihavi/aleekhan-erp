@@ -43,7 +43,7 @@ from .errors import EngineContractError
 SOURCE_SYSTEM: Final = "aleekhan-erp"
 # Newest platform_core migration this code was written for (provenance of every outbox row). Pinned to the
 # leaf of the migration graph by test_integration_events.py::test_schema_migration_head_is_the_graph_leaf.
-SCHEMA_MIGRATION_HEAD: Final = "platform_core.0028_phase02_golden_summary"
+SCHEMA_MIGRATION_HEAD: Final = "platform_core.0029_dec059_cr_open_expiry"
 SYNTHETIC_TEST_PREFIX: Final = "platform.synthetic."
 
 _UUID_RE = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")
@@ -595,6 +595,7 @@ _SPECS: tuple[EventSpec, ...] = (
             "planning_approved",
             "planning_rejected",
             "applied",
+            "expired",  # DEC-059 amendment 2026-11-17 (REV-0290)
         )
     ),
     # PHASE_02 / 02.4: external references (DEC-058; raw value never in the payload)

@@ -13,7 +13,7 @@ from __future__ import annotations
 import uuid
 from collections.abc import Iterator
 from contextlib import contextmanager
-from datetime import date
+from datetime import date, timedelta
 from typing import Any
 
 import pytest
@@ -715,7 +715,14 @@ def test_hold_and_resume_return_to_the_stored_state_with_a_version_each() -> Non
         with transaction.atomic():
             kind = "HOLD" if update["status"] == "ON_HOLD" else "RESUME"
             o.refresh_from_db()
-            cr = _change_request(o, creator, kind, status="SUBMITTED", submitted_at=Now())
+            cr = _change_request(  # an open request carries its expiry (0029, DEC-059 amendment 2026-11-17)
+                o,
+                creator,
+                kind,
+                status="SUBMITTED",
+                submitted_at=Now(),
+                expires_at=Now() + timedelta(days=30),
+            )
             OrderChangeRequest.objects.filter(pk=cr.pk).update(
                 status="APPROVED", decided_by=applier, decided_at=Now()
             )
@@ -780,7 +787,11 @@ def test_change_request_maker_checker_and_due_date_needs_the_planning_approval()
     o.refresh_from_db()
     manager, planner, applier = user(), user(), user()
     cr = _change_request(o, creator, "DUE_DATE_CHANGE", items=[{"field": "requested_due_date"}])
-    OrderChangeRequest.objects.filter(pk=cr.pk).update(status="SUBMITTED", submitted_at=Now())
+    OrderChangeRequest.objects.filter(pk=cr.pk).update(
+        status="SUBMITTED",
+        submitted_at=Now(),
+        expires_at=Now() + timedelta(days=30),  # 0029
+    )
     with refused("ck_commercial_cr_content_frozen"):
         OrderChangeRequest.objects.filter(pk=cr.pk).update(reason="changed reason")
     with refused("ck_commercial_cr_decider_not_requester"):

@@ -4,7 +4,10 @@ separate PostgreSQL connections; ID-02 / ID-04 at use-case level). Synthetic dat
 * duplicate confirms of one order: one effect (the others are refused, no extra serial, no gap)
 * concurrent confirms of different orders: no duplicate, no gap
 * the same approved change request applied concurrently: applied once
-* two change requests on the same base applied concurrently: one wins, the other is STALE_BASE_VERSION
+* two change requests of one order: since the DEC-059 amendment 2026-11-17 (REV-0290) only one can be open, so
+  concurrent submits (create + submit, or submit of DRAFTs) end with exactly one SUBMITTED request and the
+  others refused ``OPEN_CHANGE_REQUEST_EXISTS`` (replaces the 02.3 race "two approved requests on the same
+  base applied concurrently", which can no longer be set up)
 * concurrent product / style creation: distinct, contiguous numbers (row lock on the counting row)
 * concurrent code issues for one style: one code
 * confirm through the idempotent command layer: a replay returns the stored result without a second effect
@@ -18,7 +21,7 @@ from typing import Any
 import pytest
 
 from platform_core.commercial import changes, orders
-from platform_core.commercial.models import CustomerOrder, OrderChangeRequest
+from platform_core.commercial.models import OrderChangeRequest
 from platform_core.devtools import phase02_engine as e
 from platform_core.devtools import phase02_factories as f
 from platform_core.devtools.engine_fixtures import ensure_catalogue
@@ -116,35 +119,63 @@ def test_one_change_request_applied_concurrently_is_applied_once_race() -> None:
     )
 
 
-def test_two_requests_on_the_same_base_one_wins_race() -> None:
+def test_concurrent_submits_of_one_order_leave_one_open_request_race() -> None:
+    """DEC-059 amendment 2026-11-17 (REV-0290): N officers create + submit at once -> one SUBMITTED."""
     p = e.people()
     o = e.confirmed_order(p.co, p.po, lines=2)
-    a, b = e.live_lines(o)
-    crs = []
-    for ln, qty in ((a, 21), (b, 22)):
-        o.refresh_from_db()
-        cr = changes.create_change_request(
-            p.co.caller,
+    o.refresh_from_db()
+    officers = [p.co, p.co2, *[e.holder("commercial_officer") for _ in range(N - 2)]]
+    results = run_concurrently(
+        lambda i: changes.create_change_request(
+            officers[i].caller,
             o.pk,
-            kind="QTY_CHANGE",
-            items=[{"line_id": str(ln.pk), "quantity": qty}],
+            kind="HOLD",
+            items=[],
             reason="synthetic race",
             expected_version=o.row_version,
             submit=True,
-        )
-        crs.append(
-            changes.decide_change_request(p.cm.caller, cr.pk, approve=True, expected_version=cr.row_version)
-        )
-    who = [p.po, p.po2]
-    results = run_concurrently(
-        lambda i: changes.apply_change_request(who[i].caller, crs[i].pk, expected_version=crs[i].row_version),
-        2,
+        ),
+        N,
     )
     ok, bad = _split(results)
-    assert len(ok) == 1 and len(bad) == 1
-    assert isinstance(bad[0], AleekhanError) and bad[0].errors[0].code == "STALE_BASE_VERSION"
-    assert sorted(OrderChangeRequest.objects.values_list("status", flat=True)) == ["APPLIED", "APPROVED"]
-    assert CustomerOrder.objects.get(pk=o.pk).current_version == 2
+    assert len(ok) == 1, bad
+    assert all(
+        isinstance(x, AleekhanError) and x.errors[0].code == "OPEN_CHANGE_REQUEST_EXISTS" for x in bad
+    ), bad
+    assert OrderChangeRequest.objects.filter(order=o, status__in=["SUBMITTED", "APPROVED"]).count() == 1
+
+
+def test_concurrent_submits_of_drafts_of_one_order_leave_one_open_request_race() -> None:
+    p = e.people()
+    o = e.confirmed_order(p.co, p.po, lines=2)
+    officers = [p.co, p.co2, *[e.holder("commercial_officer") for _ in range(N - 2)]]
+    drafts = []
+    for who in officers:
+        o.refresh_from_db()
+        drafts.append(
+            changes.create_change_request(
+                who.caller,
+                o.pk,
+                kind="HOLD",
+                items=[],
+                reason="synthetic race",
+                expected_version=o.row_version,
+            )
+        )
+    results = run_concurrently(
+        lambda i: changes.submit_change_request(
+            officers[i].caller, drafts[i].pk, expected_version=drafts[i].row_version
+        ),
+        N,
+    )
+    ok, bad = _split(results)
+    assert len(ok) == 1, bad
+    assert all(
+        isinstance(x, AleekhanError) and x.errors[0].code == "OPEN_CHANGE_REQUEST_EXISTS" for x in bad
+    ), bad
+    assert sorted(OrderChangeRequest.objects.filter(order=o).values_list("status", flat=True)) == sorted(
+        ["SUBMITTED"] + ["DRAFT"] * (N - 1)
+    )
 
 
 def test_concurrent_product_and_style_creation_gets_distinct_contiguous_numbers_race() -> None:

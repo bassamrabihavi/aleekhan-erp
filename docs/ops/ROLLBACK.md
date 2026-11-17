@@ -51,10 +51,11 @@ fresh 0010, business rows kept, then forward to head with an empty schema diff. 
 the reverse stops at 0011 with `ProtectedError` and leaves a consistent state (schema identical to a fresh 0011,
 rows kept); forward to head works. Evidence: `reports/phase-01/step-7/logs/rollback_rehearsal*`.
 
-## 3b. PHASE_02 migrations 0019-0028 (02.7 rehearsal)
+## 3b. PHASE_02 migrations 0019-0029 (02.7 rehearsal; 0029 added by the 02.8 Gate follow-up)
 
 | Migration | Reverse | Data note |
 |---|---|---|
+| 0029 change-request one-open + expiry (REV-0290) | yes | `expires_at` dropped (EXPIRED rows stay EXPIRED); runs of `change_request_expiry_sweep` and its definition removed. Forward stops (count only) if an order has two open requests |
 | 0028 code-rule `golden_summary` (REV-0244) | yes | derived display column dropped; lists recompute on read after a code rollback |
 | 0027 matrix v2.2 (integration queue) | yes | steward / owner / viewer lose freshness / conflict grants; items stay |
 | 0026 Planning source seed | yes while no batch / conflict references it; with batches the row is kept (PROTECT, nothing lost) | import batches, staging rows and conflict items stay |

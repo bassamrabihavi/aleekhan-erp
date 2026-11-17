@@ -1,0 +1,3 @@
+# command: mypy .
+Success: no issues found in 254 source files
+# exit code: 0

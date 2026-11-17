@@ -148,6 +148,8 @@ export const REASON_LABELS: Record<string, string> = {
   APPROVER_IS_MAKER: "سازنده قاعده نمی‌تواند آن را تأیید کند",
   PLANNING_APPROVAL_REQUIRED: "تغییر تاریخ تحویل تأیید برنامه‌ریزی هم لازم دارد",
   STALE_BASE_VERSION: "سفارش پس از ثبت این درخواست تغییر کرده است",
+  OPEN_CHANGE_REQUEST_EXISTS: "این سفارش یک درخواست تغییر باز دارد؛ تا تعیین تکلیف آن، درخواست دیگری ارسال نمی‌شود",
+  CHANGE_REQUEST_EXPIRED: "مهلت ۳۰ روزه این درخواست تغییر تمام شده است",
   STATE_NOT_ALLOWED: "در وضعیت کنونی این اقدام مجاز نیست",
   RELEASED_KIND_NOT_ALLOWED: "پس از ارسال به برنامه‌ریزی فقط تغییر تاریخ و توقف/ادامه مجاز است",
   CANCEL_AFTER_RELEASE: "لغو پس از ارسال به برنامه‌ریزی تا فاز ۵ مسدود است",

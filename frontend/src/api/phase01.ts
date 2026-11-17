@@ -255,6 +255,8 @@ export interface Approval {
   resource: EntityRef;
   status: ApprovalStatus;
   requested_by: string;
+  /** DEC-032 amendment 2026-11-17: internal display name of the requester. */
+  requested_by_name?: string | null;
   requested_at: string;
   decided_by: string | null;
   decided_at: string | null;

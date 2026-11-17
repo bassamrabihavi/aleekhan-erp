@@ -120,7 +120,11 @@ def test_due_date_change_needs_planning_approval_by_a_third_person(p: e.People) 
     assert _reason(exc.value) == "PLANNING_APPROVAL_REQUIRED"
     # the requester may not give it (a planner who requested is still the requester)
     planner_requester = e.holder("planning_officer")
-    cr2 = _cr(planner_requester, o, "DUE_DATE_CHANGE", items, submit=True)
+    o2, o3, o4, o5 = (
+        e.released_order(p.co, p.po) for _ in range(4)
+    )  # one open request per order (DEC-059 amendment 2026-11-17)
+    items2 = [{"line_id": None, "requested_due_date": "2030-03-01"}]
+    cr2 = _cr(planner_requester, o2, "DUE_DATE_CHANGE", items2, submit=True)
     with pytest.raises(SelfApprovalForbidden) as exc2:
         changes.planning_approve_change_request(
             planner_requester.caller, cr2.pk, expected_version=cr2.row_version
@@ -128,7 +132,7 @@ def test_due_date_change_needs_planning_approval_by_a_third_person(p: e.People) 
     assert _reason(exc2.value) == "PLANNING_APPROVER_IS_REQUESTER"
     # the deciding manager may not give it (a person holding both roles)
     mgr_planner = e.holder("commercial_manager", "planning_officer")
-    cr3 = _cr(p.co, o, "DUE_DATE_CHANGE", items, submit=True)
+    cr3 = _cr(p.co, o3, "DUE_DATE_CHANGE", items2, submit=True)
     cr3 = changes.decide_change_request(
         mgr_planner.caller, cr3.pk, approve=True, expected_version=cr3.row_version
     )
@@ -136,7 +140,7 @@ def test_due_date_change_needs_planning_approval_by_a_third_person(p: e.People) 
         changes.planning_approve_change_request(mgr_planner.caller, cr3.pk, expected_version=cr3.row_version)
     assert _reason(exc3.value) == "PLANNING_APPROVER_IS_DECIDER"
     # ... nor decide after having given it
-    cr4 = _cr(p.co, o, "DUE_DATE_CHANGE", items, submit=True)
+    cr4 = _cr(p.co, o4, "DUE_DATE_CHANGE", items2, submit=True)
     cr4 = changes.planning_approve_change_request(
         mgr_planner.caller, cr4.pk, expected_version=cr4.row_version
     )
@@ -146,10 +150,12 @@ def test_due_date_change_needs_planning_approval_by_a_third_person(p: e.People) 
         )
     assert _reason(exc4.value) == "DECIDER_IS_PLANNING_APPROVER"
     # planning approval of a non-due-date change does not exist
-    cr5 = _cr(p.co, o, "HOLD", submit=True)
+    cr5 = _cr(p.co, o5, "HOLD", submit=True)
     with pytest.raises(StateTransitionNotAllowed) as exc5:
         changes.planning_approve_change_request(p.po.caller, cr5.pk, expected_version=cr5.row_version)
     assert _reason(exc5.value) == "PLANNING_APPROVAL_NOT_APPLICABLE"
+    # a DRAFT on the same version (DRAFTs do not count as open requests)
+    stale_draft = _cr(p.co, o, "HOLD")
     # a third planner approves, the first request is applied: header + line due dates, version 2
     cr = changes.planning_approve_change_request(p.po2.caller, cr.pk, expected_version=cr.row_version)
     with pytest.raises(StateTransitionNotAllowed) as exc6:
@@ -160,10 +166,10 @@ def test_due_date_change_needs_planning_approval_by_a_third_person(p: e.People) 
     assert (o.status, o.current_version, o.requested_due_date) == ("RELEASED_TO_PLAN", 2, date(2030, 3, 1))
     assert CustomerOrderLine.objects.get(pk=ln.pk).requested_due_date == date(2030, 3, 5)
     assert SerialSnapshot.objects.filter(serial_id=ln.serial_id, version=2).count() == 1
-    # the other open requests are now stale (the order moved on)
-    cr4 = changes.decide_change_request(p.cm.caller, cr4.pk, approve=True, expected_version=cr4.row_version)
+    # the draft made on version 1 is now stale (the order moved on); since the DEC-059 amendment 2026-11-17 no
+    # second request of the order can be open, so staleness shows at submit
     with pytest.raises(StateTransitionNotAllowed) as exc7:
-        changes.apply_change_request(p.po.caller, cr4.pk, expected_version=cr4.row_version)
+        changes.submit_change_request(p.co.caller, stale_draft.pk, expected_version=stale_draft.row_version)
     assert _reason(exc7.value) == "STALE_BASE_VERSION"
 
 
@@ -455,7 +461,9 @@ def test_requester_never_decides_and_the_owner_decides_directly(p: e.People) -> 
     )
     assert decided.decided_by_id == p.owner.pk
     stale = e.holder("commercial_manager", mfa=False)
-    cr2 = _cr(p.co, o, "HOLD", submit=True)
+    cr2 = _cr(
+        p.co, e.confirmed_order(p.co, p.po), "HOLD", submit=True
+    )  # one open request per order (DEC-059 amendment 2026-11-17)
     with pytest.raises(MfaRequired):
         changes.decide_change_request(stale.caller, cr2.pk, approve=True, expected_version=cr2.row_version)
 
@@ -478,11 +486,13 @@ CR_ROLE_ACTIONS: dict[str, set[str]] = {
 def test_change_request_permissions_per_role(p: e.People, role: str) -> None:
     who = e.holder(role)
     allowed = CR_ROLE_ACTIONS[role]
-    o = e.confirmed_order(p.co, p.po)
+    o, o2, o3, o4 = (
+        e.confirmed_order(p.co, p.po) for _ in range(4)
+    )  # one open request per order (DEC-059 amendment 2026-11-17)
     due = [{"line_id": None, "requested_due_date": "2030-04-01"}]
     submitted = _cr(p.co, o, "DUE_DATE_CHANGE", due, submit=True)
-    submitted2 = _cr(p.co, o, "DUE_DATE_CHANGE", due, submit=True)
-    approved = _cr(p.co, o, "DUE_DATE_CHANGE", due, submit=True)
+    submitted2 = _cr(p.co, o2, "DUE_DATE_CHANGE", due, submit=True)
+    approved = _cr(p.co, o3, "DUE_DATE_CHANGE", due, submit=True)
     approved = changes.planning_approve_change_request(
         p.po2.caller, approved.pk, expected_version=approved.row_version
     )
@@ -491,7 +501,7 @@ def test_change_request_permissions_per_role(p: e.People, role: str) -> None:
     )
     attempts: dict[str, Any] = {
         "read": lambda: changes.get_change_request(who.caller, submitted.pk),
-        "request": lambda: _cr(who, o, "HOLD"),
+        "request": lambda: _cr(who, o4, "HOLD"),
         "decide": lambda: changes.decide_change_request(
             who.caller, submitted.pk, approve=True, expected_version=submitted.row_version
         ),
@@ -549,7 +559,10 @@ def test_planning_rejects_a_due_date_change_before_or_after_the_manager(p: e.Peo
     with pytest.raises(StateTransitionNotAllowed):
         changes.decide_change_request(p.cm.caller, cr2.pk, approve=True, expected_version=cr2.row_version)
     # an approved planning decision cannot be turned into a rejection
-    cr3 = _cr(p.co, o, "DUE_DATE_CHANGE", items, submit=True)
+    o3, o4, o5, o6 = (
+        e.released_order(p.co, p.po) for _ in range(4)
+    )  # one open request per order (DEC-059 amendment 2026-11-17)
+    cr3 = _cr(p.co, o3, "DUE_DATE_CHANGE", items, submit=True)
     cr3 = changes.planning_approve_change_request(p.po2.caller, cr3.pk, expected_version=cr3.row_version)
     with pytest.raises(StateTransitionNotAllowed) as exc:
         changes.planning_decide_change_request(
@@ -558,19 +571,19 @@ def test_planning_rejects_a_due_date_change_before_or_after_the_manager(p: e.Peo
     assert _reason(exc.value) == "PLANNING_ALREADY_APPROVED"
     # never the requester, never the deciding manager; never a non-due-date change
     planner_requester = e.holder("planning_officer")
-    cr4 = _cr(planner_requester, o, "DUE_DATE_CHANGE", items, submit=True)
+    cr4 = _cr(planner_requester, o4, "DUE_DATE_CHANGE", items, submit=True)
     with pytest.raises(SelfApprovalForbidden):
         changes.planning_decide_change_request(
             planner_requester.caller, cr4.pk, approve=False, expected_version=cr4.row_version, note="syn"
         )
-    hold = _cr(p.co, o, "HOLD", submit=True)
+    hold = _cr(p.co, o5, "HOLD", submit=True)
     with pytest.raises(StateTransitionNotAllowed) as exc2:
         changes.planning_decide_change_request(
             p.po.caller, hold.pk, approve=False, expected_version=hold.row_version, note="synthetic"
         )
     assert _reason(exc2.value) == "PLANNING_APPROVAL_NOT_APPLICABLE"
     # the manager never moves an APPROVED request to REJECTED (only planning does)
-    cr5 = _cr(p.co, o, "DUE_DATE_CHANGE", items, submit=True)
+    cr5 = _cr(p.co, o6, "DUE_DATE_CHANGE", items, submit=True)
     cr5 = changes.decide_change_request(p.cm.caller, cr5.pk, approve=True, expected_version=cr5.row_version)
     with pytest.raises(StateTransitionNotAllowed):
         changes.decide_change_request(

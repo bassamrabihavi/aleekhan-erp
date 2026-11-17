@@ -1,7 +1,7 @@
 {
- "_note": "Golden event catalogue (PHASE_01 / 01.6). Generated from platform_core/engine/events.py and reviewed: every outbox event type of PHASE_00 + PHASE_01 (+ PHASE_02 / 02.2: identity.serial.allocated; + PHASE_02 / 02.3: the identity.* / commercial.* engine events; + 02.4: planning rejection, external references; + 02.6: batch applied / apply failed, product class imported, legacy codes registered) with producer module, aggregate type, sensitivity (S1: ids, status codes, counts only), current and accepted schema versions and the JSON Schema of each payload version. A change of this file is a contract change (new version + reviewed commit). Human-readable copy: docs/integration/EVENT_CATALOGUE.md.",
+ "_note": "Golden event catalogue (PHASE_01 / 01.6). Generated from platform_core/engine/events.py and reviewed: every outbox event type of PHASE_00 + PHASE_01 (+ PHASE_02 / 02.2: identity.serial.allocated; + PHASE_02 / 02.3: the identity.* / commercial.* engine events; + 02.4: planning rejection, external references; + 02.6: batch applied / apply failed, product class imported, legacy codes registered) with producer module, aggregate type, sensitivity (S1: ids, status codes, counts only), current and accepted schema versions and the JSON Schema of each payload version. A change of this file is a contract change (new version + reviewed commit). 02.8 Gate follow-up: commercial.change_request.expired (DEC-059 amendment 2026-11-17). Human-readable copy: docs/integration/EVENT_CATALOGUE.md.",
  "source_system": "aleekhan-erp",
- "schema_migration_head": "platform_core.0028_phase02_golden_summary",
+ "schema_migration_head": "platform_core.0029_dec059_cr_open_expiry",
  "catalogue": {
   "commercial.change_request.applied": {
    "event_type": "commercial.change_request.applied",
@@ -90,6 +90,47 @@
    "producer": "platform_core.commercial",
    "aggregate_type": "commercial.change_request",
    "description": "order change request decided (DEC-059)",
+   "sensitivity": "S1",
+   "current_version": 1,
+   "accepted_versions": [
+    1
+   ],
+   "versions": {
+    "1": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "id",
+      "kind",
+      "order_id",
+      "status"
+     ],
+     "properties": {
+      "id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "kind": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      },
+      "order_id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "status": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,39}$"
+      }
+     }
+    }
+   }
+  },
+  "commercial.change_request.expired": {
+   "event_type": "commercial.change_request.expired",
+   "producer": "platform_core.commercial",
+   "aggregate_type": "commercial.change_request",
+   "description": "order change request expired (DEC-059)",
    "sensitivity": "S1",
    "current_version": 1,
    "accepted_versions": [

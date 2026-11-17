@@ -9,7 +9,7 @@ import { DECIDE_PERMS } from "../api/phase02";
 import { useAuth } from "../auth/context";
 import { ActionError } from "../components/ActionError";
 import { DataView } from "../components/DataView";
-import { Field, ReasonDialog, ShortId, TabPanel, Tabs } from "../components/Form";
+import { Field, ReasonDialog, Requester, ShortId, TabPanel, Tabs } from "../components/Form";
 import { StatusChip } from "../components/StatusChip";
 import { formatJalaliDateTime } from "../lib/format";
 import { APPROVAL_ACTION, APPROVAL_STATUS, TASK_STATUS, toneLabel } from "../lib/labels";
@@ -123,7 +123,7 @@ function ApprovalCard({ a, onOpen }: { a: Approval; onOpen: () => void }) {
       </div>
       <dl className="meta">
         <div><dt>منبع</dt><dd><code dir="ltr">{a.resource.entity_type}</code> <ShortId id={a.resource.entity_id} /></dd></div>
-        <div><dt>درخواست‌کننده</dt><dd>{mine ? "شما" : <ShortId id={a.requested_by} />}</dd></div>
+        <div><dt>درخواست‌کننده</dt><dd>{mine ? "شما" : <Requester id={a.requested_by} name={a.requested_by_name} />}</dd></div>
         <div><dt>زمان درخواست</dt><dd>{formatJalaliDateTime(a.requested_at)}</dd></div>
         {a.expires_at ? <div><dt>مهلت</dt><dd>{formatJalaliDateTime(a.expires_at)}</dd></div> : null}
         {a.decided_at ? <div><dt>تصمیم</dt><dd>{formatJalaliDateTime(a.decided_at)} {a.decision_note ? `— ${a.decision_note}` : ""}</dd></div> : null}

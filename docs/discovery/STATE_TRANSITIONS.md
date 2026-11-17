@@ -289,12 +289,12 @@ contract enum so later phases add no breaking change.
 | From | Action | To | Guard |
 |---|---|---|---|
 | — | `createChangeRequest` | DRAFT | order is CONFIRMED / RELEASED_TO_PLAN / ON_HOLD / PAUSED (DRAFT orders are edited directly); `base_order_version` = current version; kind allowed in that state: **DEC-059** |
-| DRAFT | `submitChangeRequest` | SUBMITTED | impact computed (PHASE_02 part: lines, serials, snapshots touched; other modules "not available"); creates an approval request; *PROPOSED, not decided (REV-0203): only one SUBMITTED/APPROVED request per order - not enforced in 02.2* |
+| DRAFT | `submitChangeRequest` | SUBMITTED | impact computed (PHASE_02 part: lines, serials, snapshots touched; other modules "not available"); creates an approval request; **DECIDED (DEC-059 amendment 2026-11-17, REV-0290)**: at most one SUBMITTED/APPROVED request per order - a second submit is refused (409 `OPEN_CHANGE_REQUEST_EXISTS`) until the first is applied, rejected, withdrawn or expired (order row lock + partial UNIQUE `uq_commercial_cr_one_open_per_order`, migration 0029); `expires_at` = submit + 30 days |
 | DRAFT, SUBMITTED | `withdrawChangeRequest` | WITHDRAWN | requester only; reason |
 | SUBMITTED | `decideChangeRequest` (approve) | APPROVED | approver ≠ requester; approver role: **DEC-057**; kinds allowed: **DEC-059** |
 | SUBMITTED | `decideChangeRequest` (reject) | REJECTED | reason |
 | APPROVED | `applyChangeRequest` | APPLIED | `base_order_version` still current (else 409 `STATE_TRANSITION_NOT_ALLOWED`, re-submit on the new version); writes `CustomerOrderVersion` n+1, new serial snapshots, `CustomerOrderChanged` |
-| SUBMITTED, APPROVED | expiry period | EXPIRED | *PROPOSED, not decided (REV-0203): DEC-032's 30 days apply to platform approval requests, not to order change requests; no period is enforced in 02.2* |
+| SUBMITTED, APPROVED | expiry period | EXPIRED | **DECIDED (DEC-059 amendment 2026-11-17, REV-0290)**: 30 days after submit, the same period and mechanism as platform approval requests (DEC-032, parameter `approval_request_expiry_days`): housekeeping job `change_request_expiry_sweep` (system actor, audit + outbox `commercial.change_request.expired`); an overdue request cannot be decided or applied (409 `CHANGE_REQUEST_EXPIRED`) |
 
 ECR/ECO (engineering changes) and WIP/material/cost dispositions are not part of this machine (C-61).
 
@@ -355,14 +355,14 @@ Engine machines (`engine.state.StateMachine`, tested pair by pair against the li
 **Change request** (`commercial.changes`)
 | From | Action | To | Who | Guard |
 |---|---|---|---|---|
-| — | `create_change_request` | DRAFT / SUBMITTED | commercial_officer, planning_officer | order CONFIRMED / RELEASED / ON_HOLD; base = current version; kind allowed in the order state (below) |
-| DRAFT | `submit_change_request` | SUBMITTED | the requester | base still current; impact computed |
+| — | `create_change_request` | DRAFT / SUBMITTED | commercial_officer, planning_officer | order CONFIRMED / RELEASED / ON_HOLD; base = current version; kind allowed in the order state (below); SUBMITTED only if the order has no other SUBMITTED/APPROVED request (`OPEN_CHANGE_REQUEST_EXISTS`, DEC-059 amendment 2026-11-17) |
+| DRAFT | `submit_change_request` | SUBMITTED | the requester | base still current; impact computed; no other open request of the order (`OPEN_CHANGE_REQUEST_EXISTS`); writes `expires_at` |
 | DRAFT, SUBMITTED | `withdraw_change_request` | WITHDRAWN | the requester | reason |
 | SUBMITTED | `decide_change_request` | APPROVED / REJECTED | commercial_manager, owner | BA + fresh MFA; ≠ requester; ≠ planning approver; a rejection needs a note |
 | SUBMITTED, APPROVED (DUE_DATE_CHANGE) | `planning_decide_change_request` approve | (same) | planning_officer | fresh MFA; ≠ requester and ≠ deciding manager (amendment 2026-11-12; DB CHECKs); once |
 | SUBMITTED, APPROVED (DUE_DATE_CHANGE) | `planning_decide_change_request` reject (02.4, amendment 2026-11-14) | REJECTED | planning_officer | fresh MFA; a reason (note >= 3); ≠ requester and ≠ deciding manager; not after a planning approval; the old due date stays (DB edge APPROVED -> REJECTED only with `planning_rejected_by`, migration 0025) |
 | APPROVED | `apply_change_request` | APPLIED | planning_officer | base still current (`STALE_BASE_VERSION`); kind still allowed (the order may have been released or held since); due-date change needs the planning approval; writes order version n+1 and the next snapshot of every touched serial |
-| SUBMITTED, APPROVED | expiry | EXPIRED | — | not written: no period is decided (REV-0203) |
+| SUBMITTED, APPROVED | `expire_due` (job `change_request_expiry_sweep`) | EXPIRED | system | `expires_at` (submit + `approval_request_expiry_days` = 30 days) reached (DEC-059 amendment 2026-11-17, REV-0290); a submit on the same order first expires an overdue open request |
 
 Kinds by order state: CONFIRMED - all seven; RELEASED_TO_PLAN - DUE_DATE_CHANGE, HOLD; ON_HOLD (stored CONFIRMED) -
 RESUME, CANCEL_ORDER, CANCEL_LINE; ON_HOLD (stored RELEASED) - RESUME, DUE_DATE_CHANGE is **refused** (see open

@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import { g, get, K2, type DecisionItem } from "../api/phase02";
 import { DataView } from "../components/DataView";
-import { ShortId } from "../components/Form";
+import { Requester } from "../components/Form";
 import { Num } from "../components/Phase02";
 import { formatJalaliDateTime, toFaDigits } from "../lib/format";
 import { DECISION_KIND } from "../lib/labels02";
@@ -40,7 +40,7 @@ export function DecisionsTab() {
                       <dt>شماره</dt>
                       <dd>{it.number ? <Num value={it.number} /> : it.revision_no ? `نسخه ${toFaDigits(it.revision_no)}` : "—"}</dd>
                     </div>
-                    <div><dt>درخواست‌کننده</dt><dd><ShortId id={it.requested_by} /></dd></div>
+                    <div><dt>درخواست‌کننده</dt><dd><Requester id={it.requested_by} name={it.requested_by_name} /></dd></div>
                     <div><dt>زمان</dt><dd>{formatJalaliDateTime(it.requested_at)}</dd></div>
                   </dl>
                   <a className="btn btn--secondary" href={href(it)} data-testid="decision-open">باز کردن و تصمیم</a>

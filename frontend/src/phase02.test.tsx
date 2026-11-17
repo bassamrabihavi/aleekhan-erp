@@ -69,7 +69,7 @@ function stub(routes: Record<string, Route>): Call[] {
   return calls;
 }
 
-const VERSION = { api_version: "v1", contract_version: "0.8.4-draft", build_commit: "abcdef1234567", environment: "dev" };
+const VERSION = { api_version: "v1", contract_version: "0.8.5-draft", build_commit: "abcdef1234567", environment: "dev" };
 function signedIn(actions: string[], extra: Record<string, Route> = {}): Record<string, Route> {
   return {
     "GET /version": () => ok(VERSION),
@@ -457,6 +457,23 @@ describe("page 33 change requests", () => {
     expect(screen.queryByTestId("cr-plan-approve")).not.toBeInTheDocument();
     expect(screen.getByTestId("cr-withdraw")).toBeInTheDocument();
   });
+
+  it("shows the requester's display name next to the short id and the 30-day deadline (REV-0290/0291)", async () => {
+    stub(routes(cr({ requested_by_name: "کاربر ساختگی", expires_at: "2026-12-17T08:00:00Z" }), ["commercial.change.decide"]));
+    renderAt(`#/changes/${CR}`);
+    const who = await screen.findByTestId("requester");
+    expect(within(who).getByTestId("requester-name")).toHaveTextContent("کاربر ساختگی");
+    expect(who).toHaveTextContent(OTHER.slice(0, 8));
+    expect(screen.getByTestId("cr-expires-at")).toBeInTheDocument();
+  });
+
+  it("without a name only the short id is shown; a closed request shows no deadline", async () => {
+    stub(routes(cr({ requested_by_name: null, status: "EXPIRED", expires_at: "2026-12-17T08:00:00Z" }), []));
+    renderAt(`#/changes/${CR}`);
+    expect(await screen.findByTestId("cr-status")).toBeInTheDocument();
+    expect(screen.queryByTestId("requester-name")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("cr-expires-at")).not.toBeInTheDocument();
+  });
 });
 
 // --------------------------------------------------------------------------------------------- page 39
@@ -468,7 +485,7 @@ describe("page 39 inbox: PHASE_02 decisions", () => {
           as_of: NOW,
           truncated: false,
           items: [
-            { kind: "ORDER_CONFIRM", entity_type: "customer_order", entity_id: ORDER, number: "SO-1300-000001", revision_no: null, requested_by: OTHER, requested_at: NOW, row_version: 4 },
+            { kind: "ORDER_CONFIRM", entity_type: "customer_order", entity_id: ORDER, number: "SO-1300-000001", revision_no: null, requested_by: OTHER, requested_by_name: "فروش ساختگی", requested_at: NOW, row_version: 4 },
             { kind: "CODE_RULE_APPROVE", entity_type: "code_rule_revision", entity_id: "11111111-0000-4000-8000-000000000009", number: null, revision_no: 2, requested_by: OTHER, requested_at: NOW, row_version: 3 },
           ],
         }),
@@ -477,6 +494,9 @@ describe("page 39 inbox: PHASE_02 decisions", () => {
     expect(await screen.findByTestId("tab-decisions")).toHaveAttribute("aria-selected", "true");
     const list = await screen.findByTestId("decisions-list");
     expect(within(list).getByTestId("decision-ORDER_CONFIRM")).toHaveTextContent("SO-1300-000001");
+    // DEC-032 amendment 2026-11-17 (REV-0291): the requester's display name next to the short id
+    expect(within(within(list).getByTestId("decision-ORDER_CONFIRM")).getByTestId("requester-name")).toHaveTextContent("فروش ساختگی");
+    expect(within(within(list).getByTestId("decision-CODE_RULE_APPROVE")).queryByTestId("requester-name")).not.toBeInTheDocument();
     const links = within(list).getAllByTestId("decision-open");
     expect(links[0]).toHaveAttribute("href", `#/orders/${ORDER}`);
     expect(links[1]).toHaveAttribute("href", "#/code-rules/11111111-0000-4000-8000-000000000009");

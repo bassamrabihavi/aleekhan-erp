@@ -38,7 +38,7 @@ from platform_core.workflow.models import (
     WorkTask,
 )
 
-from .common import opt_text, sid, utc, utc_req
+from .common import opt_text, sid, user_name, utc, utc_req
 
 
 # ------------------------------------------------------------------------------------------- identity
@@ -216,6 +216,7 @@ def approval(r: ApprovalRequest) -> dict[str, Any]:
         "resource": entity_ref(r.resource_type, r.resource_id, int(r.resource_revision)),
         "status": r.status,
         "requested_by": str(r.requested_by_id),
+        "requested_by_name": user_name(r.requested_by),  # DEC-032 amendment 2026-11-17 (REV-0291)
         "requested_at": utc_req(r.requested_at),
         "decided_by": sid(r.decided_by_id),
         "decided_at": utc(r.closed_at) if r.decided_by_id else None,

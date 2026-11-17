@@ -295,8 +295,9 @@ Rahkaran code that differs from the Planning code).
     contact column exists anywhere.
 - Not created: `Inquiry/QuoteVersion` (PHASE_10), `CustomerArtworkApproval` (PHASE_03).
 - REV-0203 (untagged rules of the 02.1 draft): "one SUBMITTED/APPROVED change request per order" and "change request
-  expires after 30 days" are **not** enforced (OPEN, not decided; the base-version check already makes two changes
-  on one version impossible); "uom of the family" is now DEC-058 (enforced by trigger).
+  expires after 30 days" were decided by the employer on 2026-11-17 (DEC-059 amendment) and are enforced since the
+  02.8 Gate follow-up (REV-0290, migration 0029: `expires_at`, `uq_commercial_cr_one_open_per_order`, job
+  `change_request_expiry_sweep`); "uom of the family" is now DEC-058 (enforced by trigger).
 
 ### 02.3 result (domain engine, migrations 0023-0024)
 - **Technical numbers — PROPOSED, waiting for the employer's confirmation** (gapless not required; unique and

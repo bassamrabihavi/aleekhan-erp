@@ -184,18 +184,34 @@ def test_resolved_disputed_value_carries_over_to_a_later_import(tmp_path: Path) 
     assert reg.after is not None and reg.after["disputed_reused"] == 1
 
 
-def test_dismissed_disputed_value_is_raised_again(tmp_path: Path) -> None:
-    """DISMISSED is not a decision on the value (only RESOLVED carries over): a later file opens a new
-    item."""
+def test_dismissed_disputed_value_carries_over_like_resolved(tmp_path: Path) -> None:
+    """DEC-005 amendment 2026-11-17 (REV-0292, replaces ``test_dismissed_disputed_value_is_raised_again``): a
+    value the steward + owner DISMISSED carries over to a later Planning import like a RESOLVED one - no
+    new item, the reuse is counted and audited with the dismissed item's reference."""
     run_import(write_workbook(tmp_path / "a.xlsm", base_sheets(NOrder={"FZ12": DISPUTED, "C12": "9002"})))
     item = _disputed_item_of("FZ12")
-    _resolve(item, outcome="DISMISSED")
+    done = _resolve(item, outcome="DISMISSED")
+    assert done.status == ConflictStatus.DISMISSED
+    items_before = ConflictItem.objects.filter(kind="legacy_code_disputed").count()
     report = run_import(
-        write_workbook(tmp_path / "b.xlsm", base_sheets(NOrder={"FZ20": DISPUTED, "C20": "9003"}))
+        write_workbook(
+            tmp_path / "b.xlsm",
+            base_sheets(NOrder={"FZ20": DISPUTED, "C20": "9003"}, Codding={"K7": DISPUTED}),
+        )
     )
-    again = ConflictItem.objects.get(conflict_key=item.conflict_key, status=ConflictStatus.OPEN)
-    assert again.conflict_id != item.conflict_id and again.details["cell_refs"] == ["NOrder!FZ20"]
-    assert report.counts.get("legacy_values_disputed_reused", 0) == 0
+    assert report.status == BatchStatus.APPLIED
+    assert not ConflictItem.objects.filter(
+        conflict_key=item.conflict_key, status=ConflictStatus.OPEN
+    ).exists()
+    assert ConflictItem.objects.filter(kind="legacy_code_disputed").count() == items_before  # no new item
+    assert ConflictItem.objects.filter(conflict_key=item.conflict_key).count() == 1
+    assert report.counts["legacy_values_disputed_reused"] == 1
+    assert report.counts["legacy_rows_disputed_reused"] == 2
+    audit = AuditEvent.objects.get(action="identity.product_code.legacy_disputed_reused")
+    assert audit.resource_type == "platform.conflict_item" and audit.resource_id == str(done.conflict_id)
+    assert audit.after is not None and audit.after["status"] == ConflictStatus.DISMISSED
+    assert audit.after["cell_refs"] == ["NOrder!FZ20", "Codding!K7"]
+    assert DISPUTED not in json.dumps(audit.after, ensure_ascii=False)
 
 
 # ------------------------------------------------------------------------------- REV-0262 / REV-0266

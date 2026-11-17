@@ -2,7 +2,7 @@ openapi: 3.1.0
 jsonSchemaDialect: https://spec.openapis.org/oas/3.1/dialect/base
 info:
   title: Aleekhan Factory Platform API
-  version: 0.8.4-draft
+  version: 0.8.5-draft
   summary: PHASE_00 + PHASE_01 platform contract + PHASE_02 identity/commercial operations (all implemented; 02.4).
   description: |
     Status: DRAFT (PHASE_00 / 00.1 Discovery & Contract, implemented in 00.4). Not approved. This hand-written
@@ -131,6 +131,13 @@ info:
     (403 SELF_APPROVAL_FORBIDDEN, maker-checker); Planning import items are raised by the system. The four
     integration operations now carry `x-aleekhan-permission` and authenticate with the session cookie (before,
     no authentication = always 401). Nothing else changes.
+
+    0.8.5-draft (02.8 Gate follow-up, employer decisions 2026-11-17, additive): `Approval`, `DecisionInboxItem`
+    and `ChangeRequest` carry `requested_by_name` - the requester's internal display name next to the id
+    (DEC-032 amendment, REV-0291). `ChangeRequest.expires_at` (DEC-059 amendment, REV-0290): an open change
+    request expires 30 days after submit (`approval_request_expiry_days`); only one SUBMITTED / APPROVED request
+    per order - a second submit is 409 STATE_TRANSITION_NOT_ALLOWED with `errors[].code`
+    OPEN_CHANGE_REQUEST_EXISTS; deciding / applying an overdue request is 409 with CHANGE_REQUEST_EXPIRED.
 
     Stack: Django 5.2 LTS + DRF (DEC-001). Base path is versioned: every endpoint lives under `/api/v1`.
     A breaking change requires `/api/v2` (or an explicitly approved deprecation window); additive changes only
@@ -9585,6 +9592,7 @@ components:
       - number
       - revision_no
       - requested_by
+      - requested_by_name
       - requested_at
       - row_version
       properties:
@@ -9621,6 +9629,13 @@ components:
           - string
           - 'null'
           format: uuid
+        requested_by_name:
+          description: Display name of the requester (internal platform user display name only, DEC-032 amendment
+            2026-11-17); null when the requester is not a known user.
+          type:
+          - string
+          - 'null'
+          maxLength: 200
         requested_at:
           $ref: '#/components/schemas/UtcTimestamp'
         row_version:
@@ -10233,6 +10248,7 @@ components:
       - resource
       - status
       - requested_by
+      - requested_by_name
       - requested_at
       - decided_by
       - decided_at
@@ -10259,6 +10275,13 @@ components:
         requested_by:
           type: string
           format: uuid
+        requested_by_name:
+          description: Display name of the requester (internal platform user display name only, DEC-032 amendment
+            2026-11-17); null when the requester is not a known user.
+          type:
+          - string
+          - 'null'
+          maxLength: 200
         requested_at:
           $ref: '#/components/schemas/UtcTimestamp'
         route:
@@ -13819,7 +13842,9 @@ components:
       - reason
       - status
       - requested_by
+      - requested_by_name
       - submitted_at
+      - expires_at
       - decided_by
       - decided_at
       - planning_required
@@ -13871,7 +13896,20 @@ components:
           - string
           - 'null'
           format: uuid
+        requested_by_name:
+          description: Display name of the requester (internal platform user display name only, DEC-032 amendment
+            2026-11-17); null when the requester is not a known user.
+          type:
+          - string
+          - 'null'
+          maxLength: 200
         submitted_at:
+          oneOf:
+          - $ref: '#/components/schemas/UtcTimestamp'
+          - type: 'null'
+        expires_at:
+          description: Set at submit = submit time + approval_request_expiry_days (30 days, DEC-059 amendment
+            2026-11-17); an open request past it is moved to EXPIRED by the change_request_expiry_sweep job.
           oneOf:
           - $ref: '#/components/schemas/UtcTimestamp'
           - type: 'null'
@@ -14093,6 +14131,8 @@ x-aleekhan-conventions:
     LINE_NOT_IN_ORDER: STATE_TRANSITION_NOT_ALLOWED
     EXTERNAL_REF_EXISTS: STATE_TRANSITION_NOT_ALLOWED
     RULE_REVISION_NOT_ACTIVE: STATE_TRANSITION_NOT_ALLOWED
+    OPEN_CHANGE_REQUEST_EXISTS: STATE_TRANSITION_NOT_ALLOWED
+    CHANGE_REQUEST_EXPIRED: STATE_TRANSITION_NOT_ALLOWED
     CONFIRMER_IS_CREATOR: SELF_APPROVAL_FORBIDDEN
     DECIDER_IS_REQUESTER: SELF_APPROVAL_FORBIDDEN
     DECIDER_IS_PLANNING_APPROVER: SELF_APPROVAL_FORBIDDEN

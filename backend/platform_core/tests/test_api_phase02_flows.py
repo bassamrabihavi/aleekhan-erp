@@ -943,6 +943,70 @@ def test_change_requests_due_date_planning_approve_and_reject_add_line_and_withd
     )
 
 
+def test_change_request_one_open_per_order_expiry_and_requester_name() -> None:
+    """02.8 Gate follow-up: DEC-059 amendment 2026-11-17 (REV-0290) and DEC-032 amendment (REV-0291)."""
+    t = Team()
+    o = _confirmed(t)
+    cp = "/commercial/change-requests/{change_request_id}"
+    first = _cr(t, o, "HOLD")
+    assert first["expires_at"] is not None and first["submitted_at"] is not None
+    assert first["requested_by"] == str(t.co.pk) and first["requested_by_name"] == t.co.display_name
+    cur = ok(
+        get(t.c["co"], f"/commercial/customer-orders/{o['order_id']}"),
+        "/commercial/customer-orders/{order_id}",
+        "get",
+    )
+    refused(
+        post(
+            t.c["co"],
+            "/commercial/change-requests",
+            {
+                "order_id": o["order_id"],
+                "order_row_version": cur["row_version"],
+                "kind": "HOLD",
+                "items": [],
+                "reason": "synthetic change",
+                "submit": True,
+            },
+            **idem(),
+        ),
+        "/commercial/change-requests",
+        "post",
+        409,
+        "STATE_TRANSITION_NOT_ALLOWED",
+        "OPEN_CHANGE_REQUEST_EXISTS",
+    )
+    draft = _cr(t, o, "HOLD", submit=False)
+    assert draft["status"] == "DRAFT" and draft["expires_at"] is None
+    refused(
+        post(
+            t.c["co"],
+            f"/commercial/change-requests/{draft['change_request_id']}/submit",
+            {},
+            **if_match(draft["row_version"]),
+        ),
+        cp + "/submit",
+        "post",
+        409,
+        "STATE_TRANSITION_NOT_ALLOWED",
+        "OPEN_CHANGE_REQUEST_EXISTS",
+    )
+    # the manager sees the requester's display name (detail, list, decision inbox) - nothing else of the user
+    one = ok(get(t.c["cm"], f"/commercial/change-requests/{first['change_request_id']}"), cp, "get")
+    assert one["requested_by_name"] == t.co.display_name
+    listed = ok(
+        get(t.c["viewer"], "/commercial/change-requests", {"order_id": o["order_id"]}),
+        "/commercial/change-requests",
+        "get",
+    )
+    assert {x["requested_by_name"] for x in listed["items"]} == {t.co.display_name}
+    r = t.c["cm"].get(f"{API}/me/decision-inbox")
+    oc.validate_response("/me/decision-inbox", "get", r)
+    item = next(i for i in body(r)["items"] if i["entity_id"] == first["change_request_id"])
+    assert item["requested_by_name"] == t.co.display_name
+    assert t.co.username not in json.dumps(body(r), ensure_ascii=False)
+
+
 # ------------------------------------------------------------------------- external refs and history
 def test_external_refs_and_historical_records() -> None:
     t = Team()

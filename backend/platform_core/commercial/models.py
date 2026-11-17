@@ -363,7 +363,11 @@ class ChangeStatus(models.TextChoices):
     REJECTED = "REJECTED", "Rejected"
     APPLIED = "APPLIED", "Applied (new order version)"
     WITHDRAWN = "WITHDRAWN", "Withdrawn by the requester"
-    EXPIRED = "EXPIRED", "Expired (period not decided: OPEN)"
+    EXPIRED = "EXPIRED", "Expired (30 days unanswered, DEC-059 amendment 2026-11-17)"
+
+
+# DEC-059 amendment 2026-11-17: at most one request in these states per order
+OPEN_CHANGE_STATUSES = (ChangeStatus.SUBMITTED, ChangeStatus.APPROVED)
 
 
 class OrderChangeRequest(models.Model):
@@ -390,6 +394,8 @@ class OrderChangeRequest(models.Model):
     applied_by = _user_fk()
     applied_at = models.DateTimeField(null=True, blank=True)
     applied_version = models.IntegerField(null=True, blank=True)
+    # DEC-059 amendment 2026-11-17: set at submit (submitted_at + approval_request_expiry_days, DEC-032)
+    expires_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(db_default=Now())
     updated_at = models.DateTimeField(db_default=Now())
     row_version = models.BigIntegerField(db_default=1)
@@ -504,6 +510,23 @@ class OrderChangeRequest(models.Model):
                 | Q(planning_approved_by__isnull=False),
                 name="ck_commercial_cr_due_date_planning_approved",
             ),
+            # DEC-059 amendment 2026-11-17 (REV-0290, migration 0029): one open request per order; an open
+            # request carries its expiry instant (30 days after submit, the DEC-032 period)
+            UniqueConstraint(
+                fields=["order"],
+                condition=Q(status__in=[ChangeStatus.SUBMITTED, ChangeStatus.APPROVED]),
+                name="uq_commercial_cr_one_open_per_order",
+            ),
+            CheckConstraint(
+                condition=~Q(status__in=[ChangeStatus.SUBMITTED, ChangeStatus.APPROVED])
+                | Q(expires_at__isnull=False),
+                name="ck_commercial_cr_open_has_expiry",
+            ),
+            CheckConstraint(
+                condition=Q(expires_at__isnull=True)
+                | Q(submitted_at__isnull=False, expires_at__gt=F("submitted_at")),
+                name="ck_commercial_cr_expiry_after_submit",
+            ),
         ]
         indexes = [
             models.Index(fields=["order", "status"], name="ix_ccr_order_status"),
@@ -514,6 +537,11 @@ class OrderChangeRequest(models.Model):
             models.Index(fields=["planning_approved_by"], name="ix_ccr_planning_by"),
             models.Index(fields=["planning_rejected_by"], name="ix_ccr_planning_rejected_by"),
             models.Index(fields=["applied_by"], name="ix_ccr_applied_by"),
+            models.Index(
+                fields=["expires_at"],
+                condition=Q(status__in=[ChangeStatus.SUBMITTED, ChangeStatus.APPROVED]),
+                name="ix_ccr_open_expires_at",
+            ),
         ]
 
     def __str__(self) -> str:

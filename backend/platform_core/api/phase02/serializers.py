@@ -40,7 +40,7 @@ from platform_core.product_identity.models import (
     StyleRevisionStatus,
 )
 
-from ..phase01.common import sid, utc, utc_req
+from ..phase01.common import sid, user_name, utc, utc_req
 
 UNAVAILABLE: Final = [
     {"section": "materials", "phase": "PHASE_06"},
@@ -421,7 +421,9 @@ def change_request(cr: OrderChangeRequest) -> dict[str, Any]:
         "reason": cr.reason,
         "status": cr.status,
         "requested_by": sid(cr.requested_by_id),
+        "requested_by_name": user_name(cr.requested_by),  # DEC-032 amendment 2026-11-17 (REV-0291)
         "submitted_at": utc(cr.submitted_at),
+        "expires_at": utc(cr.expires_at),  # DEC-059 amendment 2026-11-17 (REV-0290)
         "decided_by": sid(cr.decided_by_id),
         "decided_at": utc(cr.decided_at),
         "planning_required": cr.kind == "DUE_DATE_CHANGE",

@@ -157,6 +157,17 @@ export function TabPanel({ id, children }: { id: string; children: ReactNode }) 
   );
 }
 
+/** Requester: internal display name (DEC-032 amendment 2026-11-17) next to the short id; the id alone when the
+ * server sent no name. */
+export function Requester({ id, name }: { id: string | null | undefined; name?: string | null | undefined }) {
+  if (!name) return <ShortId id={id} />;
+  return (
+    <span data-testid="requester">
+      <span data-testid="requester-name">{name}</span> <ShortId id={id} />
+    </span>
+  );
+}
+
 /** Short id for display: first 8 hex chars, full value in the title, always LTR. */
 export function ShortId({ id }: { id: string | null | undefined }) {
   if (!id) return <span>—</span>;

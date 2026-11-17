@@ -400,8 +400,9 @@ written by migrations only; the counter row is inserted by migration 0021 only a
 external reference types are extensible at runtime (DEC-058).
 
 ### 7.4 Not enforced in the database on purpose (not decided)
-"One open change request per order" and a change-request expiry period (REV-0203, PROPOSED only). The two other
-02.2 open items were decided on 2026-11-12 and are enforced since 02.3 (section 7.5).
+Nothing left from 02.2: "one open change request per order" and the change-request expiry (REV-0203) were decided
+on 2026-11-17 (DEC-059 amendment) and are enforced since migration 0029 (section 7.6). The two other 02.2 open
+items were decided on 2026-11-12 and are enforced since 02.3 (section 7.5).
 
 ### 7.5 PHASE_02 / 02.3 (migrations 0023-0024)
 | Migration | Content | Reverse |
@@ -417,3 +418,8 @@ ends with 0000, a SYS style is never 0000). Reverse: the 0019 CHECK (only while 
 The app role may `nextval` the three sequences but not `setval` them (`roles_check.sh`). The engine that writes these
 tables is `product_identity/{master,codes,serials}.py` and `commercial/{orders,changes}.py`
 (docs/discovery/STATE_TRANSITIONS.md 5.10).
+
+### 7.6 PHASE_02 / 02.8 Gate follow-up (migration 0029, DEC-059 amendment 2026-11-17, REV-0290)
+| Migration | Content | Reverse |
+|---|---|---|
+| `0029_dec059_cr_open_expiry` | `commercial_order_change_request.expires_at` (nullable; written at submit = submit + `approval_request_expiry_days`, 30 days); partial UNIQUE `uq_commercial_cr_one_open_per_order` (order WHERE status IN SUBMITTED, APPROVED); CHECK `ck_commercial_cr_open_has_expiry` (open ⇒ `expires_at`), CHECK `ck_commercial_cr_expiry_after_submit`; partial index `ix_ccr_open_expires_at`; existing open rows backfilled from `submitted_at`; job type `change_request_expiry_sweep`. Stops with a count-only message if an order already has two open requests (a person decides / withdraws first) | job runs + definition removed, constraints / index / column dropped |

@@ -286,7 +286,7 @@ class ChangeRequestsView(Phase02View):
     write_action = CHANGE_REQUEST
 
     def get(self, request: Request) -> Response:
-        qs = scoped(self, OrderChangeRequest.objects.all())
+        qs = scoped(self, OrderChangeRequest.objects.select_related("requested_by"))
         order = query_uuid(request, "order_id")
         if order is not None:
             qs = qs.filter(order_id=order)

@@ -1,7 +1,8 @@
 """Conflict queue (PHASE_00 / 00.6): items that need a human decision. Resolving never writes business data.
 
 Machine ``CONFLICT_MACHINE``: ``OPEN -> RESOLVED | DISMISSED`` (both terminal). A new occurrence after closing
-opens a new item.
+opens a new item, unless the owning importer reuses the closed decision (Planning ``legacy_code_disputed``:
+RESOLVED and DISMISSED carry over, ``product_identity.planning_import``; DEC-005 amendment 2026-11-17).
 
 * :func:`raise_conflict` is idempotent while an item is OPEN: the partial unique index
   ``uq_conflict_item_open_key`` (source, kind, key WHERE status = OPEN) makes concurrent raisers converge on

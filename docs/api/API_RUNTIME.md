@@ -330,3 +330,12 @@ every write, employee 403 on every operation, management_viewer 403 on every wri
 - Resolve is maker-checker safe: the user who raised an item can never resolve it (403
   `SELF_APPROVAL_FORBIDDEN`); Planning import items are raised by the SYSTEM actor. Resolving records the
   decision only - no official row changes (a re-import applies any correction).
+
+### 14.5 Step 02.8 Gate follow-up (contract 0.8.5-draft, additive; migration 0029)
+- `Approval`, `DecisionInboxItem` and `ChangeRequest` gain `requested_by_name`: the requester's internal platform
+  display name next to the id (DEC-032 amendment 2026-11-17, REV-0291). Shown only where the record itself is
+  visible (same scope / grant filters as before); no other user data.
+- `ChangeRequest.expires_at` and the one-open rule (DEC-059 amendment 2026-11-17, REV-0290): a second submit for
+  an order that already has a SUBMITTED / APPROVED request -> 409 `STATE_TRANSITION_NOT_ALLOWED`,
+  `errors[].code` = `OPEN_CHANGE_REQUEST_EXISTS`; decide / planning decision / apply of a request past its
+  `expires_at` -> 409 with `CHANGE_REQUEST_EXPIRED`. The job `change_request_expiry_sweep` moves it to EXPIRED.

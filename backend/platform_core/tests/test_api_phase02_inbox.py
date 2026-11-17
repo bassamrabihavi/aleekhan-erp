@@ -74,6 +74,7 @@ def test_order_confirm_item_for_planning_and_owner_never_for_the_creator(p: Peop
     item = next(i for i in inbox(session_client(p.po.user))["items"] if i["entity_id"] == str(o.pk))
     assert item["entity_type"] == "customer_order" and item["number"] == o.order_no
     assert item["requested_by"] == str(p.co.pk) and item["revision_no"] is None
+    assert item["requested_by_name"] == p.co.user.display_name  # DEC-032 amendment 2026-11-17 (REV-0291)
 
 
 def test_owner_never_sees_his_own_validated_order() -> None:

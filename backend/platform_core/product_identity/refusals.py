@@ -77,6 +77,9 @@ class Reason(StrEnum):
     # 02.4
     EXTERNAL_REF_EXISTS = "EXTERNAL_REF_EXISTS"  # same system + type + value + target already recorded
     RULE_REVISION_NOT_ACTIVE = "RULE_REVISION_NOT_ACTIVE"  # the named rule revision is not the ACTIVE one
+    # 02.8 Gate follow-up (DEC-059 amendment 2026-11-17, REV-0290)
+    OPEN_CHANGE_REQUEST_EXISTS = "OPEN_CHANGE_REQUEST_EXISTS"  # the order already has a SUBMITTED/APPROVED CR
+    CHANGE_REQUEST_EXPIRED = "CHANGE_REQUEST_EXPIRED"  # open CR past its 30-day expiry (sweep pending)
     # --- maker-checker (403 SELF_APPROVAL_FORBIDDEN)
     CONFIRMER_IS_CREATOR = "CONFIRMER_IS_CREATOR"  # DEC-057
     DECIDER_IS_REQUESTER = "DECIDER_IS_REQUESTER"  # DEC-057 / DEC-059
@@ -148,6 +151,8 @@ _BY_CODE: dict[ErrorCode, tuple[Reason, ...]] = {
         Reason.LINE_NOT_IN_ORDER,
         Reason.EXTERNAL_REF_EXISTS,
         Reason.RULE_REVISION_NOT_ACTIVE,
+        Reason.OPEN_CHANGE_REQUEST_EXISTS,
+        Reason.CHANGE_REQUEST_EXPIRED,
     ),
     _SA: (
         Reason.CONFIRMER_IS_CREATOR,

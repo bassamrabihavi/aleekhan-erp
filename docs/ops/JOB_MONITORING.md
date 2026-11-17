@@ -57,7 +57,7 @@ event), `held_events` (undelivered events behind such a head - per-aggregate ord
 
 ### Housekeeping job monitoring
 `ops.monitoring.housekeeping_health` - one entry per housekeeping job type (`jobs.service.HOUSEKEEPING_TYPES`,
-seeded by migrations 0011 and 0018): newest run state, last success / failure, `overdue` (no SUCCEEDED run
+seeded by migrations 0011, 0018 and 0029): newest run state, last success / failure, `overdue` (no SUCCEEDED run
 within `HOUSEKEEPING_MAX_AGE` = 26 h, TECHNICAL DEFAULT for a daily schedule; a type that never ran is
 overdue - PHASE_01 has no scheduler, so this is the honest answer) and `failing` (newest finished run FAILED,
 machine `error_code` only). Shown on page 36 («کارهای نگهداری دوره‌ای») and in `GET /admin/health`
@@ -80,6 +80,13 @@ TECHNICAL DEFAULT schedule until the Celery worker (ADR-001) is wired: a systemd
 the app host runs `manage.py run_housekeeping --all` (each job is idempotent, batched, safely cancellable at
 its checkpoints); a second timer every 15 min runs `manage.py job_status --json --fail-on warn` and
 `manage.py outbox_status --json --fail-on warn` and alerts IT on a non-zero exit.
+
+### Change-request expiry (`change_request_expiry_sweep`, migration 0029)
+DEC-059 amendment 2026-11-17 (REV-0290): an order change request that stays SUBMITTED / APPROVED past its
+`expires_at` (submit + `approval_request_expiry_days`, 30 days - the DEC-032 period) is moved to EXPIRED by
+`commercial.changes.expire_due` (system actor, batches of 500, row skipped while someone else holds its lock;
+audit `commercial.change_request.expire` + event `commercial.change_request.expired`). Same lifecycle and
+schedule as `approval_expiry_sweep` (`run_housekeeping --all`).
 
 ### Orphan upload cleanup (`document_orphan_cleanup`, migration 0018)
 An upload writes the encrypted bytes first and then the rows; when that transaction fails, the bytes are
