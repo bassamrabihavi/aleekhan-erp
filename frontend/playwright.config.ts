@@ -34,7 +34,10 @@ const vite = {
 
 const django = {
   // --noreload: a single process that Playwright can stop cleanly at the end of the run.
-  command: `"${python}" manage.py runserver 127.0.0.1:8000 --noreload`,
+  // runserver_e2e (02.8 / REV-0295): runserver with a larger listen backlog. Django's dev server accepts only 10
+  // pending connections; under the suite's bursts Windows then resets new ones (Vite proxy ECONNREFUSED -> a real
+  // but spurious "stale data" state in the UI). Measured: reports/phase-02/step-8/logs/rework5/backlog_probe.log.
+  command: `"${python}" manage.py runserver_e2e 127.0.0.1:8000 --noreload`,
   cwd: backendDir,
   url: `${BACKEND_URL}/api/v1/health/live`,
   reuseExistingServer: false,
