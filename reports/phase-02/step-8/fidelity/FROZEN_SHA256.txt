@@ -1,0 +1,8 @@
+b927f99da26da1d4e094e643299f8570325190d641d932f12b2c1a83454eab91 *frontend/e2e/fidelity/specs/page-01.json
+2d4d9341c91a6cf56232fd5740e749b73932a07bc73dd598f4f0be5f5af029b2 *frontend/e2e/fidelity/specs/page-02.json
+228295fe4fdaa1aac33c25076bdc89c7e24b5a4545e17e130e74d441cf404ab4 *frontend/e2e/fidelity/specs/page-04.json
+533c00c6f3beb5d0b9df0ddffd28ec8116762dab8064f55cc9308900c3a8dd65 *frontend/e2e/fidelity/specs/page-29.json
+9bab0c22e0c1b7739b6656018fa5fc1bfbfdbd4090a7af67f43eafe34ca7c81c *frontend/e2e/fidelity/specs/page-33.json
+96e2651093cfbe96f549114a0928b2e24f477e9ec0a516b497aa745f6c53bb5b *frontend/e2e/fidelity/score.ts
+784e706c0fd14b3ed022592659f5098afd039ad05dd442196099379c06532341 *frontend/e2e/fidelity/measure.ts
+28ca3aee996affde673391f5828ef0ab7561e332f45b2214fee0d919dae7f05e *frontend/e2e/fidelity/config.ts
