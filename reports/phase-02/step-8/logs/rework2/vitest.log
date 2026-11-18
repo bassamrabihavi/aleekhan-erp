@@ -1,0 +1,13 @@
+
+ RUN  v5.0.5 F:/aleekhan/aleekhan-erp/frontend
+
+
+ Test Files  7 passed (7)
+      Tests  82 passed (82)
+   Start at  18:42:16
+   Duration  37.46s (environment 64%, import 12%, setup 11%, tests 10%, transform 3%)
+
+Environment  jsdom was created 7 times · 68.81s total, 64% of tracked time
+             create it once per worker with pool: 'vmThreads' (keeps per-file isolation) or isolate: false (shares it across files)
+             learn more: https://vitest.dev/guide/improving-performance#test-environments
+

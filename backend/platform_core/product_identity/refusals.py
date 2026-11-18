@@ -53,7 +53,7 @@ class Reason(StrEnum):
     GOLDEN_FIELD_NOT_ALLOWED = "GOLDEN_FIELD_NOT_ALLOWED"  # REV-0240: harness-only / unknown golden input
     # --- state / conflict (409 STATE_TRANSITION_NOT_ALLOWED)
     STATE_NOT_ALLOWED = "STATE_NOT_ALLOWED"  # generic: the record is not in a state that allows it
-    MASTER_NOT_ACTIVE = "MASTER_NOT_ACTIVE"  # customer / brand / type / style / revision not ACTIVE
+    MASTER_NOT_ACTIVE = "MASTER_NOT_ACTIVE"  # customer/brand/type/product/style/revision not ACTIVE
     ORDER_HAS_NO_LINES = "ORDER_HAS_NO_LINES"
     LAST_LINE_CANCEL = "LAST_LINE_CANCEL"  # cancelling the last live line: use CANCEL_ORDER
     PRODUCT_NO_TAKEN = "PRODUCT_NO_TAKEN"

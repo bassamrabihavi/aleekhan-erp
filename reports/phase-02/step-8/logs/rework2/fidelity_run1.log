@@ -1,0 +1,72 @@
+
+> aleekhan-frontend@0.0.0 fidelity
+> bash scripts/fidelity.sh
+
+== e2e environment
+PGHOST=127.0.0.1 PGPORT=5433 PGPASSWORD set: yes (value never printed)
+PG_BIN set: yes | E2E_DB=test_fidelity_e2e | E2E_PYTHON: python.exe
+E2E_BROWSER_CHANNEL=msedge
+E2E_SCREENSHOT_DIR set: no | E2E_HTML_REPORT set: yes | E2E_OUTPUT_DIR set: yes
+playwright: 1.64.1
+node: v24.20.0 (win32/x64)
+browser channel: msedge
+PLAYWRIGHT_BROWSERS_PATH set: no
+browser version: 157.0.4341.60
+== server: 17.9
+== create throw-away database test_fidelity_e2e
+NOTICE:  database "test_fidelity_e2e" does not exist, skipping
+== migrate (ALEEKHAN_ENV=dev, db=test_fidelity_e2e)
+Operations to perform:
+  Apply all migrations: platform_core
+Running migrations:
+  Applying platform_core.0001_initial... OK
+  Applying platform_core.0002_db_triggers... OK
+  Applying platform_core.0003_seed_schema_meta... OK
+  Applying platform_core.0004_integration... OK
+  Applying platform_core.0005_integration_triggers... OK
+  Applying platform_core.0006_seed_integration_sources... OK
+  Applying platform_core.0007_phase01_platform_schema... OK
+  Applying platform_core.0008_phase01_db_guards... OK
+  Applying platform_core.0009_phase01_constraint_names... OK
+  Applying platform_core.0010_seed_phase01_catalogue... OK
+  Applying platform_core.0011_phase01_engine... OK
+  Applying platform_core.0012_phase01_engine_rework... OK
+  Applying platform_core.0013_dec055_bootstrap_self_approval... OK
+  Applying platform_core.0014_dec056_owner_approval_rights... OK
+  Applying platform_core.0015_dec056_matrix_v12... OK
+  Applying platform_core.0016_outbox_provenance_and_order... OK
+  Applying platform_core.0017_dec056_matrix_v13... OK
+  Applying platform_core.0018_outbox_discard_and_orphan_job... OK
+  Applying platform_core.0019_phase02_identity_commercial_schema... OK
+  Applying platform_core.0020_phase02_db_guards... OK
+  Applying platform_core.0021_phase02_seed_catalogue... OK
+  Applying platform_core.0022_dec057_matrix_v20... OK
+  Applying platform_core.0023_phase02_engine... OK
+  Applying platform_core.0024_dec057_dec059_matrix_v21... OK
+  Applying platform_core.0025_phase02_api_numbers... OK
+  Applying platform_core.0026_phase02_planning_catalogue_source... OK
+  Applying platform_core.0027_dec057_matrix_v22... OK
+  Applying platform_core.0028_phase02_golden_summary... OK
+  Applying platform_core.0029_dec059_cr_open_expiry... OK
+== playwright: fidelity harness (build commit 83e9de172d95)
+[WebServer] {"ts": "2026-11-18T14:50:22.562+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "bed0e970-bd52-44e8-a2f1-92c606683138", "event": "http_request", "method": "GET", "path": "/api/v1/health/live", "status": 200, "duration_ms": 3.0}
+[WebServer] [18/Nov/2026 18:20:22] "GET /api/v1/health/live HTTP/1.1" 200 15
+TypeError: Cannot read properties of undefined (reading 'config')
+
+   at fidelity\score.test.ts:29
+
+  27 | };
+  28 |
+> 29 | describe("fidelity scorer", () => {
+     | ^
+  30 |   it("normalises Persian text (ZWNJ, Arabic letters, digits, punctuation)", () => {
+  31 |     expect(normalize("سریال‌های  مرتبط (۲۴۵۱)")).toBe("سریالهای مرتبط 2451");
+  32 |     expect(normalize("كيف")).toBe("کیف");
+    at initSuite (F:\aleekhan\aleekhan-erp\frontend\node_modules\vitest\dist\chunks\run.BPv-BBRv.js:2745:23)
+    at createSuiteCollector (F:\aleekhan\aleekhan-erp\frontend\node_modules\vitest\dist\chunks\run.BPv-BBRv.js:2626:2)
+    at Object.suiteFn (F:\aleekhan\aleekhan-erp\frontend\node_modules\vitest\dist\chunks\run.BPv-BBRv.js:2826:10)
+    at describe (F:\aleekhan\aleekhan-erp\frontend\node_modules\vitest\dist\chunks\run.BPv-BBRv.js:1870:14)
+    at F:\aleekhan\aleekhan-erp\frontend\e2e\fidelity\score.test.ts:29:1
+
+== results: fidelity rc=1
+== drop throw-away database test_fidelity_e2e

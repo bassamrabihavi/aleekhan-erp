@@ -30,7 +30,7 @@ export function AppShell({ children, authenticated = true }: { children: ReactNo
       <a className="skip-link" href="#main" onClick={(e) => { e.preventDefault(); document.getElementById("main")?.focus(); }}>
         رفتن به محتوای اصلی
       </a>
-      <header className="topbar">
+      <header className="topbar" data-fid="topbar">
         <div className="brand">
           {/* Official logo (docs/ui/brand/README.md): same bytes, no recolouring; intrinsic size keeps the ratio. */}
           <img className="brand__logo" src={logoUrl} alt="لوگوی سراجی سنتی عالیخان" width={300} height={298} data-testid="brand-logo" />
@@ -50,10 +50,11 @@ export function AppShell({ children, authenticated = true }: { children: ReactNo
                 setMenuOpen((o) => !o);
               }}
               data-testid="nav-toggle"
+              data-fid="menu-toggle"
             >
               منو
             </button>
-            <span className="topbar__name" data-testid="current-user">
+            <span className="topbar__name" data-testid="current-user" data-fid="topbar-user">
               {me?.user.display_name}
             </span>
             <button type="button" className="btn btn--secondary" onClick={() => void logout()} data-testid="logout">
@@ -76,10 +77,10 @@ export function AppShell({ children, authenticated = true }: { children: ReactNo
 
       <div className="layout">
         {showNav ? (
-          <nav id="main-nav" className={menuOpen ? "nav nav--open" : "nav"} aria-label="بخش‌های سامانه" data-testid="main-nav">
+          <nav id="main-nav" className={menuOpen ? "nav nav--open" : "nav"} aria-label="بخش‌های سامانه" data-testid="main-nav" data-fid="side-menu">
             <ul>
               {items.map((n) => (
-                <li key={n.path}>
+                <li key={n.path} data-fid-item>
                   <a
                     href={`#${n.path}`}
                     className="nav__link"

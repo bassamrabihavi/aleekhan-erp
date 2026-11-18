@@ -13,7 +13,10 @@ first free number after it (DEC-005 amendment 2026-11-14, REV-0232) and the audi
 
 Lifecycle of products and styles (``MASTER_MACHINE``): DRAFT -> ACTIVE -> RETIRED (never deleted). Customers
 and brands: ACTIVE <-> INACTIVE. Style revisions: DRAFT -> ACTIVE (the previous ACTIVE one becomes SUPERSEDED
-in the same transaction); an ACTIVE revision never changes (DB guard 0020).
+in the same transaction); an ACTIVE revision never changes (DB guard 0020). A style is activated only while
+its product is ACTIVE (DEC-005 amendment 2026-11-18, REV-0293): refusal ``MASTER_NOT_ACTIVE`` on
+``product_id``; the product row is locked ``FOR UPDATE`` after the style row (lock order style -> product, as
+in ``codes.issue_product_code``), so a concurrent product status change cannot slip in between.
 
 Customer duplicate names are a warning (index ``ix_icus_name_lower``): the caller must acknowledge
 ``DUPLICATE_CUSTOMER_NAME``; the acknowledgement is audited.
@@ -383,6 +386,8 @@ def _set_master_status(
         obj = lock(model, pk)
         check_version(obj, expected_version)
         MASTER_MACHINE.assert_transition(obj.status, status)
+        if isinstance(obj, Style) and status == MasterStatus.ACTIVE:
+            require_active_product(obj.product_id)
         before = {"status": obj.status}
         model._default_manager.filter(pk=obj.pk).update(status=status, updated_by_id=caller.user_id)
         obj.refresh_from_db()
@@ -422,6 +427,13 @@ def set_product_status(
 
 
 # -------------------------------------------------------------------------------------------------- styles
+def require_active_product(product_id: uuid.UUID) -> None:
+    """DEC-005 amendment 2026-11-18 (REV-0293): a style is activated / a code issued only under an ACTIVE
+    product. Locks the product row (caller holds the style row lock first: order style -> product)."""
+    if lock(Product, product_id).status != MasterStatus.ACTIVE:
+        refuse(Reason.MASTER_NOT_ACTIVE, field="product_id", detail="activate the product first")
+
+
 def style_number(product: Product, category: ProductClass) -> tuple[str, str | None]:
     """``(style_no, collided)`` of a new style (``coderule.first_free_style_no``; pure read)."""
     used = Style.objects.filter(product=product, category=category).values_list("style_no", flat=True)

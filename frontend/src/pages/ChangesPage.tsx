@@ -58,7 +58,7 @@ function ChangeList() {
       (await get("/commercial/change-requests", g.crPage, { status: status || undefined, kind: kind || undefined, cursor: cursor.cursor, page_size: 25 }, signal)).data,
   });
   return (
-    <section className="panel panel--wide" aria-labelledby="changes-title">
+    <section className="panel panel--wide" aria-labelledby="changes-title" data-fid="change-list">
       <h2 id="changes-title">درخواست‌های تغییر</h2>
       <p className="field__hint">درخواست جدید را از صفحه همان سفارش ثبت کنید (دکمه «درخواست تغییر»).</p>
       <div className="filters">

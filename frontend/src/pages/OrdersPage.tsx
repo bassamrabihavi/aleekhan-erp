@@ -126,7 +126,7 @@ function OrderList() {
 function Steps({ current }: { current: number }) {
   const labels = ["سربرگ سفارش", "محصول، استایل و کد", "تعداد و تاریخ", "بررسی و ارسال به برنامه‌ریزی"];
   return (
-    <ol className="steps" aria-label={`مرحله ${toFaDigits(current)} از ۴`} data-testid="wizard-steps">
+    <ol className="steps" aria-label={`مرحله ${toFaDigits(current)} از ۴`} data-testid="wizard-steps" data-fid="wizard-steps">
       {labels.map((l, i) => (
         <li key={l} className={i + 1 === current ? "steps__item steps__item--current" : i + 1 < current ? "steps__item steps__item--done" : "steps__item"} aria-current={i + 1 === current ? "step" : undefined}>
           <span className="steps__no">{toFaDigits(i + 1)}</span> {l}
@@ -166,7 +166,7 @@ function NewOrder() {
   };
   if (!can(PERM.orderManage)) return <ForbiddenState />;
   return (
-    <section className="panel panel--wide" aria-labelledby="new-order-title" data-testid="order-wizard">
+    <section className="panel panel--wide" aria-labelledby="new-order-title" data-testid="order-wizard" data-fid="order-wizard">
       <h2 id="new-order-title">سفارش جدید</h2>
       <Steps current={1} />
       <form

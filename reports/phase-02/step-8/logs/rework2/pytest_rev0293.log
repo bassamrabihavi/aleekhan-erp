@@ -1,0 +1,18 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.10, pytest-9.1.1, pluggy-1.7.0 -- F:\aleekhan\aleekhan-erp\.venv\Scripts\python.exe
+hypothesis profile 'aleekhan' -> database=None, deadline=None, max_examples=200, derandomize=True
+django: version: 5.2.18, settings: aleekhan.settings_test (from ini)
+rootdir: F:\aleekhan\aleekhan-erp\backend
+configfile: pyproject.toml
+plugins: hypothesis-6.170.4, platformdirs-4.14.3, django-4.14.0
+collecting ... collected 112 items / 105 deselected / 7 selected
+
+platform_core/tests/test_phase02_engine_identity.py::test_rev0293_style_activation_needs_an_active_product[DRAFT] PASSED [ 14%]
+platform_core/tests/test_phase02_engine_identity.py::test_rev0293_style_activation_needs_an_active_product[RETIRED] PASSED [ 28%]
+platform_core/tests/test_phase02_engine_identity.py::test_rev0293_style_activates_once_the_product_is_active_and_retire_is_not_affected PASSED [ 42%]
+platform_core/tests/test_phase02_engine_identity.py::test_rev0293_code_issue_needs_an_active_product[DRAFT] PASSED [ 57%]
+platform_core/tests/test_phase02_engine_identity.py::test_rev0293_code_issue_needs_an_active_product[RETIRED] PASSED [ 71%]
+platform_core/tests/test_phase02_engine_identity.py::test_rev0293_issue_after_activation_and_replay_survives_a_later_product_retire PASSED [ 85%]
+platform_core/tests/test_api_phase02_flows.py::test_rev0293_style_activation_and_code_issue_refused_while_the_product_is_not_active PASSED [100%]
+
+===================== 7 passed, 105 deselected in 45.42s ======================

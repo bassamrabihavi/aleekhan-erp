@@ -18,6 +18,9 @@ const defaultPython =
     : path.resolve(here, "../.venv/bin/python");
 const python = process.env.E2E_PYTHON ?? defaultPython;
 const backendDown = process.env.E2E_MODE === "backend-down";
+// DEC-061 fidelity harness (e2e/fidelity, tag @fidelity): only with E2E_FIDELITY=1 (npm run fidelity), never in
+// the normal acceptance run.
+const fidelity = process.env.E2E_FIDELITY === "1";
 
 const vite = {
   command: "npx vite --strictPort",
@@ -55,8 +58,8 @@ export default defineConfig({
     ["list"],
     ["html", { open: "never", outputFolder: process.env.E2E_HTML_REPORT ?? "./playwright-report" }],
   ],
-  grep: backendDown ? /@backend-down/ : undefined,
-  grepInvert: backendDown ? undefined : /@backend-down/,
+  grep: backendDown ? /@backend-down/ : fidelity ? /@fidelity/ : undefined,
+  grepInvert: backendDown || fidelity ? undefined : /@backend-down|@fidelity/,
   use: {
     baseURL: FRONTEND_URL,
     locale: "fa-IR",

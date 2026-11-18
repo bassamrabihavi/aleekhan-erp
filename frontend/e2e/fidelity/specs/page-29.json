@@ -1,0 +1,831 @@
+{
+  "schema": 1,
+  "page": "29",
+  "title_fa": "ثبت سفارش و کدگذاری",
+  "route": "/orders/new",
+  "ready_testid": "order-wizard",
+  "authored": "extracted",
+  "source_note": "Extracted by fidelity.spec.ts (FIDELITY_EXTRACT=1) from handoff/08_UI_AND_UX/DESIGN_CATALOG_52/29_36_commercial_planning_admin/index.html?page=29 rendered at 1440/1180/768/390 (Playwright, channel msedge). Region selectors: config.ts.",
+  "mockup": {
+    "html": "handoff/08_UI_AND_UX/DESIGN_CATALOG_52/29_36_commercial_planning_admin/index.html",
+    "query": "?page=29",
+    "files": [
+      {
+        "path": "handoff/08_UI_AND_UX/DESIGN_CATALOG_52/29_36_commercial_planning_admin/index.html",
+        "sha256": "5e9bf54bf58b60ce8ac81f4d6698d55323e9ca30ea76410ed566cfdf3f186650"
+      },
+      {
+        "path": "handoff/08_UI_AND_UX/DESIGN_CATALOG_52/29_36_commercial_planning_admin/assets/styles.css",
+        "sha256": "7bdbc9fc18139a079cb80e8cc8ed83d8247e4f7d7a6f2f96e50ea70f10769db1"
+      },
+      {
+        "path": "handoff/08_UI_AND_UX/DESIGN_CATALOG_52/29_36_commercial_planning_admin/assets/app.js",
+        "sha256": "5fc4f3dd20f4b2dd58f48403b287a66d9e71ee53b06d47c38e32ed6f8a97f30a"
+      },
+      {
+        "path": "handoff/08_UI_AND_UX/DESIGN_CATALOG_52/29_36_commercial_planning_admin/previews/page29_desktop.png",
+        "sha256": "bfdb9f8f75d0e651854a4f5034f0391531ef853375b91224951eca5c8641c4ef"
+      },
+      {
+        "path": "handoff/08_UI_AND_UX/DESIGN_CATALOG_52/29_36_commercial_planning_admin/previews/page29_laptop.png",
+        "sha256": "74d24fbf17794e05526b8f25b10e579ed619e261c7dbd4bb346d655704425c55"
+      },
+      {
+        "path": "handoff/08_UI_AND_UX/DESIGN_CATALOG_52/29_36_commercial_planning_admin/previews/page29_tablet.png",
+        "sha256": "4bd3d2556a971018cb4f42a7dd009abf8b408b3d51fdb73fde04166c40424f5d"
+      },
+      {
+        "path": "handoff/08_UI_AND_UX/DESIGN_CATALOG_52/29_36_commercial_planning_admin/previews/page29_mobile.png",
+        "sha256": "070c5a8ad77a987eb71d8c61848b0298adfdfbcc7d7802509f2a7d36fd6232db"
+      }
+    ]
+  },
+  "excluded": [
+    "nav.pagechips (catalogue navigation between mockup pages 29-36, not a page element)",
+    ".captionline / footer / .demo badge (catalogue captions: «داده نمایشی»)",
+    "#modal / .toast (demo dialogs)"
+  ],
+  "widths": {
+    "390": {
+      "content_pad_px": 9
+    },
+    "768": {
+      "content_pad_px": 12
+    },
+    "1180": {
+      "content_pad_px": 15
+    },
+    "1440": {
+      "content_pad_px": 20
+    }
+  },
+  "regions": [
+    {
+      "id": "side-menu",
+      "label_fa": "منوی کناری (آیکون‌دار)",
+      "kind": "side-menu",
+      "frame": "viewport",
+      "children": [],
+      "widths": {
+        "390": null,
+        "768": null,
+        "1180": {
+          "box": {
+            "x": 0.9441,
+            "y": 0,
+            "w": 0.0559,
+            "h": 0.6949
+          },
+          "items": 8,
+          "radius": 0,
+          "border": 0,
+          "shadow": true,
+          "heading_px": null
+        },
+        "1440": {
+          "box": {
+            "x": 0.9542,
+            "y": 0,
+            "w": 0.0458,
+            "h": 0.625
+          },
+          "items": 8,
+          "radius": 0,
+          "border": 0,
+          "shadow": true,
+          "heading_px": null
+        }
+      }
+    },
+    {
+      "id": "topbar",
+      "label_fa": "نوار بالا",
+      "kind": "topbar",
+      "frame": "viewport",
+      "children": [],
+      "widths": {
+        "390": {
+          "box": {
+            "x": 0,
+            "y": 0,
+            "w": 1,
+            "h": 0.1359
+          },
+          "radius": 9,
+          "border": 1,
+          "shadow": false,
+          "heading_px": null
+        },
+        "768": {
+          "box": {
+            "x": 0,
+            "y": 0,
+            "w": 1,
+            "h": 0.0781
+          },
+          "radius": 9,
+          "border": 1,
+          "shadow": false,
+          "heading_px": null
+        },
+        "1180": {
+          "box": {
+            "x": 0,
+            "y": 0,
+            "w": 0.9441,
+            "h": 0.0508
+          },
+          "radius": 10,
+          "border": 1,
+          "shadow": false,
+          "heading_px": null
+        },
+        "1440": {
+          "box": {
+            "x": 0,
+            "y": 0,
+            "w": 0.9542,
+            "h": 0.0417
+          },
+          "radius": 10,
+          "border": 1,
+          "shadow": false,
+          "heading_px": null
+        }
+      }
+    },
+    {
+      "id": "topbar-search",
+      "label_fa": "جستجوی سراسری",
+      "kind": "topbar-search",
+      "frame": "viewport",
+      "children": [],
+      "widths": {
+        "390": {
+          "box": {
+            "x": 0.2205,
+            "y": 0.0231,
+            "w": 0.6487,
+            "h": 0.0872
+          },
+          "radius": 10,
+          "border": 1,
+          "shadow": false,
+          "heading_px": null
+        },
+        "768": {
+          "box": {
+            "x": 0.2617,
+            "y": 0.015,
+            "w": 0.4297,
+            "h": 0.0469
+          },
+          "radius": 10,
+          "border": 1,
+          "shadow": false,
+          "heading_px": null
+        },
+        "1180": {
+          "box": {
+            "x": 0.2496,
+            "y": 0.0097,
+            "w": 0.3174,
+            "h": 0.0305
+          },
+          "radius": 10,
+          "border": 1,
+          "shadow": false,
+          "heading_px": null
+        },
+        "1440": {
+          "box": {
+            "x": 0.283,
+            "y": 0.008,
+            "w": 0.351,
+            "h": 0.025
+          },
+          "radius": 10,
+          "border": 1,
+          "shadow": false,
+          "heading_px": null
+        }
+      }
+    },
+    {
+      "id": "topbar-date",
+      "label_fa": "تاریخ امروز",
+      "kind": "topbar-date",
+      "frame": "viewport",
+      "children": [],
+      "widths": {
+        "390": null,
+        "768": null,
+        "1180": null,
+        "1440": {
+          "box": {
+            "x": 0.0799,
+            "y": 0.016,
+            "w": 0.0576,
+            "h": 0.009
+          },
+          "radius": 0,
+          "border": 0,
+          "shadow": false,
+          "heading_px": null
+        }
+      }
+    },
+    {
+      "id": "topbar-user",
+      "label_fa": "کاربر",
+      "kind": "topbar-user",
+      "frame": "viewport",
+      "children": [],
+      "widths": {
+        "390": {
+          "box": {
+            "x": 0.0282,
+            "y": 0.0295,
+            "w": 0.0744,
+            "h": 0.0744
+          },
+          "radius": 50,
+          "border": 0,
+          "shadow": false,
+          "heading_px": null
+        },
+        "768": {
+          "box": {
+            "x": 0.0143,
+            "y": 0.0176,
+            "w": 0.0417,
+            "h": 0.0417
+          },
+          "radius": 50,
+          "border": 0,
+          "shadow": false,
+          "heading_px": null
+        },
+        "1180": {
+          "box": {
+            "x": 0.0186,
+            "y": 0.0114,
+            "w": 0.0271,
+            "h": 0.0271
+          },
+          "radius": 50,
+          "border": 0,
+          "shadow": false,
+          "heading_px": null
+        },
+        "1440": {
+          "box": {
+            "x": 0.0153,
+            "y": 0.0094,
+            "w": 0.0222,
+            "h": 0.0222
+          },
+          "radius": 50,
+          "border": 0,
+          "shadow": false,
+          "heading_px": null
+        }
+      }
+    },
+    {
+      "id": "menu-toggle",
+      "label_fa": "دکمه باز کردن منو (موبایل)",
+      "kind": "menu-toggle",
+      "frame": "viewport",
+      "children": [],
+      "widths": {
+        "390": {
+          "box": {
+            "x": 0.8872,
+            "y": 0.0244,
+            "w": 0.0846,
+            "h": 0.0846
+          },
+          "radius": 9,
+          "border": 1,
+          "shadow": false,
+          "heading_px": null
+        },
+        "768": {
+          "box": {
+            "x": 0.9427,
+            "y": 0.0169,
+            "w": 0.043,
+            "h": 0.043
+          },
+          "radius": 9,
+          "border": 1,
+          "shadow": false,
+          "heading_px": null
+        },
+        "1180": null,
+        "1440": null
+      }
+    },
+    {
+      "id": "page-header",
+      "label_fa": "سربرگ و عنوان صفحه",
+      "kind": "header",
+      "frame": "content",
+      "children": [
+        "ثبت سفارش جدید و کدگذاری محصول"
+      ],
+      "widths": {
+        "390": {
+          "box": {
+            "x": 0.0231,
+            "y": 0.0769,
+            "w": 0.9538,
+            "h": 0.2179
+          },
+          "radius": 6,
+          "border": 0,
+          "shadow": false,
+          "heading_px": 18
+        },
+        "768": {
+          "box": {
+            "x": 0.4409,
+            "y": 0.0417,
+            "w": 0.5434,
+            "h": 0.0859
+          },
+          "radius": 6,
+          "border": 0,
+          "shadow": false,
+          "heading_px": 20
+        },
+        "1180": {
+          "box": {
+            "x": 0.6119,
+            "y": 0.0314,
+            "w": 0.3746,
+            "h": 0.0628
+          },
+          "radius": 6,
+          "border": 0,
+          "shadow": false,
+          "heading_px": 23
+        },
+        "1440": {
+          "box": {
+            "x": 0.6817,
+            "y": 0.0269,
+            "w": 0.3038,
+            "h": 0.0509
+          },
+          "radius": 6,
+          "border": 0,
+          "shadow": false,
+          "heading_px": 23
+        }
+      }
+    },
+    {
+      "id": "header-actions",
+      "label_fa": "دکمه‌های اقدام صفحه",
+      "kind": "actions",
+      "frame": "content",
+      "children": [
+        "راهنمای صفحه",
+        "مالکیت و منبع داده",
+        "بررسی و ارسال به برنامه‌ریزی"
+      ],
+      "widths": {
+        "390": {
+          "box": {
+            "x": 0.0231,
+            "y": 0.3462,
+            "w": 0.9538,
+            "h": 0.0897
+          },
+          "radius": 8,
+          "border": 1,
+          "shadow": false,
+          "heading_px": null
+        },
+        "768": {
+          "box": {
+            "x": 0.3844,
+            "y": 0.1536,
+            "w": 0.6,
+            "h": 0.0456
+          },
+          "radius": 8,
+          "border": 1,
+          "shadow": false,
+          "heading_px": null
+        },
+        "1180": {
+          "box": {
+            "x": 0.0135,
+            "y": 0.0471,
+            "w": 0.4137,
+            "h": 0.0314
+          },
+          "radius": 8,
+          "border": 1,
+          "shadow": false,
+          "heading_px": null
+        },
+        "1440": {
+          "box": {
+            "x": 0.0146,
+            "y": 0.0397,
+            "w": 0.3354,
+            "h": 0.0255
+          },
+          "radius": 8,
+          "border": 1,
+          "shadow": false,
+          "heading_px": null
+        }
+      }
+    },
+    {
+      "id": "kpis",
+      "label_fa": "کارت‌های شاخص (KPI)",
+      "kind": "kpis",
+      "frame": "content",
+      "children": [
+        "مرحله ثبت سفارش",
+        "کد ۱۴رقمی نمونه",
+        "استایل‌های مشابه",
+        "آمادگی فرم"
+      ],
+      "widths": {
+        "390": {
+          "box": {
+            "x": 0.0231,
+            "y": 0.5897,
+            "w": 0.9538,
+            "h": 0.4256
+          },
+          "items": 4,
+          "radius": 12,
+          "border": 1,
+          "shadow": true,
+          "heading_px": null
+        },
+        "768": {
+          "box": {
+            "x": 0.0156,
+            "y": 0.276,
+            "w": 0.9688,
+            "h": 0.2409
+          },
+          "items": 4,
+          "radius": 12,
+          "border": 1,
+          "shadow": true,
+          "heading_px": null
+        },
+        "1180": {
+          "box": {
+            "x": 0.0135,
+            "y": 0.1472,
+            "w": 0.9731,
+            "h": 0.0781
+          },
+          "items": 4,
+          "radius": 12,
+          "border": 1,
+          "shadow": true,
+          "heading_px": null
+        },
+        "1440": {
+          "box": {
+            "x": 0.0146,
+            "y": 0.1208,
+            "w": 0.9709,
+            "h": 0.0633
+          },
+          "items": 4,
+          "radius": 12,
+          "border": 1,
+          "shadow": true,
+          "heading_px": null
+        }
+      }
+    },
+    {
+      "id": "order-wizard",
+      "label_fa": "فرم مرحله‌ای ثبت سفارش",
+      "kind": "panel",
+      "frame": "content",
+      "children": [
+        "فرم مرحله‌ای ثبت سفارش",
+        "مشتری/برند",
+        "نوع سفارش",
+        "برنامه مشتری",
+        "شماره سفارش مشتری",
+        "نام نماینده مشتری",
+        "گرید موردنیاز",
+        "مرحله قبل",
+        "مرحله بعد"
+      ],
+      "widths": {
+        "390": {
+          "box": {
+            "x": 0.0231,
+            "y": 1.0462,
+            "w": 0.9538,
+            "h": 1.4282
+          },
+          "radius": 13,
+          "border": 1,
+          "shadow": true,
+          "heading_px": 13
+        },
+        "768": {
+          "box": {
+            "x": 0.0156,
+            "y": 0.5326,
+            "w": 0.9688,
+            "h": 0.4245
+          },
+          "radius": 13,
+          "border": 1,
+          "shadow": true,
+          "heading_px": 13
+        },
+        "1180": {
+          "box": {
+            "x": 0.3807,
+            "y": 0.2361,
+            "w": 0.6059,
+            "h": 0.5336
+          },
+          "radius": 13,
+          "border": 1,
+          "shadow": true,
+          "heading_px": 13
+        },
+        "1440": {
+          "box": {
+            "x": 0.344,
+            "y": 0.1929,
+            "w": 0.6414,
+            "h": 0.4195
+          },
+          "radius": 13,
+          "border": 1,
+          "shadow": true,
+          "heading_px": 13
+        }
+      }
+    },
+    {
+      "id": "wizard-steps",
+      "label_fa": "مراحل فرم",
+      "kind": "tabs",
+      "frame": "content",
+      "children": [],
+      "widths": {
+        "390": {
+          "box": {
+            "x": 0.0538,
+            "y": 1.1513,
+            "w": 0.8923,
+            "h": 0.1718
+          },
+          "items": 4,
+          "radius": 20,
+          "border": 1,
+          "shadow": false,
+          "heading_px": null
+        },
+        "768": {
+          "box": {
+            "x": 0.0352,
+            "y": 0.5898,
+            "w": 0.9297,
+            "h": 0.043
+          },
+          "items": 4,
+          "radius": 20,
+          "border": 1,
+          "shadow": false,
+          "heading_px": null
+        },
+        "1180": {
+          "box": {
+            "x": 0.3941,
+            "y": 0.2756,
+            "w": 0.579,
+            "h": 0.0296
+          },
+          "items": 4,
+          "radius": 20,
+          "border": 1,
+          "shadow": false,
+          "heading_px": null
+        },
+        "1440": {
+          "box": {
+            "x": 0.3549,
+            "y": 0.2249,
+            "w": 0.6196,
+            "h": 0.024
+          },
+          "items": 4,
+          "radius": 20,
+          "border": 1,
+          "shadow": false,
+          "heading_px": null
+        }
+      }
+    },
+    {
+      "id": "coding-validation",
+      "label_fa": "کدگذاری راهکاران و اعتبارسنجی",
+      "kind": "table",
+      "frame": "content",
+      "children": [
+        "کدگذاری راهکاران و اعتبارسنجی",
+        "بخش",
+        "مقدار نمونه",
+        "منبع"
+      ],
+      "widths": {
+        "390": {
+          "box": {
+            "x": 0.0231,
+            "y": 2.5051,
+            "w": 0.9538,
+            "h": 1.504
+          },
+          "radius": 13,
+          "border": 1,
+          "shadow": true,
+          "heading_px": 13
+        },
+        "768": {
+          "box": {
+            "x": 0.0156,
+            "y": 0.9727,
+            "w": 0.9688,
+            "h": 0.6975
+          },
+          "radius": 13,
+          "border": 1,
+          "shadow": true,
+          "heading_px": 13
+        },
+        "1180": {
+          "box": {
+            "x": 0.0135,
+            "y": 0.2361,
+            "w": 0.3564,
+            "h": 0.5336
+          },
+          "radius": 13,
+          "border": 1,
+          "shadow": true,
+          "heading_px": 13
+        },
+        "1440": {
+          "box": {
+            "x": 0.0146,
+            "y": 0.1929,
+            "w": 0.3207,
+            "h": 0.4195
+          },
+          "radius": 13,
+          "border": 1,
+          "shadow": true,
+          "heading_px": 13
+        }
+      }
+    },
+    {
+      "id": "similar-styles",
+      "label_fa": "بررسی استایل‌های موجود",
+      "kind": "table",
+      "frame": "content",
+      "children": [
+        "بررسی استایل‌های موجود",
+        "استایل",
+        "ویژگی",
+        "نتیجه"
+      ],
+      "widths": {
+        "390": {
+          "box": {
+            "x": 0.0231,
+            "y": 4.0399,
+            "w": 0.9538,
+            "h": 0.5526
+          },
+          "radius": 13,
+          "border": 1,
+          "shadow": true,
+          "heading_px": 13
+        },
+        "768": {
+          "box": {
+            "x": 0.0156,
+            "y": 1.6858,
+            "w": 0.9688,
+            "h": 0.2943
+          },
+          "radius": 13,
+          "border": 1,
+          "shadow": true,
+          "heading_px": 13
+        },
+        "1180": {
+          "box": {
+            "x": 0.5054,
+            "y": 0.7804,
+            "w": 0.4811,
+            "h": 0.2029
+          },
+          "radius": 13,
+          "border": 1,
+          "shadow": true,
+          "heading_px": 13
+        },
+        "1440": {
+          "box": {
+            "x": 0.5044,
+            "y": 0.6211,
+            "w": 0.4811,
+            "h": 0.1645
+          },
+          "radius": 13,
+          "border": 1,
+          "shadow": true,
+          "heading_px": 13
+        }
+      }
+    },
+    {
+      "id": "pre-checks",
+      "label_fa": "کنترل‌های داده پیش از ثبت",
+      "kind": "side-panel",
+      "frame": "content",
+      "children": [
+        "کنترل‌های داده پیش از ثبت",
+        "هویت محصول",
+        "استایل جدید",
+        "ثبت نهایی"
+      ],
+      "widths": {
+        "390": {
+          "box": {
+            "x": 0.0231,
+            "y": 4.6232,
+            "w": 0.9538,
+            "h": 0.5846
+          },
+          "radius": 13,
+          "border": 1,
+          "shadow": true,
+          "heading_px": 13
+        },
+        "768": {
+          "box": {
+            "x": 0.0156,
+            "y": 1.9957,
+            "w": 0.9688,
+            "h": 0.2891
+          },
+          "radius": 13,
+          "border": 1,
+          "shadow": true,
+          "heading_px": 13
+        },
+        "1180": {
+          "box": {
+            "x": 0.0135,
+            "y": 0.7804,
+            "w": 0.4811,
+            "h": 0.2029
+          },
+          "radius": 13,
+          "border": 1,
+          "shadow": true,
+          "heading_px": 13
+        },
+        "1440": {
+          "box": {
+            "x": 0.0146,
+            "y": 0.6211,
+            "w": 0.4811,
+            "h": 0.1645
+          },
+          "radius": 13,
+          "border": 1,
+          "shadow": true,
+          "heading_px": 13
+        }
+      }
+    }
+  ]
+}

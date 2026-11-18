@@ -107,6 +107,14 @@ echo "== migrate (ALEEKHAN_ENV=dev, db=$DB)"
 (cd "$ROOT/backend" && "$E2E_PYTHON" manage.py migrate --noinput) || exit 1
 
 cd "$HERE" || exit 1
+if [ "${E2E_FIDELITY:-0}" = "1" ]; then
+  # DEC-061 fidelity harness only (npm run fidelity; e2e/fidelity/README.md): no backend-down pass.
+  echo "== playwright: fidelity harness (build commit $E2E_EXPECT_COMMIT)"
+  npx playwright test e2e/fidelity
+  rc=$?
+  echo "== results: fidelity rc=$rc"
+  exit "$rc"
+fi
 echo "== playwright: real backend (build commit $E2E_EXPECT_COMMIT)"
 npx playwright test
 rc1=$?

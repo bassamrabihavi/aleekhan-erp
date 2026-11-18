@@ -388,3 +388,11 @@ code with style 0000.
   approves OR rejects (02.4, `decidePlanningChangeRequest`).
 - `apply` has no maker-checker of its own (DEC-059 names the applier role only).
 - Products and styles are created DRAFT; an order line needs the style, its product and the product type ACTIVE.
+  **DECIDED** by the employer on 2026-11-18 (DEC-005 amendment, option A, REV-0293): a style is **activated**
+  (`set_style_status` DRAFT -> ACTIVE) and a product code is **issued** (`issue_product_code`) only while the
+  style's product is ACTIVE; otherwise 409 `STATE_TRANSITION_NOT_ALLOWED` / `MASTER_NOT_ACTIVE` on
+  `product_id` (the product row is locked after the style row). Styles are always created DRAFT, so no create
+  path yields an ACTIVE style. Not covered by this rule: the Planning legacy-code registration (02.6, system
+  actor) links an imported code to an existing style whatever the product status - it is a registry import, not
+  an issue; and existing rows are not changed (a style already ACTIVE under a DRAFT product keeps its state;
+  page 4 shows the hint and the order wizard still lists only ACTIVE products).

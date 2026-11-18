@@ -647,3 +647,79 @@ def test_rev0240_golden_summary_counts_belt_and_legacy_cases(p: e.People) -> Non
     assert (s["total"], s["belt_checked"], s["legacy_only_style_0000"]) == (20, 5, 1)
     assert s["not_reproduced"] == 15  # belt-type cases without both segments are problems, never skipped
     assert s["families_below_minimum"] == []
+
+
+# ----------------------------------------------- REV-0293: DEC-005 amendment 2026-11-18 (ACTIVE product)
+@pytest.mark.parametrize("product_status", ["DRAFT", "RETIRED"])
+def test_rev0293_style_activation_needs_an_active_product(p: e.People, product_status: str) -> None:
+    t = f.product_type()
+    c = f.category(t, "01")
+    prod = f.product(t, status=product_status)
+    s = f.style(prod, c, status="DRAFT")
+    audits, events = AuditEvent.objects.count(), OutboxEvent.objects.count()
+    with pytest.raises(StateTransitionNotAllowed) as exc:
+        master.set_style_status(
+            p.pds.caller, s.pk, status="ACTIVE", expected_version=s.row_version, reason="syn"
+        )
+    assert (_reason(exc.value), exc.value.errors[0].field) == ("MASTER_NOT_ACTIVE", "product_id")
+    s.refresh_from_db()
+    assert s.status == "DRAFT"
+    assert (AuditEvent.objects.count(), OutboxEvent.objects.count()) == (audits, events)  # nothing written
+
+
+def test_rev0293_style_activates_once_the_product_is_active_and_retire_is_not_affected(p: e.People) -> None:
+    t = f.product_type()
+    c = f.category(t, "01")
+    prod = master.create_product(p.pds.caller, product_type_id=t.pk, name_fa=f"م {f.SYN}")
+    s = master.create_style(p.pds.caller, product_id=prod.pk, category_id=c.pk, name_fa=f"س {f.SYN}")
+    assert (prod.status, s.status) == ("DRAFT", "DRAFT")  # no create path yields an ACTIVE style
+    with pytest.raises(StateTransitionNotAllowed):
+        master.set_style_status(
+            p.pds.caller, s.pk, status="ACTIVE", expected_version=s.row_version, reason="syn"
+        )
+    prod = master.set_product_status(
+        p.pds.caller, prod.pk, status="ACTIVE", expected_version=prod.row_version, reason="syn"
+    )
+    s = master.set_style_status(
+        p.pds.caller, s.pk, status="ACTIVE", expected_version=s.row_version, reason="syn"
+    )
+    assert s.status == "ACTIVE"
+    master.set_product_status(  # retiring the product later is unchanged; retiring the style too
+        p.pds.caller, prod.pk, status="RETIRED", expected_version=prod.row_version, reason="syn"
+    )
+    s = master.set_style_status(
+        p.pds.caller, s.pk, status="RETIRED", expected_version=s.row_version, reason="syn"
+    )
+    assert s.status == "RETIRED"
+
+
+@pytest.mark.parametrize("product_status", ["DRAFT", "RETIRED"])
+def test_rev0293_code_issue_needs_an_active_product(p: e.People, product_status: str) -> None:
+    _active_rule(p, ["91"])
+    t = f.product_type("91")
+    prod = f.product(t, "9001", status=product_status)
+    s = f.style(prod, f.category(t, "07"), "0042")  # existing data: ACTIVE style under a non-ACTIVE product
+    with pytest.raises(StateTransitionNotAllowed) as exc:
+        codes.issue_product_code(p.pds.caller, s.pk, idempotency_key=uuid.uuid4())
+    assert (_reason(exc.value), exc.value.errors[0].field) == ("MASTER_NOT_ACTIVE", "product_id")
+    assert not ProductCode.objects.exists()
+    assert not OutboxEvent.objects.filter(event_type="identity.product_code.reserved").exists()
+
+
+def test_rev0293_issue_after_activation_and_replay_survives_a_later_product_retire(p: e.People) -> None:
+    _active_rule(p, ["91"])
+    t = f.product_type("91")
+    prod = f.product(t, "9001", status="DRAFT")
+    s = f.style(prod, f.category(t, "07"), "0042")
+    master.set_product_status(
+        p.pds.caller, prod.pk, status="ACTIVE", expected_version=prod.row_version, reason="syn"
+    )
+    key = uuid.uuid4()
+    pc, replayed = codes.issue_product_code(p.pds.caller, s.pk, idempotency_key=key)
+    assert (pc.status, replayed) == ("RESERVED", False)
+    prod.refresh_from_db()
+    master.set_product_status(
+        p.pds.caller, prod.pk, status="RETIRED", expected_version=prod.row_version, reason="syn"
+    )
+    again, replayed2 = codes.issue_product_code(p.pds.caller, s.pk, idempotency_key=key)
+    assert (again.pk, replayed2) == (pc.pk, True)  # the stored result, no second write

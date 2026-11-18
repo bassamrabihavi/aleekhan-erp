@@ -1,0 +1,148 @@
+
+> aleekhan-frontend@0.0.0 fidelity
+> bash scripts/fidelity.sh
+
+== e2e environment
+PGHOST=127.0.0.1 PGPORT=5433 PGPASSWORD set: yes (value never printed)
+PG_BIN set: yes | E2E_DB=test_fidelity_e2e | E2E_PYTHON: python.exe
+E2E_BROWSER_CHANNEL=msedge
+E2E_SCREENSHOT_DIR set: no | E2E_HTML_REPORT set: yes | E2E_OUTPUT_DIR set: yes
+playwright: 1.64.1
+node: v24.20.0 (win32/x64)
+browser channel: msedge
+PLAYWRIGHT_BROWSERS_PATH set: no
+browser version: 157.0.4341.60
+== server: 17.9
+== create throw-away database test_fidelity_e2e
+NOTICE:  database "test_fidelity_e2e" does not exist, skipping
+== migrate (ALEEKHAN_ENV=dev, db=test_fidelity_e2e)
+Operations to perform:
+  Apply all migrations: platform_core
+Running migrations:
+  Applying platform_core.0001_initial... OK
+  Applying platform_core.0002_db_triggers... OK
+  Applying platform_core.0003_seed_schema_meta... OK
+  Applying platform_core.0004_integration... OK
+  Applying platform_core.0005_integration_triggers... OK
+  Applying platform_core.0006_seed_integration_sources... OK
+  Applying platform_core.0007_phase01_platform_schema... OK
+  Applying platform_core.0008_phase01_db_guards... OK
+  Applying platform_core.0009_phase01_constraint_names... OK
+  Applying platform_core.0010_seed_phase01_catalogue... OK
+  Applying platform_core.0011_phase01_engine... OK
+  Applying platform_core.0012_phase01_engine_rework... OK
+  Applying platform_core.0013_dec055_bootstrap_self_approval... OK
+  Applying platform_core.0014_dec056_owner_approval_rights... OK
+  Applying platform_core.0015_dec056_matrix_v12... OK
+  Applying platform_core.0016_outbox_provenance_and_order... OK
+  Applying platform_core.0017_dec056_matrix_v13... OK
+  Applying platform_core.0018_outbox_discard_and_orphan_job... OK
+  Applying platform_core.0019_phase02_identity_commercial_schema... OK
+  Applying platform_core.0020_phase02_db_guards... OK
+  Applying platform_core.0021_phase02_seed_catalogue... OK
+  Applying platform_core.0022_dec057_matrix_v20... OK
+  Applying platform_core.0023_phase02_engine... OK
+  Applying platform_core.0024_dec057_dec059_matrix_v21... OK
+  Applying platform_core.0025_phase02_api_numbers... OK
+  Applying platform_core.0026_phase02_planning_catalogue_source... OK
+  Applying platform_core.0027_dec057_matrix_v22... OK
+  Applying platform_core.0028_phase02_golden_summary... OK
+  Applying platform_core.0029_dec059_cr_open_expiry... OK
+== playwright: fidelity harness (build commit 83e9de172d95)
+[WebServer] {"ts": "2026-11-18T14:51:44.703+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "57596bb8-90e8-488b-ac9f-884a49e4ba47", "event": "http_request", "method": "GET", "path": "/api/v1/health/live", "status": 200, "duration_ms": 1.0}
+[WebServer] [18/Nov/2026 18:21:44] "GET /api/v1/health/live HTTP/1.1" 200 15
+
+Running 2 tests using 1 worker
+
+  ok 1 [chromium] › e2e\fidelity\fidelity.spec.ts:199:1 › @fidelity mockup specs: extracted (FIDELITY_EXTRACT=1) or verified against the mockup sha256 (80ms)
+[WebServer] {"ts": "2026-11-18T14:52:00.074+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "a443d781-fffc-4771-a7e5-a8e37526db8b", "event": "http_request", "method": "GET", "path": "/api/v1/version", "status": 200, "duration_ms": 1.1}
+[WebServer] [18/Nov/2026 18:22:00] "GET /api/v1/version HTTP/1.1" 200 103
+[WebServer] {"ts": "2026-11-18T14:52:00.080+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "eadb8d06-a6d0-4d90-b1df-cfaa50eca39a", "event": "http_request", "method": "GET", "path": "/api/v1/version", "status": 200, "duration_ms": 0.7}
+[WebServer] [18/Nov/2026 18:22:00] "GET /api/v1/version HTTP/1.1" 200 103
+[WebServer] {"ts": "2026-11-18T14:52:00.482+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "c099b954-ce94-4a69-b1e3-d1ca62d37a0c", "event": "http_request", "method": "GET", "path": "/api/v1/auth/session", "status": 401, "duration_ms": 2.6, "error_code": "AUTHENTICATION_REQUIRED"}
+[WebServer] {"ts": "2026-11-18T14:52:00.535+00:00", "level": "WARNING", "logger": "django.request", "msg": "Unauthorized: /api/v1/auth/session", "request_id": "c099b954-ce94-4a69-b1e3-d1ca62d37a0c"}
+[WebServer] [18/Nov/2026 18:22:00] "GET /api/v1/auth/session HTTP/1.1" 401 277
+[WebServer] {"ts": "2026-11-18T14:52:00.791+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "be0a7eb2-4c2e-4a39-bed1-4130762a3de4", "event": "http_request", "method": "GET", "path": "/api/v1/auth/login", "status": 200, "duration_ms": 1.1}
+[WebServer] [18/Nov/2026 18:22:00] "GET /api/v1/auth/login HTTP/1.1" 200 15
+[WebServer] {"ts": "2026-11-18T14:52:00.814+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "28b59f7e-0b5b-49d3-b1f8-fe2c9df23e4d", "event": "http_request", "method": "GET", "path": "/api/v1/auth/login", "status": 200, "duration_ms": 1.1}
+[WebServer] [18/Nov/2026 18:22:00] "GET /api/v1/auth/login HTTP/1.1" 200 15
+[WebServer] {"ts": "2026-11-18T14:52:02.021+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "ef44c44c-f7ca-4cb0-9ca5-ac1918f686ef", "event": "http_request", "method": "POST", "path": "/api/v1/auth/login", "status": 200, "duration_ms": 1142.7}
+[WebServer] [18/Nov/2026 18:22:02] "POST /api/v1/auth/login HTTP/1.1" 200 390
+[WebServer] {"ts": "2026-11-18T14:52:02.089+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "34f45799-f564-4739-b9eb-f774a681c3a4", "event": "http_request", "method": "GET", "path": "/api/v1/auth/session", "status": 401, "duration_ms": 58.6, "error_code": "MFA_REQUIRED"}
+[WebServer] {"ts": "2026-11-18T14:52:02.089+00:00", "level": "WARNING", "logger": "django.request", "msg": "Unauthorized: /api/v1/auth/session", "request_id": "34f45799-f564-4739-b9eb-f774a681c3a4"}
+[WebServer] [18/Nov/2026 18:22:02] "GET /api/v1/auth/session HTTP/1.1" 401 309
+[WebServer] {"ts": "2026-11-18T14:52:02.484+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "1c858733-0b08-440b-94f7-5390f02fc418", "event": "http_request", "method": "POST", "path": "/api/v1/auth/mfa/verify", "status": 200, "duration_ms": 135.6}
+[WebServer] [18/Nov/2026 18:22:02] "POST /api/v1/auth/mfa/verify HTTP/1.1" 200 379
+[WebServer] {"ts": "2026-11-18T14:52:02.557+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "cc795ff7-dcd7-41e6-bde3-3afbf1ec518c", "event": "http_request", "method": "GET", "path": "/api/v1/auth/session", "status": 200, "duration_ms": 65.8}
+[WebServer] [18/Nov/2026 18:22:02] "GET /api/v1/auth/session HTTP/1.1" 200 346
+[WebServer] {"ts": "2026-11-18T14:52:02.655+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "4e0bbf2b-3fb4-4735-aef3-7e167e11ee20", "event": "http_request", "method": "GET", "path": "/api/v1/me", "status": 200, "duration_ms": 91.8}
+[WebServer] [18/Nov/2026 18:22:02] "GET /api/v1/me HTTP/1.1" 200 1737
+[WebServer] {"ts": "2026-11-18T14:52:02.759+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "26a0e07b-ab9c-408d-8dc4-da7e688726f4", "event": "http_request", "method": "GET", "path": "/api/v1/me/permissions", "status": 200, "duration_ms": 96.3}
+[WebServer] [18/Nov/2026 18:22:02] "GET /api/v1/me/permissions HTTP/1.1" 200 5587
+[WebServer] {"ts": "2026-11-18T14:52:03.601+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "31b92803-294c-4869-96fc-10ed7313606a", "event": "http_request", "method": "GET", "path": "/api/v1/identity/serials/4e1998d0-8399-488d-8f2f-84111c7957de/tracking", "status": 200, "duration_ms": 300.9}
+[WebServer] [18/Nov/2026 18:22:03] "GET /api/v1/identity/serials/4e1998d0-8399-488d-8f2f-84111c7957de/tracking HTTP/1.1" 200 1738
+[WebServer] {"ts": "2026-11-18T14:52:03.604+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "15d2a451-86fd-4290-80f3-4191025f421a", "event": "http_request", "method": "GET", "path": "/api/v1/identity/serials/4e1998d0-8399-488d-8f2f-84111c7957de/tracking", "status": 200, "duration_ms": 344.7}
+[WebServer] {"ts": "2026-11-18T14:52:03.838+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "ef310aa4-bbd8-406c-93ad-9c79db9ff655", "event": "http_request", "method": "GET", "path": "/api/v1/identity/customers", "status": 200, "duration_ms": 208.2}
+[WebServer] {"ts": "2026-11-18T14:52:04.005+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "02870f99-efe4-405a-ab16-b9d3dc094032", "event": "http_request", "method": "GET", "path": "/api/v1/identity/styles/0fa783b9-82ec-431c-97d4-d970d4e03897", "status": 200, "duration_ms": 362.6}
+[WebServer] {"ts": "2026-11-18T14:52:04.040+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "dcd7958c-e097-4a33-a4fd-b887b59ef981", "event": "http_request", "method": "GET", "path": "/api/v1/commercial/change-requests", "status": 200, "duration_ms": 345.8}
+[WebServer] {"ts": "2026-11-18T14:52:04.164+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "6f707ac5-2441-426a-aa45-2c97da2adf4e", "event": "http_request", "method": "GET", "path": "/api/v1/identity/customers", "status": 200, "duration_ms": 302.7}
+[WebServer] [18/Nov/2026 18:22:04] "GET /api/v1/identity/customers?page_size=100 HTTP/1.1" 200 489
+[WebServer] {"ts": "2026-11-18T14:52:04.228+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "8671893e-5680-453c-a2b8-2235686f6478", "event": "http_request", "method": "GET", "path": "/api/v1/commercial/customer-orders/5642261a-aa4d-442e-b324-8c8439fa40b0", "status": 200, "duration_ms": 435.3}
+[WebServer] [18/Nov/2026 18:22:04] "GET /api/v1/commercial/customer-orders/5642261a-aa4d-442e-b324-8c8439fa40b0 HTTP/1.1" 200 972
+[WebServer] {"ts": "2026-11-18T14:52:04.358+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "149f37a3-22f9-4e53-aea8-eed32ab450a2", "event": "http_request", "method": "GET", "path": "/api/v1/identity/styles/0fa783b9-82ec-431c-97d4-d970d4e03897", "status": 200, "duration_ms": 420.8}
+[WebServer] [18/Nov/2026 18:22:04] "GET /api/v1/identity/styles/0fa783b9-82ec-431c-97d4-d970d4e03897 HTTP/1.1" 200 507
+[WebServer] {"ts": "2026-11-18T14:52:04.434+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "fadbaa58-ddd6-4986-bf64-01df59a71e66", "event": "http_request", "method": "GET", "path": "/api/v1/commercial/change-requests", "status": 200, "duration_ms": 379.1}
+[WebServer] [18/Nov/2026 18:22:04] "GET /api/v1/commercial/change-requests?serial_id=4e1998d0-8399-488d-8f2f-84111c7957de&page_size=25 HTTP/1.1" 200 847
+[WebServer] {"ts": "2026-11-18T14:52:04.529+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "8ea17636-fe2c-477c-a27e-2195e81b9c8c", "event": "http_request", "method": "GET", "path": "/api/v1/identity/products/91b4846d-0700-48a2-a6cc-6ebb70f3fab3", "status": 200, "duration_ms": 135.2}
+[WebServer] [18/Nov/2026 18:22:04] "GET /api/v1/identity/products/91b4846d-0700-48a2-a6cc-6ebb70f3fab3 HTTP/1.1" 200 469
+[WebServer] {"ts": "2026-11-18T14:52:09.057+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "841b34d3-7faa-4596-9b93-834b76581efb", "event": "http_request", "method": "GET", "path": "/api/v1/identity/external-refs", "status": 200, "duration_ms": 343.7}
+[WebServer] {"ts": "2026-11-18T14:52:09.126+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "7530a8c8-2331-4ca7-a697-bdbe8672b646", "event": "http_request", "method": "GET", "path": "/api/v1/identity/external-refs", "status": 200, "duration_ms": 304.6}
+[WebServer] {"ts": "2026-11-18T14:52:09.135+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "842423df-588c-42fa-b691-bd088343d5db", "event": "http_request", "method": "GET", "path": "/api/v1/identity/serials/4e1998d0-8399-488d-8f2f-84111c7957de/snapshots", "status": 200, "duration_ms": 292.5}
+[WebServer] {"ts": "2026-11-18T14:52:09.261+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "5abb083e-d51c-4786-bfa9-cf1e8cfe7de6", "event": "http_request", "method": "GET", "path": "/api/v1/identity/external-refs", "status": 200, "duration_ms": 369.2}
+[WebServer] [18/Nov/2026 18:22:09] "GET /api/v1/identity/external-refs?target_type=serial&target_id=4e1998d0-8399-488d-8f2f-84111c7957de&page_size=50 HTTP/1.1" 200 55
+[WebServer] {"ts": "2026-11-18T14:52:09.350+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "e91e1654-3eb1-40e0-a633-07d900758cff", "event": "http_request", "method": "GET", "path": "/api/v1/identity/external-refs", "status": 200, "duration_ms": 340.6}
+[WebServer] [18/Nov/2026 18:22:09] "GET /api/v1/identity/external-refs?target_type=customer_order&target_id=5642261a-aa4d-442e-b324-8c8439fa40b0&page_size=50 HTTP/1.1" 200 55
+[WebServer] {"ts": "2026-11-18T14:52:09.446+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "0b54a607-c8ad-4263-bb37-c319e428a747", "event": "http_request", "method": "GET", "path": "/api/v1/identity/serials/4e1998d0-8399-488d-8f2f-84111c7957de/snapshots", "status": 200, "duration_ms": 374.9}
+[WebServer] [18/Nov/2026 18:22:09] "GET /api/v1/identity/serials/4e1998d0-8399-488d-8f2f-84111c7957de/snapshots?page_size=100 HTTP/1.1" 200 351
+  x  2 [chromium] › e2e\fidelity\fidelity.spec.ts:215:1 › @fidelity built pages: score per page per width, baseline + side-by-side screenshots (27.5s)
+
+
+  1) [chromium] › e2e\fidelity\fidelity.spec.ts:215:1 › @fidelity built pages: score per page per width, baseline + side-by-side screenshots 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByTestId('serial-summary')
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByTestId('serial-summary') with timeout 10000ms
+      - waiting for getByTestId('serial-summary')
+
+
+      152 |   await s.page.goto(`/#${route}`);
+      153 |   if (spec.after_load === "open-order-tab") {
+    > 154 |     await expect(s.page.getByTestId("serial-summary")).toBeVisible();
+          |                                                        ^
+      155 |     await s.page.getByRole("tab", { name: "سفارش" }).click();
+      156 |   }
+      157 |   await expect(s.page.getByTestId(spec.ready_testid)).toBeVisible();
+        at openBuilt (F:\aleekhan\aleekhan-erp\frontend\e2e\fidelity\fidelity.spec.ts:154:56)
+        at F:\aleekhan\aleekhan-erp\frontend\e2e\fidelity\fidelity.spec.ts:227:7
+
+    Error Context: ..\..\tools\e2e-artifacts\fid-out\fidelity-fidelity--fidelit-ff685-ne-side-by-side-screenshots-chromium\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\tools\e2e-artifacts\fid-out\fidelity-fidelity--fidelit-ff685-ne-side-by-side-screenshots-chromium\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\tools\e2e-artifacts\fid-out\fidelity-fidelity--fidelit-ff685-ne-side-by-side-screenshots-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [chromium] › e2e\fidelity\fidelity.spec.ts:215:1 › @fidelity built pages: score per page per width, baseline + side-by-side screenshots 
+  1 passed (40.9s)
+== results: fidelity rc=1
+== drop throw-away database test_fidelity_e2e

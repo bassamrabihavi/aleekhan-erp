@@ -49,9 +49,10 @@ export function Num({ value, testId }: { value: string | null | undefined; testI
 export const LATER_TEXT = "در دست ساخت — به داده واقعی متصل نیست";
 
 /** A section owned by a later phase: title + placeholder, never a number (DEC-027 P-A, rule 2). */
-export function LaterSection({ title, phase }: { title: string; phase: string }) {
+/** `fid` = DEC-061 fidelity region id (e2e/fidelity), a measurement marker only. */
+export function LaterSection({ title, phase, fid }: { title: string; phase: string; fid?: string }) {
   return (
-    <section className="later" data-testid="later-section" aria-label={title}>
+    <section className="later" data-testid="later-section" aria-label={title} data-fid={fid}>
       <h3 className="later__title">{title}</h3>
       <p className="later__text">{LATER_TEXT}</p>
       <p className="later__meta">
@@ -138,12 +139,12 @@ export function JalaliDateField({
 export function PageHead({ page, title, lead, actions }: { page: string; title: string; lead?: ReactNode; actions?: ReactNode }) {
   return (
     <div className="page__head">
-      <div>
+      <div data-fid="page-header">
         <p className="eyebrow">{page}</p>
         <h1>{title}</h1>
         {lead ? <p className="lead">{lead}</p> : null}
       </div>
-      {actions ? <div className="actions">{actions}</div> : null}
+      {actions ? <div className="actions" data-fid="header-actions">{actions}</div> : null}
     </div>
   );
 }

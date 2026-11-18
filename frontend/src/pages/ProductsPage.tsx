@@ -196,7 +196,7 @@ function ProductDetail({ id, styleId }: { id: string; styleId: string | undefine
   });
   return (
     <>
-      <section className="panel" aria-labelledby="product-title" data-testid="product-detail">
+      <section className="panel" aria-labelledby="product-title" data-testid="product-detail" data-fid="product-card">
         <DataView query={q} loading="در حال دریافت محصول…" errorTitle="محصول دریافت نشد">
           {(r) => <ProductProfile p={r.data} version={r.version} />}
         </DataView>
@@ -253,7 +253,7 @@ function StyleColumn({ product, selected }: { product: Product; selected: string
     queryFn: async ({ signal }) => (await get(`/identity/products/${product.product_id}/styles`, g.stylePage, { page_size: 100 }, signal)).data,
   });
   return (
-    <section className="panel" aria-labelledby="styles-title">
+    <section className="panel" aria-labelledby="styles-title" data-fid="product-styles">
       <div className="panel__head">
         <h2 id="styles-title">استایل‌های این محصول</h2>
         {can(PERM.productManage) && product.status !== "RETIRED" ? (
@@ -405,11 +405,11 @@ function StyleDetail({ product, styleId }: { product: Product; styleId: string }
         {(r) => (
           <>
             <StyleHead s={r.data} version={r.version} product={product} />
-            <StyleCode s={r.data} />
+            <StyleCode s={r.data} product={product} />
             <Revisions s={r.data} />
             <StyleSerials s={r.data} />
             <div className="later-grid">
-              <LaterSection title="کار در جریان (WIP)" phase="PHASE_07" />
+              <LaterSection title="کار در جریان (WIP)" phase="PHASE_07" fid="stage-distribution" />
               <LaterSection title="ریسک و تعهدهای در معرض" phase="PHASE_05" />
             </div>
           </>
@@ -418,6 +418,9 @@ function StyleDetail({ product, styleId }: { product: Product; styleId: string }
     </section>
   );
 }
+
+/** DEC-005 amendment 2026-11-18 (REV-0293): style activation and code issue need an ACTIVE product. */
+const PRODUCT_NOT_ACTIVE_HINT = "ابتدا محصول را فعال کنید";
 
 function StyleHead({ s, version, product }: { s: Style; version: number | null; product: Product }) {
   const { can } = useAuth();
@@ -433,9 +436,24 @@ function StyleHead({ s, version, product }: { s: Style; version: number | null; 
       </div>
       <p className="panel__meta">محصول: {product.name_fa} · ثبت {formatJalaliDateTime(s.created_at)}</p>
       {s.status === "DRAFT" && can(PERM.productManage) ? (
-        <button type="button" className="btn btn--secondary" onClick={() => { action.reset(); setActivating(true); }} data-testid="style-activate">
-          فعال‌سازی استایل
-        </button>
+        <div className="actions">
+          {/* DEC-005 amendment 2026-11-18 (REV-0293): only under an ACTIVE product; the server refuses it too. */}
+          <button
+            type="button"
+            className="btn btn--secondary"
+            disabled={product.status !== "ACTIVE"}
+            aria-describedby={product.status !== "ACTIVE" ? "style-activate-hint" : undefined}
+            onClick={() => { action.reset(); setActivating(true); }}
+            data-testid="style-activate"
+          >
+            فعال‌سازی استایل
+          </button>
+          {product.status !== "ACTIVE" ? (
+            <span id="style-activate-hint" className="field__hint" data-testid="style-activate-hint">
+              {PRODUCT_NOT_ACTIVE_HINT}
+            </span>
+          ) : null}
+        </div>
       ) : null}
       {activating ? (
         <ReasonDialog
@@ -452,7 +470,7 @@ function StyleHead({ s, version, product }: { s: Style; version: number | null; 
   );
 }
 
-function StyleCode({ s }: { s: Style }) {
+function StyleCode({ s, product }: { s: Style; product: Product }) {
   const { can } = useAuth();
   const codes = useQuery({
     queryKey: [...K2.codes, "of", s.style_id],
@@ -497,7 +515,8 @@ function StyleCode({ s }: { s: Style }) {
             <button
               type="button"
               className="btn btn--primary"
-              disabled={issue.pending || s.status !== "ACTIVE"}
+              disabled={issue.pending || s.status !== "ACTIVE" || product.status !== "ACTIVE"}
+              aria-describedby={product.status !== "ACTIVE" ? "code-issue-hint" : undefined}
               onClick={() => {
                 void issue.run((key) => send("/identity/product-codes", g.code, { style_id: s.style_id, ...(shown.rule ? { rule_revision_id: shown.rule } : {}) }, key), [K2.codes]);
               }}
@@ -511,7 +530,11 @@ function StyleCode({ s }: { s: Style }) {
       {shown && codes.data?.items.length === 0 ? (
         <p data-testid="code-preview-value">
           کد پیش‌نمایش (هنوز رزرو نشده): <Code14 code={shown.code} />
-          {s.status !== "ACTIVE" ? <span className="field__hint"> — برای صدور، استایل باید فعال باشد.</span> : null}
+          {product.status !== "ACTIVE" ? (
+            <span id="code-issue-hint" className="field__hint" data-testid="code-issue-hint"> — {PRODUCT_NOT_ACTIVE_HINT}</span>
+          ) : s.status !== "ACTIVE" ? (
+            <span className="field__hint"> — برای صدور، استایل باید فعال باشد.</span>
+          ) : null}
         </p>
       ) : null}
       <ActionError error={preview.error ?? issue.error} />
@@ -639,9 +662,9 @@ function StyleSerials({ s }: { s: Style }) {
       (await get(`/identity/styles/${s.style_id}/tracking`, g.styleTracking, { status: status || undefined, from: from ?? undefined, to: to ?? undefined, cursor: cursor.cursor, page_size: 25 }, signal)).data,
   });
   return (
-    <section aria-labelledby="ser-title" className="subsection">
+    <section aria-labelledby="ser-title" className="subsection" data-fid="serial-table">
       <h3 id="ser-title">سریال‌های مرتبط با این استایل</h3>
-      <div className="filters">
+      <div className="filters" data-fid="filters">
         <Field label="وضعیت سریال">
           {(id) => (
             <select id={id} className="input" value={status} onChange={(e) => { cursor.reset(); setStatus(e.target.value); }}>
@@ -657,7 +680,7 @@ function StyleSerials({ s }: { s: Style }) {
       <DataView query={q} loading="در حال دریافت سریال‌ها…" errorTitle="سریال‌ها دریافت نشد">
         {(d) => (
           <>
-            <ul className="counters" data-testid="style-counts">
+            <ul className="counters" data-testid="style-counts" data-fid="kpis">
               <Counter label="سریال‌های مرتبط" value={d.counts.serials_total} />
               <Counter label="سریال‌های فعال" value={d.counts.serials_active} />
               <Counter label="تعداد سفارش‌ها" value={d.counts.orders_total} />

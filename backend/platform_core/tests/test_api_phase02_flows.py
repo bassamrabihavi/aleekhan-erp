@@ -1513,3 +1513,54 @@ def test_belt_product_takes_the_typed_width_with_the_buckle_and_refuses_a_missin
         "STATE_TRANSITION_NOT_ALLOWED",
         "PRODUCT_NO_TAKEN",
     )
+
+
+# ----------------------------------------------- REV-0293: DEC-005 amendment 2026-11-18 (ACTIVE product)
+def test_rev0293_style_activation_and_code_issue_refused_while_the_product_is_not_active() -> None:
+    t = Team()
+    ptype = f.product_type()
+    cat = f.category(ptype, "07")
+    pp = "/identity/products"
+    prod = ok(
+        post(t.c["pds"], pp, {"product_class_id": str(ptype.pk), "name_fa": f"محصول {f.SYN}"}, **idem()),
+        pp,
+        "post",
+        201,
+    )
+    assert prod["status"] == "DRAFT"
+    one = f"/identity/products/{prod['product_id']}"
+    st = ok(
+        post(
+            t.c["pds"], f"{one}/styles", {"category_id": str(cat.pk), "name_fa": f"استایل {f.SYN}"}, **idem()
+        ),
+        "/identity/products/{product_id}/styles",
+        "post",
+        201,
+    )
+    assert st["status"] == "DRAFT"
+    s1, sp = f"/identity/styles/{st['style_id']}", "/identity/styles/{style_id}"
+    r = patch(t.c["pds"], s1, {"status": "ACTIVE", "reason": "synthetic"}, **if_match(st["row_version"]))
+    refused(r, sp, "patch", 409, "STATE_TRANSITION_NOT_ALLOWED", "MASTER_NOT_ACTIVE")
+    assert body(r)["errors"][0]["field"] == "product_id"
+    assert ok(get(t.c["viewer"], s1), sp, "get")["status"] == "DRAFT"
+    # existing data (factory): an ACTIVE style under the DRAFT product -> the code issue is refused as well
+    from platform_core.product_identity.models import Product, ProductCode
+
+    legacy = f.style(Product.objects.get(pk=prod["product_id"]), cat, "0009")
+    cp = "/identity/product-codes"
+    r = post(t.c["pds"], cp, {"style_id": str(legacy.pk)}, **idem())
+    refused(r, cp, "post", 409, "STATE_TRANSITION_NOT_ALLOWED", "MASTER_NOT_ACTIVE")
+    assert not ProductCode.objects.filter(style_id=legacy.pk).exists()
+    # activate the product -> the style activation goes through
+    prod = ok(
+        patch(t.c["pds"], one, {"status": "ACTIVE", "reason": "synthetic"}, **if_match(prod["row_version"])),
+        "/identity/products/{product_id}",
+        "patch",
+    )
+    got = ok(get(t.c["viewer"], s1), sp, "get")
+    done = ok(
+        patch(t.c["pds"], s1, {"status": "ACTIVE", "reason": "synthetic"}, **if_match(got["row_version"])),
+        sp,
+        "patch",
+    )
+    assert done["status"] == "ACTIVE"

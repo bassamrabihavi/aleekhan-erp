@@ -104,7 +104,7 @@ export interface TabDef {
   label: string;
 }
 
-export function Tabs({ tabs, active, onChange, label }: { tabs: TabDef[]; active: string; onChange: (id: string) => void; label: string }) {
+export function Tabs({ tabs, active, onChange, label, fid }: { tabs: TabDef[]; active: string; onChange: (id: string) => void; label: string; fid?: string }) {
   const refs = useRef<(HTMLButtonElement | null)[]>([]);
   function onKey(e: React.KeyboardEvent, i: number): void {
     // RTL: ArrowLeft moves to the next tab, ArrowRight to the previous one
@@ -120,7 +120,7 @@ export function Tabs({ tabs, active, onChange, label }: { tabs: TabDef[]; active
     }
   }
   return (
-    <div className="tabs" role="tablist" aria-label={label}>
+    <div className="tabs" role="tablist" aria-label={label} data-fid={fid}>
       {tabs.map((t, i) => (
         <button
           key={t.id}

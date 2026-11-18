@@ -1,0 +1,634 @@
+{
+  "schema": 1,
+  "page": "02",
+  "title_fa": "مرکز کنترل سریال — تب سفارش",
+  "route": "/serials/{serial_id}",
+  "ready_testid": "serial-order",
+  "after_load": "open-order-tab",
+  "authored": "hand",
+  "source_note": "HAND-AUTHORED (no HTML mockup exists for pages 1/2): region boxes were read off the two concept PNGs in 01_02_concepts by eye. Desktop concept (1586x992, tab «خلاصه») gives 1440 and 1180 (content area x 20..1510, top y 90; boxes / content width); mobile concept (941x1672, phone content x 90..850) gives 390 and, by assumption, 768 (no tablet concept exists). Page 2: the concepts do not show the «سفارش» tab; the frame (header, actions, stage flow, tabs, side panel) is the same picture and the tab body is placed where the summary cards and events sit, with the section list of DEC-027 (approved P-A structure). Labels are the visible headings/labels of the picture, never its numbers. Style refs (radius 10, border 1, shadow) are estimates.",
+  "mockup": {
+    "files": [
+      {
+        "path": "handoff/08_UI_AND_UX/DESIGN_CATALOG_52/01_02_concepts/داشبورد_مدیریت_تولید_سریال_۲۴۵۱.png",
+        "sha256": "69bd2e79dc8c96f90a94107b09707cb0da099adda948bddb4c1d904c419d6b3d"
+      },
+      {
+        "path": "handoff/08_UI_AND_UX/DESIGN_CATALOG_52/01_02_concepts/داشبورد_کنترل_سریال_درسا.png",
+        "sha256": "278a55a5942f54afd54d05ca25ded631d7c71fe6a11ba60a5f975db5b6b2081f"
+      }
+    ]
+  },
+  "excluded": [
+    "phone status bar (9:41, signal) of the mobile concept",
+    "«کیفیت داده: 96%» chip and «جستجو در این سریال» box (demo data / later phases), measured inside their parent regions",
+    "product photo (no product images in PHASE_02)"
+  ],
+  "widths": {
+    "1440": {
+      "content_pad_px": 16
+    },
+    "1180": {
+      "content_pad_px": 16
+    },
+    "768": {
+      "content_pad_px": 6
+    },
+    "390": {
+      "content_pad_px": 6
+    }
+  },
+  "regions": [
+    {
+      "id": "side-menu",
+      "label_fa": "منوی کناری (آیکون‌دار)",
+      "kind": "side-menu",
+      "frame": "viewport",
+      "children": [],
+      "widths": {
+        "1440": {
+          "box": {
+            "x": 0.9615,
+            "y": 0,
+            "w": 0.0385,
+            "h": 0.625
+          },
+          "items": 9
+        },
+        "1180": {
+          "box": {
+            "x": 0.9615,
+            "y": 0,
+            "w": 0.0385,
+            "h": 0.6949
+          },
+          "items": 9
+        },
+        "768": null,
+        "390": null
+      }
+    },
+    {
+      "id": "topbar",
+      "label_fa": "نوار بالا",
+      "kind": "topbar",
+      "frame": "viewport",
+      "children": [],
+      "widths": {
+        "1440": {
+          "box": {
+            "x": 0.0,
+            "y": 0.0,
+            "w": 0.9615,
+            "h": 0.0473
+          }
+        },
+        "1180": {
+          "box": {
+            "x": 0.0,
+            "y": 0.0,
+            "w": 0.9615,
+            "h": 0.0473
+          }
+        },
+        "768": {
+          "box": {
+            "x": 0.0,
+            "y": 0.0,
+            "w": 1.0,
+            "h": 0.1184
+          }
+        },
+        "390": {
+          "box": {
+            "x": 0.0,
+            "y": 0.0,
+            "w": 1.0,
+            "h": 0.1184
+          }
+        }
+      }
+    },
+    {
+      "id": "topbar-search",
+      "label_fa": "جستجوی سراسری",
+      "kind": "topbar-search",
+      "frame": "viewport",
+      "children": [],
+      "widths": {
+        "1440": {
+          "box": {
+            "x": 0.4212,
+            "y": 0.0076,
+            "w": 0.3417,
+            "h": 0.0315
+          }
+        },
+        "1180": {
+          "box": {
+            "x": 0.4212,
+            "y": 0.0076,
+            "w": 0.3417,
+            "h": 0.0315
+          }
+        },
+        "768": {
+          "box": {
+            "x": 0.2895,
+            "y": 0.0329,
+            "w": 0.0526,
+            "h": 0.0526
+          }
+        },
+        "390": {
+          "box": {
+            "x": 0.2895,
+            "y": 0.0329,
+            "w": 0.0526,
+            "h": 0.0526
+          }
+        }
+      }
+    },
+    {
+      "id": "topbar-date",
+      "label_fa": "تاریخ امروز",
+      "kind": "topbar-date",
+      "frame": "viewport",
+      "children": [],
+      "widths": {
+        "1440": {
+          "box": {
+            "x": 0.2491,
+            "y": 0.0095,
+            "w": 0.1072,
+            "h": 0.0284
+          }
+        },
+        "1180": {
+          "box": {
+            "x": 0.2491,
+            "y": 0.0095,
+            "w": 0.1072,
+            "h": 0.0284
+          }
+        },
+        "768": null,
+        "390": null
+      }
+    },
+    {
+      "id": "topbar-user",
+      "label_fa": "کاربر",
+      "kind": "topbar-user",
+      "frame": "viewport",
+      "children": [],
+      "widths": {
+        "1440": {
+          "box": {
+            "x": 0.0347,
+            "y": 0.0063,
+            "w": 0.1103,
+            "h": 0.0347
+          }
+        },
+        "1180": {
+          "box": {
+            "x": 0.0347,
+            "y": 0.0063,
+            "w": 0.1103,
+            "h": 0.0347
+          }
+        },
+        "768": {
+          "box": {
+            "x": 0.0329,
+            "y": 0.0171,
+            "w": 0.0921,
+            "h": 0.0882
+          }
+        },
+        "390": {
+          "box": {
+            "x": 0.0329,
+            "y": 0.0171,
+            "w": 0.0921,
+            "h": 0.0882
+          }
+        }
+      }
+    },
+    {
+      "id": "menu-toggle",
+      "label_fa": "دکمه باز کردن منو (موبایل)",
+      "kind": "menu-toggle",
+      "frame": "viewport",
+      "children": [],
+      "widths": {
+        "1440": null,
+        "1180": null,
+        "768": {
+          "box": {
+            "x": 0.9145,
+            "y": 0.0329,
+            "w": 0.0592,
+            "h": 0.0526
+          }
+        },
+        "390": {
+          "box": {
+            "x": 0.9145,
+            "y": 0.0329,
+            "w": 0.0592,
+            "h": 0.0526
+          }
+        }
+      }
+    },
+    {
+      "id": "bottom-nav",
+      "label_fa": "نوار پایین موبایل",
+      "kind": "bottom-nav",
+      "frame": "viewport",
+      "children": [
+        "خانه",
+        "برنامه‌ریزی",
+        "ثبت",
+        "گزارش‌ها",
+        "بیشتر"
+      ],
+      "widths": {
+        "1440": null,
+        "1180": null,
+        "768": null,
+        "390": {
+          "box": {
+            "x": 0,
+            "y": 2.0615,
+            "w": 1,
+            "h": 0.1026
+          }
+        }
+      }
+    },
+    {
+      "id": "serial-header",
+      "label_fa": "سربرگ سریال (شماره، محصول، کد، مشتری، وضعیت، تعداد)",
+      "kind": "header",
+      "frame": "content",
+      "children": [
+        "سریال",
+        "کد محصول",
+        "استایل",
+        "تعداد سفارش",
+        "رنگ",
+        "جنس"
+      ],
+      "widths": {
+        "1440": {
+          "box": {
+            "x": 0.1812,
+            "y": 0.047,
+            "w": 0.8087,
+            "h": 0.094
+          },
+          "radius": 10,
+          "border": 1,
+          "shadow": true,
+          "heading_px": 26
+        },
+        "1180": {
+          "box": {
+            "x": 0.1812,
+            "y": 0.047,
+            "w": 0.8087,
+            "h": 0.094
+          },
+          "radius": 10,
+          "border": 1,
+          "shadow": true,
+          "heading_px": 26
+        },
+        "768": {
+          "box": {
+            "x": 0.0132,
+            "y": 0.0171,
+            "w": 0.9763,
+            "h": 0.2724
+          },
+          "radius": 10,
+          "border": 1,
+          "shadow": true,
+          "heading_px": 16
+        },
+        "390": {
+          "box": {
+            "x": 0.0132,
+            "y": 0.0171,
+            "w": 0.9763,
+            "h": 0.2724
+          },
+          "radius": 10,
+          "border": 1,
+          "shadow": true,
+          "heading_px": 16
+        }
+      }
+    },
+    {
+      "id": "header-actions",
+      "label_fa": "دکمه‌های اقدام سریال (تصمیم برنامه‌ریزی، تغییر اولویت، Fast Track، سناریو، بیشتر)",
+      "kind": "actions",
+      "frame": "content",
+      "later_phase": "PHASE_05",
+      "children": [
+        "تصمیم برنامه‌ریزی",
+        "تغییر اولویت",
+        "سناریو",
+        "بیشتر"
+      ],
+      "widths": {
+        "1440": {
+          "box": {
+            "x": 0.4886,
+            "y": 0.0101,
+            "w": 0.506,
+            "h": 0.0289
+          }
+        },
+        "1180": {
+          "box": {
+            "x": 0.4886,
+            "y": 0.0101,
+            "w": 0.506,
+            "h": 0.0289
+          }
+        },
+        "768": null,
+        "390": null
+      }
+    },
+    {
+      "id": "date-cards",
+      "label_fa": "کارت‌های تعهد / پیش‌بینی / اختلاف",
+      "kind": "kpis",
+      "frame": "content",
+      "later_phase": "PHASE_05",
+      "children": [
+        "تعهد",
+        "Forecast",
+        "اختلاف"
+      ],
+      "widths": {
+        "1440": {
+          "box": {
+            "x": 0.0101,
+            "y": 0.0087,
+            "w": 0.3188,
+            "h": 0.045
+          },
+          "items": 3,
+          "radius": 10,
+          "border": 1,
+          "shadow": true
+        },
+        "1180": {
+          "box": {
+            "x": 0.0101,
+            "y": 0.0087,
+            "w": 0.3188,
+            "h": 0.045
+          },
+          "items": 3,
+          "radius": 10,
+          "border": 1,
+          "shadow": true
+        },
+        "768": null,
+        "390": null
+      }
+    },
+    {
+      "id": "stage-flow",
+      "label_fa": "مراحل تولید سریال",
+      "kind": "chart",
+      "frame": "content",
+      "later_phase": "PHASE_03 … PHASE_09",
+      "children": [
+        "مواد و انبار",
+        "مهندسی",
+        "تأمین",
+        "برش",
+        "دوخت",
+        "کنترل کیفیت",
+        "آماده محصول"
+      ],
+      "widths": {
+        "1440": {
+          "box": {
+            "x": 0.196,
+            "y": 0.143,
+            "w": 0.794,
+            "h": 0.0617
+          },
+          "radius": 10,
+          "border": 1,
+          "shadow": true
+        },
+        "1180": {
+          "box": {
+            "x": 0.196,
+            "y": 0.143,
+            "w": 0.794,
+            "h": 0.0617
+          },
+          "radius": 10,
+          "border": 1,
+          "shadow": true
+        },
+        "768": {
+          "box": {
+            "x": 0.0132,
+            "y": 0.3197,
+            "w": 0.9763,
+            "h": 0.1763
+          },
+          "radius": 10,
+          "border": 1,
+          "shadow": true
+        },
+        "390": {
+          "box": {
+            "x": 0.0132,
+            "y": 0.3197,
+            "w": 0.9763,
+            "h": 0.1763
+          },
+          "radius": 10,
+          "border": 1,
+          "shadow": true
+        }
+      }
+    },
+    {
+      "id": "tabs",
+      "label_fa": "زبانه‌های مرکز کنترل سریال",
+      "kind": "tabs",
+      "frame": "content",
+      "children": [
+        "خلاصه",
+        "سفارش",
+        "برنامه‌ریزی",
+        "مهندسی",
+        "مواد و انبار",
+        "برش",
+        "تولید",
+        "کیفیت",
+        "محصول و ارسال",
+        "بهای تمام‌شده",
+        "تسک‌ها",
+        "اسناد",
+        "تاریخچه"
+      ],
+      "widths": {
+        "1440": {
+          "box": {
+            "x": 0.2081,
+            "y": 0.2114,
+            "w": 0.7832,
+            "h": 0.0289
+          },
+          "items": 13
+        },
+        "1180": {
+          "box": {
+            "x": 0.2081,
+            "y": 0.2114,
+            "w": 0.7832,
+            "h": 0.0289
+          },
+          "items": 13
+        },
+        "768": null,
+        "390": null
+      }
+    },
+    {
+      "id": "side-panel",
+      "label_fa": "تصمیم‌ها و پیگیری‌ها / تسک‌ها / ریسک‌ها",
+      "kind": "side-panel",
+      "frame": "content",
+      "children": [
+        "تصمیم‌ها و پیگیری‌ها",
+        "تسک‌های نزدیک موعد",
+        "ریسک‌ها"
+      ],
+      "widths": {
+        "1440": {
+          "box": {
+            "x": 0.0054,
+            "y": 0.1409,
+            "w": 0.1812,
+            "h": 0.443
+          },
+          "radius": 10,
+          "border": 1,
+          "shadow": true
+        },
+        "1180": {
+          "box": {
+            "x": 0.0054,
+            "y": 0.1409,
+            "w": 0.1812,
+            "h": 0.443
+          },
+          "radius": 10,
+          "border": 1,
+          "shadow": true
+        },
+        "768": {
+          "box": {
+            "x": 0.0132,
+            "y": 0.8487,
+            "w": 0.9763,
+            "h": 0.3289
+          },
+          "radius": 10,
+          "border": 1,
+          "shadow": true
+        },
+        "390": {
+          "box": {
+            "x": 0.0132,
+            "y": 0.8487,
+            "w": 0.9763,
+            "h": 0.3289
+          },
+          "radius": 10,
+          "border": 1,
+          "shadow": true
+        }
+      }
+    },
+    {
+      "id": "order-tab",
+      "label_fa": "محتوای تب سفارش (سربرگ سفارش، ردیف‌ها، Snapshot، نسخه‌ها، مرجع‌های خارجی، خط زمانی)",
+      "kind": "panel",
+      "frame": "content",
+      "children": [
+        "سفارش",
+        "ردیف",
+        "Snapshot",
+        "نسخه‌های سفارش",
+        "مرجع‌های خارجی",
+        "تاریخچه رویدادها"
+      ],
+      "widths": {
+        "1440": {
+          "box": {
+            "x": 0.196,
+            "y": 0.2517,
+            "w": 0.794,
+            "h": 0.3356
+          },
+          "radius": 10,
+          "border": 1,
+          "shadow": true
+        },
+        "1180": {
+          "box": {
+            "x": 0.196,
+            "y": 0.2517,
+            "w": 0.794,
+            "h": 0.3356
+          },
+          "radius": 10,
+          "border": 1,
+          "shadow": true
+        },
+        "768": {
+          "box": {
+            "x": 0.0132,
+            "y": 0.5197,
+            "w": 0.9763,
+            "h": 1.375
+          },
+          "radius": 10,
+          "border": 1,
+          "shadow": true
+        },
+        "390": {
+          "box": {
+            "x": 0.0132,
+            "y": 0.5197,
+            "w": 0.9763,
+            "h": 1.375
+          },
+          "radius": 10,
+          "border": 1,
+          "shadow": true
+        }
+      }
+    }
+  ]
+}

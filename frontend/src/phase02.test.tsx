@@ -418,6 +418,31 @@ describe("page 4 products and styles", () => {
     expect(blocked).toHaveTextContent("قاعده کد فعالی وجود ندارد");
     expect(screen.queryByTestId("code-issue")).not.toBeInTheDocument();
   });
+
+  it("REV-0293: under a DRAFT product, style activation and code issue are disabled with the Persian hint", async () => {
+    const draftProduct = { ...product, status: "DRAFT" };
+    const draftStyle = { ...style, status: "DRAFT" };
+    stub(signedIn([...ALL_READ, "identity.product.manage", "identity.product_code.issue"], {
+      "GET /identity/products": () => ok(page([draftProduct])),
+      ["GET /identity/products/" + PRODUCT]: () => ok(draftProduct, 200, 2),
+      "GET /identity/product-classes": () => ok(page([])),
+      ["GET /identity/products/" + PRODUCT + "/styles"]: () => ok(page([draftStyle])),
+      ["GET /identity/styles/" + STYLE]: () => ok(draftStyle, 200, 3),
+      ["GET /identity/styles/" + STYLE + "/revisions"]: () => ok(page([])),
+      ["GET /identity/styles/" + STYLE + "/tracking"]: () => ok({ style: draftStyle, counts: { serials_total: 0, serials_active: 0, orders_total: 0 }, serials: [], unavailable_sections: UNAVAILABLE, page: { page_size: 25, next_cursor: null } }),
+      "GET /identity/customers": () => ok(page([customer])),
+      "GET /identity/product-codes": () => ok(page([])),
+      "POST /identity/product-codes/preview": () => ok({ code: CODE, rule_revision_id: "r1", segments: [], new_product: false, legacy_only: false, issued: false }),
+    }));
+    renderAt(`#/products/${PRODUCT}/${STYLE}`);
+    const activate = await screen.findByTestId("style-activate");
+    expect(activate).toBeDisabled();
+    expect(screen.getByTestId("style-activate-hint")).toHaveTextContent("ابتدا محصول را فعال کنید");
+    expect(activate).toHaveAttribute("aria-describedby", "style-activate-hint");
+    await userEvent.click(await screen.findByTestId("code-preview"));
+    expect(await screen.findByTestId("code-issue")).toBeDisabled();
+    expect(screen.getByTestId("code-issue-hint")).toHaveTextContent("ابتدا محصول را فعال کنید");
+  });
 });
 
 // --------------------------------------------------------------------------------------------- page 33

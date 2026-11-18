@@ -42,7 +42,7 @@ from platform_core.models import ActorType
 from platform_core.schema_common import ProvenanceKind
 
 from . import coderule
-from .master import proposed_product_no, proposed_style_no
+from .master import proposed_product_no, proposed_style_no, require_active_product
 from .models import (
     PRODUCT_CODE_NAMESPACE,
     ClassLevel,
@@ -591,7 +591,9 @@ def _code_view(pc: ProductCode) -> dict[str, Any]:
 def issue_product_code(
     caller: Caller, style_id: uuid.UUID, *, idempotency_key: uuid.UUID, request_id: uuid.UUID | None = None
 ) -> tuple[ProductCode, bool]:
-    """RESERVED / ERP_PENDING code of an ACTIVE style (DEC-005 B1). Returns ``(code, replayed)``."""
+    """RESERVED / ERP_PENDING code of an ACTIVE style of an ACTIVE product (DEC-005 B1; product rule: DEC-005
+    amendment 2026-11-18, REV-0293). Returns ``(code, replayed)``; a replay returns the stored result even if
+    the product changed since."""
     authorize(caller, CODE_ISSUE)
     replayed: list[ProductCode] = []
     with unit_of_work_or_nothing(caller.context(request_id)) as uow:
@@ -605,6 +607,7 @@ def issue_product_code(
         s = _style(style_id)
         if s.status != MasterStatus.ACTIVE:
             refuse(Reason.MASTER_NOT_ACTIVE, field="style_id")
+        require_active_product(s.product_id)  # row lock after the style lock (order style -> product)
         parts = _style_parts(s)
         rule = active_rule_for(parts.type_code)
         if live_code_of(s.pk) is not None:

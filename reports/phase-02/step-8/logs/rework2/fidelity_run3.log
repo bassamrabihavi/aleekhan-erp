@@ -1,0 +1,328 @@
+
+> aleekhan-frontend@0.0.0 fidelity
+> bash scripts/fidelity.sh
+
+== e2e environment
+PGHOST=127.0.0.1 PGPORT=5433 PGPASSWORD set: yes (value never printed)
+PG_BIN set: yes | E2E_DB=test_fidelity_e2e | E2E_PYTHON: python.exe
+E2E_BROWSER_CHANNEL=msedge
+E2E_SCREENSHOT_DIR set: no | E2E_HTML_REPORT set: yes | E2E_OUTPUT_DIR set: yes
+playwright: 1.64.1
+node: v24.20.0 (win32/x64)
+browser channel: msedge
+PLAYWRIGHT_BROWSERS_PATH set: no
+browser version: 157.0.4341.60
+== server: 17.9
+== create throw-away database test_fidelity_e2e
+NOTICE:  database "test_fidelity_e2e" does not exist, skipping
+== migrate (ALEEKHAN_ENV=dev, db=test_fidelity_e2e)
+Operations to perform:
+  Apply all migrations: platform_core
+Running migrations:
+  Applying platform_core.0001_initial... OK
+  Applying platform_core.0002_db_triggers... OK
+  Applying platform_core.0003_seed_schema_meta... OK
+  Applying platform_core.0004_integration... OK
+  Applying platform_core.0005_integration_triggers... OK
+  Applying platform_core.0006_seed_integration_sources... OK
+  Applying platform_core.0007_phase01_platform_schema... OK
+  Applying platform_core.0008_phase01_db_guards... OK
+  Applying platform_core.0009_phase01_constraint_names... OK
+  Applying platform_core.0010_seed_phase01_catalogue... OK
+  Applying platform_core.0011_phase01_engine... OK
+  Applying platform_core.0012_phase01_engine_rework... OK
+  Applying platform_core.0013_dec055_bootstrap_self_approval... OK
+  Applying platform_core.0014_dec056_owner_approval_rights... OK
+  Applying platform_core.0015_dec056_matrix_v12... OK
+  Applying platform_core.0016_outbox_provenance_and_order... OK
+  Applying platform_core.0017_dec056_matrix_v13... OK
+  Applying platform_core.0018_outbox_discard_and_orphan_job... OK
+  Applying platform_core.0019_phase02_identity_commercial_schema... OK
+  Applying platform_core.0020_phase02_db_guards... OK
+  Applying platform_core.0021_phase02_seed_catalogue... OK
+  Applying platform_core.0022_dec057_matrix_v20... OK
+  Applying platform_core.0023_phase02_engine... OK
+  Applying platform_core.0024_dec057_dec059_matrix_v21... OK
+  Applying platform_core.0025_phase02_api_numbers... OK
+  Applying platform_core.0026_phase02_planning_catalogue_source... OK
+  Applying platform_core.0027_dec057_matrix_v22... OK
+  Applying platform_core.0028_phase02_golden_summary... OK
+  Applying platform_core.0029_dec059_cr_open_expiry... OK
+== playwright: fidelity harness (build commit 83e9de172d95)
+[WebServer] {"ts": "2026-11-18T14:53:44.274+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "13d18b37-ce89-4a89-a88c-db00f690001c", "event": "http_request", "method": "GET", "path": "/api/v1/health/live", "status": 200, "duration_ms": 1.2}
+[WebServer] [18/Nov/2026 18:23:44] "GET /api/v1/health/live HTTP/1.1" 200 15
+
+Running 2 tests using 1 worker
+
+  ok 1 [chromium] › e2e\fidelity\fidelity.spec.ts:201:1 › @fidelity mockup specs: extracted (FIDELITY_EXTRACT=1) or verified against the mockup sha256 (143ms)
+[WebServer] {"ts": "2026-11-18T14:53:57.480+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "d80034e3-6d5c-48f0-8c79-a9bdfb4fdfc4", "event": "http_request", "method": "GET", "path": "/api/v1/version", "status": 200, "duration_ms": 1.2}
+[WebServer] {"ts": "2026-11-18T14:53:57.586+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "6562aba6-72f1-471b-8976-eaaa0e1427d7", "event": "http_request", "method": "GET", "path": "/api/v1/version", "status": 200, "duration_ms": 1.4}
+[WebServer] [18/Nov/2026 18:23:57] "GET /api/v1/version HTTP/1.1" 200 103
+[WebServer] {"ts": "2026-11-18T14:53:57.629+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "fe12828d-f9c5-4d43-a80e-e3e36ad2300a", "event": "http_request", "method": "GET", "path": "/api/v1/auth/session", "status": 401, "duration_ms": 1.8, "error_code": "AUTHENTICATION_REQUIRED"}
+[WebServer] {"ts": "2026-11-18T14:53:57.635+00:00", "level": "WARNING", "logger": "django.request", "msg": "Unauthorized: /api/v1/auth/session", "request_id": "fe12828d-f9c5-4d43-a80e-e3e36ad2300a"}
+[WebServer] [18/Nov/2026 18:23:57] "GET /api/v1/auth/session HTTP/1.1" 401 277
+[WebServer] {"ts": "2026-11-18T14:53:57.744+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "6b7eb576-ea4b-47aa-ad55-cdd4d0716534", "event": "http_request", "method": "GET", "path": "/api/v1/auth/login", "status": 200, "duration_ms": 0.7}
+[WebServer] [18/Nov/2026 18:23:57] "GET /api/v1/auth/login HTTP/1.1" 200 15
+[WebServer] {"ts": "2026-11-18T14:53:57.802+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "425cec13-9c3c-4df7-8de2-f67599c3e574", "event": "http_request", "method": "GET", "path": "/api/v1/auth/login", "status": 200, "duration_ms": 1.8}
+[WebServer] [18/Nov/2026 18:23:57] "GET /api/v1/auth/login HTTP/1.1" 200 15
+[WebServer] {"ts": "2026-11-18T14:53:59.632+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "42801389-e5b7-401f-b4e0-bcfb88fac998", "event": "http_request", "method": "POST", "path": "/api/v1/auth/login", "status": 200, "duration_ms": 1688.5}
+[WebServer] [18/Nov/2026 18:23:59] "POST /api/v1/auth/login HTTP/1.1" 200 390
+[WebServer] {"ts": "2026-11-18T14:53:59.758+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "d8381bb9-ef60-4601-b7df-cc6da808aed4", "event": "http_request", "method": "GET", "path": "/api/v1/auth/session", "status": 401, "duration_ms": 113.6, "error_code": "MFA_REQUIRED"}
+[WebServer] {"ts": "2026-11-18T14:53:59.759+00:00", "level": "WARNING", "logger": "django.request", "msg": "Unauthorized: /api/v1/auth/session", "request_id": "d8381bb9-ef60-4601-b7df-cc6da808aed4"}
+[WebServer] [18/Nov/2026 18:23:59] "GET /api/v1/auth/session HTTP/1.1" 401 309
+[WebServer] {"ts": "2026-11-18T14:54:01.108+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "9aa994c4-8f46-4f24-929e-756fbe193fc6", "event": "http_request", "method": "POST", "path": "/api/v1/auth/mfa/verify", "status": 200, "duration_ms": 143.2}
+[WebServer] [18/Nov/2026 18:24:01] "POST /api/v1/auth/mfa/verify HTTP/1.1" 200 379
+[WebServer] {"ts": "2026-11-18T14:54:01.179+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "dc03605d-e9e2-4aa4-b625-628b730b548a", "event": "http_request", "method": "GET", "path": "/api/v1/auth/session", "status": 200, "duration_ms": 64.2}
+[WebServer] [18/Nov/2026 18:24:01] "GET /api/v1/auth/session HTTP/1.1" 200 346
+[WebServer] {"ts": "2026-11-18T14:54:01.274+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "4830818b-8438-4256-8f16-6762499aefea", "event": "http_request", "method": "GET", "path": "/api/v1/me", "status": 200, "duration_ms": 88.2}
+[WebServer] [18/Nov/2026 18:24:01] "GET /api/v1/me HTTP/1.1" 200 1737
+[WebServer] {"ts": "2026-11-18T14:54:01.363+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "8741d88d-2102-4cf2-883b-1c6f2f0fdd90", "event": "http_request", "method": "GET", "path": "/api/v1/me/permissions", "status": 200, "duration_ms": 83.4}
+[WebServer] [18/Nov/2026 18:24:01] "GET /api/v1/me/permissions HTTP/1.1" 200 5587
+[WebServer] {"ts": "2026-11-18T14:54:02.240+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "c2e3fb08-6385-450d-bdd9-f0b107697efc", "event": "http_request", "method": "GET", "path": "/api/v1/identity/serials/f68116bb-efdb-4b7e-96a0-a2cacbfc83a4/tracking", "status": 200, "duration_ms": 358.1}
+[WebServer] {"ts": "2026-11-18T14:54:02.279+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "bdf35b06-e2a9-47c4-8a63-69980e32d45e", "event": "http_request", "method": "GET", "path": "/api/v1/identity/serials/f68116bb-efdb-4b7e-96a0-a2cacbfc83a4/tracking", "status": 200, "duration_ms": 349.1}
+[WebServer] [18/Nov/2026 18:24:02] "GET /api/v1/identity/serials/f68116bb-efdb-4b7e-96a0-a2cacbfc83a4/tracking HTTP/1.1" 200 1738
+[WebServer] {"ts": "2026-11-18T14:54:02.726+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "d3ebc87f-1a19-4971-90ba-3432ff144ac4", "event": "http_request", "method": "GET", "path": "/api/v1/identity/styles/a6c2060e-e15b-416a-83d5-07379a8418f1", "status": 200, "duration_ms": 338.4}
+[WebServer] {"ts": "2026-11-18T14:54:02.811+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "6a6f754d-cc34-4117-bd85-ef5adcf33bf7", "event": "http_request", "method": "GET", "path": "/api/v1/identity/customers", "status": 200, "duration_ms": 465.0}
+[WebServer] {"ts": "2026-11-18T14:54:02.826+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "ad705843-0fdf-4d5f-8982-8853a13cfc1c", "event": "http_request", "method": "GET", "path": "/api/v1/commercial/customer-orders/95395b85-d13a-4a8f-92c3-f9962723f7a9", "status": 200, "duration_ms": 310.7}
+[WebServer] [18/Nov/2026 18:24:02] "GET /api/v1/commercial/customer-orders/95395b85-d13a-4a8f-92c3-f9962723f7a9 HTTP/1.1" 200 972
+[WebServer] {"ts": "2026-11-18T14:54:03.100+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "fcd185a0-8cec-4e39-92c1-ff4525616f60", "event": "http_request", "method": "GET", "path": "/api/v1/identity/styles/a6c2060e-e15b-416a-83d5-07379a8418f1", "status": 200, "duration_ms": 485.8}
+[WebServer] [18/Nov/2026 18:24:03] "GET /api/v1/identity/styles/a6c2060e-e15b-416a-83d5-07379a8418f1 HTTP/1.1" 200 507
+[WebServer] {"ts": "2026-11-18T14:54:03.325+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "088c895e-1ddd-4e0b-8db6-5c1bb1fef1a0", "event": "http_request", "method": "GET", "path": "/api/v1/identity/customers", "status": 200, "duration_ms": 764.6}
+[WebServer] [18/Nov/2026 18:24:03] "GET /api/v1/identity/customers?page_size=100 HTTP/1.1" 200 489
+[WebServer] {"ts": "2026-11-18T14:54:03.489+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "bc691c84-a186-4dd0-9210-9ad711c21964", "event": "http_request", "method": "GET", "path": "/api/v1/commercial/change-requests", "status": 200, "duration_ms": 1017.8}
+[WebServer] {"ts": "2026-11-18T14:54:03.585+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "6feb3cec-ed10-4558-b097-c65aee1eda05", "event": "http_request", "method": "GET", "path": "/api/v1/commercial/change-requests", "status": 200, "duration_ms": 895.2}
+[WebServer] [18/Nov/2026 18:24:03] "GET /api/v1/commercial/change-requests?serial_id=f68116bb-efdb-4b7e-96a0-a2cacbfc83a4&page_size=25 HTTP/1.1" 200 847
+[WebServer] {"ts": "2026-11-18T14:54:03.787+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "8efdd4db-ac8b-4a34-92b0-5518fb261e52", "event": "http_request", "method": "GET", "path": "/api/v1/identity/products/9bec8b0c-3a18-4b7a-b2f7-8092cd2f37f2", "status": 200, "duration_ms": 445.1}
+[WebServer] [18/Nov/2026 18:24:03] "GET /api/v1/identity/products/9bec8b0c-3a18-4b7a-b2f7-8092cd2f37f2 HTTP/1.1" 200 469
+[WebServer] 6:24:04 PM [vite] http proxy error: /api/v1/identity/serials/f68116bb-efdb-4b7e-96a0-a2cacbfc83a4/tracking
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:8000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:2017:16)
+[WebServer] 6:24:04 PM [vite] http proxy error: /api/v1/commercial/customer-orders/95395b85-d13a-4a8f-92c3-f9962723f7a9
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:8000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:2017:16)
+[WebServer] {"ts": "2026-11-18T14:54:04.733+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "757a9b3a-c1dc-4065-a269-48cad5ea5112", "event": "http_request", "method": "GET", "path": "/api/v1/identity/styles/a6c2060e-e15b-416a-83d5-07379a8418f1", "status": 200, "duration_ms": 336.1}
+[WebServer] {"ts": "2026-11-18T14:54:04.879+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "cfc18ed6-510f-4b08-a126-22e25109beb0", "event": "http_request", "method": "GET", "path": "/api/v1/commercial/change-requests", "status": 200, "duration_ms": 264.6}
+[WebServer] {"ts": "2026-11-18T14:54:04.888+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "bc729932-2a04-4f57-9816-3bef22b6c309", "event": "http_request", "method": "GET", "path": "/api/v1/identity/products/9bec8b0c-3a18-4b7a-b2f7-8092cd2f37f2", "status": 200, "duration_ms": 465.6}
+[WebServer] {"ts": "2026-11-18T14:54:05.002+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "249d0a83-59e9-4d85-83ab-63350004d230", "event": "http_request", "method": "GET", "path": "/api/v1/identity/serials/f68116bb-efdb-4b7e-96a0-a2cacbfc83a4/tracking", "status": 200, "duration_ms": 313.4}
+[WebServer] 6:24:05 PM [vite] http proxy error: /api/v1/identity/styles/a6c2060e-e15b-416a-83d5-07379a8418f1
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:8000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:2017:16)
+[WebServer] 6:24:05 PM [vite] http proxy error: /api/v1/identity/products/9bec8b0c-3a18-4b7a-b2f7-8092cd2f37f2
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:8000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:2017:16)
+[WebServer] 6:24:05 PM [vite] http proxy error: /api/v1/commercial/change-requests?serial_id=f68116bb-efdb-4b7e-96a0-a2cacbfc83a4&page_size=25
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:8000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:2017:16)
+[WebServer] 6:24:05 PM [vite] http proxy error: /api/v1/identity/serials/f68116bb-efdb-4b7e-96a0-a2cacbfc83a4/tracking
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:8000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:2017:16)
+[WebServer] 6:24:05 PM [vite] http proxy error: /api/v1/commercial/customer-orders/95395b85-d13a-4a8f-92c3-f9962723f7a9
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:8000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:2017:16)
+[WebServer] {"ts": "2026-11-18T14:54:05.229+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "e6abcfe8-b37d-4b1f-9c82-e94ae456f9d1", "event": "http_request", "method": "GET", "path": "/api/v1/identity/styles/a6c2060e-e15b-416a-83d5-07379a8418f1", "status": 200, "duration_ms": 382.1}
+[WebServer] {"ts": "2026-11-18T14:54:05.269+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "a6f5b595-df56-4c7f-abac-9e90260d5829", "event": "http_request", "method": "GET", "path": "/api/v1/commercial/customer-orders/95395b85-d13a-4a8f-92c3-f9962723f7a9", "status": 200, "duration_ms": 546.6}
+[WebServer] {"ts": "2026-11-18T14:54:05.531+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "bfae7a42-48d5-4a8b-938f-5cc55573f5e4", "event": "http_request", "method": "GET", "path": "/api/v1/identity/products/9bec8b0c-3a18-4b7a-b2f7-8092cd2f37f2", "status": 200, "duration_ms": 580.7}
+[WebServer] {"ts": "2026-11-18T14:54:05.614+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "3f37d9cd-3da7-45d2-9ff8-0619d2f4947d", "event": "http_request", "method": "GET", "path": "/api/v1/commercial/change-requests", "status": 200, "duration_ms": 496.2}
+[WebServer] {"ts": "2026-11-18T14:54:05.709+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "aa4e9c45-790b-481e-8571-59d191036988", "event": "http_request", "method": "GET", "path": "/api/v1/commercial/customer-orders/95395b85-d13a-4a8f-92c3-f9962723f7a9", "status": 200, "duration_ms": 433.7}
+[WebServer] {"ts": "2026-11-18T14:54:05.835+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "e8ffd9fd-3e15-4fcc-b4c8-d36f9f28144e", "event": "http_request", "method": "GET", "path": "/api/v1/identity/serials/f68116bb-efdb-4b7e-96a0-a2cacbfc83a4/tracking", "status": 200, "duration_ms": 609.7}
+[WebServer] {"ts": "2026-11-18T14:54:05.928+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "b0c73309-2c9a-49d3-b08c-b354063e43bb", "event": "http_request", "method": "GET", "path": "/api/v1/identity/products/9bec8b0c-3a18-4b7a-b2f7-8092cd2f37f2", "status": 200, "duration_ms": 470.2}
+[WebServer] {"ts": "2026-11-18T14:54:05.984+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "32617020-521f-4302-ae42-52cea812b816", "event": "http_request", "method": "GET", "path": "/api/v1/identity/styles/a6c2060e-e15b-416a-83d5-07379a8418f1", "status": 200, "duration_ms": 644.8}
+[WebServer] {"ts": "2026-11-18T14:54:06.189+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "0deeaa89-bdb0-436b-8042-c416414feb8b", "event": "http_request", "method": "GET", "path": "/api/v1/commercial/change-requests", "status": 200, "duration_ms": 547.1}
+[WebServer] {"ts": "2026-11-18T14:54:06.329+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "9ffeccd9-6dd5-4b05-926f-a3064d659e2d", "event": "http_request", "method": "GET", "path": "/api/v1/identity/styles/a6c2060e-e15b-416a-83d5-07379a8418f1", "status": 200, "duration_ms": 550.4}
+[WebServer] {"ts": "2026-11-18T14:54:06.331+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "d93ebb47-d168-4e00-9fc9-e2ac02226cfb", "event": "http_request", "method": "GET", "path": "/api/v1/commercial/customer-orders/95395b85-d13a-4a8f-92c3-f9962723f7a9", "status": 200, "duration_ms": 332.6}
+[WebServer] {"ts": "2026-11-18T14:54:06.412+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "f46947ea-cbda-47d3-a8af-ca251962defe", "event": "http_request", "method": "GET", "path": "/api/v1/commercial/change-requests", "status": 200, "duration_ms": 437.3}
+[WebServer] {"ts": "2026-11-18T14:54:06.593+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "b18d2691-b070-4208-b44c-5c35ef7e3a5e", "event": "http_request", "method": "GET", "path": "/api/v1/identity/products/9bec8b0c-3a18-4b7a-b2f7-8092cd2f37f2", "status": 200, "duration_ms": 654.7}
+[WebServer] {"ts": "2026-11-18T14:54:06.688+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "95a94d4c-65fa-4726-96f7-bd7073289e0d", "event": "http_request", "method": "GET", "path": "/api/v1/identity/serials/f68116bb-efdb-4b7e-96a0-a2cacbfc83a4/tracking", "status": 200, "duration_ms": 700.1}
+[WebServer] {"ts": "2026-11-18T14:54:07.992+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "6a48dcb5-1051-4f68-823c-91f3f43b59e6", "event": "http_request", "method": "GET", "path": "/api/v1/identity/products/9bec8b0c-3a18-4b7a-b2f7-8092cd2f37f2", "status": 200, "duration_ms": 405.4}
+[WebServer] {"ts": "2026-11-18T14:54:08.132+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "6f81be91-cc54-4278-8c86-757fc3294877", "event": "http_request", "method": "GET", "path": "/api/v1/commercial/change-requests", "status": 200, "duration_ms": 471.7}
+[WebServer] {"ts": "2026-11-18T14:54:08.138+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "5d72eb1c-b4f5-4827-b7a6-43546fef8f4c", "event": "http_request", "method": "GET", "path": "/api/v1/identity/styles/a6c2060e-e15b-416a-83d5-07379a8418f1", "status": 200, "duration_ms": 564.3}
+[WebServer] {"ts": "2026-11-18T14:54:08.230+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "ccb5ae85-6d7b-4348-a61d-53618f0be0a8", "event": "http_request", "method": "GET", "path": "/api/v1/identity/serials/f68116bb-efdb-4b7e-96a0-a2cacbfc83a4/tracking", "status": 200, "duration_ms": 490.2}
+[WebServer] {"ts": "2026-11-18T14:54:08.455+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "4eae7634-1101-4731-bb70-cee52f5c17d8", "event": "http_request", "method": "GET", "path": "/api/v1/identity/styles/a6c2060e-e15b-416a-83d5-07379a8418f1", "status": 200, "duration_ms": 473.7}
+[WebServer] [18/Nov/2026 18:24:08] "GET /api/v1/identity/styles/a6c2060e-e15b-416a-83d5-07379a8418f1 HTTP/1.1" 200 507
+[WebServer] {"ts": "2026-11-18T14:54:08.580+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "a91a6759-ac2d-4df0-87e5-781ace5de4c9", "event": "http_request", "method": "GET", "path": "/api/v1/commercial/customer-orders/95395b85-d13a-4a8f-92c3-f9962723f7a9", "status": 200, "duration_ms": 712.2}
+[WebServer] {"ts": "2026-11-18T14:54:08.685+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "44af6d6a-4a33-46f8-aa44-6bb995d54f27", "event": "http_request", "method": "GET", "path": "/api/v1/identity/products/9bec8b0c-3a18-4b7a-b2f7-8092cd2f37f2", "status": 200, "duration_ms": 610.9}
+[WebServer] [18/Nov/2026 18:24:08] "GET /api/v1/identity/products/9bec8b0c-3a18-4b7a-b2f7-8092cd2f37f2 HTTP/1.1" 200 469
+[WebServer] {"ts": "2026-11-18T14:54:08.789+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "78711c4a-17ea-43d1-bca9-b61b0deaa69c", "event": "http_request", "method": "GET", "path": "/api/v1/identity/serials/f68116bb-efdb-4b7e-96a0-a2cacbfc83a4/tracking", "status": 200, "duration_ms": 427.0}
+[WebServer] [18/Nov/2026 18:24:08] "GET /api/v1/identity/serials/f68116bb-efdb-4b7e-96a0-a2cacbfc83a4/tracking HTTP/1.1" 200 1738
+[WebServer] {"ts": "2026-11-18T14:54:08.869+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "456d4a3b-f7f0-45c4-824b-f098d28b7e9f", "event": "http_request", "method": "GET", "path": "/api/v1/commercial/change-requests", "status": 200, "duration_ms": 636.9}
+[WebServer] {"ts": "2026-11-18T14:54:09.012+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "178d87e0-a98a-41f5-8739-23bb73083b8d", "event": "http_request", "method": "GET", "path": "/api/v1/commercial/customer-orders/95395b85-d13a-4a8f-92c3-f9962723f7a9", "status": 200, "duration_ms": 547.2}
+[WebServer] [18/Nov/2026 18:24:09] "GET /api/v1/commercial/customer-orders/95395b85-d13a-4a8f-92c3-f9962723f7a9 HTTP/1.1" 200 972
+[WebServer] {"ts": "2026-11-18T14:54:09.104+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "d7903c63-0acc-45fc-bd12-8128fdd6c137", "event": "http_request", "method": "GET", "path": "/api/v1/identity/external-refs", "status": 200, "duration_ms": 509.6}
+[WebServer] {"ts": "2026-11-18T14:54:09.135+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "99af2695-9651-4ef3-b84a-1c0e72b06d9d", "event": "http_request", "method": "GET", "path": "/api/v1/identity/serials/f68116bb-efdb-4b7e-96a0-a2cacbfc83a4/snapshots", "status": 200, "duration_ms": 213.9}
+[WebServer] [18/Nov/2026 18:24:09] "GET /api/v1/identity/serials/f68116bb-efdb-4b7e-96a0-a2cacbfc83a4/snapshots?page_size=100 HTTP/1.1" 200 351
+[WebServer] {"ts": "2026-11-18T14:54:09.401+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "2b0478e4-12e1-4436-b0d3-14aecad72a99", "event": "http_request", "method": "GET", "path": "/api/v1/identity/external-refs", "status": 200, "duration_ms": 709.5}
+[WebServer] [18/Nov/2026 18:24:09] "GET /api/v1/identity/external-refs?target_type=serial&target_id=f68116bb-efdb-4b7e-96a0-a2cacbfc83a4&page_size=50 HTTP/1.1" 200 55
+[WebServer] {"ts": "2026-11-18T14:54:09.418+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "5a1280aa-1234-4470-847d-31224ada8376", "event": "http_request", "method": "GET", "path": "/api/v1/identity/external-refs", "status": 200, "duration_ms": 613.5}
+[WebServer] [18/Nov/2026 18:24:09] "GET /api/v1/identity/external-refs?target_type=customer_order&target_id=95395b85-d13a-4a8f-92c3-f9962723f7a9&page_size=50 HTTP/1.1" 200 55
+[WebServer] {"ts": "2026-11-18T14:54:10.805+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "6df4186c-3c1c-4c30-94e1-a7946c5e6035", "event": "http_request", "method": "GET", "path": "/api/v1/identity/products/9bec8b0c-3a18-4b7a-b2f7-8092cd2f37f2", "status": 200, "duration_ms": 233.1}
+[WebServer] {"ts": "2026-11-18T14:54:10.841+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "93527a33-3ebf-4206-b104-80698a0c56e4", "event": "http_request", "method": "GET", "path": "/api/v1/commercial/change-requests", "status": 200, "duration_ms": 252.5}
+[WebServer] {"ts": "2026-11-18T14:54:11.042+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "e5ddf5e6-8cdc-4887-a497-8c2ae29704f7", "event": "http_request", "method": "GET", "path": "/api/v1/identity/styles/a6c2060e-e15b-416a-83d5-07379a8418f1", "status": 200, "duration_ms": 511.2}
+[WebServer] {"ts": "2026-11-18T14:54:11.145+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "6c32cf51-56d2-402c-860c-395f457d23be", "event": "http_request", "method": "GET", "path": "/api/v1/commercial/customer-orders/95395b85-d13a-4a8f-92c3-f9962723f7a9", "status": 200, "duration_ms": 420.0}
+[WebServer] {"ts": "2026-11-18T14:54:11.173+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "8c2ed0df-e23c-4879-8b37-7727fcc90463", "event": "http_request", "method": "GET", "path": "/api/v1/identity/styles/a6c2060e-e15b-416a-83d5-07379a8418f1", "status": 200, "duration_ms": 377.4}
+[WebServer] {"ts": "2026-11-18T14:54:11.185+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "cfc6a927-b028-4c73-99cc-e765794c9d3f", "event": "http_request", "method": "GET", "path": "/api/v1/identity/serials/f68116bb-efdb-4b7e-96a0-a2cacbfc83a4/tracking", "status": 200, "duration_ms": 544.9}
+[WebServer] {"ts": "2026-11-18T14:54:11.278+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "34446521-e239-418c-97c5-7b24741f6df7", "event": "http_request", "method": "GET", "path": "/api/v1/identity/products/9bec8b0c-3a18-4b7a-b2f7-8092cd2f37f2", "status": 200, "duration_ms": 396.7}
+[WebServer] {"ts": "2026-11-18T14:54:11.352+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "b4779861-122c-4bab-a7f2-85c1a9f3d2e5", "event": "http_request", "method": "GET", "path": "/api/v1/commercial/change-requests", "status": 200, "duration_ms": 393.4}
+[WebServer] {"ts": "2026-11-18T14:54:11.508+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "39a33bec-a673-4ecd-bee7-f84eab13aa70", "event": "http_request", "method": "GET", "path": "/api/v1/identity/serials/f68116bb-efdb-4b7e-96a0-a2cacbfc83a4/tracking", "status": 200, "duration_ms": 408.7}
+[WebServer] 6:24:11 PM [vite] http proxy error: /api/v1/commercial/change-requests?serial_id=f68116bb-efdb-4b7e-96a0-a2cacbfc83a4&page_size=25
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:8000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:2017:16)
+[WebServer] 6:24:11 PM [vite] http proxy error: /api/v1/identity/serials/f68116bb-efdb-4b7e-96a0-a2cacbfc83a4/tracking
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:8000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:2017:16)
+[WebServer] 6:24:11 PM [vite] http proxy error: /api/v1/commercial/customer-orders/95395b85-d13a-4a8f-92c3-f9962723f7a9
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:8000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:2017:16)
+[WebServer] {"ts": "2026-11-18T14:54:11.645+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "43889d49-fbf5-451d-8195-6ed436b1d897", "event": "http_request", "method": "GET", "path": "/api/v1/commercial/customer-orders/95395b85-d13a-4a8f-92c3-f9962723f7a9", "status": 200, "duration_ms": 475.7}
+[WebServer] 6:24:11 PM [vite] http proxy error: /api/v1/identity/external-refs?target_type=serial&target_id=f68116bb-efdb-4b7e-96a0-a2cacbfc83a4&page_size=50
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:8000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:2017:16)
+[WebServer] 6:24:11 PM [vite] http proxy error: /api/v1/identity/external-refs?target_type=serial&target_id=f68116bb-efdb-4b7e-96a0-a2cacbfc83a4&page_size=50
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:8000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:2017:16)
+[WebServer] 6:24:11 PM [vite] http proxy error: /api/v1/identity/external-refs?target_type=customer_order&target_id=95395b85-d13a-4a8f-92c3-f9962723f7a9&page_size=50
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:8000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:2017:16)
+[WebServer] 6:24:11 PM [vite] http proxy error: /api/v1/identity/serials/f68116bb-efdb-4b7e-96a0-a2cacbfc83a4/snapshots?page_size=100
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:8000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:2017:16)
+[WebServer] {"ts": "2026-11-18T14:54:11.754+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "e0507e43-672c-43ff-94f1-d20003f98621", "event": "http_request", "method": "GET", "path": "/api/v1/identity/external-refs", "status": 200, "duration_ms": 529.2}
+[WebServer] {"ts": "2026-11-18T14:54:11.766+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "9d76876d-d9c9-4f90-abf5-b566daa4ea10", "event": "http_request", "method": "GET", "path": "/api/v1/identity/external-refs", "status": 200, "duration_ms": 485.7}
+[WebServer] {"ts": "2026-11-18T14:54:11.809+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "c6688457-610c-4151-8dc9-e588d035e692", "event": "http_request", "method": "GET", "path": "/api/v1/identity/external-refs", "status": 200, "duration_ms": 268.8}
+[WebServer] {"ts": "2026-11-18T14:54:12.044+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "b0569954-2172-49db-b1b7-81e1d79c0187", "event": "http_request", "method": "GET", "path": "/api/v1/identity/styles/a6c2060e-e15b-416a-83d5-07379a8418f1", "status": 200, "duration_ms": 395.0}
+[WebServer] {"ts": "2026-11-18T14:54:12.046+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "379badbb-5ae7-449d-ba2c-1345e59b2a08", "event": "http_request", "method": "GET", "path": "/api/v1/identity/products/9bec8b0c-3a18-4b7a-b2f7-8092cd2f37f2", "status": 200, "duration_ms": 245.3}
+[WebServer] {"ts": "2026-11-18T14:54:12.061+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "44612f4a-aa7c-43d1-84e4-af99d5df7cde", "event": "http_request", "method": "GET", "path": "/api/v1/identity/styles/a6c2060e-e15b-416a-83d5-07379a8418f1", "status": 200, "duration_ms": 314.2}
+[WebServer] {"ts": "2026-11-18T14:54:12.096+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "05aab939-ce2c-4182-9703-7161dcad561b", "event": "http_request", "method": "GET", "path": "/api/v1/commercial/change-requests", "status": 200, "duration_ms": 264.3}
+[WebServer] {"ts": "2026-11-18T14:54:12.242+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "58de79aa-a8ac-4ccf-8d96-58bce74b96db", "event": "http_request", "method": "GET", "path": "/api/v1/identity/external-refs", "status": 200, "duration_ms": 177.2}
+[WebServer] {"ts": "2026-11-18T14:54:12.258+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "1c677134-d41f-41a7-8dbe-3ab3c9934b6a", "event": "http_request", "method": "GET", "path": "/api/v1/identity/serials/f68116bb-efdb-4b7e-96a0-a2cacbfc83a4/tracking", "status": 200, "duration_ms": 353.1}
+[WebServer] {"ts": "2026-11-18T14:54:12.312+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "1e29244d-2979-4d4f-80a9-e8e6921b6178", "event": "http_request", "method": "GET", "path": "/api/v1/commercial/customer-orders/95395b85-d13a-4a8f-92c3-f9962723f7a9", "status": 200, "duration_ms": 368.2}
+[WebServer] {"ts": "2026-11-18T14:54:12.419+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "17d9e3e6-d1f8-450f-bb38-1ac932949e2e", "event": "http_request", "method": "GET", "path": "/api/v1/identity/external-refs", "status": 200, "duration_ms": 314.5}
+[WebServer] {"ts": "2026-11-18T14:54:12.500+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "bc93c408-de77-46b4-8cd2-5f78783fb10f", "event": "http_request", "method": "GET", "path": "/api/v1/identity/external-refs", "status": 200, "duration_ms": 291.5}
+[WebServer] {"ts": "2026-11-18T14:54:12.621+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "b079d3c4-0dde-44e7-a75e-93608c3ebc11", "event": "http_request", "method": "GET", "path": "/api/v1/identity/styles/a6c2060e-e15b-416a-83d5-07379a8418f1", "status": 200, "duration_ms": 313.5}
+[WebServer] [18/Nov/2026 18:24:12] "GET /api/v1/identity/styles/a6c2060e-e15b-416a-83d5-07379a8418f1 HTTP/1.1" 200 507
+[WebServer] {"ts": "2026-11-18T14:54:12.670+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "56f19b94-0a4b-4c48-bb52-4e0b0d61f7a3", "event": "http_request", "method": "GET", "path": "/api/v1/identity/products/9bec8b0c-3a18-4b7a-b2f7-8092cd2f37f2", "status": 200, "duration_ms": 299.7}
+[WebServer] [18/Nov/2026 18:24:12] "GET /api/v1/identity/products/9bec8b0c-3a18-4b7a-b2f7-8092cd2f37f2 HTTP/1.1" 200 469
+[WebServer] {"ts": "2026-11-18T14:54:14.784+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "800b0ae5-b322-43de-bf01-1bb75d1541f4", "event": "http_request", "method": "GET", "path": "/api/v1/identity/product-classes", "status": 200, "duration_ms": 638.4}
+[WebServer] {"ts": "2026-11-18T14:54:14.833+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "f857abe5-81fa-4a1a-87dd-e9febece8ebf", "event": "http_request", "method": "GET", "path": "/api/v1/identity/products/9bec8b0c-3a18-4b7a-b2f7-8092cd2f37f2/styles", "status": 200, "duration_ms": 493.0}
+[WebServer] {"ts": "2026-11-18T14:54:15.242+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "81b58c69-c664-47d3-ac31-9cb887fa330b", "event": "http_request", "method": "GET", "path": "/api/v1/identity/products", "status": 200, "duration_ms": 1117.3}
+[WebServer] {"ts": "2026-11-18T14:54:15.327+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "ccd897dd-a3ce-4cb3-90bf-4b15237af24a", "event": "http_request", "method": "GET", "path": "/api/v1/identity/styles/a6c2060e-e15b-416a-83d5-07379a8418f1/tracking", "status": 200, "duration_ms": 800.6}
+[WebServer] {"ts": "2026-11-18T14:54:15.769+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "8534cd89-983a-441c-acd6-9f754c76da88", "event": "http_request", "method": "GET", "path": "/api/v1/identity/products", "status": 200, "duration_ms": 923.0}
+[WebServer] [18/Nov/2026 18:24:15] "GET /api/v1/identity/products?page_size=25 HTTP/1.1" 200 524
+[WebServer] {"ts": "2026-11-18T14:54:15.830+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "9d502073-4f29-404b-8033-10079a292e07", "event": "http_request", "method": "GET", "path": "/api/v1/identity/styles/a6c2060e-e15b-416a-83d5-07379a8418f1/revisions", "status": 200, "duration_ms": 1359.6}
+[WebServer] {"ts": "2026-11-18T14:54:16.274+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "0bfadc4d-9293-4ecf-81c8-5f98e09a4b43", "event": "http_request", "method": "GET", "path": "/api/v1/identity/product-classes", "status": 200, "duration_ms": 1191.7}
+[WebServer] [18/Nov/2026 18:24:16] "GET /api/v1/identity/product-classes?level_key=product_type&page_size=100 HTTP/1.1" 200 410
+[WebServer] {"ts": "2026-11-18T14:54:16.505+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "67d4707c-4b16-404d-8e90-7459ca917805", "event": "http_request", "method": "GET", "path": "/api/v1/identity/product-codes", "status": 200, "duration_ms": 2071.4}
+[WebServer] {"ts": "2026-11-18T14:54:16.620+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "c3bd0ffa-a06e-47c1-b135-8e9ace75b702", "event": "http_request", "method": "GET", "path": "/api/v1/identity/product-codes", "status": 200, "duration_ms": 857.8}
+[WebServer] [18/Nov/2026 18:24:16] "GET /api/v1/identity/product-codes?style_id=a6c2060e-e15b-416a-83d5-07379a8418f1&page_size=25 HTTP/1.1" 200 55
+[WebServer] {"ts": "2026-11-18T14:54:16.666+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "562b5651-7efd-4585-8ea8-f46cc3dc6a1a", "event": "http_request", "method": "GET", "path": "/api/v1/identity/products/9bec8b0c-3a18-4b7a-b2f7-8092cd2f37f2/styles", "status": 200, "duration_ms": 1310.8}
+[WebServer] [18/Nov/2026 18:24:16] "GET /api/v1/identity/products/9bec8b0c-3a18-4b7a-b2f7-8092cd2f37f2/styles?page_size=100 HTTP/1.1" 200 563
+[WebServer] {"ts": "2026-11-18T14:54:16.905+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "f7dfcb2c-0163-419e-a54e-418f53b999e2", "event": "http_request", "method": "GET", "path": "/api/v1/identity/styles/a6c2060e-e15b-416a-83d5-07379a8418f1/revisions", "status": 200, "duration_ms": 650.0}
+[WebServer] [18/Nov/2026 18:24:16] "GET /api/v1/identity/styles/a6c2060e-e15b-416a-83d5-07379a8418f1/revisions?page_size=100 HTTP/1.1" 200 397
+[WebServer] {"ts": "2026-11-18T14:54:17.211+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "491f1da1-71d6-4847-8bf8-a09427152b00", "event": "http_request", "method": "GET", "path": "/api/v1/identity/products/9bec8b0c-3a18-4b7a-b2f7-8092cd2f37f2", "status": 200, "duration_ms": 335.5}
+[WebServer] [18/Nov/2026 18:24:17] "GET /api/v1/identity/products/9bec8b0c-3a18-4b7a-b2f7-8092cd2f37f2 HTTP/1.1" 200 469
+[WebServer] {"ts": "2026-11-18T14:54:17.270+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "012c31dc-3aa4-4deb-ad32-4feb9975a9e0", "event": "http_request", "method": "GET", "path": "/api/v1/identity/styles/a6c2060e-e15b-416a-83d5-07379a8418f1/tracking", "status": 200, "duration_ms": 865.0}
+[WebServer] [18/Nov/2026 18:24:17] "GET /api/v1/identity/styles/a6c2060e-e15b-416a-83d5-07379a8418f1/tracking?page_size=25 HTTP/1.1" 200 1359
+[WebServer] {"ts": "2026-11-18T14:54:17.360+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "e5f58bd5-712b-4a81-b2d8-fb72417f5290", "event": "http_request", "method": "GET", "path": "/api/v1/identity/styles/a6c2060e-e15b-416a-83d5-07379a8418f1", "status": 200, "duration_ms": 762.9}
+[WebServer] [18/Nov/2026 18:24:17] "GET /api/v1/identity/styles/a6c2060e-e15b-416a-83d5-07379a8418f1 HTTP/1.1" 200 507
+[WebServer] 6:24:18 PM [vite] http proxy error: /api/v1/identity/styles/a6c2060e-e15b-416a-83d5-07379a8418f1/tracking?page_size=25
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:8000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:2017:16)
+[WebServer] 6:24:18 PM [vite] http proxy error: /api/v1/identity/products?page_size=25
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:8000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:2017:16)
+[WebServer] 6:24:18 PM [vite] http proxy error: /api/v1/identity/products/9bec8b0c-3a18-4b7a-b2f7-8092cd2f37f2/styles?page_size=100
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:8000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:2017:16)
+[WebServer] 6:24:18 PM [vite] http proxy error: /api/v1/identity/product-codes?style_id=a6c2060e-e15b-416a-83d5-07379a8418f1&page_size=25
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:8000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:2017:16)
+[WebServer] 6:24:18 PM [vite] http proxy error: /api/v1/identity/styles/a6c2060e-e15b-416a-83d5-07379a8418f1/revisions?page_size=100
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:8000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:2017:16)
+[WebServer] 6:24:18 PM [vite] http proxy error: /api/v1/identity/styles/a6c2060e-e15b-416a-83d5-07379a8418f1/tracking?page_size=25
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:8000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:2017:16)
+[WebServer] 6:24:18 PM [vite] http proxy error: /api/v1/identity/styles/a6c2060e-e15b-416a-83d5-07379a8418f1
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:8000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:2017:16)
+[WebServer] 6:24:18 PM [vite] http proxy error: /api/v1/identity/products/9bec8b0c-3a18-4b7a-b2f7-8092cd2f37f2
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:8000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:2017:16)
+[WebServer] 6:24:18 PM [vite] http proxy error: /api/v1/identity/products?page_size=25
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:8000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:2017:16)
+[WebServer] 6:24:18 PM [vite] http proxy error: /api/v1/identity/products/9bec8b0c-3a18-4b7a-b2f7-8092cd2f37f2/styles?page_size=100
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:8000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:2017:16)
+[WebServer] 6:24:18 PM [vite] http proxy error: /api/v1/identity/product-codes?style_id=a6c2060e-e15b-416a-83d5-07379a8418f1&page_size=25
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:8000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:2017:16)
+[WebServer] 6:24:18 PM [vite] http proxy error: /api/v1/identity/styles/a6c2060e-e15b-416a-83d5-07379a8418f1/revisions?page_size=100
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:8000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:2017:16)
+[WebServer] 6:24:18 PM [vite] http proxy error: /api/v1/identity/styles/a6c2060e-e15b-416a-83d5-07379a8418f1/tracking?page_size=25
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:8000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:2017:16)
+[WebServer] 6:24:18 PM [vite] http proxy error: /api/v1/identity/styles/a6c2060e-e15b-416a-83d5-07379a8418f1
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:8000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:2017:16)
+[WebServer] 6:24:18 PM [vite] http proxy error: /api/v1/identity/products/9bec8b0c-3a18-4b7a-b2f7-8092cd2f37f2
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:8000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:2017:16)
+[WebServer] 6:24:18 PM [vite] http proxy error: /api/v1/identity/products?page_size=25
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:8000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:2017:16)
+[WebServer] 6:24:18 PM [vite] http proxy error: /api/v1/identity/products/9bec8b0c-3a18-4b7a-b2f7-8092cd2f37f2/styles?page_size=100
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:8000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:2017:16)
+[WebServer] 6:24:18 PM [vite] http proxy error: /api/v1/identity/product-codes?style_id=a6c2060e-e15b-416a-83d5-07379a8418f1&page_size=25
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:8000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:2017:16)
+[WebServer] 6:24:18 PM [vite] http proxy error: /api/v1/identity/styles/a6c2060e-e15b-416a-83d5-07379a8418f1/revisions?page_size=100
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:8000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:2017:16)
+[WebServer] 6:24:18 PM [vite] http proxy error: /api/v1/identity/styles/a6c2060e-e15b-416a-83d5-07379a8418f1/tracking?page_size=25
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:8000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:2017:16)
+[WebServer] 6:24:18 PM [vite] http proxy error: /api/v1/identity/styles/a6c2060e-e15b-416a-83d5-07379a8418f1
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:8000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:2017:16)
+[WebServer] 6:24:18 PM [vite] http proxy error: /api/v1/identity/products/9bec8b0c-3a18-4b7a-b2f7-8092cd2f37f2
+[WebServer] Error: connect ECONNREFUSED 127.0.0.1:8000
+[WebServer]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:2017:16)
+[WebServer] {"ts": "2026-11-18T14:54:18.899+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "8b1ce8e9-e35c-4078-a33b-ded22a5aa30c", "event": "http_request", "method": "GET", "path": "/api/v1/identity/product-codes", "status": 200, "duration_ms": 405.7}
+[WebServer] {"ts": "2026-11-18T14:54:18.972+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "ca9559af-543c-4fc3-8cb6-fbce118f5a53", "event": "http_request", "method": "GET", "path": "/api/v1/identity/styles/a6c2060e-e15b-416a-83d5-07379a8418f1/revisions", "status": 200, "duration_ms": 355.0}
+[WebServer] {"ts": "2026-11-18T14:54:19.039+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "39203081-0bf8-4491-880a-c6c3893c2968", "event": "http_request", "method": "GET", "path": "/api/v1/identity/products/9bec8b0c-3a18-4b7a-b2f7-8092cd2f37f2/styles", "status": 200, "duration_ms": 580.8}
+[WebServer] {"ts": "2026-11-18T14:54:19.135+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "4faaf96c-abfe-45a7-b70b-6df887af11b2", "event": "http_request", "method": "GET", "path": "/api/v1/identity/products", "status": 200, "duration_ms": 717.6}
+[WebServer] {"ts": "2026-11-18T14:54:19.191+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "5b956e9b-168e-4403-a119-8f1102fb3fa9", "event": "http_request", "method": "GET", "path": "/api/v1/identity/styles/a6c2060e-e15b-416a-83d5-07379a8418f1", "status": 200, "duration_ms": 217.0}
+[WebServer] {"ts": "2026-11-18T14:54:19.197+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "f5d97ce2-7af5-49c7-8d04-d666cdc863a2", "event": "http_request", "method": "GET", "path": "/api/v1/identity/styles/a6c2060e-e15b-416a-83d5-07379a8418f1/tracking", "status": 200, "duration_ms": 328.4}
+[WebServer] {"ts": "2026-11-18T14:54:19.296+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "8e860442-4c8e-42e6-b206-e2bf8f880d31", "event": "http_request", "method": "GET", "path": "/api/v1/identity/products", "status": 200, "duration_ms": 281.4}
+[WebServer] {"ts": "2026-11-18T14:54:19.443+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "0caa080f-67b9-499a-90ea-4f33943d6b74", "event": "http_request", "method": "GET", "path": "/api/v1/identity/products/9bec8b0c-3a18-4b7a-b2f7-8092cd2f37f2/styles", "status": 200, "duration_ms": 334.2}
+[WebServer] {"ts": "2026-11-18T14:54:19.601+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "9135d75a-d60b-4677-b59f-2d8ea2279f89", "event": "http_request", "method": "GET", "path": "/api/v1/identity/product-codes", "status": 200, "duration_ms": 397.7}
+[WebServer] {"ts": "2026-11-18T14:54:19.611+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "3b0e0355-379c-40bb-b32c-13536bed235c", "event": "http_request", "method": "GET", "path": "/api/v1/identity/styles/a6c2060e-e15b-416a-83d5-07379a8418f1/revisions", "status": 200, "duration_ms": 335.8}
+[WebServer] {"ts": "2026-11-18T14:54:19.638+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "597094de-8a68-452d-a8d8-a371993fdd06", "event": "http_request", "method": "GET", "path": "/api/v1/identity/styles/a6c2060e-e15b-416a-83d5-07379a8418f1", "status": 200, "duration_ms": 323.2}
+[WebServer] {"ts": "2026-11-18T14:54:19.674+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "c50cf576-ea38-41fe-97fc-ea0e00744eb6", "event": "http_request", "method": "GET", "path": "/api/v1/identity/styles/a6c2060e-e15b-416a-83d5-07379a8418f1/revisions", "status": 200, "duration_ms": 295.5}
+[WebServer] {"ts": "2026-11-18T14:54:19.787+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "54cfbbc1-810c-4424-8b3f-637d0940e042", "event": "http_request", "method": "GET", "path": "/api/v1/identity/styles/a6c2060e-e15b-416a-83d5-07379a8418f1/tracking", "status": 200, "duration_ms": 490.6}
+[WebServer] {"ts": "2026-11-18T14:54:19.806+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "b424c398-22be-44f1-bf45-c5504678fecc", "event": "http_request", "method": "GET", "path": "/api/v1/identity/products", "status": 200, "duration_ms": 447.0}
+[WebServer] {"ts": "2026-11-18T14:54:21.634+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "bf84ce37-212f-42d1-bff5-4559e541a2d9", "event": "http_request", "method": "GET", "path": "/api/v1/identity/customers", "status": 200, "duration_ms": 248.5}
+[WebServer] [18/Nov/2026 18:24:21] "GET /api/v1/identity/customers?status=ACTIVE&page_size=50 HTTP/1.1" 200 488
+[WebServer] {"ts": "2026-11-18T14:54:21.750+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "486598a6-5436-4864-a748-397df328b315", "event": "http_request", "method": "GET", "path": "/api/v1/identity/customers", "status": 200, "duration_ms": 411.0}
+[WebServer] {"ts": "2026-11-18T14:54:25.200+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "9e348a1b-3890-4f27-8ce7-32ec440d9126", "event": "http_request", "method": "GET", "path": "/api/v1/identity/customers", "status": 200, "duration_ms": 522.8}
+[WebServer] {"ts": "2026-11-18T14:54:25.359+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "8aacdf0f-9402-4635-8d9e-01b5f0f9057c", "event": "http_request", "method": "GET", "path": "/api/v1/identity/customers", "status": 200, "duration_ms": 701.3}
+[WebServer] {"ts": "2026-11-18T14:54:25.416+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "6f3abfbd-0781-4110-a2c0-1991b6d3d272", "event": "http_request", "method": "GET", "path": "/api/v1/identity/customers", "status": 200, "duration_ms": 456.1}
+[WebServer] {"ts": "2026-11-18T14:54:25.607+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "6a93664d-1863-4c25-85ad-e2db7ee389d7", "event": "http_request", "method": "GET", "path": "/api/v1/identity/customers", "status": 200, "duration_ms": 452.2}
+[WebServer] {"ts": "2026-11-18T14:54:25.689+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "303c6d1b-bf8c-4caa-90ca-794db78f8a1c", "event": "http_request", "method": "GET", "path": "/api/v1/identity/customers", "status": 200, "duration_ms": 468.6}
+[WebServer] [18/Nov/2026 18:24:25] "GET /api/v1/identity/customers?status=ACTIVE&page_size=50 HTTP/1.1" 200 488
+[WebServer] {"ts": "2026-11-18T14:54:27.754+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "0f7e23cf-382b-4d12-bcab-4c32c34e06ae", "event": "http_request", "method": "GET", "path": "/api/v1/commercial/change-requests", "status": 200, "duration_ms": 210.8}
+[WebServer] {"ts": "2026-11-18T14:54:27.812+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "8dce06b1-6f2d-4568-8934-f9f8d5751374", "event": "http_request", "method": "GET", "path": "/api/v1/commercial/change-requests", "status": 200, "duration_ms": 236.0}
+[WebServer] [18/Nov/2026 18:24:27] "GET /api/v1/commercial/change-requests?page_size=25 HTTP/1.1" 200 847
+[WebServer] {"ts": "2026-11-18T14:54:29.824+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "9f1b64db-4014-4cb4-9f34-d50d08f317f4", "event": "http_request", "method": "GET", "path": "/api/v1/commercial/change-requests", "status": 200, "duration_ms": 156.0}
+[WebServer] {"ts": "2026-11-18T14:54:29.879+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "ccf858f1-b063-462f-b7ae-327f397ef487", "event": "http_request", "method": "GET", "path": "/api/v1/commercial/change-requests", "status": 200, "duration_ms": 221.2}
+[WebServer] {"ts": "2026-11-18T14:54:30.077+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "160b082f-55f4-4f5f-ad97-8eb2cbcf3001", "event": "http_request", "method": "GET", "path": "/api/v1/commercial/change-requests", "status": 200, "duration_ms": 205.3}
+[WebServer] {"ts": "2026-11-18T14:54:30.080+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "79315a4e-361b-4840-b801-39c109619270", "event": "http_request", "method": "GET", "path": "/api/v1/commercial/change-requests", "status": 200, "duration_ms": 221.2}
+[WebServer] {"ts": "2026-11-18T14:54:30.183+00:00", "level": "INFO", "logger": "aleekhan.access", "msg": "request", "request_id": "f41910f7-a9cb-4e96-88fb-936956b74e21", "event": "http_request", "method": "GET", "path": "/api/v1/commercial/change-requests", "status": 200, "duration_ms": 134.0}
+[WebServer] [18/Nov/2026 18:24:30] "GET /api/v1/commercial/change-requests?page_size=25 HTTP/1.1" 200 847
+  ok 2 [chromium] › e2e\fidelity\fidelity.spec.ts:217:1 › @fidelity built pages: score per page per width, baseline + side-by-side screenshots (41.0s)
+
+  2 passed (51.8s)
+== results: fidelity rc=0
+== drop throw-away database test_fidelity_e2e

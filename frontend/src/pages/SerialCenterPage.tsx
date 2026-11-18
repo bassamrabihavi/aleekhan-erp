@@ -123,6 +123,7 @@ function SerialView({ id }: { id: string }) {
             active={tab}
             onChange={setTab}
             label="بخش‌های مرکز کنترل سریال"
+            fid="tabs"
           />
           <TabPanel id={tab}>{tab === "summary" ? <SummaryTab t={t} /> : <OrderTab t={t} order={order.data} orderLoading={order.isPending && order.fetchStatus !== "idle"} />}</TabPanel>
         </>
@@ -154,7 +155,7 @@ function SerialHeader({ s, order }: { s: Serial; order: CustomerOrder | undefine
   const line = order?.lines.find((l) => l.serial_id === s.serial_id);
   const brand = brands.data?.items.find((b) => b.brand_id === order?.brand_id);
   return (
-    <section className="serial-head panel panel--wide" aria-labelledby="serial-title" data-testid="serial-header">
+    <section className="serial-head panel panel--wide" aria-labelledby="serial-title" data-testid="serial-header" data-fid="serial-header">
       <div className="serial-head__main">
         <p className="eyebrow">صفحه ۱ و ۲ · مرکز کنترل سریال · فاز ۲</p>
         <h1 id="serial-title">
@@ -193,15 +194,15 @@ function SummaryTab({ t }: { t: SerialTracking }) {
   });
   return (
     <div className="stack" data-testid="serial-summary">
-      <LaterSection title="مراحل تولید (مواد و انبار ← مهندسی ← تأمین ← برش ← دوخت ← کنترل کیفیت ← آماده محصول)" phase="PHASE_03 … PHASE_09" />
-      <div className="later-grid">
-        <LaterSection title="مشکلات فعال" phase="PHASE_06 / PHASE_07" />
+      <LaterSection title="مراحل تولید (مواد و انبار ← مهندسی ← تأمین ← برش ← دوخت ← کنترل کیفیت ← آماده محصول)" phase="PHASE_03 … PHASE_09" fid="stage-flow" />
+      <div className="later-grid" data-fid="summary-cards">
+        <LaterSection title="مشکلات فعال" phase="PHASE_06 / PHASE_07" fid="active-problems" />
         <LaterSection title="پیشرفت کلی" phase="PHASE_07 / PHASE_09" />
         <LaterSection title="آمادگی مواد" phase="PHASE_06" />
         <LaterSection title="موقعیت فعلی" phase="PHASE_07" />
         <LaterSection title="کیفیت و گرید" phase="PHASE_08" />
       </div>
-      <section className="panel panel--wide" aria-labelledby="sum-changes-title">
+      <section className="panel panel--wide" aria-labelledby="sum-changes-title" data-fid="side-panel">
         <div className="panel__head">
           <h2 id="sum-changes-title">تصمیم‌ها و پیگیری‌ها (درخواست‌های تغییر این سریال)</h2>
           {can(PERM.changeRead) ? <a href="#/changes" className="btn btn--link">مشاهده همه</a> : null}
@@ -239,7 +240,7 @@ function OrderTab({ t, order, orderLoading }: { t: SerialTracking; order: Custom
   });
   const withheld = t.withheld_sections ?? [];
   return (
-    <div className="stack" data-testid="serial-order">
+    <div className="stack" data-testid="serial-order" data-fid="order-tab">
       <section className="panel panel--wide" aria-labelledby="o-title">
         <h2 id="o-title">سفارش</h2>
         {!can(PERM.orderRead) || withheld.includes("order_versions") ? (
