@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "threshold": 0.95,
-  "commit": "e7bec06fd851",
+  "commit": "0e0d92787786",
   "date": "2026-11-18",
   "channel": "msedge",
   "results": [
@@ -15,6 +15,10 @@
           "score": 0.9538461538461538,
           "presence": 1,
           "layout": 0.8461538461538461,
+          "layout_in_place": 0.8461538461538461,
+          "extra_above": 0,
+          "extra_sections": [],
+          "extra_free": [],
           "style": 1,
           "regions": [
             {
@@ -182,6 +186,10 @@
           "score": 0.9538461538461538,
           "presence": 1,
           "layout": 0.8461538461538461,
+          "layout_in_place": 0.8461538461538461,
+          "extra_above": 0,
+          "extra_sections": [],
+          "extra_free": [],
           "style": 1,
           "regions": [
             {
@@ -346,16 +354,20 @@
         },
         {
           "width": 768,
-          "score": 0.7666666666666666,
+          "score": 1,
           "presence": 1,
-          "layout": 0.2222222222222222,
+          "layout": 1,
+          "layout_in_place": 1,
+          "extra_above": 0,
+          "extra_sections": [],
+          "extra_free": [],
           "style": 1,
           "regions": [
             {
               "id": "topbar",
               "label_fa": "نوار بالا",
               "presence": 1,
-              "iou": 0.6250146631006007,
+              "iou": 0.8892262441292281,
               "in_place": true,
               "missing_children": [],
               "note": ""
@@ -364,8 +376,8 @@
               "id": "topbar-search",
               "label_fa": "جستجوی سراسری",
               "presence": 1,
-              "iou": 0.07618229176530249,
-              "in_place": false,
+              "iou": 0.9192214869491783,
+              "in_place": true,
               "missing_children": [],
               "note": ""
             },
@@ -373,8 +385,8 @@
               "id": "topbar-user",
               "label_fa": "کاربر",
               "presence": 1,
-              "iou": 0.12181162491686232,
-              "in_place": false,
+              "iou": 0.8331139848898678,
+              "in_place": true,
               "missing_children": [],
               "note": ""
             },
@@ -382,8 +394,8 @@
               "id": "menu-toggle",
               "label_fa": "دکمه باز کردن منو (موبایل)",
               "presence": 1,
-              "iou": 0.24296283085607503,
-              "in_place": false,
+              "iou": 0.840524938959761,
+              "in_place": true,
               "missing_children": [],
               "note": ""
             },
@@ -391,7 +403,7 @@
               "id": "serial-header",
               "label_fa": "سربرگ سریال (شماره، محصول، کد، مشتری، وضعیت، تعداد)",
               "presence": 1,
-              "iou": 0.6558380834298098,
+              "iou": 0.9649482425141056,
               "in_place": true,
               "missing_children": [],
               "note": ""
@@ -401,8 +413,8 @@
               "label_fa": "مراحل تولید سریال",
               "later_phase": "PHASE_03 … PHASE_09",
               "presence": 1,
-              "iou": 0.04083948591492496,
-              "in_place": false,
+              "iou": 0.9279588015784247,
+              "in_place": true,
               "missing_children": [],
               "note": "later phase: honest «در دست ساخت» in place"
             },
@@ -410,8 +422,8 @@
               "id": "side-panel",
               "label_fa": "تصمیم‌ها و پیگیری‌ها / تسک‌ها / ریسک‌ها",
               "presence": 1,
-              "iou": 0.10338786833638054,
-              "in_place": false,
+              "iou": 0.7781391875011999,
+              "in_place": true,
               "missing_children": [],
               "note": ""
             },
@@ -420,8 +432,8 @@
               "label_fa": "کارت‌های خلاصه (پیشرفت، موقعیت، مشکلات، آمادگی مواد، کیفیت)",
               "later_phase": "PHASE_06 … PHASE_09",
               "presence": 1,
-              "iou": 0.04684446756160105,
-              "in_place": false,
+              "iou": 0.7698431632244628,
+              "in_place": true,
               "missing_children": [],
               "note": "later phase: honest «در دست ساخت» in place"
             },
@@ -430,8 +442,8 @@
               "label_fa": "مشکلات فعال (کارت موبایل)",
               "later_phase": "PHASE_06 / PHASE_07",
               "presence": 1,
-              "iou": 0,
-              "in_place": false,
+              "iou": 0.9458250944063599,
+              "in_place": true,
               "missing_children": [],
               "note": "later phase: honest «در دست ساخت» in place"
             }
@@ -479,6 +491,10 @@
           "score": 1,
           "presence": 1,
           "layout": 1,
+          "layout_in_place": 1,
+          "extra_above": 0,
+          "extra_sections": [],
+          "extra_free": [],
           "style": 1,
           "regions": [
             {
@@ -614,8 +630,8 @@
           ]
         }
       ],
-      "min": 0.7666666666666666,
-      "passed": false
+      "min": 0.9538461538461538,
+      "passed": true
     },
     {
       "page": "02",
@@ -627,6 +643,10 @@
           "score": 0.95,
           "presence": 1,
           "layout": 0.8333333333333334,
+          "layout_in_place": 0.8333333333333334,
+          "extra_above": 0,
+          "extra_sections": [],
+          "extra_free": [],
           "style": 1,
           "regions": [
             {
@@ -784,6 +804,10 @@
           "score": 0.95,
           "presence": 1,
           "layout": 0.8333333333333334,
+          "layout_in_place": 0.8333333333333334,
+          "extra_above": 0,
+          "extra_sections": [],
+          "extra_free": [],
           "style": 1,
           "regions": [
             {
@@ -938,16 +962,20 @@
         },
         {
           "width": 768,
-          "score": 0.8500000000000001,
+          "score": 0.9624999999999999,
           "presence": 1,
-          "layout": 0.5,
+          "layout": 0.875,
+          "layout_in_place": 0.875,
+          "extra_above": 0,
+          "extra_sections": [],
+          "extra_free": [],
           "style": 1,
           "regions": [
             {
               "id": "topbar",
               "label_fa": "نوار بالا",
               "presence": 1,
-              "iou": 0.6250146631006007,
+              "iou": 0.8892262441292281,
               "in_place": true,
               "missing_children": [],
               "note": ""
@@ -956,8 +984,8 @@
               "id": "topbar-search",
               "label_fa": "جستجوی سراسری",
               "presence": 1,
-              "iou": 0.07618229176530249,
-              "in_place": false,
+              "iou": 0.9192214869491783,
+              "in_place": true,
               "missing_children": [],
               "note": ""
             },
@@ -965,8 +993,8 @@
               "id": "topbar-user",
               "label_fa": "کاربر",
               "presence": 1,
-              "iou": 0.12181162491686232,
-              "in_place": false,
+              "iou": 0.8331139848898678,
+              "in_place": true,
               "missing_children": [],
               "note": ""
             },
@@ -974,8 +1002,8 @@
               "id": "menu-toggle",
               "label_fa": "دکمه باز کردن منو (موبایل)",
               "presence": 1,
-              "iou": 0.24296283085607503,
-              "in_place": false,
+              "iou": 0.840524938959761,
+              "in_place": true,
               "missing_children": [],
               "note": ""
             },
@@ -983,7 +1011,7 @@
               "id": "serial-header",
               "label_fa": "سربرگ سریال (شماره، محصول، کد، مشتری، وضعیت، تعداد)",
               "presence": 1,
-              "iou": 0.6558380834298098,
+              "iou": 0.9649482425141056,
               "in_place": true,
               "missing_children": [],
               "note": ""
@@ -993,8 +1021,8 @@
               "label_fa": "مراحل تولید سریال",
               "later_phase": "PHASE_03 … PHASE_09",
               "presence": 1,
-              "iou": 0.04083948591492496,
-              "in_place": false,
+              "iou": 0.9279588015784247,
+              "in_place": true,
               "missing_children": [],
               "note": "later phase: honest «در دست ساخت» in place"
             },
@@ -1002,8 +1030,8 @@
               "id": "side-panel",
               "label_fa": "تصمیم‌ها و پیگیری‌ها / تسک‌ها / ریسک‌ها",
               "presence": 1,
-              "iou": 0.7781391875011999,
-              "in_place": true,
+              "iou": 0.357449647928957,
+              "in_place": false,
               "missing_children": [],
               "note": ""
             },
@@ -1011,7 +1039,7 @@
               "id": "order-tab",
               "label_fa": "محتوای تب سفارش (سربرگ سفارش، ردیف‌ها، Snapshot، نسخه‌ها، مرجع‌های خارجی، خط زمانی)",
               "presence": 1,
-              "iou": 0.6171295392561738,
+              "iou": 0.828956589642575,
               "in_place": true,
               "missing_children": [],
               "note": ""
@@ -1060,6 +1088,10 @@
           "score": 0.9666666666666666,
           "presence": 1,
           "layout": 0.8888888888888888,
+          "layout_in_place": 0.8888888888888888,
+          "extra_above": 0,
+          "extra_sections": [],
+          "extra_free": [],
           "style": 1,
           "regions": [
             {
@@ -1184,8 +1216,8 @@
           ]
         }
       ],
-      "min": 0.8500000000000001,
-      "passed": false
+      "min": 0.95,
+      "passed": true
     },
     {
       "page": "04",
@@ -1197,6 +1229,13 @@
           "score": 1,
           "presence": 1,
           "layout": 1,
+          "layout_in_place": 1,
+          "extra_above": 0,
+          "extra_sections": [],
+          "extra_free": [
+            "section.panel[style-detail] «استایل 0001 · استایل ساختگی (محیط آزمایشی — داده ساختگی)»",
+            "div.split «محصولات»"
+          ],
           "style": 1,
           "regions": [
             {
@@ -1371,6 +1410,13 @@
           "score": 1,
           "presence": 1,
           "layout": 1,
+          "layout_in_place": 1,
+          "extra_above": 0,
+          "extra_sections": [],
+          "extra_free": [
+            "section.panel[style-detail] «استایل 0001 · استایل ساختگی (محیط آزمایشی — داده ساختگی)»",
+            "div.split «محصولات»"
+          ],
           "style": 1,
           "regions": [
             {
@@ -1545,6 +1591,13 @@
           "score": 0.976923076923077,
           "presence": 1,
           "layout": 0.9230769230769231,
+          "layout_in_place": 0.9230769230769231,
+          "extra_above": 0,
+          "extra_sections": [],
+          "extra_free": [
+            "section.panel[style-detail] «استایل 0001 · استایل ساختگی (محیط آزمایشی — داده ساختگی)»",
+            "div.split «محصولات»"
+          ],
           "style": 1,
           "regions": [
             {
@@ -1710,6 +1763,13 @@
           "score": 0.9727272727272727,
           "presence": 1,
           "layout": 0.9090909090909091,
+          "layout_in_place": 0.9090909090909091,
+          "extra_above": 0,
+          "extra_sections": [],
+          "extra_free": [
+            "section.panel[style-detail] «استایل 0001 · استایل ساختگی (محیط آزمایشی — داده ساختگی)»",
+            "div.split «محصولات»"
+          ],
           "style": 1,
           "regions": [
             {
@@ -1866,6 +1926,10 @@
           "score": 1,
           "presence": 1,
           "layout": 1,
+          "layout_in_place": 1,
+          "extra_above": 0,
+          "extra_sections": [],
+          "extra_free": [],
           "style": 1,
           "regions": [
             {
@@ -2029,6 +2093,10 @@
           "score": 1,
           "presence": 1,
           "layout": 1,
+          "layout_in_place": 1,
+          "extra_above": 0,
+          "extra_sections": [],
+          "extra_free": [],
           "style": 1,
           "regions": [
             {
@@ -2183,6 +2251,10 @@
           "score": 1,
           "presence": 1,
           "layout": 1,
+          "layout_in_place": 1,
+          "extra_above": 0,
+          "extra_sections": [],
+          "extra_free": [],
           "style": 1,
           "regions": [
             {
@@ -2337,13 +2409,17 @@
           "score": 0.9749999999999999,
           "presence": 1,
           "layout": 0.9166666666666666,
+          "layout_in_place": 0.9166666666666666,
+          "extra_above": 0,
+          "extra_sections": [],
+          "extra_free": [],
           "style": 1,
           "regions": [
             {
               "id": "topbar",
               "label_fa": "نوار بالا",
               "presence": 1,
-              "iou": 0.9433784268221352,
+              "iou": 0.9431138575517926,
               "in_place": true,
               "missing_children": [],
               "note": ""
@@ -2379,7 +2455,7 @@
               "id": "page-header",
               "label_fa": "سربرگ و عنوان صفحه",
               "presence": 1,
-              "iou": 0.8659602776821343,
+              "iou": 0.8661900684640199,
               "in_place": true,
               "missing_children": [],
               "note": ""
@@ -2388,7 +2464,7 @@
               "id": "header-actions",
               "label_fa": "دکمه‌های اقدام صفحه",
               "presence": 1,
-              "iou": 0.739197037148252,
+              "iou": 0.740773244575161,
               "in_place": true,
               "missing_children": [],
               "note": ""
@@ -2397,7 +2473,7 @@
               "id": "kpis",
               "label_fa": "کارت‌های شاخص (KPI)",
               "presence": 1,
-              "iou": 0.9187117144890364,
+              "iou": 0.9184424706159819,
               "in_place": true,
               "missing_children": [],
               "note": ""
@@ -2406,7 +2482,7 @@
               "id": "order-wizard",
               "label_fa": "فرم مرحله‌ای ثبت سفارش",
               "presence": 1,
-              "iou": 0.835362915112722,
+              "iou": 0.834798161971046,
               "in_place": true,
               "missing_children": [],
               "note": ""
@@ -2415,7 +2491,7 @@
               "id": "wizard-steps",
               "label_fa": "مراحل فرم",
               "presence": 1,
-              "iou": 0.7703403884764753,
+              "iou": 0.7672857822656908,
               "in_place": true,
               "missing_children": [],
               "note": ""
@@ -2424,7 +2500,7 @@
               "id": "coding-validation",
               "label_fa": "کدگذاری راهکاران و اعتبارسنجی",
               "presence": 1,
-              "iou": 0.7813208844833888,
+              "iou": 0.7802639671641253,
               "in_place": true,
               "missing_children": [],
               "note": ""
@@ -2433,7 +2509,7 @@
               "id": "similar-styles",
               "label_fa": "بررسی استایل‌های موجود",
               "presence": 1,
-              "iou": 0.761171598243159,
+              "iou": 0.7613735823539993,
               "in_place": true,
               "missing_children": [],
               "note": ""
@@ -2442,7 +2518,7 @@
               "id": "pre-checks",
               "label_fa": "کنترل‌های داده پیش از ثبت",
               "presence": 1,
-              "iou": 0.7413623925973534,
+              "iou": 0.7411469297127863,
               "in_place": true,
               "missing_children": [],
               "note": ""
@@ -2500,6 +2576,10 @@
           "score": 1,
           "presence": 1,
           "layout": 1,
+          "layout_in_place": 1,
+          "extra_above": 0,
+          "extra_sections": [],
+          "extra_free": [],
           "style": 1,
           "regions": [
             {
@@ -2646,6 +2726,10 @@
           "score": 1,
           "presence": 1,
           "layout": 1,
+          "layout_in_place": 1,
+          "extra_above": 0,
+          "extra_sections": [],
+          "extra_free": [],
           "style": 1,
           "regions": [
             {
@@ -2783,6 +2867,10 @@
           "score": 1,
           "presence": 1,
           "layout": 1,
+          "layout_in_place": 1,
+          "extra_above": 0,
+          "extra_sections": [],
+          "extra_free": [],
           "style": 1,
           "regions": [
             {
@@ -2920,6 +3008,10 @@
           "score": 0.97,
           "presence": 1,
           "layout": 0.9,
+          "layout_in_place": 0.9,
+          "extra_above": 0,
+          "extra_sections": [],
+          "extra_free": [],
           "style": 1,
           "regions": [
             {
@@ -2989,7 +3081,7 @@
               "id": "change-list",
               "label_fa": "فهرست درخواست‌ها",
               "presence": 1,
-              "iou": 0.738438191118731,
+              "iou": 0.6089093196365148,
               "in_place": true,
               "missing_children": [],
               "note": ""
@@ -2998,7 +3090,7 @@
               "id": "change-compare",
               "label_fa": "مقایسه قبل و بعد و گیت‌های تأیید",
               "presence": 1,
-              "iou": 0.8893104933972729,
+              "iou": 0.812610725391702,
               "in_place": true,
               "missing_children": [],
               "note": ""
@@ -3056,6 +3148,5 @@
       "min": 0.97,
       "passed": true
     }
-  ],
-  "kind": "final (REV-0295)"
+  ]
 }
