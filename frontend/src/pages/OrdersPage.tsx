@@ -408,11 +408,12 @@ function CodingPanel() {
           ))}
         </tbody>
       </table>
-      <div className="codebox" aria-label="کد ترکیبی این سفارش">
+      <div className="codebox">
         <span className="codebox__label">کد ترکیبی نمایشی</span>
         <span className="codebox__code" dir="ltr">
           <span>02</span>
-          <span className="codebox__rest" aria-label="بقیه بخش‌ها پس از انتخاب استایل">·· ·· ···· ····</span>
+          <span className="codebox__rest" aria-hidden="true">·· ·· ···· ····</span>
+          <span className="sr-only">بقیه بخش‌ها پس از انتخاب استایل</span>
         </span>
         <span className="codebox__hint">بقیه بخش‌ها پس از انتخاب استایل (مرحله ۲)؛ کد فقط از سرور.</span>
       </div>

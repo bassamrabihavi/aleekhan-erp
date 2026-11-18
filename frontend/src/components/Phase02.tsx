@@ -68,7 +68,7 @@ export function LaterSection({ title, phase, fid, className, detail, icon, rails
             <li key={r}>
               <span>{r}</span>
               <span className="later__rail" aria-hidden="true" />
-              <span aria-label="بدون داده">—</span>
+              <span>—<span className="sr-only"> (بدون داده)</span></span>
             </li>
           ))}
         </ul>

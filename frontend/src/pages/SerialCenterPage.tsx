@@ -214,7 +214,7 @@ function DateCards() {
             <span className="date-card__label">{c.label}</span>
             <Icon name={c.icon} size={18} />
           </span>
-          <span className="date-card__value" aria-label={`${c.label}: بدون داده`}>—</span>
+          <span className="date-card__value">—<span className="sr-only"> (بدون داده)</span></span>
           <span className="date-card__meta">
             در دست ساخت · <bdi dir="ltr">PHASE_05</bdi>
           </span>
@@ -454,13 +454,13 @@ function LaterCard({ title, icon, phase, main, bar = false, box, rows, className
       {main ? (
         <p className="later-card__main">
           <span>{main}</span>
-          <strong aria-label="بدون داده">—</strong>
+          <strong>—<span className="sr-only"> (بدون داده)</span></strong>
         </p>
       ) : null}
       {box ? (
         <div className="later-card__box">
           <span>{box}</span>
-          <strong aria-label="بدون داده">—</strong>
+          <strong>—<span className="sr-only"> (بدون داده)</span></strong>
         </div>
       ) : null}
       {bar ? <span className="later-card__bar" aria-hidden="true" /> : null}
@@ -469,7 +469,7 @@ function LaterCard({ title, icon, phase, main, bar = false, box, rows, className
           <li key={r}>
             <span className="later-card__dot" aria-hidden="true" />
             <span>{r}</span>
-            <span aria-label="بدون داده">—</span>
+            <span>—<span className="sr-only"> (بدون داده)</span></span>
           </li>
         ))}
       </ul>
@@ -487,11 +487,11 @@ function ProblemsCard({ fid }: { fid?: string }) {
       <div className="later-card__head">
         <Icon name="alert" size={20} className="later-card__icon" />
         <h3 className="later__title">مشکلات فعال</h3>
-        <span className="later-card__count" aria-label="تعداد: بدون داده">— مورد</span>
+        <span className="later-card__count">— مورد<span className="sr-only"> (تعداد: بدون داده)</span></span>
       </div>
       <div className="later-card__box later-card__box--problems">
         <span>کسری، توقف دستگاه و تأخیر هر مرحله</span>
-        <strong aria-label="بدون داده">—</strong>
+        <strong>—<span className="sr-only"> (بدون داده)</span></strong>
       </div>
       <p className="later__text">{LATER_TEXT}</p>
       <p className="later__meta">

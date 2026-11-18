@@ -1107,7 +1107,7 @@ button.pagetabs__item {
   justify-content: center;
   gap: 4px;
   padding: 6px;
-  background: #6b7a8c;
+  background: #5d6b7c;
   border: 1px dashed #b7c1cd;
   border-radius: 10px;
   color: #fff;
@@ -1401,7 +1401,10 @@ button.pagetabs__item {
   text-align: center;
 }
 .later-card__box--problems {
-  background: var(--color-danger-tint);
+  align-items: flex-start;
+  background: var(--color-surface);
+  border: 1px solid #f3d8da;
+  text-align: start;
 }
 .later-card__bar {
   display: block;
@@ -1426,6 +1429,11 @@ button.pagetabs__item {
   gap: 6px;
   line-height: 1.4;
 }
+/* the value column («—» until the phase exists) reads like the concept's number column */
+.later-card__rows li > span:last-child {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-ink);
+}
 .later-card__dot {
   width: 8px;
   height: 8px;
@@ -1435,6 +1443,7 @@ button.pagetabs__item {
 .later-card .later__text {
   margin-block-start: auto;
   font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-regular, 400);
   line-height: 1.5;
 }
 .later-card .later__meta {
