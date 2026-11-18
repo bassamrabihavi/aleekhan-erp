@@ -6,7 +6,7 @@
   "ready_testid": "serial-order",
   "after_load": "open-order-tab",
   "authored": "hand",
-  "source_note": "HAND-AUTHORED (no HTML mockup exists for pages 1/2): region boxes were read off the two concept PNGs in 01_02_concepts by eye. Desktop concept (1586x992, tab «خلاصه») gives 1440 and 1180 (content area x 20..1510, top y 90; boxes / content width); mobile concept (941x1672, phone content x 90..850) gives 390 and, by assumption, 768 (no tablet concept exists). Page 2: the concepts do not show the «سفارش» tab; the frame (header, actions, stage flow, tabs, side panel) is the same picture and the tab body is placed where the summary cards and events sit, with the section list of DEC-027 (approved P-A structure). Labels are the visible headings/labels of the picture, never its numbers. Style refs (radius 10, border 1, shadow) are estimates. DEC-061 amendment 2026-11-18 (control/decisions/DECISION_LOG.md): at 768 the shell regions (side-menu, topbar, topbar-search, topbar-date, topbar-user, menu-toggle) are NOT the scaled phone concept; their 768 targets are copied unchanged from the catalogue shared shell in specs/page-29.json at 768 (extracted from 29_36_commercial_planning_admin/index.html?page=29, the same shell targets as page 33; page-33.json differs only in topbar-search, by < 0.01 of the width). The body regions at 768 are unchanged (phone concept scaled).",
+  "source_note": "HAND-AUTHORED (no HTML mockup exists for pages 1/2): region boxes were read off the two concept PNGs in 01_02_concepts by eye. Desktop concept (1586x992, tab «خلاصه») gives 1440 and 1180 (content area x 20..1510, top y 90; boxes / content width); mobile concept (941x1672, phone content x 90..850) gives 390 and, by assumption, 768 (no tablet concept exists). Page 2: the concepts do not show the «سفارش» tab; the frame (header, actions, stage flow, tabs, side panel) is the same picture and the tab body is placed where the summary cards and events sit, with the section list of DEC-027 (approved P-A structure). Labels are the visible headings/labels of the picture, never its numbers. Style refs (radius 10, border 1, shadow) are estimates. DEC-061 amendment 2026-11-18 (control/decisions/DECISION_LOG.md): at 768 the shell regions (side-menu, topbar, topbar-search, topbar-date, topbar-user, menu-toggle) are NOT the scaled phone concept; their 768 targets are copied unchanged from the catalogue shared shell in specs/page-29.json at 768 (extracted from 29_36_commercial_planning_admin/index.html?page=29, the same shell targets as page 33; page-33.json differs only in topbar-search, by < 0.01 of the width). The body regions at 768 are unchanged (phone concept scaled). FORM (2026-11-18, harness tightening): each region's visual form (circles with icons, dots, pills, bars, styled buttons, icon-headed cards, big-number size, image slot, tab row) was counted off the same concept PNGs by eye (desktop for 1440/1180, mobile for 390 and the 768 body; big numbers scaled to the target width; image slot normalised to the content width); the 768 shell form is page-29.json's extracted 768 shell form. Page 2 order-tab: the concepts do not show it; its form is the summary area's card language (every card has an icon header) - an assumption. Rows of records (events, active problems) only need their form to exist (data_rows).",
   "mockup": {
     "files": [
       {
@@ -53,7 +53,13 @@
             "w": 0.0385,
             "h": 0.625
           },
-          "items": 9
+          "items": 9,
+          "form": {
+            "features": {
+              "icons": 10
+            },
+            "hand": true
+          }
         },
         "1180": {
           "box": {
@@ -62,7 +68,13 @@
             "w": 0.0385,
             "h": 0.6949
           },
-          "items": 9
+          "items": 9,
+          "form": {
+            "features": {
+              "icons": 10
+            },
+            "hand": true
+          }
         },
         "768": null,
         "390": null
@@ -81,6 +93,12 @@
             "y": 0.0,
             "w": 0.9615,
             "h": 0.0473
+          },
+          "form": {
+            "features": {
+              "icons": 4
+            },
+            "hand": true
           }
         },
         "1180": {
@@ -89,6 +107,12 @@
             "y": 0.0,
             "w": 0.9615,
             "h": 0.0473
+          },
+          "form": {
+            "features": {
+              "icons": 4
+            },
+            "hand": true
           }
         },
         "768": {
@@ -101,7 +125,23 @@
           "radius": 9,
           "border": 1,
           "shadow": false,
-          "heading_px": null
+          "heading_px": null,
+          "form": {
+            "features": {
+              "circles": 0,
+              "dots": 0,
+              "pills": 0,
+              "bars": 0,
+              "buttons": 2,
+              "cards": 0,
+              "icon_cards": 0,
+              "icons": 2,
+              "tables": 0,
+              "row_controls": 0,
+              "big_px": 9,
+              "image": null
+            }
+          }
         },
         "390": {
           "box": {
@@ -109,6 +149,12 @@
             "y": 0.0,
             "w": 1.0,
             "h": 0.1184
+          },
+          "form": {
+            "features": {
+              "icons": 3
+            },
+            "hand": true
           }
         }
       }
@@ -126,6 +172,12 @@
             "y": 0.0076,
             "w": 0.3417,
             "h": 0.0315
+          },
+          "form": {
+            "features": {
+              "icons": 1
+            },
+            "hand": true
           }
         },
         "1180": {
@@ -134,6 +186,12 @@
             "y": 0.0076,
             "w": 0.3417,
             "h": 0.0315
+          },
+          "form": {
+            "features": {
+              "icons": 1
+            },
+            "hand": true
           }
         },
         "768": {
@@ -146,7 +204,23 @@
           "radius": 10,
           "border": 1,
           "shadow": false,
-          "heading_px": null
+          "heading_px": null,
+          "form": {
+            "features": {
+              "circles": 0,
+              "dots": 0,
+              "pills": 0,
+              "bars": 0,
+              "buttons": 0,
+              "cards": 0,
+              "icon_cards": 0,
+              "icons": 1,
+              "tables": 0,
+              "row_controls": 0,
+              "big_px": null,
+              "image": null
+            }
+          }
         },
         "390": {
           "box": {
@@ -154,6 +228,12 @@
             "y": 0.0329,
             "w": 0.0526,
             "h": 0.0526
+          },
+          "form": {
+            "features": {
+              "icons": 1
+            },
+            "hand": true
           }
         }
       }
@@ -171,6 +251,12 @@
             "y": 0.0095,
             "w": 0.1072,
             "h": 0.0284
+          },
+          "form": {
+            "features": {
+              "icons": 1
+            },
+            "hand": true
           }
         },
         "1180": {
@@ -179,6 +265,12 @@
             "y": 0.0095,
             "w": 0.1072,
             "h": 0.0284
+          },
+          "form": {
+            "features": {
+              "icons": 1
+            },
+            "hand": true
           }
         },
         "768": null,
@@ -218,7 +310,23 @@
           "radius": 50,
           "border": 0,
           "shadow": false,
-          "heading_px": null
+          "heading_px": null,
+          "form": {
+            "features": {
+              "circles": 0,
+              "dots": 0,
+              "pills": 0,
+              "bars": 0,
+              "buttons": 0,
+              "cards": 0,
+              "icon_cards": 0,
+              "icons": 0,
+              "tables": 0,
+              "row_controls": 0,
+              "big_px": null,
+              "image": null
+            }
+          }
         },
         "390": {
           "box": {
@@ -249,7 +357,23 @@
           "radius": 9,
           "border": 1,
           "shadow": false,
-          "heading_px": null
+          "heading_px": null,
+          "form": {
+            "features": {
+              "circles": 0,
+              "dots": 0,
+              "pills": 0,
+              "bars": 0,
+              "buttons": 1,
+              "cards": 0,
+              "icon_cards": 0,
+              "icons": 1,
+              "tables": 0,
+              "row_controls": 0,
+              "big_px": null,
+              "image": null
+            }
+          }
         },
         "390": {
           "box": {
@@ -257,6 +381,12 @@
             "y": 0.0329,
             "w": 0.0592,
             "h": 0.0526
+          },
+          "form": {
+            "features": {
+              "icons": 1
+            },
+            "hand": true
           }
         }
       }
@@ -283,6 +413,12 @@
             "y": 2.0615,
             "w": 1,
             "h": 0.1026
+          },
+          "form": {
+            "features": {
+              "icons": 5
+            },
+            "hand": true
           }
         }
       }
@@ -311,7 +447,18 @@
           "radius": 10,
           "border": 1,
           "shadow": true,
-          "heading_px": 26
+          "heading_px": 26,
+          "form": {
+            "features": {
+              "pills": 4,
+              "big_px": 26,
+              "image": {
+                "w": 0.069,
+                "h": 0.0705
+              }
+            },
+            "hand": true
+          }
         },
         "1180": {
           "box": {
@@ -323,7 +470,18 @@
           "radius": 10,
           "border": 1,
           "shadow": true,
-          "heading_px": 26
+          "heading_px": 26,
+          "form": {
+            "features": {
+              "pills": 4,
+              "big_px": 26,
+              "image": {
+                "w": 0.069,
+                "h": 0.0705
+              }
+            },
+            "hand": true
+          }
         },
         "768": {
           "box": {
@@ -335,7 +493,20 @@
           "radius": 10,
           "border": 1,
           "shadow": true,
-          "heading_px": 16
+          "heading_px": 16,
+          "form": {
+            "features": {
+              "cards": 2,
+              "pills": 4,
+              "icons": 2,
+              "big_px": 16,
+              "image": {
+                "w": 0.1855,
+                "h": 0.17
+              }
+            },
+            "hand": true
+          }
         },
         "390": {
           "box": {
@@ -347,7 +518,20 @@
           "radius": 10,
           "border": 1,
           "shadow": true,
-          "heading_px": 16
+          "heading_px": 16,
+          "form": {
+            "features": {
+              "cards": 2,
+              "pills": 4,
+              "icons": 2,
+              "big_px": 16,
+              "image": {
+                "w": 0.1855,
+                "h": 0.17
+              }
+            },
+            "hand": true
+          }
         }
       }
     },
@@ -370,6 +554,13 @@
             "y": 0.0101,
             "w": 0.506,
             "h": 0.0289
+          },
+          "form": {
+            "features": {
+              "buttons": 5,
+              "row_controls": 5
+            },
+            "hand": true
           }
         },
         "1180": {
@@ -378,6 +569,13 @@
             "y": 0.0101,
             "w": 0.506,
             "h": 0.0289
+          },
+          "form": {
+            "features": {
+              "buttons": 5,
+              "row_controls": 5
+            },
+            "hand": true
           }
         },
         "768": null,
@@ -406,7 +604,15 @@
           "items": 3,
           "radius": 10,
           "border": 1,
-          "shadow": true
+          "shadow": true,
+          "form": {
+            "features": {
+              "cards": 3,
+              "icon_cards": 3,
+              "big_px": 18
+            },
+            "hand": true
+          }
         },
         "1180": {
           "box": {
@@ -418,7 +624,15 @@
           "items": 3,
           "radius": 10,
           "border": 1,
-          "shadow": true
+          "shadow": true,
+          "form": {
+            "features": {
+              "cards": 3,
+              "icon_cards": 3,
+              "big_px": 18
+            },
+            "hand": true
+          }
         },
         "768": null,
         "390": null
@@ -449,7 +663,15 @@
           },
           "radius": 10,
           "border": 1,
-          "shadow": true
+          "shadow": true,
+          "form": {
+            "features": {
+              "circles": 8,
+              "icons": 8,
+              "cards": 1
+            },
+            "hand": true
+          }
         },
         "1180": {
           "box": {
@@ -460,7 +682,15 @@
           },
           "radius": 10,
           "border": 1,
-          "shadow": true
+          "shadow": true,
+          "form": {
+            "features": {
+              "circles": 8,
+              "icons": 8,
+              "cards": 1
+            },
+            "hand": true
+          }
         },
         "768": {
           "box": {
@@ -471,7 +701,15 @@
           },
           "radius": 10,
           "border": 1,
-          "shadow": true
+          "shadow": true,
+          "form": {
+            "features": {
+              "circles": 7,
+              "icons": 7,
+              "cards": 1
+            },
+            "hand": true
+          }
         },
         "390": {
           "box": {
@@ -482,7 +720,15 @@
           },
           "radius": 10,
           "border": 1,
-          "shadow": true
+          "shadow": true,
+          "form": {
+            "features": {
+              "circles": 7,
+              "icons": 7,
+              "cards": 1
+            },
+            "hand": true
+          }
         }
       }
     },
@@ -514,7 +760,13 @@
             "w": 0.7832,
             "h": 0.0289
           },
-          "items": 13
+          "items": 13,
+          "form": {
+            "features": {
+              "row_controls": 13
+            },
+            "hand": true
+          }
         },
         "1180": {
           "box": {
@@ -523,7 +775,13 @@
             "w": 0.7832,
             "h": 0.0289
           },
-          "items": 13
+          "items": 13,
+          "form": {
+            "features": {
+              "row_controls": 13
+            },
+            "hand": true
+          }
         },
         "768": null,
         "390": null
@@ -549,7 +807,16 @@
           },
           "radius": 10,
           "border": 1,
-          "shadow": true
+          "shadow": true,
+          "form": {
+            "features": {
+              "cards": 4,
+              "icon_cards": 4,
+              "circles": 2,
+              "buttons": 3
+            },
+            "hand": true
+          }
         },
         "1180": {
           "box": {
@@ -560,7 +827,16 @@
           },
           "radius": 10,
           "border": 1,
-          "shadow": true
+          "shadow": true,
+          "form": {
+            "features": {
+              "cards": 4,
+              "icon_cards": 4,
+              "circles": 2,
+              "buttons": 3
+            },
+            "hand": true
+          }
         },
         "768": {
           "box": {
@@ -571,7 +847,15 @@
           },
           "radius": 10,
           "border": 1,
-          "shadow": true
+          "shadow": true,
+          "form": {
+            "features": {
+              "cards": 3,
+              "icon_cards": 3,
+              "circles": 2
+            },
+            "hand": true
+          }
         },
         "390": {
           "box": {
@@ -582,7 +866,15 @@
           },
           "radius": 10,
           "border": 1,
-          "shadow": true
+          "shadow": true,
+          "form": {
+            "features": {
+              "cards": 3,
+              "icon_cards": 3,
+              "circles": 2
+            },
+            "hand": true
+          }
         }
       }
     },
@@ -609,7 +901,14 @@
           },
           "radius": 10,
           "border": 1,
-          "shadow": true
+          "shadow": true,
+          "form": {
+            "features": {
+              "cards": 6,
+              "icon_cards": 6
+            },
+            "hand": true
+          }
         },
         "1180": {
           "box": {
@@ -620,7 +919,14 @@
           },
           "radius": 10,
           "border": 1,
-          "shadow": true
+          "shadow": true,
+          "form": {
+            "features": {
+              "cards": 6,
+              "icon_cards": 6
+            },
+            "hand": true
+          }
         },
         "768": {
           "box": {
@@ -631,7 +937,14 @@
           },
           "radius": 10,
           "border": 1,
-          "shadow": true
+          "shadow": true,
+          "form": {
+            "features": {
+              "cards": 6,
+              "icon_cards": 6
+            },
+            "hand": true
+          }
         },
         "390": {
           "box": {
@@ -642,7 +955,14 @@
           },
           "radius": 10,
           "border": 1,
-          "shadow": true
+          "shadow": true,
+          "form": {
+            "features": {
+              "cards": 6,
+              "icon_cards": 6
+            },
+            "hand": true
+          }
         }
       }
     }

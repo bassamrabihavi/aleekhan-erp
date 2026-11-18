@@ -10,8 +10,25 @@ import { fileURLToPath } from "node:url";
 
 /** DEC-061: a page is accepted only at >= 95 % at every width. */
 export const THRESHOLD = 0.95;
-/** Score per width = 0.5 x presence + 0.3 x layout + 0.2 x style. */
-export const WEIGHTS = { presence: 0.5, layout: 0.3, style: 0.2 } as const;
+/**
+ * Score per width = 0.30 x presence + 0.25 x layout + 0.30 x form + 0.15 x style, where form = 0.20 x form checks
+ * + 0.10 x structure (blurred-grayscale SSIM). Tightened 2026-11-18 (orchestrator, DEC-061: visual similarity, not
+ * only "a region exists in the right box"); README.md "Score".
+ */
+export const WEIGHTS = { presence: 0.3, layout: 0.25, form_checks: 0.2, structure: 0.1, style: 0.15 } as const;
+/**
+ * Form checks (README.md "Form"): count features must reach (1 - count) x the mockup count (at least 1); dots, pills
+ * and bars must also stay at most (1 + countUpper) x the mockup count + countUpperSlack; the big number at least
+ * bigRatio x the mockup's (when the mockup's is >= bigMinPx); the image slot at least imageRatio x the mockup's
+ * width and height; buttons count only when styled as buttons (border or background) and >= buttonMinPx high.
+ */
+export const FORM_TOL = { count: 0.25, countUpper: 0.5, countUpperSlack: 2, bigRatio: 0.8, bigMinPx: 16, imageRatio: 0.6, buttonMinPx: 28 } as const;
+/**
+ * Structure similarity (structure.ts): each region crop is drawn at oversample x a grid gridW wide (height from the
+ * mockup box aspect, clamped), area-averaged to the grid, blurred (Gaussian, blurSigma grid px), contrast-normalised
+ * and compared with SSIM (window x window). SSIM >= full scores 1, below that linearly.
+ */
+export const STRUCTURE = { gridW: 64, gridMinH: 6, gridMaxH: 192, oversample: 4, blurSigma: 1.5, window: 7, full: 0.6, maxShotH: 6000 } as const;
 /** A region is "in place" when the IoU of its normalised box with the mockup box is at least this. */
 export const IOU_MIN = 0.5;
 /** A child label counts as present when at least this share of its words occurs in the region text. */
@@ -88,7 +105,27 @@ export interface RegionDef {
   items?: string;
   /** Data owned by a later phase: an honest «در دست ساخت» / empty state in place is enough. */
   later_phase?: string;
+  /**
+   * The region repeats DATA rows (demo records in the mockup): per-row form counts (dots, pills, cards, icons ...) are
+   * only required to exist (>= 1), never to match the demo record count. Kinds "table" and "events" always are.
+   */
+  data_rows?: boolean;
+  /** Form features NOT checked for this region, each with its reason in config (e.g. counted by a nested region). */
+  form_skip?: string[];
 }
+
+/** Kinds whose per-row form counts follow the data, not the mockup's demo records. */
+export const DATA_ROW_KINDS: readonly RegionKind[] = ["table", "events"];
+
+/**
+ * Pages 1 / 2 (hand specs): where the regions sit in the concept PNGs, in PNG pixels (README.md). Content boxes map
+ * as x = content.x + box.x * content.w, y = content.y + box.y * content.w; viewport boxes as box * page_w. A width
+ * class without a viewport mapping has no structure image for its viewport (shell) regions.
+ */
+export const HAND_FRAMES = {
+  desktop: { file: "داشبورد_مدیریت_تولید_سریال_۲۴۵۱.png", content: { x: 20, y: 90, w: 1490 }, page_w: 1586 as number | null },
+  mobile: { file: "داشبورد_کنترل_سریال_درسا.png", content: { x: 90, y: 150, w: 760 }, page_w: null as number | null },
+} as const;
 
 export interface MockupDef {
   page: string;
@@ -156,8 +193,8 @@ export const MOCKUPS: MockupDef[] = [
       { id: "header-actions", label_fa: "دکمه‌های اقدام صفحه", kind: "actions", frame: "content", selector: "section.heading .actions", children: ["button"] },
       { id: "kpis", label_fa: "کارت‌های شاخص (KPI)", kind: "kpis", frame: "content", selector: "section.metrics", items: ".metric", children: [".metric > span"] },
       { id: "filters", label_fa: "نوار فیلتر", kind: "filters", frame: "content", selector: "section.filters", children: ["label"] },
-      { id: "product-card", label_fa: "شناسنامه محصول", kind: "panel", frame: "content", selector: ".layout > section.card:nth-of-type(1)", children: [":scope > .cardhd::own", ".info small"] },
-      { id: "product-styles", label_fa: "استایل‌های این محصول", kind: "panel", frame: "content", selector: "#styles", extra_children: ["استایل‌های این محصول"] },
+      { id: "product-card", label_fa: "شناسنامه محصول", kind: "panel", frame: "content", selector: ".layout > section.card:nth-of-type(1)", children: [":scope > .cardhd::own", ".info small"], form_skip: ["buttons"] /* the style chips (demo styles) are the nested data-row region product-styles */ },
+      { id: "product-styles", label_fa: "استایل‌های این محصول", kind: "panel", frame: "content", selector: "#styles", extra_children: ["استایل‌های این محصول"], data_rows: true },
       { id: "serial-table", label_fa: "جدول سریال‌های مرتبط", kind: "table", frame: "content", selector: ".layout > section.card:nth-of-type(2)", children: [":scope > .cardhd::own", "th"] },
       { id: "stage-distribution", label_fa: "نمودار توزیع سریال‌ها در چرخه تولید", kind: "chart", frame: "content", selector: ".lower > section.card:nth-of-type(1)", children: [":scope > .cardhd::own", ".barrow label"], later_phase: "PHASE_07" },
       { id: "events", label_fa: "آخرین رخدادهای مرتبط", kind: "events", frame: "content", selector: ".lower > section.card:nth-of-type(2)", children: [":scope > .cardhd::own"], later_phase: "PHASE_07" },

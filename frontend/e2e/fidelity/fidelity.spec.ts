@@ -14,9 +14,10 @@ import { pathToFileURL } from "node:url";
 
 import { expect, test, type Browser, type Page } from "@playwright/test";
 
-import { HAND_PAGES, HEIGHTS, MOCKUPS, OUT_DIR, REPO, SHOT_WIDTHS, SPEC_DIR, THRESHOLD, WIDTHS, type MockupDef, type Width } from "./config";
-import { asBuiltPage, measure, type Probe } from "./measure";
+import { CATALOG, DATA_ROW_KINDS, HAND_FRAMES, HAND_PAGES, HEIGHTS, MOCKUPS, OUT_DIR, REPO, SHOT_WIDTHS, SPEC_DIR, STRUCTURE, THRESHOLD, WIDTHS, type MockupDef, type Width } from "./config";
+import { asBuiltPage, grayCrops, measure, type CropReq, type PageMeasure, type Probe } from "./measure";
 import { pageResult, renderMarkdown, scoreWidth, type PageResult, type PageSpec, type SpecRegion, type WidthResult } from "./score";
+import { gridFor, structureSimilarity } from "./structure";
 import { login, SYN_PW_P2, type Person, type Session } from "../phase02-helpers";
 
 test.describe.configure({ mode: "serial" });
@@ -90,12 +91,16 @@ function seed(): FidSeed {
 }
 
 // ------------------------------------------------------------------------------------------- mockups
+function mockupProbes(def: MockupDef): Probe[] {
+  return def.regions.map((r) => ({ id: r.id, kind: r.kind, frame: r.frame, selector: r.selector, ...(r.children ? { children: r.children } : {}), ...(r.items ? { items: r.items } : {}) }));
+}
+
 function mockupUrl(def: MockupDef): string {
   return pathToFileURL(path.join(REPO, def.html)).href + (def.query ?? "");
 }
 
-async function openMockup(browser: Browser, def: MockupDef, w: Width): Promise<Page> {
-  const page = await browser.newPage({ viewport: { width: w, height: HEIGHTS[w] }, locale: "fa-IR" });
+async function openMockup(browser: Browser, def: MockupDef, w: Width, height: number = HEIGHTS[w]): Promise<Page> {
+  const page = await browser.newPage({ viewport: { width: w, height }, locale: "fa-IR" });
   await page.goto(mockupUrl(def));
   await page.waitForTimeout(400); // the catalogue renders with JS and short CSS transitions
   return page;
@@ -114,8 +119,7 @@ async function extract(browser: Browser, def: MockupDef): Promise<PageSpec> {
   const widths: PageSpec["widths"] = {};
   for (const w of WIDTHS) {
     const page = await openMockup(browser, def, w);
-    const probes: Probe[] = def.regions.map((r) => ({ id: r.id, kind: r.kind, frame: r.frame, selector: r.selector, ...(r.children ? { children: r.children } : {}), ...(r.items ? { items: r.items } : {}) }));
-    const m = await measure(page, probes, def.content_selector, ".btn.primary", false);
+    const m = await measure(page, mockupProbes(def), def.content_selector, ".btn.primary", false);
     await page.close();
     widths[`${w}`] = { content_pad_px: m.content_pad_px };
     for (const [i, r] of def.regions.entries()) {
@@ -125,7 +129,15 @@ async function extract(browser: Browser, def: MockupDef): Promise<PageSpec> {
       if (w === 1440) spec.children = [...(got?.children ?? []), ...(r.extra_children ?? [])];
       spec.widths[`${w}`] =
         got?.visible && got.box
-          ? { box: round(got.box), ...(r.items ? { items: got.items } : {}), radius: got.radius, border: got.border, shadow: got.shadow, heading_px: got.heading_px }
+          ? {
+              box: round(got.box),
+              ...(r.items ? { items: got.items } : {}),
+              radius: got.radius,
+              border: got.border,
+              shadow: got.shadow,
+              heading_px: got.heading_px,
+              ...(got.form ? { form: { features: Object.fromEntries(Object.entries(got.form).filter(([k]) => !(r.form_skip ?? []).includes(k))), ...(r.data_rows || DATA_ROW_KINDS.includes(r.kind) ? { data_rows: true } : {}) } } : {}),
+            }
           : null;
     }
   }
@@ -216,6 +228,74 @@ async function mockupShot(browser: Browser, spec: PageSpec, w: Width): Promise<B
   return fs.readFileSync(path.join(REPO, png.path));
 }
 
+// ------------------------------------------------------------------------------------------ structure
+type Crops = Record<string, { w: number; h: number; px: number[] }>;
+
+/** Render the page at its full content height (same width), measure the region rectangles and screenshot it. */
+async function tallShot(page: Page, w: Width, probes: Probe[], content: string, primary: string, built: boolean): Promise<{ png: Buffer; m: PageMeasure }> {
+  const full = await page.evaluate(() => Math.max(document.documentElement.scrollHeight, document.body.scrollHeight));
+  await page.setViewportSize({ width: w, height: Math.min(STRUCTURE.maxShotH, Math.max(HEIGHTS[w], full)) });
+  await page.waitForTimeout(400);
+  await page.evaluate(() => { window.scrollTo(0, 0); });
+  const m = await measure(page, probes, content, primary, built);
+  const png = await page.screenshot({ fullPage: false });
+  await page.setViewportSize({ width: w, height: HEIGHTS[w] });
+  await page.waitForTimeout(200);
+  return { png, m };
+}
+
+/** The mockup's region crops at one width (HTML mockup: rendered; hand pages: the concept PNG) and their grids. */
+async function mockupCrops(browser: Browser, helper: Page, spec: PageSpec, w: Width): Promise<{ crops: Crops; grids: Record<string, CropReq["grid"]> }> {
+  const key = `${w}` as const;
+  const reqs: CropReq[] = [];
+  let png: Buffer;
+  const def = MOCKUPS.find((m) => m.page === spec.page);
+  if (def) {
+    const page = await openMockup(browser, def, w);
+    const shot = await tallShot(page, w, mockupProbes(def), def.content_selector, ".btn.primary", false);
+    await page.close();
+    png = shot.png;
+    for (const r of spec.regions) {
+      const rect = shot.m.regions[r.id]?.px;
+      if (r.widths[key] && rect) reqs.push({ id: r.id, rect, grid: gridFor(rect) });
+    }
+  } else {
+    // hand pages (README.md "Structure"): spec boxes mapped into the concept PNG of the width class
+    const frame = w >= 1000 ? HAND_FRAMES.desktop : HAND_FRAMES.mobile;
+    png = fs.readFileSync(path.join(REPO, CATALOG, "01_02_concepts", frame.file));
+    for (const r of spec.regions) {
+      const at = r.widths[key];
+      if (!at) continue;
+      let rect: CropReq["rect"] | null = null;
+      if (r.frame === "content") rect = { x: frame.content.x + at.box.x * frame.content.w, y: frame.content.y + at.box.y * frame.content.w, w: at.box.w * frame.content.w, h: at.box.h * frame.content.w };
+      else if (frame.page_w !== null && w >= 1000) rect = { x: at.box.x * frame.page_w, y: at.box.y * frame.page_w, w: at.box.w * frame.page_w, h: at.box.h * frame.page_w };
+      if (rect) reqs.push({ id: r.id, rect, grid: gridFor(rect) });
+    }
+  }
+  const crops = await grayCrops(helper, png, reqs, STRUCTURE.oversample);
+  return { crops, grids: Object.fromEntries(reqs.map((q) => [q.id, q.grid])) };
+}
+
+/** Structure SSIM per region at one width (null = no mockup image for that region). The page stays at HEIGHTS[w]. */
+async function structureOf(browser: Browser, helper: Page, s: Session, spec: PageSpec, w: Width): Promise<Record<string, number | null>> {
+  const mk = await mockupCrops(browser, helper, spec, w);
+  const shot = await tallShot(s.page, w, builtProbes(spec), "main#main", ".btn--primary", true);
+  const reqs: CropReq[] = [];
+  for (const [id, grid] of Object.entries(mk.grids)) {
+    const rect = shot.m.regions[id]?.px;
+    if (rect) reqs.push({ id, rect, grid });
+  }
+  const bc = await grayCrops(helper, shot.png, reqs, STRUCTURE.oversample);
+  const out: Record<string, number | null> = {};
+  for (const r of spec.regions) {
+    if (!r.widths[`${w}`]) continue;
+    const m = mk.crops[r.id];
+    const b = bc[r.id];
+    out[r.id] = !m ? null : b ? Math.round(structureSimilarity(m, b) * 10000) / 10000 : 0;
+  }
+  return out;
+}
+
 // ---------------------------------------------------------------------------------------------- tests
 test("@fidelity mockup specs: extracted (FIDELITY_EXTRACT=1) or verified against the mockup sha256", async ({ browser }) => {
   fs.mkdirSync(SPEC_DIR, { recursive: true });
@@ -240,6 +320,8 @@ test("@fidelity built pages: score per page per width, baseline + side-by-side s
   const shots = path.join(OUT_DIR, "shots");
   fs.mkdirSync(shots, { recursive: true });
   const results: PageResult[] = [];
+  const helper = await browser.newPage();
+  await helper.setContent("<!doctype html><html><body></body></html>");
   for (const page of ["01", "02", "04", "29", "33"]) {
     const spec = readSpec(page);
     const route = spec.route.replace(/\{(\w+)\}/g, (_m, k: string) => vars[k] ?? `{${k}}`);
@@ -247,7 +329,9 @@ test("@fidelity built pages: score per page per width, baseline + side-by-side s
     for (const w of WIDTHS) {
       await openBuilt(s, spec, route, w);
       const m = await measure(s.page, builtProbes(spec), "main#main", ".btn--primary", true);
-      per.push(scoreWidth(spec, w, asBuiltPage(m, w)));
+      const structure = await structureOf(browser, helper, s, spec, w);
+      await s.page.evaluate(() => { window.scrollTo(0, 0); });
+      per.push(scoreWidth(spec, w, asBuiltPage(m, w, structure)));
       if (SHOT_WIDTHS.includes(w)) {
         const built = await s.page.screenshot({ fullPage: true });
         await sideBySide(browser, await mockupShot(browser, spec, w), built, w, path.join(shots, `page-${page}-${w}.jpg`));
@@ -255,6 +339,7 @@ test("@fidelity built pages: score per page per width, baseline + side-by-side s
     }
     results.push(pageResult(spec, per));
   }
+  await helper.close();
   await s.ctx.close();
   const commit = process.env.ALEEKHAN_BUILD_COMMIT ?? "unknown";
   const meta = { commit: commit.slice(0, 12), date: new Date().toISOString().slice(0, 10), channel: process.env.E2E_BROWSER_CHANNEL ?? "chromium" };

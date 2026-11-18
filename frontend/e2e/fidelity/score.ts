@@ -1,6 +1,55 @@
 // DEC-061 fidelity scorer (pure functions; unit tests in score.vitest.ts). The browser-side measurement lives in
 // measure.ts; fidelity.spec.ts drives both. Method and formula: README.md.
-import { EXTRA_PENALTY, IOU_MIN, LABEL_TOKEN_SHARE, LATER_TEXT, PANEL_KINDS, THRESHOLD, TOL, WEIGHTS, WIDTHS, type Frame, type RegionKind, type Width } from "./config";
+import { DATA_ROW_KINDS, EXTRA_PENALTY, FORM_TOL, IOU_MIN, LABEL_TOKEN_SHARE, LATER_TEXT, PANEL_KINDS, THRESHOLD, TOL, WEIGHTS, WIDTHS, type Frame, type RegionKind, type Width } from "./config";
+import { structureScore } from "./structure";
+
+/** The visual form of a region (measure.ts formOf; README.md "Form"). Counts are of visible elements. */
+export interface FormFeatures {
+  /** Circular elements 18-72 px with an icon inside (stage / status circles). */
+  circles: number;
+  /** Status dots 5-14 px (element or ::before / ::after). */
+  dots: number;
+  /** Pills / badges (rounded, filled, with text; not a control). */
+  pills: number;
+  /** Progress bars / rails (outermost). */
+  bars: number;
+  /** Buttons styled as buttons (border or background, >= FORM_TOL.buttonMinPx high). */
+  buttons: number;
+  /** Framed boxes with a radius (border, shadow or own background), >= 80 x 44 px. */
+  cards: number;
+  /** Cards with an icon in their top 56 px (icon header / leading status icon). */
+  icon_cards: number;
+  /** Icons (svg, img, data-icon, glyph) up to 64 px. */
+  icons: number;
+  /** Tables (table / role=table / role=grid). */
+  tables: number;
+  /** Largest number of sibling controls on one line (tabs, step buttons). */
+  row_controls: number;
+  /** Largest font size of a short text with a digit or a dash value (the "big number"). */
+  big_px: number | null;
+  /** Largest image slot (img / role=img / background image >= 40 px), normalised like the region box. */
+  image: { w: number; h: number } | null;
+}
+
+export type FormKey = keyof FormFeatures;
+
+/**
+ * The mockup's form of a region at one width. Extracted specs carry every feature; hand specs (pages 1 / 2) give
+ * only the features they check (`hand: true`).
+ */
+export interface FormSpec {
+  features: Partial<FormFeatures>;
+  /** Per-row counts follow the data (>= 1 suffices); always true for DATA_ROW_KINDS. */
+  data_rows?: boolean;
+  /** Hand-authored: every listed feature is checked (row_controls for any kind). */
+  hand?: boolean;
+}
+
+export interface FormCheck {
+  feature: FormKey;
+  ok: boolean;
+  detail: string;
+}
 
 export interface Box {
   x: number;
@@ -17,6 +66,8 @@ export interface RegionAtWidth {
   border?: number | null;
   shadow?: boolean | null;
   heading_px?: number | null;
+  /** The mockup's visual form at this width (README.md "Form"). */
+  form?: FormSpec;
 }
 
 export interface SpecRegion {
@@ -64,6 +115,8 @@ export interface BuiltRegion {
   shadow: boolean | null;
   heading_px: number | null;
   icons: number;
+  /** Visual form features (null when not visible). */
+  form?: FormFeatures | null;
 }
 
 export interface BuiltPage {
@@ -76,6 +129,8 @@ export interface BuiltPage {
   content_pad_px: number | null;
   /** Extra sections found by the built-page scan (measure.ts); none = []. */
   extras: ExtraSection[];
+  /** Structure SSIM per region id (structure.ts); null = no mockup image for that region at that width. */
+  structure?: Record<string, number | null>;
 }
 
 export interface RegionResult {
@@ -87,6 +142,12 @@ export interface RegionResult {
   in_place: boolean;
   missing_children: string[];
   note: string;
+  /** Form checks of the region (empty = the mockup region has no checkable form). */
+  form_checks: FormCheck[];
+  /** Share of form checks met (null = no checks). */
+  form: number | null;
+  /** Structure SSIM (null = no mockup image). */
+  ssim: number | null;
 }
 
 export interface StyleCheck {
@@ -110,6 +171,12 @@ export interface WidthResult {
   /** Extra sections found that are free (fully below all mockup regions): listed for transparency, no penalty. */
   extra_free: string[];
   style: number;
+  /** Mean share of form checks met over the regions that have checks. */
+  form_checks: number;
+  /** Mean structure score over the regions with a mockup image. */
+  structure: number;
+  /** form = (WEIGHTS.form_checks x form_checks + WEIGHTS.structure x structure) / (their sum). */
+  form: number;
   regions: RegionResult[];
   style_checks: StyleCheck[];
 }
@@ -182,17 +249,64 @@ export function rgb(c: string): string {
   return t;
 }
 
+// ------------------------------------------------------------------------------------------------ form
+const COUNT_KEYS: readonly FormKey[] = ["circles", "dots", "pills", "bars", "buttons", "cards", "icon_cards", "icons", "row_controls"];
+/** Per-row counts: relaxed to ">= 1" in data-row regions. */
+const PER_ROW_KEYS: readonly FormKey[] = ["circles", "dots", "pills", "bars", "buttons", "cards", "icon_cards", "icons"];
+/** Counts that also have an upper bound (a page full of extra badges does not look like the mockup either). */
+const UPPER_KEYS: readonly FormKey[] = ["dots", "pills", "bars"];
+
+/**
+ * The form checks of one region: every feature the mockup HAS (count > 0, big number >= bigMinPx, an image slot)
+ * must be matched by the built region; tables must agree both ways (table vs card layout at that width). Features
+ * the mockup does not have are not checked (except tables). A region that is not visible fails every check.
+ * row_controls is checked for kind "tabs" (and wherever a hand spec lists it).
+ */
+export function formChecks(kind: RegionKind, form: FormSpec, built: FormFeatures | null | undefined): FormCheck[] {
+  const out: FormCheck[] = [];
+  const m = form.features;
+  const dataRows = !!form.data_rows || DATA_ROW_KINDS.includes(kind);
+  for (const k of COUNT_KEYS) {
+    const want = m[k];
+    if (typeof want !== "number" || want <= 0) continue;
+    if (k === "row_controls" && kind !== "tabs" && !form.hand) continue;
+    const got = built ? (built[k] as number) : 0;
+    const relaxed = dataRows && PER_ROW_KEYS.includes(k);
+    const lo = relaxed ? 1 : Math.max(1, Math.round(want * (1 - FORM_TOL.count)));
+    const hi = !relaxed && UPPER_KEYS.includes(k) ? Math.ceil(want * (1 + FORM_TOL.countUpper)) + FORM_TOL.countUpperSlack : Infinity;
+    out.push({ feature: k, ok: !!built && got >= lo && got <= hi, detail: `${k} ${got} (mockup ${want}; need ${lo}${hi === Infinity ? "+" : `..${hi}`})` });
+  }
+  const big = m.big_px;
+  if (typeof big === "number" && big >= FORM_TOL.bigMinPx) {
+    const got = built?.big_px ?? null;
+    const need = Math.round(big * FORM_TOL.bigRatio * 10) / 10;
+    out.push({ feature: "big_px", ok: got !== null && got >= need, detail: `big number ${got ?? "-"}px (mockup ${big}px; need >= ${need})` });
+  }
+  if (m.image) {
+    const got = built?.image ?? null;
+    const ok = !!got && got.w >= m.image.w * FORM_TOL.imageRatio && got.h >= m.image.h * FORM_TOL.imageRatio;
+    out.push({ feature: "image", ok, detail: `image slot ${got ? `${got.w.toFixed(3)}x${got.h.toFixed(3)}` : "none"} (mockup ${m.image.w.toFixed(3)}x${m.image.h.toFixed(3)})` });
+  }
+  if (typeof m.tables === "number") {
+    const got = built?.tables ?? 0;
+    if (m.tables > 0 || got > 0) out.push({ feature: "tables", ok: !!built && m.tables > 0 === got > 0, detail: `table ${got > 0 ? "yes" : "no"} (mockup ${m.tables > 0 ? "table" : "cards / no table"})` });
+  }
+  return out;
+}
+
 // ----------------------------------------------------------------------------------------------- score
-export function scoreRegion(spec: SpecRegion, at: RegionAtWidth, built: BuiltRegion | undefined): RegionResult {
+export function scoreRegion(spec: SpecRegion, at: RegionAtWidth, built: BuiltRegion | undefined, ssimValue: number | null = null): RegionResult {
   const base = { id: spec.id, label_fa: spec.label_fa, ...(spec.later_phase ? { later_phase: spec.later_phase } : {}) };
+  const fc = at.form ? formChecks(spec.kind, at.form, built?.visible ? built.form : null) : [];
+  const formPart = { form_checks: fc, form: fc.length ? fc.filter((c) => c.ok).length / fc.length : null, ssim: ssimValue };
   if (!built?.visible || !built.box) {
-    return { ...base, presence: 0, iou: null, in_place: false, missing_children: spec.children, note: built ? "not visible" : "no data-fid region on the built page" };
+    return { ...base, presence: 0, iou: null, in_place: false, missing_children: spec.children, note: built ? "not visible" : "no data-fid region on the built page", ...formPart };
   }
   const overlap = iou(at.box, built.box);
   const inPlace = overlap >= IOU_MIN;
   const honestLater = !!spec.later_phase && normalize(built.text).includes(normalize(LATER_TEXT));
   if (honestLater) {
-    return { ...base, presence: 1, iou: overlap, in_place: inPlace, missing_children: [], note: `later phase: honest «${LATER_TEXT}» in place` };
+    return { ...base, presence: 1, iou: overlap, in_place: inPlace, missing_children: [], note: `later phase: honest «${LATER_TEXT}» in place`, ...formPart };
   }
   const missing = spec.children.filter((c) => !labelPresent(c, built.text));
   let got = 1 + (spec.children.length - missing.length);
@@ -203,7 +317,7 @@ export function scoreRegion(spec: SpecRegion, at: RegionAtWidth, built: BuiltReg
     total += 1;
     if (built.items < at.items) note = `items ${built.items}/${at.items}`;
   }
-  return { ...base, presence: got / total, iou: overlap, in_place: inPlace, missing_children: missing, note };
+  return { ...base, presence: got / total, iou: overlap, in_place: inPlace, missing_children: missing, note, ...formPart };
 }
 
 function styleChecks(spec: PageSpec, w: Width, built: BuiltPage): StyleCheck[] {
@@ -287,7 +401,8 @@ export function scoreWidth(spec: PageSpec, w: Width, built: BuiltPage): WidthRes
   for (const r of spec.regions) {
     const at = r.widths[key];
     if (!at) continue; // not shown in the mockup at this width
-    regions.push(scoreRegion(r, at, built.regions[r.id]));
+    const st = built.structure?.[r.id];
+    regions.push(scoreRegion(r, at, built.regions[r.id], typeof st === "number" ? st : null));
   }
   const presence = regions.length ? regions.reduce((s, r) => s + r.presence, 0) / regions.length : 1;
   const inPlace = regions.length ? regions.filter((r) => r.in_place).length / regions.length : 1;
@@ -295,8 +410,29 @@ export function scoreWidth(spec: PageSpec, w: Width, built: BuiltPage): WidthRes
   const layout = Math.max(0, inPlace - (extras.length * EXTRA_PENALTY) / WEIGHTS.layout);
   const checks = styleChecks(spec, w, built);
   const style = checks.length ? checks.reduce((s, c) => s + c.ok, 0) / checks.length : 1;
-  const score = WEIGHTS.presence * presence + WEIGHTS.layout * layout + WEIGHTS.style * style;
-  return { width: w, score, presence, layout, layout_in_place: inPlace, extra_above: extras.length, extra_sections: extras.map((e) => e.label), extra_free: built.extras.filter((e) => !extras.includes(e)).map((e) => e.label), style, regions, style_checks: checks };
+  const withForm = regions.filter((r) => r.form !== null);
+  const formChecksScore = withForm.length ? withForm.reduce((s, r) => s + (r.form ?? 0), 0) / withForm.length : 1;
+  // structure: over the regions with a mockup image; nothing measured at all = 0 (never a free pass)
+  const withImg = regions.filter((r) => r.ssim !== null);
+  const structure = withImg.length ? withImg.reduce((s, r) => s + structureScore(r.ssim ?? 0), 0) / withImg.length : 0;
+  const form = (WEIGHTS.form_checks * formChecksScore + WEIGHTS.structure * structure) / (WEIGHTS.form_checks + WEIGHTS.structure);
+  const score = WEIGHTS.presence * presence + WEIGHTS.layout * layout + WEIGHTS.form_checks * formChecksScore + WEIGHTS.structure * structure + WEIGHTS.style * style;
+  return {
+    width: w,
+    score,
+    presence,
+    layout,
+    layout_in_place: inPlace,
+    extra_above: extras.length,
+    extra_sections: extras.map((e) => e.label),
+    extra_free: built.extras.filter((e) => !extras.includes(e)).map((e) => e.label),
+    style,
+    form_checks: formChecksScore,
+    structure,
+    form,
+    regions,
+    style_checks: checks,
+  };
 }
 
 export function pageResult(spec: PageSpec, widths: WidthResult[]): PageResult {
@@ -312,7 +448,7 @@ export function renderMarkdown(results: PageResult[], meta: { commit: string; da
   lines.push("# PHASE_02 UI fidelity baseline (DEC-061)", "");
   lines.push(`Measured by \`frontend/e2e/fidelity/fidelity.spec.ts\` (method: \`frontend/e2e/fidelity/README.md\`).`);
   lines.push(`Commit \`${meta.commit}\` · ${meta.date} · browser channel ${meta.channel} · threshold ${pct(THRESHOLD)} at every width.`, "");
-  lines.push("Score per width = 0.5 × presence + 0.3 × layout (IoU ≥ 0.5) + 0.2 × style. Colours are checked against the approved brand tokens, not the mockup colours.");
+  lines.push(`Score per width = ${WEIGHTS.presence} × presence + ${WEIGHTS.layout} × layout (IoU ≥ ${IOU_MIN}) + ${WEIGHTS.form_checks} × form checks + ${WEIGHTS.structure} × structure (blurred SSIM) + ${WEIGHTS.style} × style. Colours are checked against the approved brand tokens, not the mockup colours.`);
   lines.push(`Each extra (non-mockup) section above or between the mockup regions (\`extra_above\`) removes ${pct(EXTRA_PENALTY)} of the total from the layout part (DEC-061 amendment).`, "");
   lines.push(`| Page | ${WIDTHS.join(" | ")} | min | ≥ 95%? |`, `|---|${WIDTHS.map(() => "---").join("|")}|---|---|`);
   for (const p of results) {
@@ -325,8 +461,8 @@ export function renderMarkdown(results: PageResult[], meta: { commit: string; da
   lines.push("");
   for (const p of results) {
     lines.push(`## Page ${p.page} — ${p.title_fa}`, "");
-    lines.push(`| Width | score | presence | layout | in place | extra_above | style |`, `|---|---|---|---|---|---|---|`);
-    for (const w of p.widths) lines.push(`| ${w.width} | ${pct(w.score)} | ${pct(w.presence)} | ${pct(w.layout)} | ${pct(w.layout_in_place)} | ${w.extra_above} | ${pct(w.style)} |`);
+    lines.push(`| Width | score | presence | layout | in place | extra_above | form checks | structure | style |`, `|---|---|---|---|---|---|---|---|---|`);
+    for (const w of p.widths) lines.push(`| ${w.width} | ${pct(w.score)} | ${pct(w.presence)} | ${pct(w.layout)} | ${pct(w.layout_in_place)} | ${w.extra_above} | ${pct(w.form_checks)} | ${pct(w.structure)} | ${pct(w.style)} |`);
     lines.push("");
     for (const w of p.widths) if (w.extra_sections.length) lines.push(`Extra sections above / between mockup regions at ${w.width}: ${w.extra_sections.map((x) => `\`${x}\``).join(", ")}`);
     for (const w of p.widths) if (w.extra_free.length) lines.push(`Extra sections below all mockup regions at ${w.width} (free): ${w.extra_free.map((x) => `\`${x}\``).join(", ")}`);
@@ -349,6 +485,18 @@ export function renderMarkdown(results: PageResult[], meta: { commit: string; da
         .join(", ");
       const miss = r.missing_children.length ? r.missing_children.map((c) => `«${c}»`).join("، ") : "";
       lines.push(`| ${r.id} (${r.label_fa})${r.later_phase ? ` [${r.later_phase}]` : ""} | ${state} | ${r.iou === null ? "-" : r.iou.toFixed(2)} | ${[miss, r.note, other].filter(Boolean).join(" · ")} |`);
+    }
+    lines.push("", "Form failures per width (region: failed checks; ssim when below full):", "");
+    for (const w of p.widths) {
+      const fails = w.regions
+        .map((r) => {
+          const bad = r.form_checks.filter((c) => !c.ok).map((c) => c.detail);
+          const lowSsim = r.ssim !== null && structureScore(r.ssim) < 1;
+          if (!bad.length && !lowSsim) return null;
+          return `${r.id}: ${bad.length ? bad.join("; ") : "form ok"}${r.ssim !== null ? `; ssim ${r.ssim.toFixed(2)}` : ""}`;
+        })
+        .filter(Boolean);
+      lines.push(`- ${w.width}: ${fails.length ? fails.join(" · ") : "none"}`);
     }
     lines.push("", "Style checks at 1440: " + w1440.style_checks.map((c) => `${c.id} ${c.ok === 1 ? "ok" : c.ok === 0 ? "FAIL" : pct(c.ok)} (${c.detail})`).join("; "), "");
   }

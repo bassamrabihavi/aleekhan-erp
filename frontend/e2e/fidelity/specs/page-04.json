@@ -70,7 +70,23 @@
           "radius": 0,
           "border": 0,
           "shadow": true,
-          "heading_px": null
+          "heading_px": null,
+          "form": {
+            "features": {
+              "circles": 0,
+              "dots": 0,
+              "pills": 0,
+              "bars": 0,
+              "buttons": 1,
+              "cards": 0,
+              "icon_cards": 0,
+              "icons": 11,
+              "tables": 0,
+              "row_controls": 1,
+              "big_px": null,
+              "image": null
+            }
+          }
         },
         "1180": {
           "box": {
@@ -83,7 +99,23 @@
           "radius": 0,
           "border": 0,
           "shadow": true,
-          "heading_px": null
+          "heading_px": null,
+          "form": {
+            "features": {
+              "circles": 0,
+              "dots": 0,
+              "pills": 0,
+              "bars": 0,
+              "buttons": 1,
+              "cards": 0,
+              "icon_cards": 0,
+              "icons": 11,
+              "tables": 0,
+              "row_controls": 1,
+              "big_px": null,
+              "image": null
+            }
+          }
         },
         "1440": {
           "box": {
@@ -96,7 +128,23 @@
           "radius": 0,
           "border": 0,
           "shadow": true,
-          "heading_px": null
+          "heading_px": null,
+          "form": {
+            "features": {
+              "circles": 0,
+              "dots": 0,
+              "pills": 0,
+              "bars": 0,
+              "buttons": 1,
+              "cards": 0,
+              "icon_cards": 0,
+              "icons": 11,
+              "tables": 0,
+              "row_controls": 1,
+              "big_px": null,
+              "image": null
+            }
+          }
         }
       }
     },
@@ -117,7 +165,23 @@
           "radius": 8,
           "border": 1,
           "shadow": false,
-          "heading_px": 12
+          "heading_px": 12,
+          "form": {
+            "features": {
+              "circles": 0,
+              "dots": 0,
+              "pills": 0,
+              "bars": 0,
+              "buttons": 1,
+              "cards": 0,
+              "icon_cards": 0,
+              "icons": 2,
+              "tables": 0,
+              "row_controls": 0,
+              "big_px": null,
+              "image": null
+            }
+          }
         },
         "768": {
           "box": {
@@ -129,7 +193,23 @@
           "radius": 50,
           "border": 0,
           "shadow": false,
-          "heading_px": 17
+          "heading_px": 17,
+          "form": {
+            "features": {
+              "circles": 0,
+              "dots": 0,
+              "pills": 0,
+              "bars": 0,
+              "buttons": 0,
+              "cards": 0,
+              "icon_cards": 0,
+              "icons": 1,
+              "tables": 0,
+              "row_controls": 0,
+              "big_px": 12,
+              "image": null
+            }
+          }
         },
         "1180": {
           "box": {
@@ -141,7 +221,23 @@
           "radius": 9,
           "border": 1,
           "shadow": false,
-          "heading_px": 17
+          "heading_px": 17,
+          "form": {
+            "features": {
+              "circles": 0,
+              "dots": 0,
+              "pills": 0,
+              "bars": 0,
+              "buttons": 0,
+              "cards": 0,
+              "icon_cards": 0,
+              "icons": 1,
+              "tables": 0,
+              "row_controls": 0,
+              "big_px": 12,
+              "image": null
+            }
+          }
         },
         "1440": {
           "box": {
@@ -153,7 +249,23 @@
           "radius": 9,
           "border": 1,
           "shadow": false,
-          "heading_px": 17
+          "heading_px": 17,
+          "form": {
+            "features": {
+              "circles": 0,
+              "dots": 0,
+              "pills": 0,
+              "bars": 0,
+              "buttons": 0,
+              "cards": 0,
+              "icon_cards": 0,
+              "icons": 1,
+              "tables": 0,
+              "row_controls": 0,
+              "big_px": 12,
+              "image": null
+            }
+          }
         }
       }
     },
@@ -176,7 +288,23 @@
           "radius": 9,
           "border": 1,
           "shadow": false,
-          "heading_px": null
+          "heading_px": null,
+          "form": {
+            "features": {
+              "circles": 0,
+              "dots": 0,
+              "pills": 0,
+              "bars": 0,
+              "buttons": 0,
+              "cards": 0,
+              "icon_cards": 0,
+              "icons": 0,
+              "tables": 0,
+              "row_controls": 0,
+              "big_px": null,
+              "image": null
+            }
+          }
         },
         "1440": {
           "box": {
@@ -188,7 +316,23 @@
           "radius": 9,
           "border": 1,
           "shadow": false,
-          "heading_px": null
+          "heading_px": null,
+          "form": {
+            "features": {
+              "circles": 0,
+              "dots": 0,
+              "pills": 0,
+              "bars": 0,
+              "buttons": 0,
+              "cards": 0,
+              "icon_cards": 0,
+              "icons": 0,
+              "tables": 0,
+              "row_controls": 0,
+              "big_px": null,
+              "image": null
+            }
+          }
         }
       }
     },
@@ -210,7 +354,23 @@
           "radius": 0,
           "border": 0,
           "shadow": false,
-          "heading_px": null
+          "heading_px": null,
+          "form": {
+            "features": {
+              "circles": 0,
+              "dots": 0,
+              "pills": 0,
+              "bars": 0,
+              "buttons": 0,
+              "cards": 0,
+              "icon_cards": 0,
+              "icons": 0,
+              "tables": 0,
+              "row_controls": 0,
+              "big_px": 12,
+              "image": null
+            }
+          }
         },
         "1180": {
           "box": {
@@ -222,7 +382,23 @@
           "radius": 0,
           "border": 0,
           "shadow": false,
-          "heading_px": null
+          "heading_px": null,
+          "form": {
+            "features": {
+              "circles": 0,
+              "dots": 0,
+              "pills": 0,
+              "bars": 0,
+              "buttons": 0,
+              "cards": 0,
+              "icon_cards": 0,
+              "icons": 0,
+              "tables": 0,
+              "row_controls": 0,
+              "big_px": 12,
+              "image": null
+            }
+          }
         },
         "1440": {
           "box": {
@@ -234,7 +410,23 @@
           "radius": 0,
           "border": 0,
           "shadow": false,
-          "heading_px": null
+          "heading_px": null,
+          "form": {
+            "features": {
+              "circles": 0,
+              "dots": 0,
+              "pills": 0,
+              "bars": 0,
+              "buttons": 0,
+              "cards": 0,
+              "icon_cards": 0,
+              "icons": 0,
+              "tables": 0,
+              "row_controls": 0,
+              "big_px": 12,
+              "image": null
+            }
+          }
         }
       }
     },
@@ -256,7 +448,23 @@
           "radius": 50,
           "border": 0,
           "shadow": false,
-          "heading_px": null
+          "heading_px": null,
+          "form": {
+            "features": {
+              "circles": 0,
+              "dots": 0,
+              "pills": 0,
+              "bars": 0,
+              "buttons": 0,
+              "cards": 0,
+              "icon_cards": 0,
+              "icons": 0,
+              "tables": 0,
+              "row_controls": 0,
+              "big_px": null,
+              "image": null
+            }
+          }
         },
         "1180": {
           "box": {
@@ -268,7 +476,23 @@
           "radius": 50,
           "border": 0,
           "shadow": false,
-          "heading_px": null
+          "heading_px": null,
+          "form": {
+            "features": {
+              "circles": 0,
+              "dots": 0,
+              "pills": 0,
+              "bars": 0,
+              "buttons": 0,
+              "cards": 0,
+              "icon_cards": 0,
+              "icons": 0,
+              "tables": 0,
+              "row_controls": 0,
+              "big_px": null,
+              "image": null
+            }
+          }
         },
         "1440": {
           "box": {
@@ -280,7 +504,23 @@
           "radius": 50,
           "border": 0,
           "shadow": false,
-          "heading_px": null
+          "heading_px": null,
+          "form": {
+            "features": {
+              "circles": 0,
+              "dots": 0,
+              "pills": 0,
+              "bars": 0,
+              "buttons": 0,
+              "cards": 0,
+              "icon_cards": 0,
+              "icons": 0,
+              "tables": 0,
+              "row_controls": 0,
+              "big_px": null,
+              "image": null
+            }
+          }
         }
       }
     },
@@ -301,7 +541,23 @@
           "radius": 8,
           "border": 1,
           "shadow": false,
-          "heading_px": null
+          "heading_px": null,
+          "form": {
+            "features": {
+              "circles": 0,
+              "dots": 0,
+              "pills": 0,
+              "bars": 0,
+              "buttons": 1,
+              "cards": 0,
+              "icon_cards": 0,
+              "icons": 1,
+              "tables": 0,
+              "row_controls": 0,
+              "big_px": null,
+              "image": null
+            }
+          }
         },
         "768": null,
         "1180": null,
@@ -327,7 +583,23 @@
           "radius": 0,
           "border": 0,
           "shadow": false,
-          "heading_px": 17
+          "heading_px": 17,
+          "form": {
+            "features": {
+              "circles": 0,
+              "dots": 0,
+              "pills": 0,
+              "bars": 0,
+              "buttons": 0,
+              "cards": 0,
+              "icon_cards": 0,
+              "icons": 0,
+              "tables": 0,
+              "row_controls": 0,
+              "big_px": null,
+              "image": null
+            }
+          }
         },
         "768": {
           "box": {
@@ -339,7 +611,23 @@
           "radius": 0,
           "border": 0,
           "shadow": false,
-          "heading_px": 21
+          "heading_px": 21,
+          "form": {
+            "features": {
+              "circles": 0,
+              "dots": 0,
+              "pills": 0,
+              "bars": 0,
+              "buttons": 0,
+              "cards": 0,
+              "icon_cards": 0,
+              "icons": 0,
+              "tables": 0,
+              "row_controls": 0,
+              "big_px": null,
+              "image": null
+            }
+          }
         },
         "1180": {
           "box": {
@@ -351,7 +639,23 @@
           "radius": 0,
           "border": 0,
           "shadow": false,
-          "heading_px": 21
+          "heading_px": 21,
+          "form": {
+            "features": {
+              "circles": 0,
+              "dots": 0,
+              "pills": 0,
+              "bars": 0,
+              "buttons": 0,
+              "cards": 0,
+              "icon_cards": 0,
+              "icons": 0,
+              "tables": 0,
+              "row_controls": 0,
+              "big_px": null,
+              "image": null
+            }
+          }
         },
         "1440": {
           "box": {
@@ -363,7 +667,23 @@
           "radius": 0,
           "border": 0,
           "shadow": false,
-          "heading_px": 21
+          "heading_px": 21,
+          "form": {
+            "features": {
+              "circles": 0,
+              "dots": 0,
+              "pills": 0,
+              "bars": 0,
+              "buttons": 0,
+              "cards": 0,
+              "icon_cards": 0,
+              "icons": 0,
+              "tables": 0,
+              "row_controls": 0,
+              "big_px": null,
+              "image": null
+            }
+          }
         }
       }
     },
@@ -388,7 +708,23 @@
           "radius": 8,
           "border": 1,
           "shadow": false,
-          "heading_px": null
+          "heading_px": null,
+          "form": {
+            "features": {
+              "circles": 0,
+              "dots": 0,
+              "pills": 0,
+              "bars": 0,
+              "buttons": 2,
+              "cards": 0,
+              "icon_cards": 0,
+              "icons": 0,
+              "tables": 0,
+              "row_controls": 0,
+              "big_px": null,
+              "image": null
+            }
+          }
         },
         "768": {
           "box": {
@@ -400,7 +736,23 @@
           "radius": 8,
           "border": 1,
           "shadow": false,
-          "heading_px": null
+          "heading_px": null,
+          "form": {
+            "features": {
+              "circles": 0,
+              "dots": 0,
+              "pills": 0,
+              "bars": 0,
+              "buttons": 3,
+              "cards": 0,
+              "icon_cards": 0,
+              "icons": 0,
+              "tables": 0,
+              "row_controls": 3,
+              "big_px": null,
+              "image": null
+            }
+          }
         },
         "1180": {
           "box": {
@@ -412,7 +764,23 @@
           "radius": 8,
           "border": 1,
           "shadow": false,
-          "heading_px": null
+          "heading_px": null,
+          "form": {
+            "features": {
+              "circles": 0,
+              "dots": 0,
+              "pills": 0,
+              "bars": 0,
+              "buttons": 3,
+              "cards": 0,
+              "icon_cards": 0,
+              "icons": 0,
+              "tables": 0,
+              "row_controls": 3,
+              "big_px": null,
+              "image": null
+            }
+          }
         },
         "1440": {
           "box": {
@@ -424,7 +792,23 @@
           "radius": 8,
           "border": 1,
           "shadow": false,
-          "heading_px": null
+          "heading_px": null,
+          "form": {
+            "features": {
+              "circles": 0,
+              "dots": 0,
+              "pills": 0,
+              "bars": 0,
+              "buttons": 3,
+              "cards": 0,
+              "icon_cards": 0,
+              "icons": 0,
+              "tables": 0,
+              "row_controls": 3,
+              "big_px": null,
+              "image": null
+            }
+          }
         }
       }
     },
@@ -452,7 +836,23 @@
           "radius": 11,
           "border": 1,
           "shadow": true,
-          "heading_px": null
+          "heading_px": null,
+          "form": {
+            "features": {
+              "circles": 0,
+              "dots": 0,
+              "pills": 0,
+              "bars": 5,
+              "buttons": 0,
+              "cards": 5,
+              "icon_cards": 0,
+              "icons": 0,
+              "tables": 0,
+              "row_controls": 0,
+              "big_px": 19,
+              "image": null
+            }
+          }
         },
         "768": {
           "box": {
@@ -465,7 +865,23 @@
           "radius": 11,
           "border": 1,
           "shadow": true,
-          "heading_px": null
+          "heading_px": null,
+          "form": {
+            "features": {
+              "circles": 0,
+              "dots": 0,
+              "pills": 0,
+              "bars": 5,
+              "buttons": 0,
+              "cards": 5,
+              "icon_cards": 0,
+              "icons": 0,
+              "tables": 0,
+              "row_controls": 0,
+              "big_px": 23,
+              "image": null
+            }
+          }
         },
         "1180": {
           "box": {
@@ -478,7 +894,23 @@
           "radius": 11,
           "border": 1,
           "shadow": true,
-          "heading_px": null
+          "heading_px": null,
+          "form": {
+            "features": {
+              "circles": 0,
+              "dots": 0,
+              "pills": 0,
+              "bars": 5,
+              "buttons": 0,
+              "cards": 5,
+              "icon_cards": 0,
+              "icons": 0,
+              "tables": 0,
+              "row_controls": 0,
+              "big_px": 23,
+              "image": null
+            }
+          }
         },
         "1440": {
           "box": {
@@ -491,7 +923,23 @@
           "radius": 11,
           "border": 1,
           "shadow": true,
-          "heading_px": null
+          "heading_px": null,
+          "form": {
+            "features": {
+              "circles": 0,
+              "dots": 0,
+              "pills": 0,
+              "bars": 5,
+              "buttons": 0,
+              "cards": 5,
+              "icon_cards": 0,
+              "icons": 0,
+              "tables": 0,
+              "row_controls": 0,
+              "big_px": 23,
+              "image": null
+            }
+          }
         }
       }
     },
@@ -519,7 +967,23 @@
           "radius": 11,
           "border": 1,
           "shadow": false,
-          "heading_px": null
+          "heading_px": null,
+          "form": {
+            "features": {
+              "circles": 0,
+              "dots": 0,
+              "pills": 0,
+              "bars": 0,
+              "buttons": 0,
+              "cards": 1,
+              "icon_cards": 0,
+              "icons": 0,
+              "tables": 0,
+              "row_controls": 0,
+              "big_px": null,
+              "image": null
+            }
+          }
         },
         "768": {
           "box": {
@@ -531,7 +995,23 @@
           "radius": 11,
           "border": 1,
           "shadow": false,
-          "heading_px": null
+          "heading_px": null,
+          "form": {
+            "features": {
+              "circles": 0,
+              "dots": 0,
+              "pills": 0,
+              "bars": 0,
+              "buttons": 0,
+              "cards": 1,
+              "icon_cards": 0,
+              "icons": 0,
+              "tables": 0,
+              "row_controls": 0,
+              "big_px": null,
+              "image": null
+            }
+          }
         },
         "1180": {
           "box": {
@@ -543,7 +1023,23 @@
           "radius": 11,
           "border": 1,
           "shadow": false,
-          "heading_px": null
+          "heading_px": null,
+          "form": {
+            "features": {
+              "circles": 0,
+              "dots": 0,
+              "pills": 0,
+              "bars": 0,
+              "buttons": 0,
+              "cards": 1,
+              "icon_cards": 0,
+              "icons": 0,
+              "tables": 0,
+              "row_controls": 0,
+              "big_px": null,
+              "image": null
+            }
+          }
         },
         "1440": {
           "box": {
@@ -555,7 +1051,23 @@
           "radius": 11,
           "border": 1,
           "shadow": false,
-          "heading_px": null
+          "heading_px": null,
+          "form": {
+            "features": {
+              "circles": 0,
+              "dots": 0,
+              "pills": 0,
+              "bars": 0,
+              "buttons": 0,
+              "cards": 1,
+              "icon_cards": 0,
+              "icons": 0,
+              "tables": 0,
+              "row_controls": 0,
+              "big_px": null,
+              "image": null
+            }
+          }
         }
       }
     },
@@ -582,7 +1094,25 @@
           "radius": 11,
           "border": 1,
           "shadow": true,
-          "heading_px": 15
+          "heading_px": 15,
+          "form": {
+            "features": {
+              "circles": 0,
+              "dots": 0,
+              "pills": 0,
+              "bars": 0,
+              "cards": 5,
+              "icon_cards": 0,
+              "icons": 0,
+              "tables": 0,
+              "row_controls": 2,
+              "big_px": 12,
+              "image": {
+                "w": 0.3538,
+                "h": 0.3256
+              }
+            }
+          }
         },
         "768": {
           "box": {
@@ -594,7 +1124,25 @@
           "radius": 11,
           "border": 1,
           "shadow": true,
-          "heading_px": 15
+          "heading_px": 15,
+          "form": {
+            "features": {
+              "circles": 0,
+              "dots": 0,
+              "pills": 0,
+              "bars": 0,
+              "cards": 5,
+              "icon_cards": 0,
+              "icons": 0,
+              "tables": 0,
+              "row_controls": 1,
+              "big_px": 12,
+              "image": {
+                "w": 0.1971,
+                "h": 0.1814
+              }
+            }
+          }
         },
         "1180": {
           "box": {
@@ -606,7 +1154,25 @@
           "radius": 11,
           "border": 1,
           "shadow": true,
-          "heading_px": 15
+          "heading_px": 15,
+          "form": {
+            "features": {
+              "circles": 0,
+              "dots": 0,
+              "pills": 0,
+              "bars": 0,
+              "cards": 5,
+              "icon_cards": 0,
+              "icons": 0,
+              "tables": 0,
+              "row_controls": 1,
+              "big_px": 12,
+              "image": {
+                "w": 0.1241,
+                "h": 0.1142
+              }
+            }
+          }
         },
         "1440": {
           "box": {
@@ -618,7 +1184,25 @@
           "radius": 11,
           "border": 1,
           "shadow": true,
-          "heading_px": 15
+          "heading_px": 15,
+          "form": {
+            "features": {
+              "circles": 0,
+              "dots": 0,
+              "pills": 0,
+              "bars": 0,
+              "cards": 5,
+              "icon_cards": 0,
+              "icons": 0,
+              "tables": 0,
+              "row_controls": 1,
+              "big_px": 12,
+              "image": {
+                "w": 0.1006,
+                "h": 0.0926
+              }
+            }
+          }
         }
       }
     },
@@ -641,7 +1225,24 @@
           "radius": 8,
           "border": 1,
           "shadow": false,
-          "heading_px": null
+          "heading_px": null,
+          "form": {
+            "features": {
+              "circles": 0,
+              "dots": 0,
+              "pills": 0,
+              "bars": 0,
+              "buttons": 5,
+              "cards": 0,
+              "icon_cards": 0,
+              "icons": 0,
+              "tables": 0,
+              "row_controls": 2,
+              "big_px": 12,
+              "image": null
+            },
+            "data_rows": true
+          }
         },
         "768": {
           "box": {
@@ -653,7 +1254,24 @@
           "radius": 8,
           "border": 1,
           "shadow": false,
-          "heading_px": null
+          "heading_px": null,
+          "form": {
+            "features": {
+              "circles": 0,
+              "dots": 0,
+              "pills": 0,
+              "bars": 0,
+              "buttons": 5,
+              "cards": 0,
+              "icon_cards": 0,
+              "icons": 0,
+              "tables": 0,
+              "row_controls": 1,
+              "big_px": 12,
+              "image": null
+            },
+            "data_rows": true
+          }
         },
         "1180": {
           "box": {
@@ -665,7 +1283,24 @@
           "radius": 8,
           "border": 1,
           "shadow": false,
-          "heading_px": null
+          "heading_px": null,
+          "form": {
+            "features": {
+              "circles": 0,
+              "dots": 0,
+              "pills": 0,
+              "bars": 0,
+              "buttons": 5,
+              "cards": 0,
+              "icon_cards": 0,
+              "icons": 0,
+              "tables": 0,
+              "row_controls": 1,
+              "big_px": 12,
+              "image": null
+            },
+            "data_rows": true
+          }
         },
         "1440": {
           "box": {
@@ -677,7 +1312,24 @@
           "radius": 8,
           "border": 1,
           "shadow": false,
-          "heading_px": null
+          "heading_px": null,
+          "form": {
+            "features": {
+              "circles": 0,
+              "dots": 0,
+              "pills": 0,
+              "bars": 0,
+              "buttons": 5,
+              "cards": 0,
+              "icon_cards": 0,
+              "icons": 0,
+              "tables": 0,
+              "row_controls": 1,
+              "big_px": 12,
+              "image": null
+            },
+            "data_rows": true
+          }
         }
       }
     },
@@ -710,7 +1362,24 @@
           "radius": 11,
           "border": 1,
           "shadow": true,
-          "heading_px": null
+          "heading_px": null,
+          "form": {
+            "features": {
+              "circles": 0,
+              "dots": 0,
+              "pills": 0,
+              "bars": 0,
+              "buttons": 6,
+              "cards": 9,
+              "icon_cards": 0,
+              "icons": 0,
+              "tables": 0,
+              "row_controls": 4,
+              "big_px": 12,
+              "image": null
+            },
+            "data_rows": true
+          }
         },
         "768": {
           "box": {
@@ -722,7 +1391,24 @@
           "radius": 11,
           "border": 1,
           "shadow": true,
-          "heading_px": null
+          "heading_px": null,
+          "form": {
+            "features": {
+              "circles": 0,
+              "dots": 7,
+              "pills": 0,
+              "bars": 7,
+              "buttons": 5,
+              "cards": 2,
+              "icon_cards": 0,
+              "icons": 0,
+              "tables": 1,
+              "row_controls": 5,
+              "big_px": 11,
+              "image": null
+            },
+            "data_rows": true
+          }
         },
         "1180": {
           "box": {
@@ -734,7 +1420,24 @@
           "radius": 11,
           "border": 1,
           "shadow": true,
-          "heading_px": null
+          "heading_px": null,
+          "form": {
+            "features": {
+              "circles": 0,
+              "dots": 7,
+              "pills": 0,
+              "bars": 7,
+              "buttons": 6,
+              "cards": 2,
+              "icon_cards": 0,
+              "icons": 0,
+              "tables": 1,
+              "row_controls": 5,
+              "big_px": 11,
+              "image": null
+            },
+            "data_rows": true
+          }
         },
         "1440": {
           "box": {
@@ -746,7 +1449,24 @@
           "radius": 11,
           "border": 1,
           "shadow": true,
-          "heading_px": null
+          "heading_px": null,
+          "form": {
+            "features": {
+              "circles": 0,
+              "dots": 7,
+              "pills": 0,
+              "bars": 7,
+              "buttons": 6,
+              "cards": 2,
+              "icon_cards": 0,
+              "icons": 0,
+              "tables": 1,
+              "row_controls": 5,
+              "big_px": 11,
+              "image": null
+            },
+            "data_rows": true
+          }
         }
       }
     },
@@ -775,7 +1495,23 @@
           "radius": 11,
           "border": 1,
           "shadow": true,
-          "heading_px": null
+          "heading_px": null,
+          "form": {
+            "features": {
+              "circles": 0,
+              "dots": 0,
+              "pills": 0,
+              "bars": 5,
+              "buttons": 0,
+              "cards": 1,
+              "icon_cards": 0,
+              "icons": 0,
+              "tables": 0,
+              "row_controls": 0,
+              "big_px": 11,
+              "image": null
+            }
+          }
         },
         "768": {
           "box": {
@@ -787,7 +1523,23 @@
           "radius": 11,
           "border": 1,
           "shadow": true,
-          "heading_px": null
+          "heading_px": null,
+          "form": {
+            "features": {
+              "circles": 0,
+              "dots": 0,
+              "pills": 0,
+              "bars": 5,
+              "buttons": 0,
+              "cards": 1,
+              "icon_cards": 0,
+              "icons": 0,
+              "tables": 0,
+              "row_controls": 0,
+              "big_px": 11,
+              "image": null
+            }
+          }
         },
         "1180": {
           "box": {
@@ -799,7 +1551,23 @@
           "radius": 11,
           "border": 1,
           "shadow": true,
-          "heading_px": null
+          "heading_px": null,
+          "form": {
+            "features": {
+              "circles": 0,
+              "dots": 0,
+              "pills": 0,
+              "bars": 5,
+              "buttons": 0,
+              "cards": 1,
+              "icon_cards": 0,
+              "icons": 0,
+              "tables": 0,
+              "row_controls": 0,
+              "big_px": 11,
+              "image": null
+            }
+          }
         },
         "1440": {
           "box": {
@@ -811,7 +1579,23 @@
           "radius": 11,
           "border": 1,
           "shadow": true,
-          "heading_px": null
+          "heading_px": null,
+          "form": {
+            "features": {
+              "circles": 0,
+              "dots": 0,
+              "pills": 0,
+              "bars": 5,
+              "buttons": 0,
+              "cards": 1,
+              "icon_cards": 0,
+              "icons": 0,
+              "tables": 0,
+              "row_controls": 0,
+              "big_px": 11,
+              "image": null
+            }
+          }
         }
       }
     },
@@ -835,7 +1619,24 @@
           "radius": 11,
           "border": 1,
           "shadow": true,
-          "heading_px": null
+          "heading_px": null,
+          "form": {
+            "features": {
+              "circles": 0,
+              "dots": 0,
+              "pills": 0,
+              "bars": 0,
+              "buttons": 0,
+              "cards": 1,
+              "icon_cards": 0,
+              "icons": 3,
+              "tables": 0,
+              "row_controls": 0,
+              "big_px": 10,
+              "image": null
+            },
+            "data_rows": true
+          }
         },
         "768": {
           "box": {
@@ -847,7 +1648,24 @@
           "radius": 11,
           "border": 1,
           "shadow": true,
-          "heading_px": null
+          "heading_px": null,
+          "form": {
+            "features": {
+              "circles": 0,
+              "dots": 0,
+              "pills": 0,
+              "bars": 0,
+              "buttons": 0,
+              "cards": 1,
+              "icon_cards": 0,
+              "icons": 3,
+              "tables": 0,
+              "row_controls": 0,
+              "big_px": 10,
+              "image": null
+            },
+            "data_rows": true
+          }
         },
         "1180": {
           "box": {
@@ -859,7 +1677,24 @@
           "radius": 11,
           "border": 1,
           "shadow": true,
-          "heading_px": null
+          "heading_px": null,
+          "form": {
+            "features": {
+              "circles": 0,
+              "dots": 0,
+              "pills": 0,
+              "bars": 0,
+              "buttons": 0,
+              "cards": 1,
+              "icon_cards": 0,
+              "icons": 3,
+              "tables": 0,
+              "row_controls": 0,
+              "big_px": 10,
+              "image": null
+            },
+            "data_rows": true
+          }
         },
         "1440": {
           "box": {
@@ -871,7 +1706,24 @@
           "radius": 11,
           "border": 1,
           "shadow": true,
-          "heading_px": null
+          "heading_px": null,
+          "form": {
+            "features": {
+              "circles": 0,
+              "dots": 0,
+              "pills": 0,
+              "bars": 0,
+              "buttons": 0,
+              "cards": 1,
+              "icon_cards": 0,
+              "icons": 3,
+              "tables": 0,
+              "row_controls": 0,
+              "big_px": 10,
+              "image": null
+            },
+            "data_rows": true
+          }
         }
       }
     }

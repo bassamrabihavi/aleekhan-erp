@@ -84,7 +84,13 @@ overwrites a hand spec.
 
 ## Score
 
-Score per width = **0.5 × presence + 0.3 × layout + 0.2 × style**. The weights are in `config.ts`.
+Score per width = **0.30 × presence + 0.25 × layout + 0.30 × form + 0.15 × style**, where
+**form = 0.20 × form checks + 0.10 × structure**. The weights are `WEIGHTS` in `config.ts`.
+
+History: until 2026-11-18 the score was 0.5 × presence + 0.3 × layout + 0.2 × style. That only checked that a region
+exists in roughly the right box, not what it looks like inside, so pages that did not look like the mockups reached
+95 %. The orchestrator tightened the metric (never loosened it): the form and structure parts were added and the
+other weights reduced. The threshold stays 95 % per page per width.
 
 - **Presence.** The score is the mean over the regions required at that width. A region scores
   `(visible + required child labels found + min(items/required, 1)) / (1 + children + 1 if items)`.
@@ -102,6 +108,7 @@ Score per width = **0.5 × presence + 0.3 × layout + 0.2 × style**. The weight
     records what the mockup renders.
   - **Extra sections (DEC-061 amendment, 2026-11-18).** The layout part also carries a penalty for sections that
     the mockup does not have but that sit above or between its regions (see "Extra sections" below).
+- **Form checks** (0.20) and **structure** (0.10): see "Form" and "Structure" below.
 - **Style.** This is the mean of the checks that apply:
   1. the side menu is visible with ≥ 3 icons (where the mockup hides it, a menu toggle is required instead);
   2. the median radius of cards and panels is within ±4 px of the mockup's;
@@ -115,6 +122,70 @@ Score per width = **0.5 × presence + 0.3 × layout + 0.2 × style**. The weight
 (docs/ui/DESIGN_TOKENS.md, frontend/src/styles/tokens.css: logo green `--color-primary`, Vazirmatn). It takes
 precedence over the mockup's colours and its Tahoma/Noto fonts. So the colour check compares the built page with
 the tokens read at runtime from `:root`, and never with the mockup's hex values.
+
+## Form (harness tightening, 2026-11-18)
+
+Every region has a **visual form**: what its inside looks like. `measure.ts` (`formOf`) measures the same features
+on the mockup and on the built page, counting visible elements inside the region:
+
+| Feature | What is counted |
+|---|---|
+| `circles` | circular elements 18–72 px (radius ≥ 45 %, filled or bordered) **with an icon inside** — stage / status circles |
+| `dots` | status dots 5–14 px, round, filled (the element itself or its `::before` / `::after`) |
+| `pills` | pills / badges: 14–34 px high, fully rounded, filled, with text, not a control |
+| `bars` | progress bars / rails (`role=progressbar`, `progress`, `meter`, or 3–14 px high, ≥ 40 px and ≥ 5 × high, rounded, filled); outermost only |
+| `buttons` | `button`, `role=button`, `role=tab`, `.btn`, input buttons **styled as buttons** (border or background) and ≥ 28 px high |
+| `cards` | framed boxes (border, shadow or own background) with a radius ≥ 4 px, ≥ 80 × 44 px, not a control or table part |
+| `icon_cards` | cards with an icon in their top 56 px (icon header, leading status icon) |
+| `icons` | `svg`, `img`, `[data-icon]` or a 1–2 character glyph, ≤ 64 px |
+| `tables` | `table`, `role=table`, `role=grid` |
+| `row_controls` | the largest number of sibling controls on one line (tabs, step buttons) |
+| `big_px` | the largest font size of a short text (≤ 16 chars) with a digit or a dash value — the "big number" |
+| `image` | the largest image slot ≥ 40 × 40 px (`img`, large `svg`, `picture`, `canvas`, `video`, `role=img`, background image), normalised like the region box |
+
+**Where the target form comes from.**
+- Pages 4, 29, 33: extracted automatically from the rendered HTML mockup at each width (`FIDELITY_EXTRACT=1`), into
+  `widths.<w>.form` of `specs/page-XX.json`. Boxes, labels and styles of those specs did not change (verified by
+  re-extraction: every non-form value is identical). `form_skip` in `config.ts` removes a feature from one region with
+  the reason written next to it (page 4 product card: its buttons are the style chips, which are the nested data-row
+  region `product-styles`).
+- Pages 1, 2: **hand-authored** from the concept PNGs by eye (`hand: true`; only the listed features are checked).
+  Desktop concept for 1440 / 1180, mobile concept for 390 and for the 768 body; the 768 shell form is copied from
+  `page-29.json`'s extracted 768 shell (as the 768 shell boxes are). Big numbers are scaled to the target width; the
+  image slot is normalised to the content width. Page 2's «سفارش» tab is not in the concepts: its form (six cards
+  with icon headers) is the card language of the summary area — an assumption, written in `source_note`.
+
+**Checks** (`formChecks` in `score.ts`; tolerances `FORM_TOL` in `config.ts`). Only features the mockup **has** are
+checked (count > 0, a big number ≥ 16 px, an image slot); `tables` is checked both ways (a table where the mockup
+shows cards fails too):
+- counts: built ≥ max(1, round(0.75 × mockup)); for `dots`, `pills`, `bars` also ≤ ceil(1.5 × mockup) + 2;
+- `big_px`: built ≥ 0.8 × mockup;
+- `image`: built width and height ≥ 0.6 × the mockup's;
+- `row_controls`: for kind `tabs` (and wherever a hand spec lists it);
+- **data rows:** in regions that repeat records (kinds `table`, `events`, or `data_rows` in the spec / config), the
+  per-row counts (circles, dots, pills, bars, buttons, cards, icon cards, icons) only need to exist (≥ 1). The demo
+  records of a mockup are never required — as with labels, mock numbers are never required.
+- A later-phase region still has to show the mockup's form (e.g. stage circles in a neutral state, cards with icon
+  headers showing «—»); the honest «در دست ساخت» text only covers presence.
+- A region that is missing or hidden fails all its checks.
+
+A region's form score is the share of its checks met; **form checks** is the mean over the regions that have checks.
+
+## Structure (harness tightening, 2026-11-18)
+
+A blurred-grayscale structural similarity per region (`structure.ts`, no new dependency):
+1. The mockup and the built page are rendered at the width with a viewport as tall as the page (≤ 6000 px, so nothing
+   is scrolled or stitched), the region rectangles are measured and the viewport is screenshotted. Hand pages use the
+   concept PNG; a spec box is mapped into it with `HAND_FRAMES` (`config.ts`: desktop content x 20, y 90, width 1490,
+   page width 1586; mobile content x 90, y 150, width 760, no viewport mapping). At 768 the hand-page shell regions
+   have no image (their targets are not from the concept) and are left out of the structure mean.
+2. In a blank browser page each region crop is drawn (canvas) at 4 × a grid 64 wide (height from the **mockup** box
+   aspect, 6..192), converted to grayscale; both crops use the mockup's grid.
+3. Area-average to the grid, Gaussian blur σ = 1.5 grid px (text becomes grey bands: text content does not matter,
+   blocks, lines, icons and fills do), contrast stretch to 0..1 (the brand colours beat the mockup colours), mean SSIM
+   over 7 × 7 windows.
+4. Region score = min(1, SSIM / 0.6). A built region that is missing scores 0. **structure** = the mean over the
+   regions with a mockup image; if no region could be measured it is 0, never a free pass.
 
 ## Extra sections (DEC-061 amendment, 2026-11-18)
 
@@ -153,8 +224,10 @@ region that has no marker is reported as MISSING. That missing region is on the 
 
 - `config.ts`: threshold, weights, widths and the mockup region map.
 - `measure.ts`: the browser-side measurement, used for both the mockup and the built page (plus the extra-section
-  scan on the built page).
-- `score.ts`: the pure scoring and the Markdown report. Its unit tests are in `score.vitest.ts` (vitest).
+  scan on the built page, the form features and the grayscale crops).
+- `score.ts`: the pure scoring (including the form checks) and the Markdown report. Its unit tests are in
+  `score.vitest.ts` (vitest), together with those of `structure.ts`.
+- `structure.ts`: the blurred-grayscale SSIM (pure functions).
 - `fidelity.spec.ts`: the seed (synthetic data: one viewer, one product with one style, seven confirmed orders of that
   style - seven serials, the sample size of the page-4 mockup - and one HOLD change request; REV-0295), extraction or
   verification, the scoring run, and the
