@@ -13,12 +13,12 @@ import { ActionError } from "../components/ActionError";
 import { DataView, ForbiddenState } from "../components/DataView";
 import { Dialog } from "../components/Dialog";
 import { Field, Requester, ShortId } from "../components/Form";
-import { JalaliDateField, LaterSections, Num, PageHead } from "../components/Phase02";
+import { DisabledAction, JalaliDateField, Kpi, LATER_TEXT, LaterKpi, LaterSections, Num, PageHead, PageInfoButtons } from "../components/Phase02";
 import { StatusChip } from "../components/StatusChip";
 import { formatJalaliDateTime, toFaDigits } from "../lib/format";
 import { formatJalaliDate } from "../lib/jalali";
 import { toneLabel } from "../lib/labels";
-import { CHANGE_KIND, CHANGE_STATUS, UOM } from "../lib/labels02";
+import { CHANGE_KIND, CHANGE_STATUS, ORDER_STATUS, UOM } from "../lib/labels02";
 import { useCursor } from "../lib/queries";
 import { navigate, segments, useRoute } from "../lib/router";
 import { useAction } from "../lib/useAction";
@@ -36,6 +36,13 @@ export function ChangesPage() {
       </div>
     );
   }
+  if (!first) {
+    return (
+      <div className="page" data-testid="page-changes">
+        <ChangeList />
+      </div>
+    );
+  }
   return (
     <div className="page" data-testid="page-changes">
       <PageHead
@@ -43,7 +50,7 @@ export function ChangesPage() {
         title="تغییرات سفارش"
         lead="سفارش تأییدشده مستقیم ویرایش نمی‌شود. هر تغییر یک درخواست است: تصمیم مدیر بازرگانی، برای تغییر تاریخ تحویل تأیید برنامه‌ریزی هم، و سپس اعمال که نسخه جدید سفارش و Snapshot جدید سریال می‌سازد. تغییرات مهندسی (ECR/ECO) در فازهای ۳ و ۴ می‌آیند."
       />
-      {first === "new" && second ? <NewChange orderId={second} /> : first ? <ChangeDetail id={first} /> : <ChangeList />}
+      {first === "new" && second ? <NewChange orderId={second} /> : <ChangeDetail id={first} />}
     </div>
   );
 }
@@ -52,64 +59,276 @@ function ChangeList() {
   const cursor = useCursor();
   const [status, setStatus] = useState("");
   const [kind, setKind] = useState("");
+  const [picked, setPicked] = useState<string | null>(null);
   const list = useQuery({
     queryKey: [...K2.changes, "list", status, kind, cursor.cursor],
     queryFn: async ({ signal }) =>
       (await get("/commercial/change-requests", g.crPage, { status: status || undefined, kind: kind || undefined, cursor: cursor.cursor, page_size: 25 }, signal)).data,
   });
+  const counts = useQuery({
+    queryKey: [...K2.changes, "counts"],
+    queryFn: async ({ signal }) => (await get("/commercial/change-requests/counts", g.changeCounts, undefined, signal)).data,
+  });
+  const items = list.data?.items ?? [];
+  const selected = items.find((c) => c.change_request_id === picked) ?? items[0] ?? null;
+  const n = (v: number | undefined) => (v === undefined ? "…" : toFaDigits(v));
   return (
-    <section className="panel panel--wide" aria-labelledby="changes-title" data-fid="change-list">
-      <h2 id="changes-title">درخواست‌های تغییر</h2>
-      <p className="field__hint">درخواست جدید را از صفحه همان سفارش ثبت کنید (دکمه «درخواست تغییر»).</p>
-      <div className="filters">
-        <Field label="وضعیت">
-          {(id) => (
-            <select id={id} className="input" value={status} onChange={(e) => { cursor.reset(); setStatus(e.target.value); }} data-testid="change-status-filter">
-              <option value="">همه</option>
-              {Object.entries(CHANGE_STATUS).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
-            </select>
+    <>
+      <ChangeHead selected={selected} />
+      <nav className="pagetabs" aria-label="بخش‌های مرتبط با تغییرات سفارش">
+        <span className="pagetabs__item" aria-current="page">فهرست درخواست‌ها</span>
+        <a href="#/orders" className="pagetabs__item">سفارش‌ها (درخواست جدید از صفحه سفارش)</a>
+        <a href="#/work" className="pagetabs__item">کارها و تأییدها</a>
+      </nav>
+      <ul className="kpis" data-fid="kpis" aria-label="شمارش درخواست‌های تغییر">
+        <Kpi label="درخواست‌های باز" value={counts.isError ? "—" : n(counts.data?.open)} note={counts.data ? `در انتظار تصمیم: ${toFaDigits(counts.data.awaiting_decision)}` : "پیش‌نویس، ارسال‌شده یا تأییدشده"} testId="kpi-open" />
+        <LaterKpi label="نیازمند تحلیل اثر" phase="PHASE_06 / PHASE_07" />
+        <Kpi label="تغییرات اجراشده" value={counts.isError ? "—" : n(counts.data?.applied)} note="با نسخه جدید سفارش" tone="good" testId="kpi-applied" />
+        <Kpi label="درخواست لغو" value={counts.isError ? "—" : n(counts.data?.cancel_open)} note="لغو سفارش یا ردیف، هنوز باز" tone="critical" testId="kpi-cancel" />
+      </ul>
+      {counts.isError ? <p className="field__hint" role="status">شمارش‌ها دریافت نشد؛ فهرست زیر معتبر است.</p> : null}
+      <div className="grid-main grid-main--changes">
+        <section className="panel" aria-labelledby="changes-title" data-fid="change-list">
+          <div className="panel__head panel__head--wrap">
+            <h2 id="changes-title">فهرست درخواست‌ها</h2>
+          <div className="filters filters--compact">
+            <Field label="وضعیت">
+              {(id) => (
+                <select id={id} className="input" value={status} onChange={(e) => { cursor.reset(); setStatus(e.target.value); }} data-testid="change-status-filter">
+                  <option value="">همه</option>
+                  {Object.entries(CHANGE_STATUS).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
+                </select>
+              )}
+            </Field>
+            <Field label="نوع">
+              {(id) => (
+                <select id={id} className="input" value={kind} onChange={(e) => { cursor.reset(); setKind(e.target.value); }}>
+                  <option value="">همه</option>
+                  {Object.entries(CHANGE_KIND).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                </select>
+              )}
+            </Field>
+          </div>
+          </div>
+          <DataView query={list} loading="در حال دریافت درخواست‌ها…" errorTitle="درخواست‌ها دریافت نشد" isEmpty={(d) => d.items.length === 0} empty={{ title: "درخواست تغییری با این فیلتر نیست." }}>
+            {(d) => (
+              <>
+                <table className="table table--cards table--grid" data-testid="changes-table">
+                  <caption className="sr-only">درخواست‌های تغییر سفارش؛ ردیف انتخاب‌شده در «مقایسه قبل و بعد» دیده می‌شود</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">شماره</th>
+                      <th scope="col">نوع</th>
+                      <th scope="col">دلیل</th>
+                      <th scope="col">ثبت</th>
+                      <th scope="col">وضعیت</th>
+                      <th scope="col"><span className="sr-only">مقایسه</span></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {d.items.map((c) => {
+                      const on = selected?.change_request_id === c.change_request_id;
+                      return (
+                        <tr key={c.change_request_id} className={on ? "row--current" : undefined}>
+                          <td data-label="شماره"><a href={`#/changes/${c.change_request_id}`} data-testid="change-open"><Num value={c.request_no} /></a></td>
+                          <td data-label="نوع">{CHANGE_KIND[c.kind] ?? c.kind}</td>
+                          <td data-label="دلیل" className="cell--wide">{c.reason}</td>
+                          <td data-label="ثبت">{formatJalaliDateTime(c.created_at)}</td>
+                          <td data-label="وضعیت"><StatusChip {...toneLabel(CHANGE_STATUS, c.status)} /></td>
+                          <td data-label="مقایسه">
+                            <button type="button" className="btn btn--outline btn--compact" aria-pressed={on} onClick={() => { setPicked(c.change_request_id); }} data-testid="change-compare-pick">
+                              {on ? "در مقایسه" : "مقایسه"}
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+                <Pager depth={cursor.depth} next={d.page.next_cursor} onNext={cursor.next} onPrev={cursor.prev} />
+              </>
+            )}
+          </DataView>
+        </section>
+        <section className="panel compare-panel" aria-labelledby="compare-title" data-fid="change-compare" data-testid="change-compare">
+          <div className="panel__head">
+            <h2 id="compare-title">مقایسه قبل و بعد</h2>
+            {selected ? <Num value={selected.request_no} /> : null}
+          </div>
+          {selected ? (
+            <CompareBody cr={selected} />
+          ) : (
+            <>
+              <p className="field__hint" data-testid="compare-empty">درخواستی برای مقایسه انتخاب نشده است.</p>
+              <div className="parttitle">وضعیت قبل · وضعیت درخواستی</div>
+              <div className="parttitle">تحلیل اثر موردنیاز</div>
+              <div className="parttitle">گیت‌های تأیید</div>
+              <Gates cr={null} />
+            </>
           )}
-        </Field>
-        <Field label="نوع">
-          {(id) => (
-            <select id={id} className="input" value={kind} onChange={(e) => { cursor.reset(); setKind(e.target.value); }}>
-              <option value="">همه</option>
-              {Object.entries(CHANGE_KIND).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-            </select>
-          )}
-        </Field>
+        </section>
       </div>
-      <DataView query={list} loading="در حال دریافت درخواست‌ها…" errorTitle="درخواست‌ها دریافت نشد" isEmpty={(d) => d.items.length === 0} empty={{ title: "درخواست تغییری با این فیلتر نیست." }}>
-        {(d) => (
-          <>
-            <table className="table table--cards" data-testid="changes-table">
-              <caption className="sr-only">درخواست‌های تغییر سفارش</caption>
-              <thead>
-                <tr>
-                  <th scope="col">شماره</th>
-                  <th scope="col">نوع</th>
-                  <th scope="col">دلیل</th>
-                  <th scope="col">ثبت</th>
-                  <th scope="col">وضعیت</th>
-                </tr>
-              </thead>
-              <tbody>
-                {d.items.map((c) => (
-                  <tr key={c.change_request_id}>
-                    <td data-label="شماره"><a href={`#/changes/${c.change_request_id}`} data-testid="change-open"><Num value={c.request_no} /></a></td>
-                    <td data-label="نوع">{CHANGE_KIND[c.kind] ?? c.kind}</td>
-                    <td data-label="دلیل">{c.reason}</td>
-                    <td data-label="ثبت">{formatJalaliDateTime(c.created_at)}</td>
-                    <td data-label="وضعیت"><StatusChip {...toneLabel(CHANGE_STATUS, c.status)} /></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            <Pager depth={cursor.depth} next={d.page.next_cursor} onNext={cursor.next} onPrev={cursor.prev} />
-          </>
-        )}
-      </DataView>
-    </section>
+      <section className="panel later-panel" aria-labelledby="effectivity-title" data-fid="revision-effectivity">
+        <div className="panel__head">
+          <h2 id="effectivity-title">قاعده اثرپذیری Revision بر مقدار</h2>
+        </div>
+        <p className="later__text">{LATER_TEXT}</p>
+        <p className="later__meta">
+          فاز مالک: <bdi dir="ltr">PHASE_04 / PHASE_05</bdi> — تغییر Revision مهندسی (ECR/ECO) و اثر آن بر مقدار سفارش، Batch و BOM در فازهای ۴ و ۵ ساخته می‌شود؛ در فاز ۲ تغییر سفارش فقط نسخه جدید سفارش و Snapshot جدید سریال می‌سازد.
+        </p>
+      </section>
+    </>
+  );
+}
+
+/** Page head of the list: the decision action opens the selected request, where the decision is recorded. */
+function ChangeHead({ selected }: { selected: ChangeRequest | null }) {
+  const { can, me } = useAuth();
+  const mayAct = can(PERM.changeDecide) || can(PERM.changePlanning) || can(PERM.changeApply);
+  const open = selected !== null && (selected.status === "SUBMITTED" || selected.status === "APPROVED");
+  const reason = !mayAct
+    ? "برای ثبت تصمیم نقش مدیر بازرگانی یا برنامه‌ریزی لازم است."
+    : !selected
+      ? "ابتدا یک درخواست را از فهرست انتخاب کنید."
+      : !open
+        ? "درخواست انتخاب‌شده باز نیست و تصمیمی نمی‌خواهد."
+        : selected.requested_by === me?.user.user_id
+          ? "این درخواست را خودتان ثبت کرده‌اید؛ تصمیم با فرد دیگری است."
+          : null;
+  return (
+    <PageHead
+      page="برنامه‌ریزی و کنترل · صفحه ۳۳ · فاز ۲ (بخش سفارش)"
+      title="کنترل تغییرات سفارش"
+      lead="مقایسه قبل و بعد، تصمیم، تأیید برنامه‌ریزی و اعمال با نسخه جدید سفارش."
+      actions={
+        <>
+          <PageInfoButtons help={CHANGES_HELP} owner="برنامه‌ریزی و کنترل · گردش کار بین بازرگانی و برنامه‌ریزی" sources={CHANGES_SOURCES} />
+          {reason || !selected ? (
+            <DisabledAction primary label="ثبت تصمیم روی درخواست" reason={reason ?? "ابتدا یک درخواست را انتخاب کنید."} testId="change-decide-disabled" />
+          ) : (
+            <a className="btn btn--primary btn--compact" href={`#/changes/${selected.change_request_id}`} data-testid="change-decide-open">
+              ثبت تصمیم روی درخواست
+            </a>
+          )}
+        </>
+      }
+    />
+  );
+}
+
+const CHANGES_HELP = (
+  <>
+    <p>سفارش تأییدشده مستقیم ویرایش نمی‌شود. هر تغییر یک درخواست است: تصمیم مدیر بازرگانی، برای تغییر تاریخ تحویل تأیید برنامه‌ریزی هم، و سپس اعمال که نسخه جدید سفارش و Snapshot جدید سریال می‌سازد.</p>
+    <p>درخواست‌کننده هرگز تصمیم‌گیرنده نیست. درخواست باز پس از ۳۰ روز بی‌پاسخ منقضی می‌شود. تغییرات مهندسی (ECR/ECO) در فازهای ۳ و ۴ می‌آیند.</p>
+  </>
+);
+
+const CHANGES_SOURCES = [
+  { label: "درخواست‌های تغییر", detail: "سرور سامانه: /commercial/change-requests (نسخه‌دار؛ تصمیم با If-Match و MFA تازه)" },
+  { label: "شمارش‌ها", detail: "سرور سامانه: /commercial/change-requests/counts (همان دامنه دسترسی فهرست)" },
+  { label: "اثر تغییر", detail: "ردیف‌ها، سریال‌ها و Snapshotها از فاز ۲؛ مواد، WIP، ظرفیت و هزینه در فازهای بعد" },
+];
+
+/** Before / after of the selected request (from the request items and the current order), impact and gates. */
+function CompareBody({ cr }: { cr: ChangeRequest }) {
+  const order = useQuery({
+    queryKey: [...K2.orders, "one", cr.order_id],
+    queryFn: ({ signal }) => get(`/commercial/customer-orders/${cr.order_id}`, g.order, undefined, signal),
+    select: (r) => r.data,
+  });
+  const impact = useQuery({
+    queryKey: [...K2.changes, "impact", cr.change_request_id, cr.row_version],
+    queryFn: async ({ signal }) => (await get(`/commercial/change-requests/${cr.change_request_id}/impact`, g.impact, undefined, signal)).data,
+  });
+  const ba = beforeAfter(cr, order.data);
+  return (
+    <>
+      <div className="comparison">
+        <div className="tile tile--compare">
+          <h3>وضعیت قبل</h3>
+          <b data-testid="compare-before">{order.isPending ? "…" : ba.before}</b>
+        </div>
+        <div className="tile tile--compare">
+          <h3>وضعیت درخواستی</h3>
+          <b data-testid="compare-after">{ba.after}</b>
+        </div>
+      </div>
+      <dl className="meta meta--compact">
+        <div><dt>دلیل</dt><dd>{cr.reason}</dd></div>
+        <div><dt>درخواست‌کننده</dt><dd><Requester id={cr.requested_by} name={cr.requested_by_name} /></dd></div>
+      </dl>
+      <div className="parttitle">تحلیل اثر موردنیاز</div>
+      {impact.isPending ? (
+        <p className="field__hint">در حال محاسبه اثر…</p>
+      ) : impact.isError ? (
+        <p className="field__hint">اثر دریافت نشد.</p>
+      ) : (
+        <p className="alert" data-testid="compare-impact">
+          ردیف {toFaDigits(impact.data.lines_affected.length)} · سریال {toFaDigits(impact.data.serials_affected.length)} · Snapshot جدید {toFaDigits(impact.data.snapshots_to_write)}؛ مواد، WIP و هزینه: فازهای بعد.
+        </p>
+      )}
+      <div className="parttitle">گیت‌های تأیید</div>
+      <Gates cr={cr} />
+    </>
+  );
+}
+
+function beforeAfter(cr: ChangeRequest, order: CustomerOrder | undefined): { before: string; after: string } {
+  const first = cr.items[0];
+  const more = cr.items.length > 1 ? ` (+${toFaDigits(cr.items.length - 1)})` : "";
+  const ln = first?.line_id ? order?.lines.find((l) => l.line_id === first.line_id) : undefined;
+  const orderState = order ? (ORDER_STATUS[order.status]?.label ?? order.status) : "—";
+  switch (cr.kind) {
+    case "QTY_CHANGE":
+      return { before: ln ? `${toFaDigits(ln.quantity)} ${UOM[ln.uom] ?? ln.uom}` : "—", after: first?.quantity !== undefined ? `${toFaDigits(first.quantity)}${more}` : "—" };
+    case "DUE_DATE_CHANGE":
+      return { before: formatJalaliDate(ln ? ln.requested_due_date : (order?.requested_due_date ?? null)), after: `${formatJalaliDate(first?.requested_due_date ?? null)}${more}` };
+    case "CANCEL_LINE":
+      return { before: "ردیف فعال", after: `لغو ردیف${more}` };
+    case "CANCEL_ORDER":
+      return { before: orderState, after: "لغو سفارش" };
+    case "HOLD":
+      return { before: orderState, after: "توقف (Hold)" };
+    case "RESUME":
+      return { before: orderState, after: "ادامه از وضعیت پیش از توقف" };
+    case "ADD_LINE":
+      return { before: order ? `${toFaDigits(order.lines.filter((l) => l.status !== "REMOVED").length)} ردیف` : "—", after: `ردیف جدید${more}` };
+    default:
+      return { before: "—", after: "—" };
+  }
+}
+
+/** The approval gates: the real PHASE_02 gates of the request and the later-phase gates without numbers. */
+function Gates({ cr }: { cr: ChangeRequest | null }) {
+  const planning = !cr
+    ? "—"
+    : !cr.planning_required
+      ? "برای این نوع لازم نیست · QA: فاز ۸"
+      : cr.planning_approved_at
+        ? `تأیید · ${formatJalaliDateTime(cr.planning_approved_at)} · QA: فاز ۸`
+        : cr.planning_rejected_at
+          ? `رد · ${formatJalaliDateTime(cr.planning_rejected_at)}`
+          : "در انتظار برنامه‌ریزی · QA: فاز ۸";
+  const commercial = !cr ? "—" : cr.decided_at ? `تصمیم · ${formatJalaliDateTime(cr.decided_at)}` : cr.status === "DRAFT" ? "هنوز ارسال نشده" : "در انتظار مدیر بازرگانی";
+  return (
+    <ul className="bullets bullets--grid" data-testid="compare-gates">
+      <li className="bullet">
+        <strong>بازرگانی</strong>
+        <p>{commercial}</p>
+      </li>
+      <li className="bullet">
+        <strong>برنامه‌ریزی و QA</strong>
+        <p>{planning}</p>
+      </li>
+      <li className="bullet">
+        <strong>مهندسی</strong>
+        <p>در دست ساخت · <bdi dir="ltr">PHASE_03/04</bdi></p>
+      </li>
+      <li className="bullet">
+        <strong>انبار/تأمین</strong>
+        <p>در دست ساخت · <bdi dir="ltr">PHASE_06</bdi></p>
+      </li>
+    </ul>
   );
 }
 

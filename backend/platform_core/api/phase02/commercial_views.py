@@ -22,6 +22,7 @@ from __future__ import annotations
 import uuid
 from typing import Any, Final
 
+from django.db.models import Count, Q
 from rest_framework.request import Request
 from rest_framework.response import Response
 
@@ -41,6 +42,7 @@ from platform_core.engine.idempotency import StoredResponse
 from platform_core.product_identity.refusals import Reason
 
 from ..phase01.common import (
+    NO_STORE,
     body_of,
     etag_response,
     if_match,
@@ -319,6 +321,28 @@ class ChangeRequestsView(Phase02View):
             return stored(201, S.change_request(cr), etag_version=cr.row_version)
 
         return write(self, run)
+
+
+class ChangeRequestCountsView(Phase02View):
+    """Page 33 KPI cards (REV-0295 / DEC-061): server-computed counts over the same scoped set as the list.
+
+    ``open`` = DRAFT + SUBMITTED + APPROVED (not final yet), ``awaiting_decision`` = SUBMITTED, ``applied`` =
+    APPLIED, ``cancel_open`` = open requests of kind CANCEL_ORDER / CANCEL_LINE.
+    Read only; no sample numbers."""
+
+    required_action = CHANGE_READ
+
+    def get(self, request: Request) -> Response:
+        qs = scoped(self, OrderChangeRequest.objects.all())
+        open_states = (ChangeStatus.DRAFT, ChangeStatus.SUBMITTED, ChangeStatus.APPROVED)
+        cancel_kinds = (ChangeKind.CANCEL_ORDER, ChangeKind.CANCEL_LINE)
+        agg = qs.aggregate(
+            open=Count("pk", filter=Q(status__in=open_states)),
+            awaiting_decision=Count("pk", filter=Q(status=ChangeStatus.SUBMITTED)),
+            applied=Count("pk", filter=Q(status=ChangeStatus.APPLIED)),
+            cancel_open=Count("pk", filter=Q(status__in=open_states, kind__in=cancel_kinds)),
+        )
+        return Response({k: int(v) for k, v in agg.items()}, headers=NO_STORE)
 
 
 class ChangeRequestView(Phase02View):

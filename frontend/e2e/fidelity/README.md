@@ -123,7 +123,9 @@ region that has no marker is reported as MISSING. That missing region is on the 
 - `config.ts`: threshold, weights, widths and the mockup region map.
 - `measure.ts`: the browser-side measurement, used for both the mockup and the built page.
 - `score.ts`: the pure scoring and the Markdown report. Its unit tests are in `score.vitest.ts` (vitest).
-- `fidelity.spec.ts`: the seed (synthetic data), extraction or verification, the scoring run, and the
+- `fidelity.spec.ts`: the seed (synthetic data: one viewer, one product with one style, seven confirmed orders of that
+  style - seven serials, the sample size of the page-4 mockup - and one HOLD change request; REV-0295), extraction or
+  verification, the scoring run, and the
   screenshots.
 - `extract.config.ts`: the mockup-only Playwright config.
 - `specs/page-XX.json`: the targets.

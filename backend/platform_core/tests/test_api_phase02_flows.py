@@ -325,7 +325,14 @@ def test_products_styles_revisions_collision_tracking_suggestions_and_classes() 
     )
     track = ok(get(t.c["viewer"], f"{s1}/tracking"), "/identity/styles/{style_id}/tracking", "get")
     assert (
-        track["counts"] == {"serials_total": 0, "serials_active": 0, "orders_total": 0}
+        track["counts"]
+        == {
+            "serials_total": 0,
+            "serials_active": 0,
+            "orders_total": 0,
+            "orders_active": 0,
+            "quantity_total": 0,
+        }
         and track["serials"] == []
     )
     sug = ok(
@@ -1433,7 +1440,14 @@ def test_rev0242_tracking_blocks_need_their_own_read_permission() -> None:
     product_only = session_client(_role_with("identity.product.read"))
     tr = ok(get(product_only, f"/identity/styles/{style_id}/tracking"), sp, "get")
     assert tr["serials"] == [] and tr["withheld_sections"] == ["serials", "orders"]
-    assert tr["counts"] == {"serials_total": None, "serials_active": None, "orders_total": None}
+    assert tr["counts"] == {
+        "serials_total": None,
+        "serials_active": None,
+        "orders_total": None,
+        "orders_active": None,
+        "quantity_total": None,
+    }
+    assert tr["orders"] == {}  # REV-0295: order facts only with commercial.order.read
     full = ok(get(t.c["viewer"], f"/identity/styles/{style_id}/tracking"), sp, "get")
     assert full["withheld_sections"] == [] and full["counts"]["serials_total"] == 1
     serial_only = session_client(_role_with("identity.serial.read"))
@@ -1564,3 +1578,42 @@ def test_rev0293_style_activation_and_code_issue_refused_while_the_product_is_no
         "patch",
     )
     assert done["status"] == "ACTIVE"
+
+
+def test_rev0295_change_request_counts_follow_the_states_and_the_read_permission() -> None:
+    """Page 33 KPI cards: counts computed by the server over the scoped set; no change.read -> 403."""
+    t = Team()
+    path = "/commercial/change-requests/counts"
+    empty = ok(get(t.c["viewer"], path), path, "get")
+    assert empty == {"open": 0, "awaiting_decision": 0, "applied": 0, "cancel_open": 0}
+    o1, o2 = _confirmed(t), _confirmed(t)
+    _cr(t, o1, "HOLD")
+    _cr(t, o2, "CANCEL_ORDER")
+    got = ok(get(t.c["viewer"], path), path, "get")
+    assert got == {"open": 2, "awaiting_decision": 2, "applied": 0, "cancel_open": 1}
+    refused(get(session_client(_role_with("identity.product.read")), path), path, "get", 403, "ACCESS_DENIED")
+
+
+def test_rev0295_style_tracking_active_orders_quantity_order_facts_and_attribute_filters() -> None:
+    t = Team()
+    o = _confirmed(t)
+    line = o["lines"][0]
+    sp = "/identity/styles/{style_id}/tracking"
+    url = f"/identity/styles/{line['style_id']}/tracking"
+    full = ok(get(t.c["viewer"], url), sp, "get")
+    assert full["counts"]["orders_active"] == 1 and full["counts"]["quantity_total"] == 5
+    assert full["orders"][o["order_id"]]["order_no"] == o["order_no"]
+    attrs = Serial.objects.get(pk=line["serial_id"]).style_revision.attributes
+    colour = attrs.get("colour_fa")
+    assert colour  # the factory revision carries a synthetic colour
+    hit = ok(get(t.c["viewer"], url, {"colour": colour}), sp, "get")
+    assert [s["serial_id"] for s in hit["serials"]] == [line["serial_id"]]
+    miss = ok(get(t.c["viewer"], url, {"colour": "رنگ ناموجود ساختگی"}), sp, "get")
+    assert (
+        miss["serials"] == [] and miss["counts"]["serials_total"] == 1
+    )  # counts are of the style, not the filter
+    assert ok(get(t.c["viewer"], url, {"material": "جنس ناموجود ساختگی"}), sp, "get")["serials"] == []
+    refused(get(t.c["viewer"], url, {"colour": " "}), sp, "get", 400, "VALIDATION_FAILED")
+    serial_only = session_client(_role_with("identity.serial.read", "identity.product.read"))
+    no_orders = ok(get(serial_only, url), sp, "get")
+    assert no_orders["orders"] == {} and no_orders["counts"]["orders_active"] is None

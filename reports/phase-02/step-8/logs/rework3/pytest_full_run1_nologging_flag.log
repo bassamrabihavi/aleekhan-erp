@@ -1,0 +1,111 @@
+........................................................................ [  2%]
+........................................................................ [  4%]
+........................................................................ [  6%]
+........................................................................ [  9%]
+........................................................................ [ 11%]
+........................................................................ [ 13%]
+........................................................................ [ 15%]
+........................................................................ [ 18%]
+........................................................................ [ 20%]
+........................................................................ [ 22%]
+........................................................................ [ 24%]
+........................................................................ [ 27%]
+........................................................................ [ 29%]
+........................................................................ [ 31%]
+........................................................................ [ 33%]
+........................................................................ [ 36%]
+........................................................................ [ 38%]
+........................................................................ [ 40%]
+........................................................................ [ 42%]
+........................................................................ [ 45%]
+........................................................................ [ 47%]
+........................................................................ [ 49%]
+........................................................................ [ 51%]
+........................................................................ [ 54%]
+........................................................................ [ 56%]
+........................................................................ [ 58%]
+........................................................................ [ 60%]
+........................................................................ [ 63%]
+........................................................................ [ 65%]
+........................................................................ [ 67%]
+........................................................................ [ 69%]
+........................................................................ [ 72%]
+........................................................................ [ 74%]
+........................................................................ [ 76%]
+........................................................................ [ 78%]
+........................................................................ [ 81%]
+........................................................................ [ 83%]
+..........................E............E................................ [ 85%]
+...............................................................E........ [ 87%]
+.........EE............................................................. [ 90%]
+........................................................................ [ 92%]
+...........................s............................................ [ 94%]
+...................................s.....................F.............. [ 96%]
+........................................................................ [ 99%]
+...........................                                              [100%]
+=================================== ERRORS ====================================
+_ ERROR at setup of test_no_password_otp_recovery_code_or_token_in_any_table_or_log _
+file F:\aleekhan\aleekhan-erp\backend\platform_core\tests\test_phase01_step7_privacy.py, line 292
+  @pytest.mark.django_db(transaction=True)
+  @pytest.mark.usefixtures("api_db", "clear_cache")
+  def test_no_password_otp_recovery_code_or_token_in_any_table_or_log(caplog: Any) -> None:
+E       fixture 'caplog' not found
+>       available fixtures: _dj_autoclear_mailbox, _django_clear_site_cache, _django_db_helper, _django_db_marker, _django_isolate_apps, _django_set_urlconf, _django_setup_unittest, _fail_for_invalid_template_variable, _live_server_helper, _template_string_if_invalid_marker, _zones, admin_client, admin_user, api_db, async_client, async_rf, audit_cleanup, cache, capfd, capfdbinary, capsys, capsysbinary, capteesys, clear_cache, client, db, django_assert_max_num_queries, django_assert_num_queries, django_capture_on_commit_callbacks, django_db_blocker, django_db_createdb, django_db_keepdb, django_db_modify_db_settings, django_db_modify_db_settings_parallel_suffix, django_db_modify_db_settings_tox_suffix, django_db_modify_db_settings_xdist_suffix, django_db_reset_sequences, django_db_serialized_rollback, django_db_setup, django_db_use_migrations, django_isolated_apps, django_mail_dnsname, django_mail_patch_dns, django_test_environment, django_user_model, django_username_field, doctest_namespace, live_server, mailoutbox, monkeypatch, platformdirs_isolated, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, rf, settings, store, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory, transactional_db
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+F:\aleekhan\aleekhan-erp\backend\platform_core\tests\test_phase01_step7_privacy.py:292
+_____ ERROR at setup of test_representative_name_never_leaves_its_column ______
+file F:\aleekhan\aleekhan-erp\backend\platform_core\tests\test_phase02_step7_pii.py, line 76
+  def test_representative_name_never_leaves_its_column(caplog: Any) -> None:
+E       fixture 'caplog' not found
+>       available fixtures: _dj_autoclear_mailbox, _django_clear_site_cache, _django_db_helper, _django_db_marker, _django_isolate_apps, _django_set_urlconf, _django_setup_unittest, _fail_for_invalid_template_variable, _live_server_helper, _template_string_if_invalid_marker, admin_client, admin_user, api_db, async_client, async_rf, audit_cleanup, cache, capfd, capfdbinary, capsys, capsysbinary, capteesys, clear_cache, client, db, django_assert_max_num_queries, django_assert_num_queries, django_capture_on_commit_callbacks, django_db_blocker, django_db_createdb, django_db_keepdb, django_db_modify_db_settings, django_db_modify_db_settings_parallel_suffix, django_db_modify_db_settings_tox_suffix, django_db_modify_db_settings_xdist_suffix, django_db_reset_sequences, django_db_serialized_rollback, django_db_setup, django_db_use_migrations, django_isolated_apps, django_mail_dnsname, django_mail_patch_dns, django_test_environment, django_user_model, django_username_field, doctest_namespace, live_server, mailoutbox, monkeypatch, platformdirs_isolated, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, rf, settings, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory, transactional_db
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+F:\aleekhan\aleekhan-erp\backend\platform_core\tests\test_phase02_step7_pii.py:76
+____________ ERROR at setup of test_access_log_line_has_request_id ____________
+file F:\aleekhan\aleekhan-erp\backend\platform_core\tests\test_api_platform.py, line 335
+  def test_access_log_line_has_request_id(client: Client, caplog: pytest.LogCaptureFixture) -> None:
+E       fixture 'caplog' not found
+>       available fixtures: _dj_autoclear_mailbox, _django_clear_site_cache, _django_db_helper, _django_db_marker, _django_isolate_apps, _django_set_urlconf, _django_setup_unittest, _fail_for_invalid_template_variable, _live_server_helper, _template_string_if_invalid_marker, admin_client, admin_user, api_db, async_client, async_rf, audit_cleanup, cache, capfd, capfdbinary, capsys, capsysbinary, capteesys, clear_cache, client, db, django_assert_max_num_queries, django_assert_num_queries, django_capture_on_commit_callbacks, django_db_blocker, django_db_createdb, django_db_keepdb, django_db_modify_db_settings, django_db_modify_db_settings_parallel_suffix, django_db_modify_db_settings_tox_suffix, django_db_modify_db_settings_xdist_suffix, django_db_reset_sequences, django_db_serialized_rollback, django_db_setup, django_db_use_migrations, django_isolated_apps, django_mail_dnsname, django_mail_patch_dns, django_test_environment, django_user_model, django_username_field, doctest_namespace, live_server, mailoutbox, monkeypatch, platformdirs_isolated, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, rf, settings, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory, transactional_db
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+F:\aleekhan\aleekhan-erp\backend\platform_core\tests\test_api_platform.py:335
+_____ ERROR at setup of test_unexpected_errors_are_generic_500[contract] ______
+file F:\aleekhan\aleekhan-erp\backend\platform_core\tests\test_api_utilities.py, line 290
+  @pytest.mark.parametrize("kind", ["contract", "runtime"])
+  def test_unexpected_errors_are_generic_500(
+E       fixture 'caplog' not found
+>       available fixtures: _dj_autoclear_mailbox, _django_clear_site_cache, _django_db_helper, _django_db_marker, _django_isolate_apps, _django_set_urlconf, _django_setup_unittest, _fail_for_invalid_template_variable, _live_server_helper, _template_string_if_invalid_marker, admin_client, admin_user, api_db, async_client, async_rf, audit_cleanup, cache, capfd, capfdbinary, capsys, capsysbinary, capteesys, clear_cache, client, db, django_assert_max_num_queries, django_assert_num_queries, django_capture_on_commit_callbacks, django_db_blocker, django_db_createdb, django_db_keepdb, django_db_modify_db_settings, django_db_modify_db_settings_parallel_suffix, django_db_modify_db_settings_tox_suffix, django_db_modify_db_settings_xdist_suffix, django_db_reset_sequences, django_db_serialized_rollback, django_db_setup, django_db_use_migrations, django_isolated_apps, django_mail_dnsname, django_mail_patch_dns, django_test_environment, django_user_model, django_username_field, doctest_namespace, live_server, mailoutbox, monkeypatch, platformdirs_isolated, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, rf, settings, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory, transactional_db
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+F:\aleekhan\aleekhan-erp\backend\platform_core\tests\test_api_utilities.py:290
+______ ERROR at setup of test_unexpected_errors_are_generic_500[runtime] ______
+file F:\aleekhan\aleekhan-erp\backend\platform_core\tests\test_api_utilities.py, line 290
+  @pytest.mark.parametrize("kind", ["contract", "runtime"])
+  def test_unexpected_errors_are_generic_500(
+E       fixture 'caplog' not found
+>       available fixtures: _dj_autoclear_mailbox, _django_clear_site_cache, _django_db_helper, _django_db_marker, _django_isolate_apps, _django_set_urlconf, _django_setup_unittest, _fail_for_invalid_template_variable, _live_server_helper, _template_string_if_invalid_marker, admin_client, admin_user, api_db, async_client, async_rf, audit_cleanup, cache, capfd, capfdbinary, capsys, capsysbinary, capteesys, clear_cache, client, db, django_assert_max_num_queries, django_assert_num_queries, django_capture_on_commit_callbacks, django_db_blocker, django_db_createdb, django_db_keepdb, django_db_modify_db_settings, django_db_modify_db_settings_parallel_suffix, django_db_modify_db_settings_tox_suffix, django_db_modify_db_settings_xdist_suffix, django_db_reset_sequences, django_db_serialized_rollback, django_db_setup, django_db_use_migrations, django_isolated_apps, django_mail_dnsname, django_mail_patch_dns, django_test_environment, django_user_model, django_username_field, doctest_namespace, live_server, mailoutbox, monkeypatch, platformdirs_isolated, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, rf, settings, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory, transactional_db
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+F:\aleekhan\aleekhan-erp\backend\platform_core\tests\test_api_utilities.py:290
+================================== FAILURES ===================================
+__________ test_scope_covers_every_phase02_and_integration_operation __________
+
+    def test_scope_covers_every_phase02_and_integration_operation() -> None:
+        assert len(ROLES) == 16, ROLES  # 11 PHASE_01 roles + 5 PHASE_02 business roles
+>       assert len(OPS) == 69  # 65 PHASE_02 operations (0.8.2-draft) + 4 integration operations (0.8.4-draft)
+        ^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert 70 == 69
+E        +  where 70 = len([('/integration/freshness', 'get', {'tags': ['integration'], 'operationId': 'listIntegrationFreshness', 'x-aleekhan-pe...- out of scope = 404). Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).\n', ...}), ...])
+
+platform_core\tests\test_phase02_step7_privacy.py:96: AssertionError
+=========================== short test summary info ===========================
+SKIPPED [1] platform_core\tests\test_phase01_documents_engine.py:276: clamd not configured/reachable (ALEEKHAN_CLAMD_HOST); real-scanner contract test skipped
+SKIPPED [1] platform_core\tests\test_phase02_golden_harness.py:323: ALEEKHAN_GOLDEN_FILE is not set: the real Planning golden file exists only on the work machine (R-38)
+ERROR platform_core/tests/test_phase01_step7_privacy.py::test_no_password_otp_recovery_code_or_token_in_any_table_or_log
+ERROR platform_core/tests/test_phase02_step7_pii.py::test_representative_name_never_leaves_its_column
+ERROR platform_core/tests/test_api_platform.py::test_access_log_line_has_request_id
+ERROR platform_core/tests/test_api_utilities.py::test_unexpected_errors_are_generic_500[contract]
+ERROR platform_core/tests/test_api_utilities.py::test_unexpected_errors_are_generic_500[runtime]
+FAILED platform_core/tests/test_phase02_step7_privacy.py::test_scope_covers_every_phase02_and_integration_operation
+1 failed, 3187 passed, 2 skipped, 11 deselected, 5 errors in 549.46s (0:09:09)

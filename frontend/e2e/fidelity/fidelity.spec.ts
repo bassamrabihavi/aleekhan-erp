@@ -59,6 +59,13 @@ give_role(confirmer, "planning_officer")
 f.confirm_order(o.pk, confirmer)
 o.refresh_from_db()
 changes.create_change_request(c, o.pk, kind="HOLD", items=[], reason=f"توقف ساختگی {SYN}", expected_version=o.row_version, submit=True)
+# REV-0295: a realistic volume for page 4 - the style has several synthetic orders / serials (the catalogue
+# sample shows seven); every one is synthetic and created through the same confirm harness
+for _ in range(6):
+    oi = f.order(f.customer(), u)
+    f.line(oi, sty, rev)
+    CustomerOrder.objects.filter(pk=oi.pk).update(status="VALIDATED")
+    f.confirm_order(oi.pk, confirmer)
 serial_id = CustomerOrderLine.objects.get(order=o).serial_id
 print("FIDSEED:" + json.dumps({"person": {"username": u.username, "secret": b32, "user_id": str(u.pk)},
       "product_id": str(prod.pk), "style_id": str(sty.pk), "serial_id": str(serial_id), "order_id": str(o.pk)}))

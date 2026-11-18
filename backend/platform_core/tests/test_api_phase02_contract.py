@@ -74,7 +74,9 @@ def _schema(name: str) -> dict[str, Any]:
 # ---------------------------------------------------------------------------------------- static rules
 def test_every_phase02_operation_is_implemented_and_nothing_is_planned() -> None:
     ops = phase02_operations()
-    assert len(ops) == 65  # 66 in 0.8.0-draft; allocateSerial removed (employer decision 2026-11-14)
+    # 66 in 0.8.0-draft; allocateSerial removed (employer decision 2026-11-14);
+    # getChangeRequestCounts added (REV-0295)
+    assert len(ops) == 66
     assert "post" not in oc.spec()["paths"]["/identity/serials"]
     assert oc.planned_paths() == set()
     for path, _m, _op in ops:

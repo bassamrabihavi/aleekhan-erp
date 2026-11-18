@@ -3,6 +3,9 @@
 // the masked representative name (DEC-058), a Jalali date field that sends ISO dates, and small helpers.
 import { useId, useState, type ReactNode } from "react";
 
+import { Dialog } from "./Dialog";
+import { Icon } from "./Icon";
+
 import { REDACTED, type Customer } from "../api/phase02";
 import { isoToJalaliInput, jalaliInputToIso } from "../lib/jalali";
 import { SECTION_LABEL } from "../lib/labels02";
@@ -50,10 +53,11 @@ export const LATER_TEXT = "در دست ساخت — به داده واقعی م�
 
 /** A section owned by a later phase: title + placeholder, never a number (DEC-027 P-A, rule 2). */
 /** `fid` = DEC-061 fidelity region id (e2e/fidelity), a measurement marker only. */
-export function LaterSection({ title, phase, fid }: { title: string; phase: string; fid?: string }) {
+export function LaterSection({ title, phase, fid, className, detail }: { title: string; phase: string; fid?: string; className?: string; detail?: string }) {
   return (
-    <section className="later" data-testid="later-section" aria-label={title} data-fid={fid}>
+    <section className={className ? `later ${className}` : "later"} data-testid="later-section" aria-label={title} data-fid={fid}>
       <h3 className="later__title">{title}</h3>
+      {detail ? <p className="later__detail">{detail}</p> : null}
       <p className="later__text">{LATER_TEXT}</p>
       <p className="later__meta">
         فاز مالک: <bdi dir="ltr">{phase}</bdi>
@@ -136,16 +140,110 @@ export function JalaliDateField({
   );
 }
 
-export function PageHead({ page, title, lead, actions }: { page: string; title: string; lead?: ReactNode; actions?: ReactNode }) {
+/** Page intro (REV-0295, catalogue «pageintro»): owner / page chip, title, one-line subtitle, header actions. */
+export function PageHead({ page, title, lead, actions, compact = false }: { page: string; title: string; lead?: ReactNode; actions?: ReactNode; compact?: boolean }) {
+  if (compact) {
+    // page 4 heading (catalogue «section.heading»): title, then the page chip and the subtitle on one line
+    return (
+      <div className="page__head page__head--compact">
+        <div className="page__intro" data-fid="page-header">
+          <h1>{title}</h1>
+          <p className="lead">
+            <span className="eyebrow">{page}</span> {lead}
+          </p>
+        </div>
+        {actions ? <div className="actions page__actions" data-fid="header-actions">{actions}</div> : null}
+      </div>
+    );
+  }
   return (
     <div className="page__head">
-      <div data-fid="page-header">
+      <div className="page__intro" data-fid="page-header">
         <p className="eyebrow">{page}</p>
         <h1>{title}</h1>
         {lead ? <p className="lead">{lead}</p> : null}
       </div>
-      {actions ? <div className="actions" data-fid="header-actions">{actions}</div> : null}
+      {actions ? <div className="actions page__actions" data-fid="header-actions">{actions}</div> : null}
     </div>
+  );
+}
+
+/** A visibly disabled control with its honest reason (tooltip + accessible description), never a dead button. */
+export function DisabledAction({ label, reason, primary = false, icon, testId }: { label: string; reason: string; primary?: boolean; icon?: "download" | "clear" | "plus"; testId?: string }) {
+  const id = useId();
+  return (
+    <>
+      <button type="button" className={primary ? "btn btn--primary btn--compact" : "btn btn--outline btn--compact"} disabled title={reason} aria-describedby={id} data-testid={testId}>
+        {icon ? <Icon name={icon} size={16} /> : null}
+        {label}
+      </button>
+      <span id={id} className="sr-only">
+        {reason}
+      </span>
+    </>
+  );
+}
+
+/** «راهنمای صفحه» and «مالکیت و منبع داده»: real dialogs with the page's help text and its owner / sources. */
+export function PageInfoButtons({ help, owner, sources }: { help: ReactNode; owner: string; sources: { label: string; detail: string }[] }) {
+  const [open, setOpen] = useState<"help" | "source" | null>(null);
+  return (
+    <>
+      <button type="button" className="btn btn--outline btn--compact" onClick={() => { setOpen("help"); }} data-testid="page-help">
+        راهنمای صفحه
+      </button>
+      <button type="button" className="btn btn--outline btn--compact" onClick={() => { setOpen("source"); }} data-testid="page-sources">
+        مالکیت و منبع داده
+      </button>
+      {open === "help" ? (
+        <Dialog title="راهنمای صفحه" onClose={() => { setOpen(null); }} testId="page-help-dialog">
+          <div className="lead">{help}</div>
+          <div className="form__actions">
+            <button type="button" className="btn btn--secondary" onClick={() => { setOpen(null); }}>بستن</button>
+          </div>
+        </Dialog>
+      ) : null}
+      {open === "source" ? (
+        <Dialog title="مالکیت و منبع داده" onClose={() => { setOpen(null); }} testId="page-sources-dialog">
+          <p className="lead">مالک صفحه: {owner}</p>
+          <dl className="meta meta--rows">
+            {sources.map((x) => (
+              <div key={x.label}>
+                <dt>{x.label}</dt>
+                <dd>{x.detail}</dd>
+              </div>
+            ))}
+          </dl>
+          <div className="form__actions">
+            <button type="button" className="btn btn--secondary" onClick={() => { setOpen(null); }}>بستن</button>
+          </div>
+        </Dialog>
+      ) : null}
+    </>
+  );
+}
+
+/** KPI card (catalogue «.kpi»): title, value, one-line note. The value is real data or an honest state. */
+export function Kpi({ label, value, note, tone, testId }: { label: string; value: ReactNode; note?: ReactNode; tone?: "critical" | "good" | "later" | undefined; testId?: string }) {
+  return (
+    <li className={tone ? `kpi kpi--${tone}` : "kpi"} data-fid-item data-testid={testId}>
+      <span className="kpi__label">{label}</span>
+      <strong className="kpi__value">{value}</strong>
+      {note ? <small className="kpi__note">{note}</small> : null}
+    </li>
+  );
+}
+
+/** KPI whose data belongs to a later phase: title + the placeholder in the value's place, never a number. */
+export function LaterKpi({ label, phase }: { label: string; phase: string }) {
+  return (
+    <li className="kpi kpi--later" data-fid-item data-testid="later-kpi">
+      <span className="kpi__label">{label}</span>
+      <strong className="kpi__value kpi__value--later">{LATER_TEXT}</strong>
+      <small className="kpi__note">
+        فاز مالک: <bdi dir="ltr">{phase}</bdi>
+      </small>
+    </li>
   );
 }
 

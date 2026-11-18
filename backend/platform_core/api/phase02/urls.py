@@ -79,6 +79,7 @@ urlpatterns: list[URLPattern] = [
     ),
     # commercial: change requests
     path("commercial/change-requests", C.ChangeRequestsView.as_view()),
+    path("commercial/change-requests/counts", C.ChangeRequestCountsView.as_view()),  # REV-0295 page 33 KPIs
     path(f"commercial/change-requests/{U('change_request_id')}", C.ChangeRequestView.as_view()),
     path(f"commercial/change-requests/{U('change_request_id')}/impact", C.ChangeRequestImpactView.as_view()),
     path(f"commercial/change-requests/{U('change_request_id')}/submit", C.SubmitChangeRequestView.as_view()),

@@ -200,6 +200,8 @@ describe("pages 1/2 serial control center (DEC-027 P-A)", () => {
     const tab = await screen.findByTestId("tab-summary");
     tab.focus();
     await userEvent.keyboard("{ArrowLeft}");
+    // REV-0295: the references are a folded part of the order tab, loaded when it is opened
+    await userEvent.click(within(await screen.findByTestId("fold-refs")).getByText(/مرجع‌های خارجی/));
     const serialRefs = await screen.findByRole("heading", { level: 2, name: "ارجاع‌های بیرونی سریال" });
     const orderRefs = await screen.findByRole("heading", { level: 2, name: "ارجاع‌های بیرونی سفارش" });
     expect(serialRefs).not.toBe(orderRefs);
@@ -490,6 +492,40 @@ describe("page 33 change requests", () => {
     expect(within(who).getByTestId("requester-name")).toHaveTextContent("کاربر ساختگی");
     expect(who).toHaveTextContent(OTHER.slice(0, 8));
     expect(screen.getByTestId("cr-expires-at")).toBeInTheDocument();
+  });
+
+  it("list (REV-0295): server counts in the KPI cards, the selected request compared, the decision action honest", async () => {
+    stub(signedIn([...ALL_READ], {
+      "GET /commercial/change-requests": () => ok(page([cr()])),
+      "GET /commercial/change-requests/counts": () => ok({ open: 3, awaiting_decision: 2, applied: 5, cancel_open: 1 }),
+      ["GET /commercial/change-requests/" + CR + "/impact"]: () => ok({ change_request_id: CR, base_order_version: 1, lines_affected: [LINE], serials_affected: [SERIAL], new_lines: 0, snapshots_to_write: 1, unavailable_sections: UNAVAILABLE }),
+      ["GET /commercial/customer-orders/" + ORDER]: () => ok(order(), 200, 5),
+    }));
+    renderAt("#/changes");
+    await waitFor(() => { expect(screen.getByTestId("kpi-open")).toHaveTextContent("۳"); });
+    expect(screen.getByTestId("kpi-open")).toHaveTextContent("در انتظار تصمیم: ۲");
+    expect(screen.getByTestId("kpi-applied")).toHaveTextContent("۵");
+    expect(screen.getByTestId("kpi-cancel")).toHaveTextContent("۱");
+    expect(screen.getByTestId("later-kpi")).toHaveTextContent(LATER_TEXT); // impact analysis: later phase, no number
+    await waitFor(() => { expect(screen.getByTestId("compare-before")).toHaveTextContent("۱۸ آذر ۱۴۰۵"); });
+    expect(screen.getByTestId("compare-after")).toHaveTextContent("۲۹ آذر ۱۴۰۵");
+    expect(await screen.findByTestId("compare-impact")).toHaveTextContent("Snapshot جدید ۱");
+    // a viewer without decide / planning / apply sees the action disabled with its reason (never a dead button)
+    const decide = screen.getByTestId("change-decide-disabled");
+    expect(decide).toBeDisabled();
+    expect(decide).toHaveAccessibleDescription("برای ثبت تصمیم نقش مدیر بازرگانی یا برنامه‌ریزی لازم است.");
+  });
+
+  it("list (REV-0295): a decider gets the decision action as a link to the selected request", async () => {
+    stub(signedIn([...ALL_READ, "commercial.change.decide"], {
+      "GET /commercial/change-requests": () => ok(page([cr()])),
+      "GET /commercial/change-requests/counts": () => ok({ open: 1, awaiting_decision: 1, applied: 0, cancel_open: 0 }),
+      ["GET /commercial/change-requests/" + CR + "/impact"]: () => ok({ change_request_id: CR, base_order_version: 1, lines_affected: [], serials_affected: [], new_lines: 0, snapshots_to_write: 0, unavailable_sections: UNAVAILABLE }),
+      ["GET /commercial/customer-orders/" + ORDER]: () => ok(order(), 200, 5),
+    }));
+    renderAt("#/changes");
+    const link = await screen.findByTestId("change-decide-open");
+    expect(link).toHaveAttribute("href", `#/changes/${CR}`);
   });
 
   it("without a name only the short id is shown; a closed request shows no deadline", async () => {

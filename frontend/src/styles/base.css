@@ -69,51 +69,6 @@ code {
   top: var(--space-2);
 }
 
-/* shell */
-.shell {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-.topbar {
-  position: sticky;
-  top: 0;
-  z-index: 20;
-  height: var(--topbar-height);
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-  padding-inline: var(--space-5);
-  background: var(--color-surface);
-  border-block-end: 1px solid var(--color-line);
-}
-
-.brand {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-}
-/* official logo (docs/ui/brand): never recoloured, cropped or stretched - height fixed, width from the ratio */
-.brand__logo {
-  display: block;
-  flex: none;
-  height: 44px;
-  width: auto;
-  aspect-ratio: 300 / 298;
-}
-.brand__text {
-  display: flex;
-  flex-direction: column;
-  line-height: var(--line-height-tight);
-}
-.brand__name {
-  font-weight: var(--font-weight-bold);
-}
-.brand__sub {
-  font-size: var(--font-size-xs);
-  color: var(--color-muted);
-}
 
 .banner {
   margin: 0;
@@ -131,25 +86,7 @@ code {
   color: var(--color-danger);
 }
 
-.main {
-  flex: 1;
-  width: 100%;
-  max-width: var(--content-max);
-  margin-inline: auto;
-  padding: var(--space-5);
-}
-.main:focus {
-  outline: none;
-}
 
-.footer {
-  padding: var(--space-3) var(--space-5);
-  font-size: var(--font-size-xs);
-  color: var(--color-muted);
-  text-align: center;
-  border-block-start: 1px solid var(--color-line);
-  background: var(--color-surface);
-}
 
 /* page */
 .page__head {
@@ -461,20 +398,11 @@ h2 {
 }
 
 @media (max-width: 600px) {
-  .main {
-    padding: var(--space-3);
-  }
-  .topbar {
-    padding-inline: var(--space-3);
-  }
   h1 {
     font-size: var(--font-size-xl);
   }
   .grid {
     grid-template-columns: minmax(0, 1fr);
-  }
-  .brand__logo {
-    height: 38px;
   }
   .panel {
     padding: var(--space-3);

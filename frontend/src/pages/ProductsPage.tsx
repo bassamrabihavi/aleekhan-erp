@@ -4,17 +4,19 @@
 // (DEC-005 B1: RESERVED / ERP_PENDING; fresh MFA) and a 14-digit code check. WIP and risk are later phases.
 // Product numbers, style numbers and codes are built by the server only; style 0000 is never offered.
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useId, useState } from "react";
 
-import { g, get, K2, PERM, probe, send, type Product, type ProductClass, type Style, type StyleAttributes, type StyleRevision } from "../api/phase02";
+import { g, get, K2, PERM, probe, send, type Product, type ProductClass, type Style, type StyleAttributes, type StyleRevision, type StyleTracking } from "../api/phase02";
 import { useAuth } from "../auth/context";
 import { ActionError } from "../components/ActionError";
 import { DataView, ForbiddenState } from "../components/DataView";
 import { Dialog } from "../components/Dialog";
 import { Field, ReasonDialog } from "../components/Form";
-import { Code14, CustomerName, JalaliDateField, LaterSection, Num, PageHead } from "../components/Phase02";
+import { Icon } from "../components/Icon";
+import { Code14, CustomerName, DisabledAction, Kpi, LaterKpi, LaterSection, Num, PageHead } from "../components/Phase02";
 import { StatusChip } from "../components/StatusChip";
 import { formatJalaliDateTime, toFaDigits } from "../lib/format";
+import { isoToJalaliInput, jalaliInputToIso } from "../lib/jalali";
 import { toneLabel } from "../lib/labels";
 import { ATTRIBUTE_LABEL, CODE_CHECK_REASONS, CODE_STATUS, ERP_STATUS, MASTER_STATUS, SERIAL_STATUS, UOM } from "../lib/labels02";
 import { useCursor } from "../lib/queries";
@@ -43,6 +45,13 @@ export function ProductsPage() {
       <div className="page" data-testid="page-products">
         <PageHead page="صفحه ۴ · فاز ۲" title="ردیابی محصولات و استایل‌ها" />
         <ForbiddenState />
+      </div>
+    );
+  }
+  if (productId && styleId) {
+    return (
+      <div className="page" data-testid="page-products">
+        <Style360 productId={productId} styleId={styleId} />
       </div>
     );
   }
@@ -196,7 +205,7 @@ function ProductDetail({ id, styleId }: { id: string; styleId: string | undefine
   });
   return (
     <>
-      <section className="panel" aria-labelledby="product-title" data-testid="product-detail" data-fid="product-card">
+      <section className="panel" aria-labelledby="product-title" data-testid="product-detail">
         <DataView query={q} loading="در حال دریافت محصول…" errorTitle="محصول دریافت نشد">
           {(r) => <ProductProfile p={r.data} version={r.version} />}
         </DataView>
@@ -253,7 +262,7 @@ function StyleColumn({ product, selected }: { product: Product; selected: string
     queryFn: async ({ signal }) => (await get(`/identity/products/${product.product_id}/styles`, g.stylePage, { page_size: 100 }, signal)).data,
   });
   return (
-    <section className="panel" aria-labelledby="styles-title" data-fid="product-styles">
+    <section className="panel product-styles" aria-labelledby="styles-title" data-fid="product-styles">
       <div className="panel__head">
         <h2 id="styles-title">استایل‌های این محصول</h2>
         {can(PERM.productManage) && product.status !== "RETIRED" ? (
@@ -407,11 +416,6 @@ function StyleDetail({ product, styleId }: { product: Product; styleId: string }
             <StyleHead s={r.data} version={r.version} product={product} />
             <StyleCode s={r.data} product={product} />
             <Revisions s={r.data} />
-            <StyleSerials s={r.data} />
-            <div className="later-grid">
-              <LaterSection title="کار در جریان (WIP)" phase="PHASE_07" fid="stage-distribution" />
-              <LaterSection title="ریسک و تعهدهای در معرض" phase="PHASE_05" />
-            </div>
           </>
         )}
       </DataView>
@@ -650,87 +654,317 @@ function Attrs({ a }: { a: StyleAttributes }) {
   );
 }
 
-function StyleSerials({ s }: { s: Style }) {
-  const names = useCustomerNames();
+// ---------------------------------------------------------------------------------- style 360 view
+// REV-0295 / DEC-061: page 4 laid out as the catalogue «product_style_360»: header + actions, five KPI cards,
+// filter bar, product identity card (with this product's styles) next to the related serials, the later-phase
+// production distribution and events, then the style's own technical detail (code, revisions) and the product
+// list. Every number is server data; later-phase parts show the placeholder without numbers.
+
+interface SerialFilter {
+  status: string;
+  customer: string;
+  colour: string;
+  material: string;
+  from: string | null;
+  to: string | null;
+}
+const NO_FILTER: SerialFilter = { status: "", customer: "", colour: "", material: "", from: null, to: null };
+
+function Style360({ productId, styleId }: { productId: string; styleId: string }) {
+  const { can } = useAuth();
+  const [filter, setFilter] = useState<SerialFilter>(NO_FILTER);
+  const [filterKey, setFilterKey] = useState(0); // remounts the date inputs when the filters are cleared
+  const [creating, setCreating] = useState(false);
   const cursor = useCursor();
-  const [status, setStatus] = useState("");
-  const [from, setFrom] = useState<string | null>(null);
-  const [to, setTo] = useState<string | null>(null);
-  const q = useQuery({
-    queryKey: [...K2.styles, "tracking", s.style_id, status, from, to, cursor.cursor],
-    queryFn: async ({ signal }) =>
-      (await get(`/identity/styles/${s.style_id}/tracking`, g.styleTracking, { status: status || undefined, from: from ?? undefined, to: to ?? undefined, cursor: cursor.cursor, page_size: 25 }, signal)).data,
+  const product = useQuery({
+    queryKey: [...K2.products, "one", productId],
+    queryFn: async ({ signal }) => get(`/identity/products/${productId}`, g.product, undefined, signal),
   });
+  const revisions = useQuery({
+    queryKey: [...K2.styles, "revisions", styleId],
+    queryFn: async ({ signal }) => (await get(`/identity/styles/${styleId}/revisions`, g.revisionPage, { page_size: 100 }, signal)).data,
+  });
+  const tracking = useQuery({
+    queryKey: [...K2.styles, "tracking", styleId, filter, cursor.cursor],
+    queryFn: async ({ signal }) =>
+      (
+        await get(
+          `/identity/styles/${styleId}/tracking`,
+          g.styleTracking,
+          {
+            status: filter.status || undefined,
+            customer_id: filter.customer || undefined,
+            colour: filter.colour || undefined,
+            material: filter.material || undefined,
+            from: filter.from ?? undefined,
+            to: filter.to ?? undefined,
+            cursor: cursor.cursor,
+            page_size: 25,
+          },
+          signal,
+        )
+      ).data,
+  });
+  const set = (patch: Partial<SerialFilter>) => {
+    cursor.reset();
+    setFilter((f) => ({ ...f, ...patch }));
+  };
+  const active = JSON.stringify(filter) !== JSON.stringify(NO_FILTER);
+  const c = tracking.data?.counts;
+  const num = (v: number | null | undefined) => (tracking.isPending ? "…" : v === null || v === undefined ? "بدون مجوز" : toFaDigits(v));
   return (
-    <section aria-labelledby="ser-title" className="subsection" data-fid="serial-table">
-      <h3 id="ser-title">سریال‌های مرتبط با این استایل</h3>
-      <div className="filters" data-fid="filters">
-        <Field label="وضعیت سریال">
-          {(id) => (
-            <select id={id} className="input" value={status} onChange={(e) => { cursor.reset(); setStatus(e.target.value); }}>
-              <option value="">همه</option>
-              <option value="ALLOCATED">تخصیص‌یافته</option>
-              <option value="CANCELLED">لغوشده</option>
-            </select>
-          )}
-        </Field>
-        <JalaliDateField label="از تاریخ تخصیص" value={from} onChange={(v) => { cursor.reset(); setFrom(v); }} />
-        <JalaliDateField label="تا تاریخ تخصیص" value={to} onChange={(v) => { cursor.reset(); setTo(v); }} />
-      </div>
-      <DataView query={q} loading="در حال دریافت سریال‌ها…" errorTitle="سریال‌ها دریافت نشد">
-        {(d) => (
+    <>
+      <PageHead
+        compact
+        page="صفحه ۴ · فاز ۲ · Product 360"
+        title="ردیابی محصولات و استایل‌ها"
+        lead={product.data ? `محصول ${product.data.data.name_fa} · شماره ${product.data.data.product_no}` : "محصول، استایل و سریال‌های مرتبط"}
+        actions={
           <>
-            <ul className="counters" data-testid="style-counts" data-fid="kpis">
-              <Counter label="سریال‌های مرتبط" value={d.counts.serials_total} />
-              <Counter label="سریال‌های فعال" value={d.counts.serials_active} />
-              <Counter label="تعداد سفارش‌ها" value={d.counts.orders_total} />
-            </ul>
-            {(d.withheld_sections ?? []).length > 0 ? (
-              <p className="notice notice--info" data-testid="withheld">بخشی از داده برای نقش شما نمایش داده نمی‌شود (مجوز خواندن ندارید).</p>
-            ) : null}
-            {d.serials.length === 0 ? (
-              <p className="state state--empty" data-testid="state-empty">سریالی برای این استایل نیست.</p>
+            <button
+              type="button"
+              className="btn btn--outline btn--compact"
+              disabled={!active}
+              title={active ? undefined : "فیلتری فعال نیست"}
+              onClick={() => {
+                setFilter(NO_FILTER);
+                setFilterKey((k) => k + 1);
+                cursor.reset();
+              }}
+              data-testid="filters-clear"
+            >
+              <Icon name="clear" size={16} />
+              پاک‌کردن فیلترها
+            </button>
+            <DisabledAction label="خروجی Excel" icon="download" reason="خروجی Excel در دست ساخت است: قالب و مجوز خروجی (با ممیزی) هنوز تعریف نشده است." testId="export-disabled" />
+            {can(PERM.productManage) ? (
+              <button type="button" className="btn btn--primary btn--compact" onClick={() => { setCreating(true); }} data-testid="product-create-open">
+                <Icon name="plus" size={16} />
+                محصول / استایل جدید
+              </button>
             ) : (
-              <table className="table table--cards" data-testid="style-serials">
-                <caption className="sr-only">سریال‌های استایل با رنگ و جنس واقعی هر سریال</caption>
-                <thead>
-                  <tr>
-                    <th scope="col">سریال</th>
-                    <th scope="col">مشتری</th>
-                    <th scope="col">رنگ و جنس (همان سریال)</th>
-                    <th scope="col">تعداد</th>
-                    <th scope="col">وضعیت</th>
-                    <th scope="col">تخصیص</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {d.serials.map((x) => (
-                    <tr key={x.serial_id}>
-                      <td data-label="سریال"><a href={`#/serials/${x.serial_id}`}><Num value={x.serial_number} /></a></td>
-                      <td data-label="مشتری"><CustomerName id={x.customer_id} names={names} /></td>
-                      <td data-label="رنگ و جنس"><Attrs a={x.attributes} /></td>
-                      <td data-label="تعداد">{x.quantity !== null ? `${toFaDigits(x.quantity)} ${UOM[x.uom ?? ""] ?? ""}` : "—"}</td>
-                      <td data-label="وضعیت"><StatusChip {...toneLabel(SERIAL_STATUS, x.status)} /></td>
-                      <td data-label="تخصیص">{formatJalaliDateTime(x.allocated_at)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <DisabledAction primary icon="plus" label="محصول / استایل جدید" reason="برای ساخت محصول یا استایل مجوز مدیریت داده محصول لازم است." />
             )}
-            <Pager depth={cursor.depth} next={d.page.next_cursor} onNext={cursor.next} onPrev={cursor.prev} />
           </>
+        }
+      />
+      {creating ? <CreateProductDialog onClose={() => { setCreating(false); }} /> : null}
+      <ul className="kpis kpis--5" data-testid="style-counts" data-fid="kpis" aria-label="شاخص‌های این استایل">
+        <Kpi label="سریال‌های مرتبط" value={num(c?.serials_total)} note={c?.serials_active != null ? `فعال: ${toFaDigits(c.serials_active)}` : "سریال‌های این استایل"} />
+        <Kpi label="سفارش‌های فعال" value={num(c?.orders_active)} note="تأییدشده، ارسال‌شده یا متوقف" />
+        <Kpi label="مجموع تعداد سفارش" value={num(c?.quantity_total)} note="ردیف‌های تأییدشده سفارش‌های فعال" />
+        <LaterKpi label="در جریان تولید" phase="PHASE_07" />
+        <LaterKpi label="تعهدهای در معرض ریسک" phase="PHASE_05" />
+      </ul>
+      {(tracking.data?.withheld_sections ?? []).length > 0 ? (
+        <p className="notice notice--info" data-testid="withheld">بخشی از داده برای نقش شما نمایش داده نمی‌شود (مجوز خواندن ندارید).</p>
+      ) : null}
+      <SerialFilters key={filterKey} filter={filter} set={set} revisions={revisions.data?.items ?? []} />
+      <div className="grid-side">
+        <section className="panel product-card" aria-labelledby="product-title" data-testid="product-detail" data-fid="product-card">
+          <DataView query={product} loading="در حال دریافت محصول…" errorTitle="محصول دریافت نشد">
+            {(r) => (
+              <>
+                <p className="product-card__kicker">شناسنامه محصول</p>
+                <ProductProfile p={r.data} version={r.version} />
+                <ProductFacts styleId={styleId} productId={productId} activeSerials={c?.serials_active} revisions={revisions.data?.items} />
+                <StyleColumn product={r.data} selected={styleId} />
+              </>
+            )}
+          </DataView>
+        </section>
+        <section className="panel panel--table" aria-labelledby="ser-title" data-fid="serial-table">
+          <div className="panel__head">
+            <h2 id="ser-title">سریال‌های مرتبط با محصول / استایل</h2>
+            {tracking.data && c?.serials_total != null ? <span className="field__hint">{toFaDigits(tracking.data.serials.length)} سریال در این صفحه</span> : null}
+          </div>
+          <DataView query={tracking} loading="در حال دریافت سریال‌ها…" errorTitle="سریال‌ها دریافت نشد">
+            {(d) => <SerialRows d={d} />}
+          </DataView>
+          <p className="field__hint later-note">مرحله فعلی، پیشرفت و تعهد هر سریال: در دست ساخت (فاز مالک <bdi dir="ltr">PHASE_07 / PHASE_05</bdi>).</p>
+          {tracking.data ? <Pager depth={cursor.depth} next={tracking.data.page.next_cursor} onNext={cursor.next} onPrev={cursor.prev} /> : null}
+        </section>
+      </div>
+      <div className="grid-half grid-half--lower">
+        <LaterSection title="توزیع سریال‌ها در چرخه تولید" phase="PHASE_07" fid="stage-distribution" />
+        <LaterSection title="آخرین رخدادهای مرتبط" phase="PHASE_07" fid="events" />
+      </div>
+      {product.data ? <StyleDetail product={product.data.data} styleId={styleId} /> : null}
+      <div className="split split--after">
+        <ProductList selected={productId} />
+      </div>
+    </>
+  );
+}
+
+function SerialFilters({ filter, set, revisions }: { filter: SerialFilter; set: (p: Partial<SerialFilter>) => void; revisions: StyleRevision[] }) {
+  const names = useCustomerNames();
+  const colours = [...new Set(revisions.map((r) => r.attributes.colour_fa).filter((v): v is string => !!v))];
+  const materials = [...new Set(revisions.map((r) => r.attributes.main_material_fa).filter((v): v is string => !!v))];
+  return (
+    <section className="panel filterbar" aria-label="فیلتر سریال‌های مرتبط" data-fid="filters">
+      <ProductSearch />
+      <Field label="مشتری / برند">
+        {(id) => (
+          <select id={id} className="input" value={filter.customer} onChange={(e) => { set({ customer: e.target.value }); }} data-testid="filter-customer">
+            <option value="">همه مشتریان</option>
+            {[...names.values()].map((x) => <option key={x.customer_id} value={x.customer_id}>{x.display_name_fa}</option>)}
+          </select>
         )}
-      </DataView>
+      </Field>
+      <Field label="جنس اصلی">
+        {(id) => (
+          <select id={id} className="input" value={filter.material} onChange={(e) => { set({ material: e.target.value }); }} data-testid="filter-material">
+            <option value="">همه جنس‌ها</option>
+            {materials.map((m) => <option key={m} value={m}>{m}</option>)}
+          </select>
+        )}
+      </Field>
+      <Field label="رنگ اصلی">
+        {(id) => (
+          <select id={id} className="input" value={filter.colour} onChange={(e) => { set({ colour: e.target.value }); }} data-testid="filter-colour">
+            <option value="">همه رنگ‌ها</option>
+            {colours.map((m) => <option key={m} value={m}>{m}</option>)}
+          </select>
+        )}
+      </Field>
+      <Field label="موقعیت سریال">
+        {(id) => (
+          <select id={id} className="input" value={filter.status} onChange={(e) => { set({ status: e.target.value }); }} data-testid="filter-status">
+            <option value="">همه وضعیت‌ها</option>
+            <option value="ALLOCATED">تخصیص‌یافته</option>
+            <option value="CANCELLED">لغوشده</option>
+          </select>
+        )}
+      </Field>
+      <div className="field filterbar__period">
+        <span className="field__label">دوره سفارش (تاریخ تخصیص)</span>
+        <div className="filterbar__dates">
+          <DateInput label="از تاریخ تخصیص" value={filter.from} onChange={(v) => { set({ from: v }); }} />
+          <DateInput label="تا تاریخ تخصیص" value={filter.to} onChange={(v) => { set({ to: v }); }} />
+        </div>
+      </div>
     </section>
   );
 }
 
-function Counter({ label, value }: { label: string; value: number | null }) {
+/** Compact Jalali date input for the filter bar (the full field with hint is JalaliDateField). */
+function DateInput({ label, value, onChange }: { label: string; value: string | null; onChange: (iso: string | null) => void }) {
+  const [text, setText] = useState(() => isoToJalaliInput(value));
+  const iso = text ? jalaliInputToIso(text) : null;
   return (
-    <li className="counter">
-      <span className="counter__label">{label}</span>
-      <span className="counter__value">{value === null ? "بدون مجوز" : toFaDigits(value)}</span>
-    </li>
+    <input
+      className="input"
+      dir="ltr"
+      inputMode="numeric"
+      placeholder="____/__/__"
+      aria-label={`${label} (سال/ماه/روز شمسی)`}
+      aria-invalid={text !== "" && iso === null}
+      value={text}
+      onChange={(e) => {
+        setText(e.target.value);
+        const v = e.target.value ? jalaliInputToIso(e.target.value) : null;
+        if (!e.target.value || v) onChange(v);
+      }}
+    />
+  );
+}
+
+/** Product / style search of the filter bar: products by name or number, styles by name (links). */
+function ProductSearch() {
+  const id = useId();
+  const [text, setText] = useState("");
+  const term = text.trim();
+  const q = useQuery({
+    queryKey: [...K2.products, "search", term],
+    enabled: term.length >= 2,
+    queryFn: async ({ signal }) => {
+      const [p, s] = await Promise.all([
+        get("/identity/products", g.productPage, { q: term, page_size: 5 }, signal),
+        get("/identity/style-suggestions", g.suggestions, { q: term }, signal),
+      ]);
+      return { products: p.data.items, styles: s.data.items.slice(0, 5) };
+    },
+  });
+  return (
+    <div className="field filterbar__search">
+      <label className="field__label" htmlFor={id}>جستجوی محصول یا استایل (نام یا شماره)</label>
+      <input id={id} className="input" type="search" maxLength={100} value={text} onChange={(e) => { setText(e.target.value); }} placeholder="مثلاً نام یا شماره محصول" data-testid="product-style-search" />
+      {term.length >= 2 && q.data ? (
+        <ul className="filterbar__results" data-testid="product-style-results">
+          {q.data.products.map((p) => (
+            <li key={p.product_id}><a href={`#/products/${p.product_id}`}>محصول {p.name_fa} · <bdi dir="ltr">{p.product_no}</bdi></a></li>
+          ))}
+          {q.data.styles.map((s) => (
+            <li key={s.style_id}><a href={`#/products/${s.product_id}/${s.style_id}`}>استایل {s.name_fa}</a></li>
+          ))}
+          {q.data.products.length + q.data.styles.length === 0 ? <li className="field__hint">موردی پیدا نشد.</li> : null}
+        </ul>
+      ) : null}
+    </div>
+  );
+}
+
+function ProductFacts({ productId, styleId, activeSerials, revisions }: { productId: string; styleId: string; activeSerials: number | null | undefined; revisions: StyleRevision[] | undefined }) {
+  const styles = useQuery({
+    queryKey: [...K2.styles, "of", productId],
+    queryFn: async ({ signal }) => (await get(`/identity/products/${productId}/styles`, g.stylePage, { page_size: 100 }, signal)).data,
+  });
+  const latest = revisions && revisions.length ? revisions.reduce((a, b) => (b.revision_no > a.revision_no ? b : a)) : null;
+  return (
+    <dl className="facts" data-testid="product-facts" data-style={styleId}>
+      <div><dt>تعداد استایل</dt><dd>{styles.data ? toFaDigits(styles.data.items.length) : "…"}</dd></div>
+      <div><dt>گرید پیش‌فرض</dt><dd title="مقایسه گرید تا تصمیم DEC-019 تعریف نشده است">تعریف نشده (DEC-019)</dd></div>
+      <div><dt>آخرین نسخه فنی</dt><dd>{latest ? `R${toFaDigits(latest.revision_no)} · ${MASTER_STATUS[latest.status]?.label ?? latest.status}` : revisions ? "ندارد" : "…"}</dd></div>
+      <div><dt>سریال‌های فعال</dt><dd>{activeSerials === undefined ? "…" : activeSerials === null ? "بدون مجوز" : toFaDigits(activeSerials)}</dd></div>
+    </dl>
+  );
+}
+
+const LATER_CELL = "در دست ساخت";
+
+function SerialRows({ d }: { d: StyleTracking }) {
+  const names = useCustomerNames();
+  if (d.serials.length === 0) return <p className="state state--empty" data-testid="state-empty">سریالی برای این استایل با این فیلتر نیست.</p>;
+  return (
+    <div className="tablewrap">
+      <table className="table table--cards" data-testid="style-serials">
+        <caption className="sr-only">سریال‌های استایل با رنگ و جنس واقعی هر سریال (مرحله، پیشرفت و تعهد در فازهای ۵ و ۷)</caption>
+        <thead>
+          <tr>
+            <th scope="col">سریال</th>
+            <th scope="col">استایل</th>
+            <th scope="col">مشتری</th>
+            <th scope="col">جنس و رنگ واقعی</th>
+            <th scope="col">دوره سفارش</th>
+            <th scope="col">تعداد</th>
+            <th scope="col">گرید</th>
+            <th scope="col" title="فاز مالک: PHASE_07">مرحله فعلی</th>
+            <th scope="col" title="فاز مالک: PHASE_07">پیشرفت</th>
+            <th scope="col" title="فاز مالک: PHASE_05">تعهد</th>
+          </tr>
+        </thead>
+        <tbody>
+          {d.serials.map((x) => {
+            const o = x.order_id ? d.orders?.[x.order_id] : undefined;
+            return (
+              <tr key={x.serial_id}>
+                <td data-label="سریال" className="cell--serial"><a href={`#/serials/${x.serial_id}`}><Num value={x.serial_number} /></a> <StatusChip {...toneLabel(SERIAL_STATUS, x.status)} /></td>
+                <td data-label="استایل" className="cell--style"><Num value={d.style.style_no} /></td>
+                <td data-label="مشتری" className="cell--wide"><CustomerName id={x.customer_id} names={names} /></td>
+                <td data-label="جنس و رنگ واقعی" className="cell--wide"><Attrs a={x.attributes} /></td>
+                <td data-label="دوره سفارش">{o?.program_ref ?? "—"}</td>
+                <td data-label="تعداد">{x.quantity !== null ? `${toFaDigits(x.quantity)} ${UOM[x.uom ?? ""] ?? ""}` : "—"}</td>
+                <td data-label="گرید">{o?.required_quality_requirement ?? "—"}</td>
+                <td data-label="مرحله فعلی" className="cell--later">{LATER_CELL}</td>
+                <td data-label="پیشرفت" className="cell--later">{LATER_CELL}</td>
+                <td data-label="تعهد" className="cell--later">{LATER_CELL}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
   );
 }
 

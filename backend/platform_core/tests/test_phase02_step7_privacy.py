@@ -93,7 +93,9 @@ def _call(c: Client, method: str, path: str) -> Any:
 # ------------------------------------------------------------------------------- 1. matrix == the seed
 def test_scope_covers_every_phase02_and_integration_operation() -> None:
     assert len(ROLES) == 16, ROLES  # 11 PHASE_01 roles + 5 PHASE_02 business roles
-    assert len(OPS) == 69  # 65 PHASE_02 operations (0.8.2-draft) + 4 integration operations (0.8.4-draft)
+    # 65 PHASE_02 operations (0.8.2-draft) + 4 integration operations (0.8.4-draft)
+    # + getChangeRequestCounts (REV-0295)
+    assert len(OPS) == 70
     perms = {op["x-aleekhan-permission"] for _p, _m, op in OPS}
     seeded = {*_V20.PERMISSIONS, *_V21.NEW_PERMISSIONS, *_V22.NEW_PERMISSIONS}
     # identity.serial.allocate stays seeded without an operation (allocateSerial removed 2026-11-14)

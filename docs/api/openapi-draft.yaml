@@ -5664,6 +5664,20 @@ paths:
         schema:
           type: string
           format: date
+      - name: colour
+        in: query
+        required: false
+        description: 'REV-0295: exact colour (colour_fa) of the serial''s style revision.'
+        schema:
+          type: string
+          maxLength: 200
+      - name: material
+        in: query
+        required: false
+        description: 'REV-0295: exact main material (main_material_fa) of the serial''s style revision.'
+        schema:
+          type: string
+          maxLength: 200
       - $ref: '#/components/parameters/Cursor'
       - $ref: '#/components/parameters/PageSize'
       responses:
@@ -7605,6 +7619,40 @@ paths:
           $ref: '#/components/responses/IdempotencyKeyReused'
         '428':
           $ref: '#/components/responses/PreconditionRequired'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /commercial/change-requests/counts:
+    get:
+      tags:
+      - commercial
+      operationId: getChangeRequestCounts
+      summary: Change request counts for the page 33 KPI cards (REV-0295)
+      description: 'Requires permission `commercial.change.read` (deny by default; GLOBAL record scope - out of scope = 404).
+        Refusal reasons: errors[].code (x-aleekhan-conventions.phase02_refusal_reasons).
+
+
+        Counted on the server over the same scoped set as listChangeRequests; never sample numbers.
+
+        '
+      x-aleekhan-permission: commercial.change.read
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeRequestCounts'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
         '429':
           $ref: '#/components/responses/RateLimited'
   /commercial/change-requests/{change_request_id}:
@@ -12658,6 +12706,7 @@ components:
       required:
       - style
       - counts
+      - orders
       - serials
       - unavailable_sections
       - page
@@ -12674,6 +12723,8 @@ components:
           - serials_total
           - serials_active
           - orders_total
+          - orders_active
+          - quantity_total
           properties:
             serials_total:
               type:
@@ -12690,6 +12741,43 @@ components:
               - integer
               - 'null'
               minimum: 0
+            orders_active:
+              type:
+              - integer
+              - 'null'
+              minimum: 0
+              description: 'REV-0295: orders with a CONFIRMED line of this style in CONFIRMED / RELEASED_TO_PLAN / ON_HOLD
+                / PARTIAL_FULFILLED.'
+            quantity_total:
+              type:
+              - integer
+              - 'null'
+              minimum: 0
+              description: 'REV-0295: sum of the quantities of those confirmed lines.'
+        orders:
+          type: object
+          description: 'REV-0295: order facts of the listed serials keyed by order_id (empty without commercial.order.read).'
+          additionalProperties:
+            type: object
+            additionalProperties: false
+            required:
+            - order_no
+            - program_ref
+            - required_quality_requirement
+            properties:
+              order_no:
+                type: string
+                maxLength: 32
+              program_ref:
+                type:
+                - string
+                - 'null'
+                maxLength: 64
+              required_quality_requirement:
+                type:
+                - string
+                - 'null'
+                maxLength: 64
         serials:
           type: array
           maxItems: 100
@@ -13967,6 +14055,29 @@ components:
             $ref: '#/components/schemas/ChangeRequest'
         page:
           $ref: '#/components/schemas/PageMeta'
+    ChangeRequestCounts:
+      type: object
+      additionalProperties: false
+      description: 'REV-0295 (page 33 KPI cards): open = DRAFT + SUBMITTED + APPROVED; awaiting_decision = SUBMITTED;
+        applied = APPLIED; cancel_open = open CANCEL_ORDER / CANCEL_LINE requests.'
+      required:
+      - open
+      - awaiting_decision
+      - applied
+      - cancel_open
+      properties:
+        open:
+          type: integer
+          minimum: 0
+        awaiting_decision:
+          type: integer
+          minimum: 0
+        applied:
+          type: integer
+          minimum: 0
+        cancel_open:
+          type: integer
+          minimum: 0
     ChangeRequestImpact:
       type: object
       additionalProperties: false

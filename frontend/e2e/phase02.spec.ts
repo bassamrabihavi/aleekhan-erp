@@ -270,7 +270,9 @@ test("planning confirms from the inbox (fresh MFA): the serial is shown; pages 1
     await expect(po.getByTestId("serial-order")).toBeVisible();
   });
   await expectSerialTitleOneLine(po); // REV-0251
-  // REV-0252: the serial and the order reference panels have distinct titles
+  // REV-0252: the serial and the order reference panels have distinct titles (REV-0295: they sit in the
+  // folded «مرجع‌های خارجی» part of the order tab - open it first)
+  await po.getByTestId("fold-refs").locator("summary").click();
   await expect(po.getByRole("heading", { name: "ارجاع‌های بیرونی سریال" })).toBeVisible();
   await expect(po.getByRole("heading", { name: "ارجاع‌های بیرونی سفارش" })).toBeVisible();
 });

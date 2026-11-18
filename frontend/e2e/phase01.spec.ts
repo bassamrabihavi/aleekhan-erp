@@ -437,6 +437,7 @@ test("page 39 + 40: the owner opens, downloads and decides a document revision s
 
 test("logout ends the owner's session", async () => {
   await go(owner, "/", "page-home");
+  await owner.getByTestId("user-menu").click(); // REV-0295: logout moved into the user menu of the top bar
   await owner.getByTestId("logout").click();
   await expect(owner.getByTestId("login-notice")).toContainText("خارج شدید");
   const res = await owner.request.get("/api/v1/me");

@@ -198,11 +198,27 @@ export interface SerialTracking {
 }
 export interface StyleTracking {
   style: Style;
-  counts: { serials_total: number | null; serials_active: number | null; orders_total: number | null };
+  counts: {
+    serials_total: number | null;
+    serials_active: number | null;
+    orders_total: number | null;
+    /** REV-0295: orders with a confirmed line of this style that are confirmed / released / on hold / partial */
+    orders_active?: number | null;
+    quantity_total?: number | null;
+  };
+  /** REV-0295: order facts of the listed serials by order_id (empty without commercial.order.read) */
+  orders?: Record<string, { order_no: string; program_ref: string | null; required_quality_requirement: string | null }>;
   serials: SerialSummary[];
   unavailable_sections: UnavailableSection[];
   withheld_sections?: string[];
   page: { page_size: number; next_cursor: string | null };
+}
+/** REV-0295: page 33 KPI counts (server-computed over the scoped change requests). */
+export interface ChangeCounts {
+  open: number;
+  awaiting_decision: number;
+  applied: number;
+  cancel_open: number;
 }
 export interface StyleSuggestion {
   style_id: string;
@@ -412,6 +428,7 @@ export const g = {
   version: shape<OrderVersion>("order_id", "version", "reason", "image"),
   cr,
   crPage: pageOf(cr),
+  changeCounts: shape<ChangeCounts>("open", "awaiting_decision", "applied", "cancel_open"),
   impact: shape<ChangeImpact>("change_request_id", "lines_affected", "serials_affected", "unavailable_sections"),
   inbox: (v: unknown): v is DecisionInbox => isObj(v) && Array.isArray(v.items) && typeof v.truncated === "boolean",
 };

@@ -15,13 +15,13 @@ from __future__ import annotations
 import uuid
 from typing import Any, Final
 
-from django.db.models import Count, Q
+from django.db.models import Count, Q, Sum
 from rest_framework.request import Request
 from rest_framework.response import Response
 
 from platform_core.authz import policy as P
 from platform_core.authz.policy import Caller
-from platform_core.commercial.models import CustomerOrderLine
+from platform_core.commercial.models import CustomerOrder, CustomerOrderLine, LineStatus, OrderStatus
 from platform_core.engine.errors import FieldError, NotFound, ValidationFailed
 from platform_core.engine.idempotency import StoredResponse
 from platform_core.models import AuditEvent
@@ -73,6 +73,14 @@ RULE_READ: Final = "identity.code_rule.read"
 RULE_MANAGE: Final = "identity.code_rule.manage"
 RULE_APPROVE: Final = "identity.code_rule.approve"
 SERIAL_READ: Final = "identity.serial.read"
+# REV-0295 page 4 KPI: orders whose serials are in production hands
+# (not draft, cancelled, fulfilled or closed)
+ACTIVE_ORDER_STATES: Final = (
+    OrderStatus.CONFIRMED,
+    OrderStatus.RELEASED_TO_PLAN,
+    OrderStatus.ON_HOLD,
+    OrderStatus.PARTIAL_FULFILLED,
+)
 REF_READ: Final = "identity.external_ref.read"
 REF_MANAGE: Final = "identity.external_ref.manage"
 HISTORICAL_READ: Final = "identity.historical.read"
@@ -390,14 +398,36 @@ class StyleTrackingView(Phase02View):
             serials = serials.filter(allocated_at__date__gte=start)
         if end is not None:
             serials = serials.filter(allocated_at__date__lte=end)
+        # REV-0295 (page 4 filter bar): exact colour / main material of the serial's style revision
+        colour = query_pattern(request, "colour", r"^\S(.{0,198}\S)?$", max_len=200)
+        if colour is not None:
+            serials = serials.filter(style_revision__attributes__colour_fa=colour)
+        material = query_pattern(request, "material", r"^\S(.{0,198}\S)?$", max_len=200)
+        if material is not None:
+            serials = serials.filter(style_revision__attributes__main_material_fa=material)
         page = paginate(request, self, serials, S.serial_summary, ordering="-serial_value")
-        orders = (
-            CustomerOrderLine.objects.filter(style=s).values("order_id").distinct().count()
-            if see_orders
-            else None
-        )
+        style_lines = CustomerOrderLine.objects.filter(style=s)
+        orders = style_lines.values("order_id").distinct().count() if see_orders else None
+        # REV-0295 KPI «سفارش‌های فعال» / «مجموع تعداد سفارش»: orders in production hands (confirmed, released,
+        # on hold, partially fulfilled) and the quantity of their confirmed lines of this style
+        live = style_lines.filter(order__status__in=ACTIVE_ORDER_STATES, status=LineStatus.CONFIRMED)
+        orders_active = live.values("order_id").distinct().count() if see_orders else None
+        quantity_total = int(live.aggregate(q=Sum("quantity"))["q"] or 0) if see_orders else None
         counts = Serial.objects.filter(style=s).aggregate(
             total=Count("pk"), active=Count("pk", filter=~Q(status=SerialStatus.CANCELLED))
+        )
+        order_ids = {i["order_id"] for i in page.data["items"] if i["order_id"]}
+        order_facts = (
+            {
+                str(o.pk): {
+                    "order_no": o.order_no,
+                    "program_ref": o.program_ref,
+                    "required_quality_requirement": o.required_quality_requirement,
+                }
+                for o in CustomerOrder.objects.filter(pk__in=order_ids)
+            }
+            if see_orders
+            else {}
         )
         body = {
             "style": S.style(s),
@@ -405,7 +435,10 @@ class StyleTrackingView(Phase02View):
                 "serials_total": counts["total"] if see_serials else None,
                 "serials_active": counts["active"] if see_serials else None,
                 "orders_total": orders,
+                "orders_active": orders_active,
+                "quantity_total": quantity_total,
             },
+            "orders": order_facts,
             "serials": page.data["items"],
             "unavailable_sections": S.UNAVAILABLE,
             "withheld_sections": [

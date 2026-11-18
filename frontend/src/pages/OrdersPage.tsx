@@ -14,7 +14,7 @@ import { ActionError } from "../components/ActionError";
 import { DataView, ForbiddenState } from "../components/DataView";
 import { Dialog } from "../components/Dialog";
 import { Field, ReasonDialog } from "../components/Form";
-import { Code14, CustomerName, JalaliDateField, Num, PageHead, Representative } from "../components/Phase02";
+import { Code14, CustomerName, DisabledAction, JalaliDateField, Kpi, Num, PageHead, PageInfoButtons, Representative } from "../components/Phase02";
 import { StatusChip } from "../components/StatusChip";
 import { formatJalaliDateTime, toFaDigits } from "../lib/format";
 import { formatJalaliDate, todayTehranIso } from "../lib/jalali";
@@ -38,17 +38,55 @@ export function OrdersPage() {
       </div>
     );
   }
+  const isNew = id === "new";
   return (
     <div className="page" data-testid="page-orders">
       <PageHead
-        page="صفحه ۲۹ · فاز ۲"
-        title="ثبت سفارش و کدگذاری"
-        lead="شماره سفارش (SO-سال شمسی-شماره) و سریال‌ها را سرور می‌دهد. سریال فقط هنگام تأیید سفارش توسط برنامه‌ریزی تخصیص می‌یابد. سفارش تأییدشده مستقیم ویرایش نمی‌شود؛ هر تغییر با «درخواست تغییر» است."
+        page="بازرگانی و ثبت سفارش · صفحه ۲۹ · فاز ۲"
+        title={isNew ? "ثبت سفارش جدید و کدگذاری محصول" : "ثبت سفارش و کدگذاری"}
+        lead="ثبت مرحله‌ای؛ شماره سفارش، کد ۱۴رقمی و سریال را فقط سرور می‌دهد."
+        actions={
+          <>
+            <PageInfoButtons help={ORDERS_HELP} owner="بازرگانی و ثبت سفارش (ایجاد سریال با تأیید برنامه‌ریزی)" sources={ORDERS_SOURCES} />
+            {isNew ? (
+              <DisabledAction
+                primary
+                label="بررسی و ارسال به برنامه‌ریزی"
+                reason="ابتدا پیش‌نویس سفارش را در مرحله ۱ ثبت کنید؛ بررسی و ارسال در مرحله ۴ روی صفحه همان سفارش انجام می‌شود."
+                testId="order-send-disabled"
+              />
+            ) : null}
+          </>
+        }
       />
-      {id === "new" ? <NewOrder /> : id ? <OrderDetail id={id} /> : <OrderList />}
+      <nav className="pagetabs" aria-label="بخش‌های ثبت سفارش">
+        <a href="#/orders" className="pagetabs__item" aria-current={!id ? "page" : undefined}>فهرست سفارش‌ها</a>
+        {can(PERM.orderManage) ? (
+          <a href="#/orders/new" className="pagetabs__item" aria-current={isNew ? "page" : undefined} data-testid="pagetab-order-new">سفارش جدید</a>
+        ) : null}
+        {id && !isNew ? <span className="pagetabs__item" aria-current="page">جزئیات سفارش</span> : null}
+        <a href="#/code-rules" className="pagetabs__item">قاعده کد ۱۴رقمی</a>
+        <a href="#/changes" className="pagetabs__item">تغییرات سفارش</a>
+      </nav>
+      {isNew ? <NewOrder /> : id ? <OrderDetail id={id} /> : <OrderList />}
     </div>
   );
 }
+
+const ORDERS_HELP = (
+  <>
+    <p>شماره سفارش (SO-سال شمسی-شماره) و سریال‌ها را سرور می‌دهد. سریال فقط هنگام تأیید سفارش توسط برنامه‌ریزی تخصیص می‌یابد.</p>
+    <p>مراحل: ۱) سربرگ سفارش و ثبت پیش‌نویس؛ ۲) محصول، استایل و کد ۱۴رقمی؛ ۳) تعداد و تاریخ؛ ۴) بررسی سرور و ارسال به برنامه‌ریزی.</p>
+    <p>سفارش تأییدشده مستقیم ویرایش نمی‌شود؛ هر تغییر با «درخواست تغییر» در صفحه ۳۳ انجام می‌شود. PO تکراری فقط هشدار است و باید آگاهانه تأیید شود.</p>
+  </>
+);
+
+const ORDERS_SOURCES = [
+  { label: "سفارش و ردیف‌ها", detail: "سرور سامانه: /commercial/customer-orders (نسخه‌دار؛ هر ویرایش با If-Match)" },
+  { label: "مشتری و برند", detail: "ثبت مشتریان سامانه (صفحه مشتریان و برندها)" },
+  { label: "محصول، استایل، کد ۱۴رقمی", detail: "ثبت محصول سامانه؛ کد فقط زیر قاعده فعال DEC-005 صادر می‌شود" },
+  { label: "راهکاران", detail: "فقط خواندنی؛ سامانه چیزی در راهکاران نمی‌نویسد" },
+];
 
 // ---------------------------------------------------------------------------------------------- list
 function OrderList() {
@@ -124,7 +162,7 @@ function OrderList() {
 }
 
 function Steps({ current }: { current: number }) {
-  const labels = ["سربرگ سفارش", "محصول، استایل و کد", "تعداد و تاریخ", "بررسی و ارسال به برنامه‌ریزی"];
+  const labels = ["سربرگ سفارش", "محصول، استایل و کد", "تعداد و تاریخ", "بررسی و ارسال"];
   return (
     <ol className="steps" aria-label={`مرحله ${toFaDigits(current)} از ۴`} data-testid="wizard-steps" data-fid="wizard-steps">
       {labels.map((l, i) => (
@@ -165,84 +203,196 @@ function NewOrder() {
     set(v);
   };
   if (!can(PERM.orderManage)) return <ForbiddenState />;
+  // «آمادگی فرم»: the required fields of step 1 that are filled (computed from this form only)
+  const required = [customer !== "", orderDate !== null];
+  const filled = required.filter(Boolean).length;
   return (
-    <section className="panel panel--wide" aria-labelledby="new-order-title" data-testid="order-wizard" data-fid="order-wizard">
-      <h2 id="new-order-title">سفارش جدید</h2>
-      <Steps current={1} />
-      <form
-        className="form form--grid"
-        onSubmit={(e) => {
-          e.preventDefault();
-          if (!orderDate) return;
-          void action
-            .run(
-              () =>
-                send("/commercial/customer-orders", g.order, {
-                  customer_id: customer,
-                  brand_id: brand || null,
-                  order_type: type,
-                  external_po_number: po.trim() || null,
-                  program_ref: program.trim() || null,
-                  order_date: orderDate,
-                  requested_due_date: due,
-                  required_quality_requirement: quality.trim() || null,
-                  customer_representative_name: rep.trim() || null,
-                }, key.current),
-              [K2.orders],
-            )
-            .then((r) => {
-              if (r) navigate(`/orders/${r.data.order_id}`);
-            });
-        }}
-      >
-        <Field label="جستجوی مشتری">
-          {(id) => <input id={id} className="input" maxLength={100} value={cq} onChange={(e) => { setCq(e.target.value); }} data-testid="wiz-customer-search" />}
-        </Field>
-        <Field label="مشتری *">
-          {(id) => (
-            <select id={id} className="input" required value={customer} onChange={(e) => { touch(setCustomer)(e.target.value); setBrand(""); }} data-testid="wiz-customer">
-              <option value="">انتخاب کنید</option>
-              {(customers.data?.items ?? []).map((c) => <option key={c.customer_id} value={c.customer_id}>{c.display_name_fa} ({c.customer_no})</option>)}
-            </select>
-          )}
-        </Field>
-        <Field label="برند (اختیاری)">
-          {(id) => (
-            <select id={id} className="input" value={brand} disabled={!customer} onChange={(e) => { touch(setBrand)(e.target.value); }} data-testid="wiz-brand">
-              <option value="">بدون برند</option>
-              {(brands.data?.items ?? []).filter((b) => b.status === "ACTIVE").map((b) => <option key={b.brand_id} value={b.brand_id}>{b.brand_name_fa}</option>)}
-            </select>
-          )}
-        </Field>
-        <Field label="نوع سفارش *">
-          {(id) => (
-            <select id={id} className="input" required value={type} onChange={(e) => { touch(setType)(e.target.value); }} data-testid="wiz-type">
-              {Object.entries(ORDER_TYPES).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-            </select>
-          )}
-        </Field>
-        <Field label="شماره سفارش مشتری (PO)" hint="تکراری بودن فقط هشدار است و در بررسی سفارش باید تأیید شود.">
-          {(id, hintId) => <input id={id} className="input" dir="ltr" maxLength={64} aria-describedby={hintId} value={po} onChange={(e) => { touch(setPo)(e.target.value); }} data-testid="wiz-po" />}
-        </Field>
-        <Field label="برنامه / دوره مشتری">
-          {(id) => <input id={id} className="input" maxLength={64} value={program} onChange={(e) => { touch(setProgram)(e.target.value); }} />}
-        </Field>
-        <Field label="نام نماینده مشتری" hint="فقط نام (داده شخصی؛ هر خواندن ممیزی می‌شود). تلفن و ایمیل ثبت نمی‌شود.">
-          {(id, hintId) => <input id={id} className="input" maxLength={200} autoComplete="off" aria-describedby={hintId} value={rep} onChange={(e) => { touch(setRep)(e.target.value); }} data-testid="wiz-rep" />}
-        </Field>
-        <Field label="گرید موردنیاز (متن آزاد تا DEC-019)">
-          {(id) => <input id={id} className="input" maxLength={64} value={quality} onChange={(e) => { touch(setQuality)(e.target.value); }} />}
-        </Field>
-        <JalaliDateField label="تاریخ سفارش" required value={orderDate} onChange={touch(setOrderDate)} testId="wiz-order-date" />
-        <JalaliDateField label="تاریخ تحویل درخواستی" value={due} onChange={touch(setDue)} testId="wiz-due" />
-        <ActionError error={action.error} />
-        <div className="form__actions">
-          <button type="submit" className="btn btn--primary" disabled={action.pending || !customer || !orderDate} data-testid="wiz-create">
-            {action.pending ? "در حال ثبت…" : "ثبت پیش‌نویس و رفتن به مرحله ۲"}
-          </button>
-          <a className="btn btn--secondary" href="#/orders">انصراف</a>
-        </div>
-      </form>
+    <>
+      <ul className="kpis" data-fid="kpis" aria-label="وضعیت فرم سفارش جدید">
+        <Kpi label="مرحله ثبت سفارش" value={`${toFaDigits(1)} از ${toFaDigits(4)}`} note="سربرگ سفارش" />
+        <Kpi label="کد ۱۴رقمی نمونه" value="—" note="پس از انتخاب استایل (مرحله ۲)" />
+        <Kpi label="استایل‌های مشابه" value="—" note="پس از انتخاب محصول (مرحله ۲)" />
+        <Kpi
+          label="آمادگی فرم"
+          value={`${toFaDigits(filled)} از ${toFaDigits(required.length)}`}
+          note="فیلدهای اجباری مرحله ۱"
+          tone={filled === required.length ? "good" : undefined}
+          testId="form-readiness"
+        />
+      </ul>
+      <div className="grid-main">
+        <section className="panel" aria-labelledby="new-order-title" data-testid="order-wizard" data-fid="order-wizard">
+          <div className="panel__head">
+            <h2 id="new-order-title">فرم مرحله‌ای ثبت سفارش</h2>
+          </div>
+          <Steps current={1} />
+          <form
+            className="form wizard-form"
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (!orderDate) return;
+              void action
+                .run(
+                  () =>
+                    send("/commercial/customer-orders", g.order, {
+                      customer_id: customer,
+                      brand_id: brand || null,
+                      order_type: type,
+                      external_po_number: po.trim() || null,
+                      program_ref: program.trim() || null,
+                      order_date: orderDate,
+                      requested_due_date: due,
+                      required_quality_requirement: quality.trim() || null,
+                      customer_representative_name: rep.trim() || null,
+                    }, key.current),
+                  [K2.orders],
+                )
+                .then((r) => {
+                  if (r) navigate(`/orders/${r.data.order_id}`);
+                });
+            }}
+          >
+            <div className="formgrid">
+              <Field label="جستجوی مشتری">
+                {(id) => <input id={id} className="input" maxLength={100} value={cq} onChange={(e) => { setCq(e.target.value); }} data-testid="wiz-customer-search" />}
+              </Field>
+              <Field label="مشتری *">
+                {(id) => (
+                  <select id={id} className="input" required value={customer} onChange={(e) => { touch(setCustomer)(e.target.value); setBrand(""); }} data-testid="wiz-customer">
+                    <option value="">انتخاب کنید</option>
+                    {(customers.data?.items ?? []).map((c) => <option key={c.customer_id} value={c.customer_id}>{c.display_name_fa} ({c.customer_no})</option>)}
+                  </select>
+                )}
+              </Field>
+              <Field label="برند مشتری (اختیاری)">
+                {(id) => (
+                  <select id={id} className="input" value={brand} disabled={!customer} onChange={(e) => { touch(setBrand)(e.target.value); }} data-testid="wiz-brand">
+                    <option value="">بدون برند</option>
+                    {(brands.data?.items ?? []).filter((b) => b.status === "ACTIVE").map((b) => <option key={b.brand_id} value={b.brand_id}>{b.brand_name_fa}</option>)}
+                  </select>
+                )}
+              </Field>
+              <Field label="نوع سفارش *">
+                {(id) => (
+                  <select id={id} className="input" required value={type} onChange={(e) => { touch(setType)(e.target.value); }} data-testid="wiz-type">
+                    {Object.entries(ORDER_TYPES).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                  </select>
+                )}
+              </Field>
+              <Field label="شماره سفارش مشتری (PO)" hint="تکراری بودن فقط هشدار است.">
+                {(id, hintId) => <input id={id} className="input" dir="ltr" maxLength={64} aria-describedby={hintId} value={po} onChange={(e) => { touch(setPo)(e.target.value); }} data-testid="wiz-po" />}
+              </Field>
+              <Field label="برنامه / دوره مشتری">
+                {(id) => <input id={id} className="input" maxLength={64} value={program} onChange={(e) => { touch(setProgram)(e.target.value); }} />}
+              </Field>
+              <Field label="نام نماینده مشتری" hint="فقط نام (داده شخصی، ممیزی می‌شود).">
+                {(id, hintId) => <input id={id} className="input" maxLength={200} autoComplete="off" aria-describedby={hintId} value={rep} onChange={(e) => { touch(setRep)(e.target.value); }} data-testid="wiz-rep" />}
+              </Field>
+              <Field label="گرید موردنیاز (متن آزاد تا DEC-019)">
+                {(id) => <input id={id} className="input" maxLength={64} value={quality} onChange={(e) => { touch(setQuality)(e.target.value); }} />}
+              </Field>
+              <JalaliDateField label="تاریخ سفارش" required value={orderDate} onChange={touch(setOrderDate)} testId="wiz-order-date" />
+              <JalaliDateField label="تاریخ تحویل درخواستی" value={due} onChange={touch(setDue)} testId="wiz-due" />
+            </div>
+            <ActionError error={action.error} />
+            <div className="rowbuttons">
+              <span className="field__hint">مشتری و برند از ثبت مشتریان سامانه انتخاب می‌شوند.</span>
+              <div className="actions">
+                <a className="btn btn--outline btn--compact" href="#/orders">انصراف</a>
+                <DisabledAction label="مرحله قبل" reason="این مرحله اول است." testId="wiz-prev" />
+                <button type="submit" className="btn btn--primary btn--compact" disabled={action.pending || !customer || !orderDate} data-testid="wiz-create">
+                  {action.pending ? "در حال ثبت…" : "ثبت پیش‌نویس و مرحله بعد"}
+                </button>
+              </div>
+            </div>
+          </form>
+        </section>
+        <CodingPanel />
+      </div>
+      <div className="grid-half">
+        <section className="panel" aria-labelledby="similar-title" data-fid="similar-styles">
+          <div className="panel__head">
+            <h2 id="similar-title">بررسی استایل‌های موجود</h2>
+          </div>
+          <table className="table table--plain">
+            <caption className="sr-only">استایل‌های موجود محصول انتخاب‌شده</caption>
+            <thead>
+              <tr>
+                <th scope="col">استایل</th>
+                <th scope="col">ویژگی</th>
+                <th scope="col">نتیجه</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td colSpan={3} className="table__empty">
+                  محصول هنوز انتخاب نشده است. در مرحله ۲، استایل‌های موجود همان محصول و پیشنهادهای مشابه (فقط پیشنهاد؛ ادغام انجام نمی‌شود) این‌جا می‌آیند.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+        <section className="panel" aria-labelledby="checks-title" data-fid="pre-checks">
+          <div className="panel__head">
+            <h2 id="checks-title">کنترل‌های داده پیش از ثبت</h2>
+          </div>
+          <ul className="bullets">
+            <li className="bullet">
+              <strong>هویت محصول</strong>
+              <p>فقط محصول و استایل «فعال» با نسخه فعال قابل انتخاب است؛ سرور دوباره بررسی می‌کند.</p>
+            </li>
+            <li className="bullet">
+              <strong>استایل جدید</strong>
+              <p>استایل جدید در صفحه محصولات ساخته می‌شود؛ شماره آن را سرور می‌دهد (۰۰۰۰ هرگز).</p>
+            </li>
+            <li className="bullet">
+              <strong>ثبت نهایی</strong>
+              <p>سریال فقط هنگام تأیید برنامه‌ریزی در یک تراکنش ساخته می‌شود؛ کلیک دوباره سفارش تکراری نمی‌سازد.</p>
+            </li>
+          </ul>
+        </section>
+      </div>
+    </>
+  );
+}
+
+/** DEC-005 (APPROVED): code = «02» + product type (2) + category (2) + product number (4) + style number (4). */
+function CodingPanel() {
+  const rows = [
+    { part: "ماهیت", value: "02", source: "ثابت قاعده DEC-005 (محصول)" },
+    { part: "نوع محصول", value: null, source: "طبقه‌بندی محصول (برگه Sorce)" },
+    { part: "دسته‌بندی", value: null, source: "طبقه‌بندی استایل (برگه Sorce)" },
+    { part: "شماره محصول", value: null, source: "سرور: بزرگ‌ترین شماره همان نوع + ۱" },
+    { part: "شماره استایل", value: null, source: "سرور: شمارش استایل‌ها + ۱ (۰۰۰۰ هرگز)" },
+  ];
+  return (
+    <section className="panel" aria-labelledby="coding-title" data-fid="coding-validation">
+      <div className="panel__head">
+        <h2 id="coding-title">کدگذاری راهکاران و اعتبارسنجی</h2>
+      </div>
+      <p className="ruleline">
+        ساختار کد ۱۴رقمی (DEC-005): <b>ماهیت ۲ رقم + نوع ۲ + دسته ۲ + محصول ۴ + استایل ۴</b>
+      </p>
+      <table className="table table--plain">
+        <caption className="sr-only">بخش‌های کد ۱۴رقمی این سفارش</caption>
+        <thead>
+          <tr>
+            <th scope="col">بخش</th>
+            <th scope="col">مقدار نمونه (این سفارش)</th>
+            <th scope="col">منبع</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r) => (
+            <tr key={r.part}>
+              <td>{r.part}</td>
+              <td>{r.value ? <Code14 code={r.value} /> : <span className="field__hint">مرحله ۲</span>}</td>
+              <td>{r.source}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <p className="ruleline ruleline--warning">کد کالا ≠ شماره سریال داخلی. شماره سفارش مشتری (PO) و کد پروژه راهکاران فیلدهای جداگانه‌اند.</p>
     </section>
   );
 }

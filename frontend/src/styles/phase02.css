@@ -152,47 +152,11 @@
 .row--current td {
   background: var(--color-primary-tint);
 }
-/* serial header (pages 1/2) */
-.serial-head {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) fit-content(40%);
-  gap: var(--space-3);
-}
-.serial-head h1 {
-  margin: 0;
-}
-.serial-head__product {
-  margin: 0;
-  font-weight: var(--font-weight-medium);
-}
-.serial-head__chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-  align-content: flex-start;
-  justify-content: flex-end;
-}
-.serial-head__facts {
-  grid-column: 1 / -1;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  padding: var(--space-3);
-  background: var(--color-surface-muted);
-  border-radius: var(--radius-md);
-  margin: 0;
-}
-
 /* REV-0251: below 900px the chips column (max-content) squeezed the title to one word per line; the header
    collapses to one column there and the chips wrap under the title */
 @media (max-width: 900px) {
   .split {
     grid-template-columns: minmax(0, 1fr);
-  }
-  .serial-head {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .serial-head__chips {
-    justify-content: flex-start;
   }
 }
 @media (max-width: 600px) {
@@ -201,9 +165,3 @@
   }
 }
 
-/* 02.5: long customer names in the serial header chips wrap instead of overflowing on mobile */
-.serial-head__chips .chip {
-  white-space: normal;
-  max-width: 100%;
-  overflow-wrap: anywhere;
-}

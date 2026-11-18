@@ -7,13 +7,13 @@
 //     the audited timeline.
 // No sample number of the images is ever shown (rule 1/2).
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 
 import { g, get, K2, PERM, type CustomerOrder, type Serial, type SerialTracking } from "../api/phase02";
 import { useAuth } from "../auth/context";
 import { DataView, ForbiddenState } from "../components/DataView";
 import { Field, ShortId, TabPanel, Tabs } from "../components/Form";
-import { Code14, CustomerName, LaterSection, Num, PageHead, Representative } from "../components/Phase02";
+import { Code14, CustomerName, LATER_TEXT, LaterSection, Num, PageHead, Representative } from "../components/Phase02";
 import { StatusChip } from "../components/StatusChip";
 import { formatJalaliDateTime, toFaDigits } from "../lib/format";
 import { formatJalaliDate } from "../lib/jalali";
@@ -95,6 +95,24 @@ function SerialSearch() {
   );
 }
 
+/** The 13 sections of the serial control center (concept pages 1/2). Only «خلاصه», «سفارش» and «تاریخچه» carry
+ * PHASE_02 data; every other tab is a later phase and shows the placeholder without numbers (DEC-027). */
+const SERIAL_TABS: { id: string; label: string; phase?: string }[] = [
+  { id: "summary", label: "خلاصه" },
+  { id: "order", label: "سفارش" },
+  { id: "planning", label: "برنامه‌ریزی", phase: "PHASE_05" },
+  { id: "engineering", label: "مهندسی", phase: "PHASE_03 / PHASE_04" },
+  { id: "materials", label: "مواد و انبار", phase: "PHASE_06" },
+  { id: "cutting", label: "برش", phase: "PHASE_07" },
+  { id: "production", label: "تولید", phase: "PHASE_07" },
+  { id: "quality", label: "کیفیت", phase: "PHASE_08" },
+  { id: "dispatch", label: "محصول و ارسال", phase: "PHASE_09" },
+  { id: "cost", label: "بهای تمام‌شده", phase: "PHASE_10" },
+  { id: "tasks", label: "تسک‌ها", phase: "PHASE_05" },
+  { id: "documents", label: "اسناد", phase: "PHASE_03 / PHASE_04" },
+  { id: "history", label: "تاریخچه" },
+];
+
 function SerialView({ id }: { id: string }) {
   const { can } = useAuth();
   const [tab, setTab] = useState("summary");
@@ -110,23 +128,49 @@ function SerialView({ id }: { id: string }) {
     queryFn: ({ signal }) => get(`/commercial/customer-orders/${String(orderId)}`, g.order, undefined, signal),
     select: (r) => r.data,
   });
+  const current = SERIAL_TABS.find((t) => t.id === tab) ?? SERIAL_TABS[0];
   return (
     <DataView query={tracking} loading="در حال دریافت سریال…" errorTitle="سریال دریافت نشد">
       {(t) => (
-        <>
+        <div className="serial-center">
+          <div className="serial-top">
+            <div className="serial-actions" role="group" aria-label="اقدام‌های برنامه‌ریزی سریال" data-fid="header-actions">
+              {["تصمیم برنامه‌ریزی", "تغییر اولویت", "Fast Track", "سناریو", "بیشتر"].map((l) => (
+                <button key={l} type="button" className="btn btn--outline btn--compact" disabled title="در دست ساخت — فاز ۵ (برنامه‌ریزی)" aria-describedby="serial-actions-later">
+                  {l}
+                </button>
+              ))}
+              <span id="serial-actions-later" className="serial-actions__note">
+                {LATER_TEXT} · <bdi dir="ltr">PHASE_05</bdi>
+              </span>
+            </div>
+            <ul className="date-cards" aria-label="تاریخ‌های تعهد و پیش‌بینی" data-fid="date-cards">
+              {["تعهد", "Forecast", "اختلاف"].map((l) => (
+                <li key={l} className="date-card" data-fid-item title="فاز مالک: PHASE_05">
+                  <span className="date-card__label">{l}</span>
+                  <span className="date-card__value">در دست ساخت</span>
+                </li>
+              ))}
+            </ul>
+          </div>
           <SerialHeader s={t.serial} order={order.data} />
-          <Tabs
-            tabs={[
-              { id: "summary", label: "خلاصه" },
-              { id: "order", label: "سفارش" },
-            ]}
-            active={tab}
-            onChange={setTab}
-            label="بخش‌های مرکز کنترل سریال"
-            fid="tabs"
-          />
-          <TabPanel id={tab}>{tab === "summary" ? <SummaryTab t={t} /> : <OrderTab t={t} order={order.data} orderLoading={order.isPending && order.fetchStatus !== "idle"} />}</TabPanel>
-        </>
+          <LaterSection title="مراحل تولید سریال" detail="مواد و انبار ← مهندسی ← تأمین ← برش ← دوخت ← کنترل کیفیت ← آماده محصول" phase="PHASE_03 … PHASE_09" fid="stage-flow" className="later--inline" />
+          <Tabs tabs={SERIAL_TABS.map(({ id: tid, label }) => ({ id: tid, label }))} active={tab} onChange={setTab} label="بخش‌های مرکز کنترل سریال" fid="tabs" />
+          <TabPanel id={tab}>
+            {tab === "summary" ? (
+              <SummaryTab t={t} />
+            ) : tab === "order" ? (
+              <OrderTab t={t} order={order.data} orderLoading={order.isPending && order.fetchStatus !== "idle"} />
+            ) : tab === "history" ? (
+              <section className="panel" aria-labelledby="hist-title" data-testid="serial-history">
+                <h2 id="hist-title">تاریخچه رویدادها</h2>
+                <EventList t={t} />
+              </section>
+            ) : current?.phase ? (
+              <LaterSection title={`بخش ${current.label} سریال`} phase={current.phase} />
+            ) : null}
+          </TabPanel>
+        </div>
       )}
     </DataView>
   );
@@ -152,81 +196,153 @@ function SerialHeader({ s, order }: { s: Serial; order: CustomerOrder | undefine
     enabled: !!order?.brand_id && can(PERM.customerRead),
     queryFn: async ({ signal }) => (await get(`/identity/customers/${s.customer_id}/brands`, g.brandPage, { page_size: 100 }, signal)).data,
   });
+  // colour / material of the serial's own style revision (fixed when the serial was committed), never the
+  // style's current revision
+  const revisions = useQuery({
+    queryKey: [...K2.styles, "revisions", s.style_id],
+    enabled: can(PERM.productRead),
+    queryFn: async ({ signal }) => (await get(`/identity/styles/${s.style_id}/revisions`, g.revisionPage, { page_size: 100 }, signal)).data,
+  });
+  const rev = revisions.data?.items.find((r) => r.style_revision_id === s.style_revision_id);
+  const attr = (k: "colour_fa" | "main_material_fa") => rev?.attributes[k] ?? (revisions.isPending && can(PERM.productRead) ? "…" : "—");
   const line = order?.lines.find((l) => l.serial_id === s.serial_id);
   const brand = brands.data?.items.find((b) => b.brand_id === order?.brand_id);
   return (
-    <section className="serial-head panel panel--wide" aria-labelledby="serial-title" data-testid="serial-header" data-fid="serial-header">
+    <section className="serial-head panel" aria-labelledby="serial-title" data-testid="serial-header" data-fid="serial-header">
       <div className="serial-head__main">
         <p className="eyebrow">صفحه ۱ و ۲ · مرکز کنترل سریال · فاز ۲</p>
-        <h1 id="serial-title">
-          سریال <Num value={s.serial_number} testId="serial-number" />
-        </h1>
+        <div className="serial-head__title">
+          <h1 id="serial-title">
+            سریال <Num value={s.serial_number} testId="serial-number" />
+          </h1>
+          <StatusChip {...toneLabel(SERIAL_STATUS, s.status)} testId="serial-status" />
+        </div>
         <p className="serial-head__product">
           {product.data?.name_fa ?? "—"}
-          {style.data ? <> · استایل <Num value={style.data.style_no} /> {style.data.name_fa}</> : null}
+          {style.data ? <> · {style.data.name_fa}</> : null}
         </p>
-        <p>کد محصول: <Code14 code={s.product_code} copy testId="serial-code" /></p>
       </div>
       <div className="serial-head__chips">
-        <StatusChip {...toneLabel(SERIAL_STATUS, s.status)} testId="serial-status" />
         <span className="chip chip--neutral chip--inline"><CustomerName id={s.customer_id} names={names} /></span>
         {brand ? <span className="chip chip--info chip--inline">{brand.brand_name_fa}</span> : null}
         {order?.required_quality_requirement ? <span className="chip chip--warning chip--inline" title="متن گرید موردنیاز (مقایسه با گرید تا DEC-019 نیست)">گرید: {order.required_quality_requirement}</span> : null}
       </div>
-      <dl className="meta serial-head__facts">
+      <dl className="serial-head__facts">
+        <div><dt>کد محصول</dt><dd><Code14 code={s.product_code} copy testId="serial-code" /></dd></div>
+        <div><dt>استایل</dt><dd><Num value={style.data?.style_no} /></dd></div>
         <div><dt>تعداد سفارش</dt><dd data-testid="serial-qty">{line ? `${toFaDigits(line.quantity)} ${UOM[line.uom] ?? line.uom}` : "—"}</dd></div>
+        <div><dt>رنگ</dt><dd title={attr("colour_fa")}>{attr("colour_fa")}</dd></div>
+        <div><dt>جنس</dt><dd title={attr("main_material_fa")}>{attr("main_material_fa")}</dd></div>
         <div><dt>برنامه مشتری</dt><dd>{order?.program_ref ?? "—"}</dd></div>
-        <div><dt>تحویل درخواستی</dt><dd>{formatJalaliDate(line?.requested_due_date ?? order?.requested_due_date ?? null)}</dd></div>
-        <div><dt>تخصیص</dt><dd>{formatJalaliDateTime(s.allocated_at)}</dd></div>
+        <div className="fact--wide"><dt>تحویل درخواستی</dt><dd>{formatJalaliDate(line?.requested_due_date ?? order?.requested_due_date ?? null)}</dd></div>
+        <div className="fact--wide"><dt>تخصیص</dt><dd>{formatJalaliDateTime(s.allocated_at)}</dd></div>
       </dl>
     </section>
   );
 }
 
-// ------------------------------------------------------------------------------------------ page 1
-function SummaryTab({ t }: { t: SerialTracking }) {
+/** «تصمیم‌ها و پیگیری‌ها»: the serial's change requests (PHASE_02), tasks and risks (later phases). */
+function SidePanel({ serialId }: { serialId: string }) {
   const { can } = useAuth();
-  const serial = t.serial;
   const changes = useQuery({
-    queryKey: [...K2.changes, "serial", serial.serial_id],
+    queryKey: [...K2.changes, "serial", serialId],
     enabled: can(PERM.changeRead),
-    queryFn: async ({ signal }) => (await get("/commercial/change-requests", g.crPage, { serial_id: serial.serial_id, page_size: 25 }, signal)).data,
+    queryFn: async ({ signal }) => (await get("/commercial/change-requests", g.crPage, { serial_id: serialId, page_size: 25 }, signal)).data,
   });
   return (
-    <div className="stack" data-testid="serial-summary">
-      <LaterSection title="مراحل تولید (مواد و انبار ← مهندسی ← تأمین ← برش ← دوخت ← کنترل کیفیت ← آماده محصول)" phase="PHASE_03 … PHASE_09" fid="stage-flow" />
-      <div className="later-grid" data-fid="summary-cards">
-        <LaterSection title="مشکلات فعال" phase="PHASE_06 / PHASE_07" fid="active-problems" />
+    <aside className="panel serial-side" aria-labelledby="side-title" data-fid="side-panel">
+      <div className="panel__head">
+        <h2 id="side-title">تصمیم‌ها و پیگیری‌ها</h2>
+        {can(PERM.changeRead) ? <a href="#/changes" className="btn btn--link">مشاهده همه</a> : null}
+      </div>
+      <p className="serial-side__sub">درخواست‌های تغییر این سریال</p>
+      {!can(PERM.changeRead) ? (
+        <p className="field__hint">برای دیدن درخواست‌های تغییر مجوز ندارید.</p>
+      ) : (
+        <DataView query={changes} loading="در حال دریافت درخواست‌ها…" errorTitle="درخواست‌ها دریافت نشد" isEmpty={(d) => d.items.length === 0} empty={{ title: "درخواست تغییری برای این سریال ثبت نشده است." }}>
+          {(d) => (
+            <ul className="cards serial-side__list" data-testid="serial-changes">
+              {d.items.map((c) => (
+                <li key={c.change_request_id} className="card">
+                  <a href={`#/changes/${c.change_request_id}`} className="card__link">
+                    <Num value={c.request_no} /> · {CHANGE_KIND[c.kind] ?? c.kind}
+                  </a>
+                  <StatusChip {...toneLabel(CHANGE_STATUS, c.status)} />
+                </li>
+              ))}
+            </ul>
+          )}
+        </DataView>
+      )}
+      <div className="serial-side__laters">
+      <div className="serial-side__later">
+        <h3>تسک‌های نزدیک موعد</h3>
+        <p>
+          در دست ساخت · <bdi dir="ltr">PHASE_05</bdi>
+        </p>
+      </div>
+      <div className="serial-side__later">
+        <h3>ریسک‌ها</h3>
+        <p>
+          در دست ساخت · <bdi dir="ltr">PHASE_05</bdi>
+        </p>
+      </div>
+      </div>
+    </aside>
+  );
+}
+
+function EventList({ t }: { t: SerialTracking }) {
+  if (t.events.length === 0) return <p className="state state--empty" data-testid="state-empty">رویدادی ثبت نشده است.</p>;
+  return (
+    <ol className="timeline" data-testid="serial-timeline">
+      {t.events.map((e) => (
+        <li key={e.audit_event_id}>
+          {TRACKING_EVENT[e.kind] ?? e.kind} · <time dateTime={e.occurred_at}>{formatJalaliDateTime(e.occurred_at)}</time>
+          {e.ref.entity_type === "change_request" ? <> · <a href={`#/changes/${e.ref.entity_id}`}>درخواست تغییر</a></> : null}
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+// ------------------------------------------------------------------------------------------ page 1
+function SummaryTab({ t }: { t: SerialTracking }) {
+  return (
+    <div className="serial-grid serial-grid--summary" data-testid="serial-summary">
+      <SidePanel serialId={t.serial.serial_id} />
+      <LaterSection title="مشکلات فعال" phase="PHASE_06 / PHASE_07" fid="active-problems" className="serial-problems" />
+      <div className="later-grid serial-cards" data-fid="summary-cards">
         <LaterSection title="پیشرفت کلی" phase="PHASE_07 / PHASE_09" />
         <LaterSection title="آمادگی مواد" phase="PHASE_06" />
-        <LaterSection title="موقعیت فعلی" phase="PHASE_07" />
+        <LaterSection title="این کجاست (موقعیت فعلی)" phase="PHASE_07" />
         <LaterSection title="کیفیت و گرید" phase="PHASE_08" />
       </div>
-      <section className="panel panel--wide" aria-labelledby="sum-changes-title" data-fid="side-panel">
+      <section className="panel serial-events" aria-labelledby="ev-title" data-fid="events">
         <div className="panel__head">
-          <h2 id="sum-changes-title">تصمیم‌ها و پیگیری‌ها (درخواست‌های تغییر این سریال)</h2>
-          {can(PERM.changeRead) ? <a href="#/changes" className="btn btn--link">مشاهده همه</a> : null}
+          <h2 id="ev-title">تاریخچه رویدادها</h2>
         </div>
-        {!can(PERM.changeRead) ? (
-          <p className="field__hint">برای دیدن درخواست‌های تغییر مجوز ندارید.</p>
-        ) : (
-          <DataView query={changes} loading="در حال دریافت درخواست‌ها…" errorTitle="درخواست‌ها دریافت نشد" isEmpty={(d) => d.items.length === 0} empty={{ title: "درخواست تغییری برای این سریال ثبت نشده است." }}>
-            {(d) => (
-              <ul className="cards" data-testid="serial-changes">
-                {d.items.map((c) => (
-                  <li key={c.change_request_id} className="card">
-                    <a href={`#/changes/${c.change_request_id}`} className="card__link">
-                      <Num value={c.request_no} /> · {CHANGE_KIND[c.kind] ?? c.kind}
-                    </a>
-                    <StatusChip {...toneLabel(CHANGE_STATUS, c.status)} />
-                  </li>
-                ))}
-              </ul>
-            )}
-          </DataView>
-        )}
+        <EventList t={t} />
       </section>
     </div>
+  );
+}
+
+/** A collapsible part of the order tab (native disclosure, keyboard accessible); the title shows what is inside.
+ * `lazy`: the content (and its requests) is mounted only once the part is opened. */
+function Fold({ title, children, testId, lazy = false }: { title: string; children: ReactNode; testId?: string; lazy?: boolean }) {
+  const [opened, setOpened] = useState(false);
+  return (
+    <details
+      className="fold"
+      data-testid={testId}
+      onToggle={(e) => {
+        if (e.currentTarget.open) setOpened(true);
+      }}
+    >
+      <summary className="fold__title">{title}</summary>
+      <div className="fold__body">{!lazy || opened ? children : null}</div>
+    </details>
   );
 }
 
@@ -240,26 +356,26 @@ function OrderTab({ t, order, orderLoading }: { t: SerialTracking; order: Custom
   });
   const withheld = t.withheld_sections ?? [];
   return (
-    <div className="stack" data-testid="serial-order" data-fid="order-tab">
-      <section className="panel panel--wide" aria-labelledby="o-title">
-        <h2 id="o-title">سفارش</h2>
+    <div className="serial-grid serial-grid--order" data-testid="serial-order" data-fid="order-tab">
+      <section className="panel serial-order-head" aria-labelledby="o-title">
+        <h2 id="o-title">سفارش و ردیف‌های آن</h2>
         {!can(PERM.orderRead) || withheld.includes("order_versions") ? (
           <p className="notice notice--info" data-testid="withheld">برای دیدن سفارش مجوز ندارید.</p>
         ) : orderLoading ? (
           <p className="state state--loading" data-testid="state-loading">در حال دریافت سفارش…</p>
         ) : order ? (
           <>
-            <dl className="meta meta--rows">
+            <dl className="facts facts--order">
               <div><dt>شماره سفارش</dt><dd><a href={`#/orders/${order.order_id}`}><Num value={order.order_no} testId="serial-order-no" /></a></dd></div>
               <div><dt>PO مشتری</dt><dd><Num value={order.external_po_number} /></dd></div>
               <div><dt>نوع</dt><dd>{ORDER_TYPES[order.order_type] ?? order.order_type}</dd></div>
+              <div><dt>وضعیت</dt><dd><StatusChip {...toneLabel(ORDER_STATUS, order.status)} /></dd></div>
               <div><dt>تاریخ سفارش</dt><dd>{formatJalaliDate(order.order_date)}</dd></div>
               <div><dt>تحویل درخواستی</dt><dd>{formatJalaliDate(order.requested_due_date)}</dd></div>
-              <div><dt>وضعیت</dt><dd><StatusChip {...toneLabel(ORDER_STATUS, order.status)} /></dd></div>
               <div><dt>نسخه جاری</dt><dd>{order.current_version ? toFaDigits(order.current_version) : "—"}</dd></div>
               <div><dt>نماینده مشتری</dt><dd><Representative value={order.customer_representative_name} /></dd></div>
             </dl>
-            <table className="table table--cards" data-testid="serial-order-lines">
+            <table className="table table--cards table--grid" data-testid="serial-order-lines">
               <caption>ردیف‌های سفارش</caption>
               <thead>
                 <tr><th scope="col">ردیف</th><th scope="col">کد</th><th scope="col">تعداد</th><th scope="col">تحویل</th><th scope="col">وضعیت</th><th scope="col">سریال</th></tr>
@@ -282,50 +398,41 @@ function OrderTab({ t, order, orderLoading }: { t: SerialTracking; order: Custom
           <p className="field__hint">این سریال به سفارشی وصل نیست.</p>
         )}
       </section>
-      <section className="panel panel--wide" aria-labelledby="snap-title">
-        <h2 id="snap-title">Snapshot سریال (آنچه هنگام تعهد ثبت شد)</h2>
-        <DataView query={snaps} loading="در حال دریافت Snapshotها…" errorTitle="Snapshotها دریافت نشد" isEmpty={(d) => d.items.length === 0} empty={{ title: "Snapshotی نیست." }}>
-          {(d) => (
-            <ol className="timeline" data-testid="serial-snapshots">
-              {d.items.map((x) => (
-                <li key={x.version}>
-                  <strong>نسخه {toFaDigits(x.version)}</strong> — {VERSION_REASON[x.reason] ?? x.reason} · {formatJalaliDateTime(x.created_at)}
-                  <SnapshotFacts snap={x.snapshot} />
-                </li>
+      <SidePanel serialId={s.serial_id} />
+      <div className="serial-order-folds">
+        <Fold title={`Snapshot سریال (آنچه هنگام تعهد ثبت شد)${snaps.data ? ` · ${toFaDigits(snaps.data.items.length)} نسخه` : ""}`}>
+          <DataView query={snaps} loading="در حال دریافت Snapshotها…" errorTitle="Snapshotها دریافت نشد" isEmpty={(d) => d.items.length === 0} empty={{ title: "Snapshotی نیست." }}>
+            {(d) => (
+              <ol className="timeline" data-testid="serial-snapshots">
+                {d.items.map((x) => (
+                  <li key={x.version}>
+                    <strong>نسخه {toFaDigits(x.version)}</strong> — {VERSION_REASON[x.reason] ?? x.reason} · {formatJalaliDateTime(x.created_at)}
+                    <SnapshotFacts snap={x.snapshot} />
+                  </li>
+                ))}
+              </ol>
+            )}
+          </DataView>
+        </Fold>
+        <Fold title={`نسخه‌های سفارش · ${toFaDigits(t.order_versions.length)}`}>
+          {t.order_versions.length === 0 ? (
+            <p className="field__hint">{withheld.includes("order_versions") ? "بدون مجوز خواندن سفارش." : "نسخه‌ای نیست."}</p>
+          ) : (
+            <ol className="timeline" data-testid="serial-versions">
+              {t.order_versions.map((v) => (
+                <li key={v.version}>نسخه {toFaDigits(v.version)} — {VERSION_REASON[v.reason] ?? v.reason} · {formatJalaliDateTime(v.created_at)}</li>
               ))}
             </ol>
           )}
-        </DataView>
-      </section>
-      <section className="panel panel--wide" aria-labelledby="ver-title">
-        <h2 id="ver-title">نسخه‌های سفارش</h2>
-        {t.order_versions.length === 0 ? (
-          <p className="field__hint">{withheld.includes("order_versions") ? "بدون مجوز خواندن سفارش." : "نسخه‌ای نیست."}</p>
-        ) : (
-          <ol className="timeline" data-testid="serial-versions">
-            {t.order_versions.map((v) => (
-              <li key={v.version}>نسخه {toFaDigits(v.version)} — {VERSION_REASON[v.reason] ?? v.reason} · {formatJalaliDateTime(v.created_at)}</li>
-            ))}
-          </ol>
-        )}
-      </section>
-      <ExternalRefs targetType="serial" targetId={s.serial_id} />
-      {order ? <ExternalRefs targetType="customer_order" targetId={order.order_id} /> : null}
-      <section className="panel panel--wide" aria-labelledby="tl-title">
-        <h2 id="tl-title">تاریخچه رویدادها</h2>
-        {t.events.length === 0 ? (
-          <p className="state state--empty" data-testid="state-empty">رویدادی ثبت نشده است.</p>
-        ) : (
-          <ol className="timeline" data-testid="serial-timeline">
-            {t.events.map((e) => (
-              <li key={e.audit_event_id}>
-                {TRACKING_EVENT[e.kind] ?? e.kind} · <time dateTime={e.occurred_at}>{formatJalaliDateTime(e.occurred_at)}</time>
-                {e.ref.entity_type === "change_request" ? <> · <a href={`#/changes/${e.ref.entity_id}`}>درخواست تغییر</a></> : null}
-              </li>
-            ))}
-          </ol>
-        )}
-      </section>
+        </Fold>
+        <Fold title="مرجع‌های خارجی (ارجاع‌های بیرونی سریال و سفارش)" testId="fold-refs" lazy>
+          <ExternalRefs targetType="serial" targetId={s.serial_id} />
+          {order ? <ExternalRefs targetType="customer_order" targetId={order.order_id} /> : null}
+        </Fold>
+        <Fold title={`تاریخچه رویدادها · ${toFaDigits(t.events.length)}`}>
+          <EventList t={t} />
+        </Fold>
+      </div>
     </div>
   );
 }
