@@ -10,3 +10,9 @@ Step 02.8 is reopened (PASS -> REWORK) only for these items. Reviewed migrations
 | REV-0292 | P2 | DEC-005 amendment 2026-11-17 (Gate item g) | A DISMISSED disputed legacy value carries over to later Planning imports like a RESOLVED one (no new conflict item; reuse recorded in counts + audit). Replaces `test_dismissed_disputed_value_is_raised_again`. |
 | REV-0293 | P2 | T-004 observation (uat02) | A style was activated and a product code issued while its product was still DRAFT; the order wizard then could not find the product (lists ACTIVE products only). Check the contract/spec; if it requires an ACTIVE product, enforce it; if the spec is silent, do not invent a rule — report it as a decision question. |
 | REV-0294 | P3 | T-004 run | `reports/phase-02/UAT_HOWTO_FA.md`: steward first login must come before the golden load (`MAKER_NOT_ACTIVE`); the UAT environment needs `ALEEKHAN_INTERNAL_CIDRS` (otherwise `MFA_REQUIRED` for a user without MFA); belt (family 02) golden cases need buckle type + belt width, so only the usable belt cases count. |
+
+## Added 2026-11-18
+| ID | Prio | Source | Item |
+|---|---|---|---|
+| REV-0293 (update) | P2 | DEC-005 amendment 2026-11-18 (option A) | Refuse style activation and product-code issue while the product is not ACTIVE (engine + API + UI hint + tests; existing data check in a new migration if needed, count-only). |
+| REV-0295 | P1 | DEC-061 | Bring PHASE_02 pages 1, 2, 4, 29, 33 (and the shared shell/side menu) to ≥95% fidelity with the design-catalogue mockups at 1440/1180/768/390, measured by the orchestrator's fidelity test. Later-phase data stays honest («در دست ساخت»/empty), never mock numbers. |

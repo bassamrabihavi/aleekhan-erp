@@ -301,3 +301,9 @@ Given by the employer in chat, in Persian, after the orchestrator compared page 
 - **PHASE_02:** pages 1, 2, 4, 29, 33 are brought to ≥95% before the PHASE_02 Gate.
 - **Unchanged guardrail:** demo numbers in a mockup are never shown as real; an element whose data comes from a later phase sits in the same place with an honest "در دست ساخت" / empty state.
 - **Decided by:** بسام ربیهاوی (کارفرما).
+
+## 2026-11-18 — DEC-005 amendment: ACTIVE product required for style activation and code issue (REV-0293)
+Asked in chat, in Persian (options A/B/C); the employer chose A (the recommended option).
+- **Rule:** activating a style and issuing a product code are refused while the style's product is not ACTIVE. Removes the T-004 dead end (style active + code issued under a DRAFT product that the order wizard cannot list).
+- **Status:** decided; implementation follows in 02.8 rework.
+- **Decided by:** بسام ربیهاوی (کارفرما).

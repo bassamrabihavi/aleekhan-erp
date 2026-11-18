@@ -1627,9 +1627,9 @@
       "owner": "برنامه‌ریزی + بازرگانی",
       "phase": "PHASE_02",
       "source": "Planning--.xlsm",
-      "resolution": "Amendment 2026-11-17 (Gate PHASE_02 item g): a DISMISSED disputed legacy value also carries over to later Planning imports and is not raised again (overrides the 02.8 re-raise interpretation)",
+      "resolution": "Amendment 2026-11-18 (REV-0293, option A): a style can be activated and a product code issued only while its product is ACTIVE",
       "decided_by": "بسام ربیهاوی",
-      "decided_at": "2026-11-17T17:30:47+00:00"
+      "decided_at": "2026-11-18T14:19:46+00:00"
     },
     {
       "id": "DEC-006",
@@ -3753,7 +3753,15 @@
       "status": "APPROVED",
       "by": "بسام ربیهاوی",
       "note": "UI fidelity: every built page must match its design-catalogue mockup at >=95% (orchestrator's fidelity test, 4 widths) before acceptance; each phase's mockups reviewed/approved by the employer before the phase starts; mockup layout frame built from the start, only polish at the end; PHASE_02 pages 1,2,4,29,33 brought to >=95% before the PHASE_02 Gate"
+    },
+    {
+      "at": "2026-11-18T14:19:46+00:00",
+      "kind": "decision",
+      "id": "DEC-005",
+      "status": "APPROVED",
+      "by": "بسام ربیهاوی",
+      "note": "Amendment 2026-11-18 (REV-0293, option A): a style can be activated and a product code issued only while its product is ACTIVE"
     }
   ],
-  "updated_at": "2026-11-17T17:42:47+00:00"
+  "updated_at": "2026-11-18T14:19:46+00:00"
 }
