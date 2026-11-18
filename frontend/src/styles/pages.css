@@ -1218,6 +1218,29 @@ button.pagetabs__item {
     min-height: 0;
   }
 }
+/* tablet only (601-900 px; DEC-061 amendment: the page body follows the phone concept scaled to the tablet):
+   the sections keep the concept's proportions to the content width (aspect-ratio = preferred height, the content
+   can still grow) and the concept's spacing. The phone (<= 600 px) is unchanged. */
+@media (min-width: 601px) and (max-width: 900px) {
+  .serial-center,
+  .serial-grid {
+    gap: 16px;
+  }
+  .serial-head {
+    aspect-ratio: 96 / 27.2;
+    align-content: start;
+  }
+  .serial-center > .later--inline {
+    aspect-ratio: 96 / 17.6;
+    align-content: center;
+  }
+  .serial-grid--summary > .serial-problems {
+    aspect-ratio: 96 / 30.7;
+  }
+  .serial-grid--summary > .serial-cards {
+    aspect-ratio: 96 / 69.7;
+  }
+}
 @media (max-width: 600px) {
   .serial-center > .tabs,
   .shell--nav .serial-center > .tabs {
