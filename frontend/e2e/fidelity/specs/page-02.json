@@ -6,7 +6,7 @@
   "ready_testid": "serial-order",
   "after_load": "open-order-tab",
   "authored": "hand",
-  "source_note": "HAND-AUTHORED (no HTML mockup exists for pages 1/2): region boxes were read off the two concept PNGs in 01_02_concepts by eye. Desktop concept (1586x992, tab «خلاصه») gives 1440 and 1180 (content area x 20..1510, top y 90; boxes / content width); mobile concept (941x1672, phone content x 90..850) gives 390 and, by assumption, 768 (no tablet concept exists). Page 2: the concepts do not show the «سفارش» tab; the frame (header, actions, stage flow, tabs, side panel) is the same picture and the tab body is placed where the summary cards and events sit, with the section list of DEC-027 (approved P-A structure). Labels are the visible headings/labels of the picture, never its numbers. Style refs (radius 10, border 1, shadow) are estimates.",
+  "source_note": "HAND-AUTHORED (no HTML mockup exists for pages 1/2): region boxes were read off the two concept PNGs in 01_02_concepts by eye. Desktop concept (1586x992, tab «خلاصه») gives 1440 and 1180 (content area x 20..1510, top y 90; boxes / content width); mobile concept (941x1672, phone content x 90..850) gives 390 and, by assumption, 768 (no tablet concept exists). Page 2: the concepts do not show the «سفارش» tab; the frame (header, actions, stage flow, tabs, side panel) is the same picture and the tab body is placed where the summary cards and events sit, with the section list of DEC-027 (approved P-A structure). Labels are the visible headings/labels of the picture, never its numbers. Style refs (radius 10, border 1, shadow) are estimates. DEC-061 amendment 2026-11-18 (control/decisions/DECISION_LOG.md): at 768 the shell regions (side-menu, topbar, topbar-search, topbar-date, topbar-user, menu-toggle) are NOT the scaled phone concept; their 768 targets are copied unchanged from the catalogue shared shell in specs/page-29.json at 768 (extracted from 29_36_commercial_planning_admin/index.html?page=29, the same shell targets as page 33; page-33.json differs only in topbar-search, by < 0.01 of the width). The body regions at 768 are unchanged (phone concept scaled).",
   "mockup": {
     "files": [
       {
@@ -93,11 +93,15 @@
         },
         "768": {
           "box": {
-            "x": 0.0,
-            "y": 0.0,
-            "w": 1.0,
-            "h": 0.1184
-          }
+            "x": 0,
+            "y": 0,
+            "w": 1,
+            "h": 0.0781
+          },
+          "radius": 9,
+          "border": 1,
+          "shadow": false,
+          "heading_px": null
         },
         "390": {
           "box": {
@@ -134,11 +138,15 @@
         },
         "768": {
           "box": {
-            "x": 0.2895,
-            "y": 0.0329,
-            "w": 0.0526,
-            "h": 0.0526
-          }
+            "x": 0.2617,
+            "y": 0.015,
+            "w": 0.4297,
+            "h": 0.0469
+          },
+          "radius": 10,
+          "border": 1,
+          "shadow": false,
+          "heading_px": null
         },
         "390": {
           "box": {
@@ -202,11 +210,15 @@
         },
         "768": {
           "box": {
-            "x": 0.0329,
-            "y": 0.0171,
-            "w": 0.0921,
-            "h": 0.0882
-          }
+            "x": 0.0143,
+            "y": 0.0176,
+            "w": 0.0417,
+            "h": 0.0417
+          },
+          "radius": 50,
+          "border": 0,
+          "shadow": false,
+          "heading_px": null
         },
         "390": {
           "box": {
@@ -229,11 +241,15 @@
         "1180": null,
         "768": {
           "box": {
-            "x": 0.9145,
-            "y": 0.0329,
-            "w": 0.0592,
-            "h": 0.0526
-          }
+            "x": 0.9427,
+            "y": 0.0169,
+            "w": 0.043,
+            "h": 0.043
+          },
+          "radius": 9,
+          "border": 1,
+          "shadow": false,
+          "heading_px": null
         },
         "390": {
           "box": {

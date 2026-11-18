@@ -1,6 +1,6 @@
 // DEC-061 fidelity scorer (pure functions; unit tests in score.vitest.ts). The browser-side measurement lives in
 // measure.ts; fidelity.spec.ts drives both. Method and formula: README.md.
-import { IOU_MIN, LABEL_TOKEN_SHARE, LATER_TEXT, PANEL_KINDS, THRESHOLD, TOL, WEIGHTS, WIDTHS, type Frame, type RegionKind, type Width } from "./config";
+import { EXTRA_PENALTY, IOU_MIN, LABEL_TOKEN_SHARE, LATER_TEXT, PANEL_KINDS, THRESHOLD, TOL, WEIGHTS, WIDTHS, type Frame, type RegionKind, type Width } from "./config";
 
 export interface Box {
   x: number;
@@ -46,6 +46,13 @@ export interface PageSpec {
   regions: SpecRegion[];
 }
 
+/** A visible top-level section / panel of the built content that carries no spec region (DEC-061 amendment). */
+export interface ExtraSection {
+  label: string;
+  /** Content frame (normalised like the content regions). */
+  box: Box;
+}
+
 /** Built page measurement of one region at one width. */
 export interface BuiltRegion {
   visible: boolean;
@@ -67,6 +74,8 @@ export interface BuiltPage {
   primary_bg: string | null;
   tokens: { primary: string; bg: string };
   content_pad_px: number | null;
+  /** Extra sections found by the built-page scan (measure.ts); none = []. */
+  extras: ExtraSection[];
 }
 
 export interface RegionResult {
@@ -90,7 +99,16 @@ export interface WidthResult {
   width: Width;
   score: number;
   presence: number;
+  /** Share of required regions in place, minus the extra-section penalty (floored at 0). */
   layout: number;
+  /** Share of required regions in place (before the extra-section penalty). */
+  layout_in_place: number;
+  /** Number of extra (non-mockup) sections whose top lies above the bottom of the lowest mockup region. */
+  extra_above: number;
+  /** Their labels (tag.class[testid] «heading»). */
+  extra_sections: string[];
+  /** Extra sections found that are free (fully below all mockup regions): listed for transparency, no penalty. */
+  extra_free: string[];
   style: number;
   regions: RegionResult[];
   style_checks: StyleCheck[];
@@ -243,6 +261,26 @@ function styleChecks(spec: PageSpec, w: Width, built: BuiltPage): StyleCheck[] {
   return out;
 }
 
+/**
+ * DEC-061 amendment: the extra sections that lie above or between the mockup regions, i.e. whose top edge is above
+ * the bottom edge of the lowest content region of the spec that is present (visible) on the built page at this width.
+ * Sections fully below all mockup regions are free; with no content region present there is nothing to be above.
+ */
+export function extraAbove(spec: PageSpec, w: Width, built: BuiltPage): ExtraSection[] {
+  const key = `${w}` as const;
+  let bottom: number | null = null;
+  for (const r of spec.regions) {
+    if (r.frame !== "content" || !r.widths[key]) continue;
+    const b = built.regions[r.id];
+    if (!b?.visible || !b.box) continue;
+    const y = b.box.y + b.box.h;
+    if (bottom === null || y > bottom) bottom = y;
+  }
+  if (bottom === null) return [];
+  const lowest = bottom;
+  return built.extras.filter((e) => e.box.y < lowest);
+}
+
 export function scoreWidth(spec: PageSpec, w: Width, built: BuiltPage): WidthResult {
   const key = `${w}` as const;
   const regions: RegionResult[] = [];
@@ -252,11 +290,13 @@ export function scoreWidth(spec: PageSpec, w: Width, built: BuiltPage): WidthRes
     regions.push(scoreRegion(r, at, built.regions[r.id]));
   }
   const presence = regions.length ? regions.reduce((s, r) => s + r.presence, 0) / regions.length : 1;
-  const layout = regions.length ? regions.filter((r) => r.in_place).length / regions.length : 1;
+  const inPlace = regions.length ? regions.filter((r) => r.in_place).length / regions.length : 1;
+  const extras = extraAbove(spec, w, built);
+  const layout = Math.max(0, inPlace - (extras.length * EXTRA_PENALTY) / WEIGHTS.layout);
   const checks = styleChecks(spec, w, built);
   const style = checks.length ? checks.reduce((s, c) => s + c.ok, 0) / checks.length : 1;
   const score = WEIGHTS.presence * presence + WEIGHTS.layout * layout + WEIGHTS.style * style;
-  return { width: w, score, presence, layout, style, regions, style_checks: checks };
+  return { width: w, score, presence, layout, layout_in_place: inPlace, extra_above: extras.length, extra_sections: extras.map((e) => e.label), extra_free: built.extras.filter((e) => !extras.includes(e)).map((e) => e.label), style, regions, style_checks: checks };
 }
 
 export function pageResult(spec: PageSpec, widths: WidthResult[]): PageResult {
@@ -272,7 +312,8 @@ export function renderMarkdown(results: PageResult[], meta: { commit: string; da
   lines.push("# PHASE_02 UI fidelity baseline (DEC-061)", "");
   lines.push(`Measured by \`frontend/e2e/fidelity/fidelity.spec.ts\` (method: \`frontend/e2e/fidelity/README.md\`).`);
   lines.push(`Commit \`${meta.commit}\` · ${meta.date} · browser channel ${meta.channel} · threshold ${pct(THRESHOLD)} at every width.`, "");
-  lines.push("Score per width = 0.5 × presence + 0.3 × layout (IoU ≥ 0.5) + 0.2 × style. Colours are checked against the approved brand tokens, not the mockup colours.", "");
+  lines.push("Score per width = 0.5 × presence + 0.3 × layout (IoU ≥ 0.5) + 0.2 × style. Colours are checked against the approved brand tokens, not the mockup colours.");
+  lines.push(`Each extra (non-mockup) section above or between the mockup regions (\`extra_above\`) removes ${pct(EXTRA_PENALTY)} of the total from the layout part (DEC-061 amendment).`, "");
   lines.push(`| Page | ${WIDTHS.join(" | ")} | min | ≥ 95%? |`, `|---|${WIDTHS.map(() => "---").join("|")}|---|---|`);
   for (const p of results) {
     const cells = WIDTHS.map((w) => {
@@ -284,9 +325,12 @@ export function renderMarkdown(results: PageResult[], meta: { commit: string; da
   lines.push("");
   for (const p of results) {
     lines.push(`## Page ${p.page} — ${p.title_fa}`, "");
-    lines.push(`| Width | score | presence | layout | style |`, `|---|---|---|---|---|`);
-    for (const w of p.widths) lines.push(`| ${w.width} | ${pct(w.score)} | ${pct(w.presence)} | ${pct(w.layout)} | ${pct(w.style)} |`);
+    lines.push(`| Width | score | presence | layout | in place | extra_above | style |`, `|---|---|---|---|---|---|---|`);
+    for (const w of p.widths) lines.push(`| ${w.width} | ${pct(w.score)} | ${pct(w.presence)} | ${pct(w.layout)} | ${pct(w.layout_in_place)} | ${w.extra_above} | ${pct(w.style)} |`);
     lines.push("");
+    for (const w of p.widths) if (w.extra_sections.length) lines.push(`Extra sections above / between mockup regions at ${w.width}: ${w.extra_sections.map((x) => `\`${x}\``).join(", ")}`);
+    for (const w of p.widths) if (w.extra_free.length) lines.push(`Extra sections below all mockup regions at ${w.width} (free): ${w.extra_free.map((x) => `\`${x}\``).join(", ")}`);
+    if (p.widths.some((w) => w.extra_sections.length || w.extra_free.length)) lines.push("");
     const w1440 = p.widths.find((x) => x.width === 1440) ?? p.widths[0];
     if (!w1440) continue;
     lines.push("To-do for the restyle (regions at 1440; widths where a region differs are listed after it):", "");

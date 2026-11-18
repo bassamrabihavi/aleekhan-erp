@@ -2,8 +2,8 @@
 // inside the page (page.evaluate): it must be self-contained (no imports, no closures over module values).
 import type { Page } from "@playwright/test";
 
-import type { Frame, RegionKind, Width } from "./config";
-import type { BuiltPage, BuiltRegion } from "./score";
+import { EXTRA_IGNORE_SELECTOR, EXTRA_SECTION_SELECTOR, type Frame, type RegionKind, type Width } from "./config";
+import type { BuiltPage, BuiltRegion, ExtraSection } from "./score";
 
 export interface Probe {
   id: string;
@@ -26,6 +26,8 @@ export interface PageMeasure {
   primary_bg: string | null;
   tokens: { primary: string; bg: string };
   content_pad_px: number | null;
+  /** Built page only: visible top-level sections / panels of the content that carry no spec region (README.md). */
+  extras: ExtraSection[];
 }
 
 interface Args {
@@ -33,9 +35,11 @@ interface Args {
   content: string;
   primary: string;
   built: boolean;
+  /** Built page only: the extra-section scan (spec region ids + the section / ignore selectors of config.ts). */
+  extra: { ids: string[]; section: string; ignore: string } | null;
 }
 
-function measureInPage({ probes, content, primary, built }: Args): PageMeasure {
+function measureInPage({ probes, content, primary, built, extra }: Args): PageMeasure {
   const vw = document.documentElement.clientWidth;
   const main = document.querySelector(content);
   const c = main ? main.getBoundingClientRect() : new DOMRect(0, 0, vw, 0);
@@ -129,6 +133,39 @@ function measureInPage({ probes, content, primary, built }: Args): PageMeasure {
   const prim = Array.from(document.querySelectorAll(primary)).find(visible);
   const bodyBg = getComputedStyle(document.body).backgroundColor;
   const rootBg = root.backgroundColor;
+  // DEC-061 amendment: scan the content for sections / panels that are not spec regions. Starting at <main>, an
+  // element that is a spec region is skipped (its inside belongs to the region); an element that only CONTAINS spec
+  // regions is a wrapper (page container, grid, tab panel) and is scanned the same way; any other visible element
+  // that is, or contains, a section / panel is one extra section. Dialogs and fixed overlays are never counted;
+  // tabs that are not the default view are not rendered / not visible and so are not counted either.
+  const extras: { label: string; box: { x: number; y: number; w: number; h: number } }[] = [];
+  if (built && extra && main && c.width > 0) {
+    const ids = new Set(extra.ids);
+    const isSpec = (e: Element): boolean => ids.has(e.getAttribute("data-fid") ?? "");
+    const hasSpec = (e: Element): boolean => Array.from(e.querySelectorAll("[data-fid]")).some(isSpec);
+    const ignored = (e: Element): boolean => !!e.closest(extra.ignore) || getComputedStyle(e).position === "fixed";
+    const isSection = (e: Element): boolean => e.matches(extra.section) || !!e.querySelector(extra.section);
+    const labelOf = (e: Element): string => {
+      const h = e.querySelector("h1,h2,h3,h4");
+      const name = e.getAttribute("aria-label") ?? (h ? ((h as HTMLElement).innerText || h.textContent || "").trim() : "");
+      const tid = e.getAttribute("data-testid");
+      const cls = e.getAttribute("class")?.split(/\s+/)[0];
+      return `${e.tagName.toLowerCase()}${cls ? "." + cls : ""}${tid ? `[${tid}]` : ""}${name ? ` «${name.slice(0, 60)}»` : ""}`;
+    };
+    const scan = (container: Element): void => {
+      for (const ch of Array.from(container.children)) {
+        if (isSpec(ch)) continue;
+        if (hasSpec(ch)) {
+          scan(ch);
+          continue;
+        }
+        if (ignored(ch) || !visible(ch) || !isSection(ch)) continue;
+        const r = ch.getBoundingClientRect();
+        extras.push({ label: labelOf(ch), box: { x: (r.left - c.left) / c.width, y: (r.top + window.scrollY - cTop) / c.width, w: r.width / c.width, h: r.height / c.width } });
+      }
+    };
+    scan(main);
+  }
   return {
     regions,
     font_family: getComputedStyle(document.body).fontFamily,
@@ -136,13 +173,15 @@ function measureInPage({ probes, content, primary, built }: Args): PageMeasure {
     primary_bg: prim ? getComputedStyle(prim).backgroundColor : null,
     tokens: { primary: root.getPropertyValue("--color-primary").trim(), bg: root.getPropertyValue("--color-bg").trim() },
     content_pad_px: pad,
+    extras,
   };
 }
 
 export async function measure(page: Page, probes: Probe[], content: string, primary: string, built: boolean): Promise<PageMeasure> {
-  return page.evaluate(measureInPage, { probes, content, primary, built });
+  const extra = built ? { ids: probes.map((p) => p.id), section: EXTRA_SECTION_SELECTOR, ignore: EXTRA_IGNORE_SELECTOR } : null;
+  return page.evaluate(measureInPage, { probes, content, primary, built, extra });
 }
 
 export function asBuiltPage(m: PageMeasure, width: Width): BuiltPage {
-  return { width, regions: m.regions, font_family: m.font_family, body_bg: m.body_bg, primary_bg: m.primary_bg, tokens: m.tokens, content_pad_px: m.content_pad_px };
+  return { width, regions: m.regions, font_family: m.font_family, body_bg: m.body_bg, primary_bg: m.primary_bg, tokens: m.tokens, content_pad_px: m.content_pad_px, extras: m.extras };
 }

@@ -18,6 +18,18 @@ export const IOU_MIN = 0.5;
 export const LABEL_TOKEN_SHARE = 0.6;
 /** Style tolerances. */
 export const TOL = { radiusPx: 4, headingRatio: 0.25, paddingPx: 8 } as const;
+/**
+ * DEC-061 amendment (2026-11-18): a built section that is not a mockup region is allowed only below all mockup
+ * content (or in a dialog / a tab that is not the default view). Each visible extra section whose top edge lies above
+ * the bottom edge of the lowest mockup region present on the built page costs this share of the TOTAL score, taken
+ * from the layout part (layout -= EXTRA_PENALTY / WEIGHTS.layout per section, floored at 0: the cap is the whole
+ * layout weight). Reported per width as `extra_above`.
+ */
+export const EXTRA_PENALTY = 0.05;
+/** What counts as a "section / panel" when the built page content is scanned for extra sections (README.md). */
+export const EXTRA_SECTION_SELECTOR = "section, aside, article, form, table, .panel, .card, [role=region], [role=tabpanel]";
+/** Elements that are never extra sections (a dialog is not the default view; fixed overlays are not page content). */
+export const EXTRA_IGNORE_SELECTOR = "dialog, [role=dialog], [role=alertdialog], [aria-modal=true], .dialog-backdrop";
 /** Honest placeholder text of a later-phase region (DEC-027 / DEC-061: never mock numbers). */
 export const LATER_TEXT = "در دست ساخت";
 
