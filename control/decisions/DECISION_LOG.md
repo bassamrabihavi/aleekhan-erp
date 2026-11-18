@@ -307,3 +307,9 @@ Asked in chat, in Persian (options A/B/C); the employer chose A (the recommended
 - **Rule:** activating a style and issuing a product code are refused while the style's product is not ACTIVE. Removes the T-004 dead end (style active + code issued under a DRAFT product that the order wizard cannot list).
 - **Status:** decided; implementation follows in 02.8 rework.
 - **Decided by:** بسام ربیهاوی (کارفرما).
+
+## 2026-11-18 — DEC-061 amendment: tablet target for pages 1/2 and extra sections
+Asked with AskUserQuestion, in Persian; the employer chose both recommended options.
+- **Tablet (768) for pages 1 and 2:** they have no tablet mockup (only a phone concept). At 768 their shell regions (side menu/menu button, top-bar search, user element) are measured against the catalogue's shared shell, the same targets as pages 29/33. The phone-concept scaling stays for the page body.
+- **Extra sections:** a section the work needs but the mockup lacks (e.g. page 4 style detail, code issue, revisions) is allowed only below all mockup content, or in a separate tab/dialog. The fidelity test adds a penalty for any non-mockup section placed above or between mockup regions.
+- **Decided by:** بسام ربیهاوی (کارفرما).

@@ -110,6 +110,7 @@ flowchart LR
 
 ## آخرین رویدادها
 
+- `2026-11-18T17:50:25+00:00` decision id=DEC-061 status=APPROVED by=بسام ربیهاوی note=Amendment 2026-11-18: (1) pages without a tablet mockup (1, 2) are measured at 768 against the catalogue's shared shell for shell regions; (2) required sections absent from the mockup are allowed only below the mockup content (or in a separate tab/dialog); the fidelity test penalises extra sections placed above or between mockup regions
 - `2026-11-18T14:19:46+00:00` decision id=DEC-005 status=APPROVED by=بسام ربیهاوی note=Amendment 2026-11-18 (REV-0293, option A): a style can be activated and a product code issued only while its product is ACTIVE
 - `2026-11-17T17:42:47+00:00` decision id=DEC-061 status=APPROVED by=بسام ربیهاوی note=UI fidelity: every built page must match its design-catalogue mockup at >=95% (orchestrator's fidelity test, 4 widths) before acceptance; each phase's mockups reviewed/approved by the employer before the phase starts; mockup layout frame built from the start, only polish at the end; PHASE_02 pages 1,2,4,29,33 brought to >=95% before the PHASE_02 Gate
 - `2026-11-17T17:42:47+00:00` decision_added id=DEC-061 status=OPEN
@@ -124,4 +125,3 @@ flowchart LR
 - `2026-11-16T06:37:42+00:00` gate_pending phase=PHASE_02
 - `2026-11-16T06:25:29+00:00` step phase=PHASE_02 step=02.8 state=IN_REVIEW commit=b359715
 - `2026-11-16T04:22:39+00:00` step phase=PHASE_02 step=02.8 state=IN_PROGRESS
-- `2026-11-16T04:22:03+00:00` decision id=DEC-005 status=APPROVED by=بسام ربیهاوی note=2026-11-16 Q-D follow-up: a resolved disputed value carries over to later Planning imports (REV-0271)
