@@ -454,7 +454,7 @@ button.pagetabs__item {
   line-height: 1.15;
 }
 .codebox__rest {
-  color: var(--color-muted);
+  color: var(--color-neutral);
 }
 .codebox__hint {
   font-size: 11px;
@@ -506,6 +506,10 @@ button.pagetabs__item {
 .crcard--on {
   border-color: #9cc2b5;
   background: var(--color-primary-tint);
+}
+.crcard--on .crcard__reason,
+.crcard--on .crcard__meta {
+  color: var(--color-neutral);
 }
 .crcard__main {
   min-width: 0;
@@ -1397,7 +1401,7 @@ button.pagetabs__item {
   background: var(--color-neutral-tint);
   border-radius: 8px;
   font-size: var(--font-size-xs);
-  color: var(--color-muted);
+  color: var(--color-neutral);
   text-align: center;
 }
 .later-card__box--problems {

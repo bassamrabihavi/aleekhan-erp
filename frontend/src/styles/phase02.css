@@ -228,7 +228,7 @@
   background: linear-gradient(155deg, #f5f6f3, #e7ebef);
   border: 1px dashed #cdd5df;
   border-radius: 10px;
-  color: var(--color-muted);
+  color: var(--color-neutral);
   font-size: var(--font-size-xs);
 }
 /* segmented filter buttons above a list */
