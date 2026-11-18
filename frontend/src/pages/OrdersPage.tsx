@@ -161,16 +161,32 @@ function OrderList() {
   );
 }
 
+/** The wizard's step buttons (catalogue form): the current step brings its fields into view; the other steps are
+ * visibly disabled with the reason (done, or opened once the previous step is saved). */
 function Steps({ current }: { current: number }) {
   const labels = ["سربرگ سفارش", "محصول، استایل و کد", "تعداد و تاریخ", "بررسی و ارسال"];
   return (
-    <ol className="steps" aria-label={`مرحله ${toFaDigits(current)} از ۴`} data-testid="wizard-steps" data-fid="wizard-steps">
-      {labels.map((l, i) => (
-        <li key={l} className={i + 1 === current ? "steps__item steps__item--current" : i + 1 < current ? "steps__item steps__item--done" : "steps__item"} aria-current={i + 1 === current ? "step" : undefined}>
-          <span className="steps__no">{toFaDigits(i + 1)}</span> {l}
-        </li>
-      ))}
-    </ol>
+    <div className="steps" role="group" aria-label={`مرحله ${toFaDigits(current)} از ۴`} data-testid="wizard-steps" data-fid="wizard-steps">
+      {labels.map((l, i) => {
+        const n = i + 1;
+        const state = n === current ? "current" : n < current ? "done" : "next";
+        return (
+          <button
+            key={l}
+            type="button"
+            className={state === "current" ? "steps__item steps__item--current" : state === "done" ? "steps__item steps__item--done" : "steps__item"}
+            aria-current={state === "current" ? "step" : undefined}
+            disabled={state !== "current"}
+            title={state === "done" ? "این مرحله انجام شده است" : state === "next" ? "پس از ثبت مرحله قبل باز می‌شود" : "رفتن به فیلدهای این مرحله"}
+            onClick={() => {
+              document.querySelector(".wizard-form, .wizard-step")?.scrollIntoView({ block: "start" });
+            }}
+          >
+            <span className="steps__no">{toFaDigits(n)}</span> {l}
+          </button>
+        );
+      })}
+    </div>
   );
 }
 
@@ -366,7 +382,7 @@ function CodingPanel() {
     { part: "شماره استایل", value: null, source: "سرور: شمارش استایل‌ها + ۱ (۰۰۰۰ هرگز)" },
   ];
   return (
-    <section className="panel" aria-labelledby="coding-title" data-fid="coding-validation">
+    <section className="panel coding-panel" aria-labelledby="coding-title" data-fid="coding-validation">
       <div className="panel__head">
         <h2 id="coding-title">کدگذاری راهکاران و اعتبارسنجی</h2>
       </div>
@@ -392,6 +408,14 @@ function CodingPanel() {
           ))}
         </tbody>
       </table>
+      <div className="codebox" aria-label="کد ترکیبی این سفارش">
+        <span className="codebox__label">کد ترکیبی نمایشی</span>
+        <span className="codebox__code" dir="ltr">
+          <span>02</span>
+          <span className="codebox__rest" aria-label="بقیه بخش‌ها پس از انتخاب استایل">·· ·· ···· ····</span>
+        </span>
+        <span className="codebox__hint">بقیه بخش‌ها پس از انتخاب استایل (مرحله ۲)؛ کد فقط از سرور.</span>
+      </div>
       <p className="ruleline ruleline--warning">کد کالا ≠ شماره سریال داخلی. شماره سفارش مشتری (PO) و کد پروژه راهکاران فیلدهای جداگانه‌اند.</p>
     </section>
   );

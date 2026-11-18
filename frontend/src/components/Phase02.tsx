@@ -4,9 +4,10 @@
 import { useId, useState, type ReactNode } from "react";
 
 import { Dialog } from "./Dialog";
-import { Icon } from "./Icon";
+import { Icon, type IconName } from "./Icon";
 
 import { REDACTED, type Customer } from "../api/phase02";
+import { toFaDigits } from "../lib/format";
 import { isoToJalaliInput, jalaliInputToIso } from "../lib/jalali";
 import { SECTION_LABEL } from "../lib/labels02";
 
@@ -53,11 +54,25 @@ export const LATER_TEXT = "در دست ساخت — به داده واقعی م�
 
 /** A section owned by a later phase: title + placeholder, never a number (DEC-027 P-A, rule 2). */
 /** `fid` = DEC-061 fidelity region id (e2e/fidelity), a measurement marker only. */
-export function LaterSection({ title, phase, fid, className, detail }: { title: string; phase: string; fid?: string; className?: string; detail?: string }) {
+export function LaterSection({ title, phase, fid, className, detail, icon, rails }: { title: string; phase: string; fid?: string; className?: string; detail?: string; icon?: IconName; rails?: readonly string[] }) {
   return (
     <section className={className ? `later ${className}` : "later"} data-testid="later-section" aria-label={title} data-fid={fid}>
-      <h3 className="later__title">{title}</h3>
+      <h3 className="later__title">
+        {icon ? <Icon name={icon} size={18} className="later__icon" /> : null}
+        {title}
+      </h3>
       {detail ? <p className="later__detail">{detail}</p> : null}
+      {rails ? (
+        <ul className="later__rails">
+          {rails.map((r) => (
+            <li key={r}>
+              <span>{r}</span>
+              <span className="later__rail" aria-hidden="true" />
+              <span aria-label="بدون داده">—</span>
+            </li>
+          ))}
+        </ul>
+      ) : null}
       <p className="later__text">{LATER_TEXT}</p>
       <p className="later__meta">
         فاز مالک: <bdi dir="ltr">{phase}</bdi>
@@ -224,18 +239,30 @@ export function PageInfoButtons({ help, owner, sources }: { help: ReactNode; own
 }
 
 /** KPI card (catalogue «.kpi»): title, value, one-line note. The value is real data or an honest state. */
-export function Kpi({ label, value, note, tone, testId }: { label: string; value: ReactNode; note?: ReactNode; tone?: "critical" | "good" | "later" | undefined; testId?: string }) {
+export function Kpi({ label, value, note, tone, testId, bar }: { label: string; value: ReactNode; note?: ReactNode; tone?: "critical" | "good" | "later" | undefined; testId?: string; bar?: { share: number | null; label?: string } }) {
   return (
     <li className={tone ? `kpi kpi--${tone}` : "kpi"} data-fid-item data-testid={testId}>
       <span className="kpi__label">{label}</span>
       <strong className="kpi__value">{value}</strong>
       {note ? <small className="kpi__note">{note}</small> : null}
+      {bar ? <KpiBar share={bar.share} label={bar.label} /> : null}
     </li>
   );
 }
 
+/** The catalogue's mini bar under a KPI: filled by a real share (0..1) when there is one, otherwise an empty rail. */
+export function KpiBar({ share, label }: { share: number | null; label?: string | undefined }) {
+  if (share === null || !Number.isFinite(share)) return <span className="kpi__bar" aria-hidden="true" />;
+  const pct = Math.max(0, Math.min(1, share)) * 100;
+  return (
+    <span className="kpi__bar" role="img" aria-label={label ?? `${toFaDigits(Math.round(pct))}٪`}>
+      <span className="kpi__fill" style={{ width: `${pct}%` }} />
+    </span>
+  );
+}
+
 /** KPI whose data belongs to a later phase: title + the placeholder in the value's place, never a number. */
-export function LaterKpi({ label, phase }: { label: string; phase: string }) {
+export function LaterKpi({ label, phase, bar = false }: { label: string; phase: string; bar?: boolean }) {
   return (
     <li className="kpi kpi--later" data-fid-item data-testid="later-kpi">
       <span className="kpi__label">{label}</span>
@@ -243,6 +270,7 @@ export function LaterKpi({ label, phase }: { label: string; phase: string }) {
       <small className="kpi__note">
         فاز مالک: <bdi dir="ltr">{phase}</bdi>
       </small>
+      {bar ? <KpiBar share={null} /> : null}
     </li>
   );
 }

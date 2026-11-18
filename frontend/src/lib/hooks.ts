@@ -23,6 +23,23 @@ function subscribeOnline(cb: () => void): () => void {
   };
 }
 
+/** True while the CSS media query matches (false where matchMedia does not exist, e.g. jsdom). One rendering per
+ * layout instead of two copies hidden by CSS (no duplicated test ids or texts). */
+export function useMediaQuery(query: string): boolean {
+  return useSyncExternalStore(
+    (cb) => {
+      if (typeof window.matchMedia !== "function") return () => undefined;
+      const mq = window.matchMedia(query);
+      mq.addEventListener("change", cb);
+      return () => {
+        mq.removeEventListener("change", cb);
+      };
+    },
+    () => typeof window.matchMedia === "function" && window.matchMedia(query).matches,
+    () => false,
+  );
+}
+
 /** Browser connectivity as reported by `navigator.onLine` (offline state, UI_HANDOFF_INSTRUCTIONS). */
 export function useOnline(): boolean {
   return useSyncExternalStore(

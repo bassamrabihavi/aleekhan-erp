@@ -113,38 +113,29 @@ function ChangeList() {
           <DataView query={list} loading="در حال دریافت درخواست‌ها…" errorTitle="درخواست‌ها دریافت نشد" isEmpty={(d) => d.items.length === 0} empty={{ title: "درخواست تغییری با این فیلتر نیست." }}>
             {(d) => (
               <>
-                <table className="table table--cards table--grid" data-testid="changes-table">
-                  <caption className="sr-only">درخواست‌های تغییر سفارش؛ ردیف انتخاب‌شده در «مقایسه قبل و بعد» دیده می‌شود</caption>
-                  <thead>
-                    <tr>
-                      <th scope="col">شماره</th>
-                      <th scope="col">نوع</th>
-                      <th scope="col">دلیل</th>
-                      <th scope="col">ثبت</th>
-                      <th scope="col">وضعیت</th>
-                      <th scope="col"><span className="sr-only">مقایسه</span></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {d.items.map((c) => {
-                      const on = selected?.change_request_id === c.change_request_id;
-                      return (
-                        <tr key={c.change_request_id} className={on ? "row--current" : undefined}>
-                          <td data-label="شماره"><a href={`#/changes/${c.change_request_id}`} data-testid="change-open"><Num value={c.request_no} /></a></td>
-                          <td data-label="نوع">{CHANGE_KIND[c.kind] ?? c.kind}</td>
-                          <td data-label="دلیل" className="cell--wide">{c.reason}</td>
-                          <td data-label="ثبت">{formatJalaliDateTime(c.created_at)}</td>
-                          <td data-label="وضعیت"><StatusChip {...toneLabel(CHANGE_STATUS, c.status)} /></td>
-                          <td data-label="مقایسه">
-                            <button type="button" className="btn btn--outline btn--compact" aria-pressed={on} onClick={() => { setPicked(c.change_request_id); }} data-testid="change-compare-pick">
-                              {on ? "در مقایسه" : "مقایسه"}
-                            </button>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                <ul className="crlist" data-testid="changes-table" aria-label="درخواست‌های تغییر سفارش؛ درخواست انتخاب‌شده در «مقایسه قبل و بعد» دیده می‌شود">
+                  {d.items.map((c) => {
+                    const on = selected?.change_request_id === c.change_request_id;
+                    return (
+                      <li key={c.change_request_id} className={on ? "crcard crcard--on" : "crcard"}>
+                        <div className="crcard__main">
+                          <div className="crcard__title">
+                            <a href={`#/changes/${c.change_request_id}`} data-testid="change-open"><Num value={c.request_no} /></a>
+                            <span className="crcard__kind">{CHANGE_KIND[c.kind] ?? c.kind}</span>
+                          </div>
+                          <p className="crcard__reason">{c.reason}</p>
+                          <p className="crcard__meta">ثبت: {formatJalaliDateTime(c.created_at)}</p>
+                        </div>
+                        <div className="crcard__side">
+                          <StatusChip {...toneLabel(CHANGE_STATUS, c.status)} />
+                          <button type="button" className="btn btn--outline btn--compact" aria-pressed={on} onClick={() => { setPicked(c.change_request_id); }} data-testid="change-compare-pick">
+                            {on ? "در مقایسه" : "مقایسه"}
+                          </button>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
                 <Pager depth={cursor.depth} next={d.page.next_cursor} onNext={cursor.next} onPrev={cursor.prev} />
               </>
             )}
@@ -172,10 +163,17 @@ function ChangeList() {
         <div className="panel__head">
           <h2 id="effectivity-title">قاعده اثرپذیری Revision بر مقدار</h2>
         </div>
-        <p className="later__text">{LATER_TEXT}</p>
-        <p className="later__meta">
-          فاز مالک: <bdi dir="ltr">PHASE_04 / PHASE_05</bdi> — تغییر Revision مهندسی (ECR/ECO) و اثر آن بر مقدار سفارش، Batch و BOM در فازهای ۴ و ۵ ساخته می‌شود؛ در فاز ۲ تغییر سفارش فقط نسخه جدید سفارش و Snapshot جدید سریال می‌سازد.
-        </p>
+        <ul className="effectivity" aria-label="گزینه‌های اثرپذیری (در دست ساخت)">
+          <li className="chip chip--neutral">اثر از مقدار مشخص (Effectivity)</li>
+          <li className="chip chip--neutral">Batch باقیمانده</li>
+          <li className="chip chip--neutral">Package جدید</li>
+        </ul>
+        <div className="effectivity__rule">
+          <p className="later__text">{LATER_TEXT}</p>
+          <p className="later__meta">
+            فاز مالک: <bdi dir="ltr">PHASE_04 / PHASE_05</bdi> — تغییر Revision مهندسی (ECR/ECO) و اثر آن بر مقدار سفارش، Batch و BOM در فازهای ۴ و ۵ ساخته می‌شود؛ در فاز ۲ تغییر سفارش فقط نسخه جدید سفارش و Snapshot جدید سریال می‌سازد.
+          </p>
+        </div>
       </section>
     </>
   );
@@ -252,8 +250,12 @@ function CompareBody({ cr }: { cr: ChangeRequest }) {
           <h3>وضعیت درخواستی</h3>
           <b data-testid="compare-after">{ba.after}</b>
         </div>
+        <div className="tile tile--compare tile--version">
+          <h3>نسخه جاری سفارش</h3>
+          <b className="tile__big" data-testid="compare-version">{order.data?.current_version ? toFaDigits(order.data.current_version) : "—"}</b>
+        </div>
       </div>
-      <dl className="meta meta--compact">
+      <dl className="meta meta--compact meta--line">
         <div><dt>دلیل</dt><dd>{cr.reason}</dd></div>
         <div><dt>درخواست‌کننده</dt><dd><Requester id={cr.requested_by} name={cr.requested_by_name} /></dd></div>
       </dl>
@@ -269,6 +271,9 @@ function CompareBody({ cr }: { cr: ChangeRequest }) {
       )}
       <div className="parttitle">گیت‌های تأیید</div>
       <Gates cr={cr} />
+      <a className="btn btn--primary btn--compact compare-open" href={`#/changes/${cr.change_request_id}`} data-testid="compare-open">
+        باز کردن درخواست و ثبت تصمیم
+      </a>
     </>
   );
 }

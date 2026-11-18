@@ -132,6 +132,37 @@
   opacity: 1;
 }
 
+.rail__health {
+  flex: none;
+  margin: auto 8px 10px;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 13px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-muted);
+  color: var(--color-neutral);
+  font-size: var(--font-size-xs);
+  white-space: nowrap;
+  text-decoration: none;
+}
+.rail__dot {
+  flex: none;
+  width: 9px;
+  height: 9px;
+  margin-inline: 4px;
+  border-radius: 50%;
+  background: var(--color-muted);
+}
+.rail__health--ok .rail__dot {
+  background: var(--color-success);
+}
+.rail__health--down .rail__dot {
+  background: var(--color-danger);
+}
+
 .iconbtn {
   flex: none;
   width: 32px;
@@ -347,6 +378,88 @@
   color: var(--color-primary);
   cursor: pointer;
 }
+.avatar__circle {
+  display: grid;
+  place-items: center;
+}
+.avatar__name {
+  display: none;
+}
+/* pages 1 / 2 (desktop): the concept's top bar - user block (avatar, name, caret) at the left edge and the date
+   block (calendar icon, weekday, date); sizes in vw follow the concept's proportions of the page width */
+@media (min-width: 1001px) {
+  .shell--concept .topbar__end {
+    gap: 0;
+  }
+  .shell--concept .usermenu {
+    margin-inline-end: calc(3.47vw - 22px);
+  }
+  .shell--concept .avatar {
+    width: 11.03vw;
+    height: 3.47vw;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-inline: 6px 10px;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--color-ink);
+  }
+  .shell--concept .avatar__circle {
+    flex: none;
+    width: 2.9vw;
+    height: 2.9vw;
+    border-radius: 50%;
+    background: var(--color-primary);
+    color: #fff;
+  }
+  .shell--concept .avatar__name {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+    text-align: start;
+    line-height: 1.35;
+  }
+  .shell--concept .avatar__who {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-bold);
+  }
+  .shell--concept .avatar__sub {
+    font-size: 11px;
+    color: var(--color-muted);
+  }
+  .shell--concept .topbar__inbox {
+    margin-inline-end: 0;
+  }
+  .shell--concept .topbar__date {
+    width: 10.72vw;
+    height: 2.84vw;
+    margin-inline-end: calc(10.41vw - 36px);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-align: start;
+    color: var(--color-ink);
+    font-size: var(--font-size-xs);
+    line-height: 1.35;
+  }
+  .shell--concept .topbar__date-icon {
+    flex: none;
+    color: var(--color-neutral);
+  }
+  .shell--concept .topbar__date-text {
+    display: flex;
+    flex-direction: column;
+  }
+  .shell--concept .topbar__weekday {
+    color: var(--color-muted);
+    font-size: 11px;
+  }
+}
 .usermenu__pop {
   position: absolute;
   top: 40px;
@@ -460,6 +573,11 @@
 
 /* phone: drawer menu, compact top bar (search behind its icon), bottom navigation */
 @media (max-width: 600px) {
+  /* touch-size screens scroll with an overlay indicator: no classic scrollbar that would narrow the layout by its
+     width (and make the phone layout differ between a fresh load and a window resized down) */
+  html {
+    scrollbar-width: none;
+  }
   .shell--nav .app,
   .shell--nav.shell--pinned .app {
     padding-inline-start: 0;
@@ -551,6 +669,45 @@
   }
   .topbar__date {
     display: none;
+  }
+  .shell--nav:not(.shell--concept) .topbar__brand {
+    display: none;
+  }
+  .shell--nav:not(.shell--concept) .nav-toggle {
+    top: 9px;
+    right: 13px;
+    width: 33px;
+    height: 33px;
+  }
+  .shell--nav:not(.shell--concept) .topsearch-wrap {
+    flex: 1;
+    min-width: 0;
+    margin-inline: 0 2px;
+  }
+  .shell--nav:not(.shell--concept) .topsearch,
+  .shell--nav:not(.shell--concept) .topsearch:focus-within {
+    position: static;
+    width: 100%;
+    height: 34px;
+    padding-inline: 8px 3px;
+    justify-content: flex-start;
+    background: var(--color-surface-muted);
+  }
+  .shell--nav:not(.shell--concept) .topsearch .topsearch__input,
+  .shell--nav:not(.shell--concept) .topsearch .topsearch__go {
+    position: static;
+    height: 28px;
+    overflow: visible;
+    clip: auto;
+  }
+  .shell--nav:not(.shell--concept) .topsearch .topsearch__input {
+    width: auto;
+    padding: 0;
+  }
+  .shell--nav:not(.shell--concept) .topsearch .topsearch__go {
+    width: auto;
+    padding-inline: 8px;
+    border: 1px solid var(--color-line);
   }
   .avatar {
     width: 32px;

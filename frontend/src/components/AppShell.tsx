@@ -88,7 +88,10 @@ export function AppShell({ children, authenticated = true }: { children: ReactNo
     });
   };
 
-  const shellClass = ["shell", showNav ? "shell--nav" : "", showNav && pinned ? "shell--pinned" : "", menuOpen ? "shell--menu-open" : ""].filter(Boolean).join(" ");
+  // pages 1 / 2 (serial control center): the concept's top bar - the user block (avatar + name) and the date block
+  // (calendar icon, weekday, date) on the desktop; every other page keeps the catalogue's shared shell (DEC-061)
+  const concept = showNav && route.startsWith("/serials/");
+  const shellClass = ["shell", showNav ? "shell--nav" : "", showNav && pinned ? "shell--pinned" : "", menuOpen ? "shell--menu-open" : "", concept ? "shell--concept" : ""].filter(Boolean).join(" ");
 
   return (
     <div className={shellClass}>
@@ -131,6 +134,18 @@ export function AppShell({ children, authenticated = true }: { children: ReactNo
                 </li>
               ))}
             </ul>
+            <a
+              href="#/status"
+              className={`btn rail__health rail__health--${version.isSuccess ? "ok" : version.isError ? "down" : "wait"}`}
+              title={version.isSuccess ? "ارتباط با سرور برقرار است (آخرین بررسی)" : version.isError ? "سرور پاسخ نداد (آخرین بررسی)" : "در حال بررسی ارتباط با سرور"}
+              onClick={() => {
+                setMenuOpen(false);
+              }}
+              data-testid="rail-health"
+            >
+              <span className="rail__dot" aria-hidden="true" />
+              <span className="rail__label">{version.isSuccess ? "ارتباط با سرور برقرار" : version.isError ? "ارتباط با سرور قطع" : "در حال بررسی ارتباط"}</span>
+            </a>
           </nav>
           {menuOpen ? <button type="button" className="scrim" aria-label="بستن منو" tabIndex={-1} onClick={() => { setMenuOpen(false); }} /> : null}
           <button
@@ -163,7 +178,7 @@ export function AppShell({ children, authenticated = true }: { children: ReactNo
             <>
               <GlobalSearch canSerial={can(PERM.serialRead)} canOrder={can(PERM.orderRead)} canProduct={can(PERM.productRead)} />
               <div className="topbar__end">
-                <TodayDate />
+                <TodayDate concept={concept} />
                 {items.some((n) => n.path === "/work") ? (
                   <a href="#/work" className="iconbtn topbar__inbox" title="کارها و تأییدها" data-testid="topbar-inbox">
                     <Icon name="inbox" size={18} />
@@ -182,7 +197,15 @@ export function AppShell({ children, authenticated = true }: { children: ReactNo
                     data-testid="user-menu"
                     data-fid="topbar-user"
                   >
-                    <Icon name="user" size={18} />
+                    {concept ? (
+                      <span className="avatar__name" aria-hidden="true">
+                        <span className="avatar__who">{me?.user.display_name}</span>
+                        <span className="avatar__sub">حساب کاربری</span>
+                      </span>
+                    ) : null}
+                    <span className="avatar__circle">
+                      <Icon name="user" size={18} />
+                    </span>
                     <span className="sr-only">حساب کاربری: {me?.user.display_name}</span>
                   </button>
                   {userOpen ? (
@@ -244,7 +267,7 @@ export function AppShell({ children, authenticated = true }: { children: ReactNo
 }
 
 /** Today in Asia/Tehran, Jalali (re-read every minute so a session past midnight shows the new day). */
-function TodayDate() {
+function TodayDate({ concept = false }: { concept?: boolean }) {
   const [iso, setIso] = useState(() => todayTehranIso());
   useEffect(() => {
     const id = window.setInterval(() => {
@@ -256,10 +279,19 @@ function TodayDate() {
   }, []);
   return (
     <time className="topbar__date" dateTime={iso} data-testid="topbar-date" data-fid="topbar-date">
-      <span className="sr-only">امروز: </span>
-      {formatJalaliDate(iso)}
+      {concept ? <Icon name="calendar" size={20} className="topbar__date-icon" /> : null}
+      <span className="topbar__date-text">
+        <span className="sr-only">امروز: </span>
+        {concept ? <span className="topbar__weekday">{weekdayFa(iso)}</span> : null}
+        {formatJalaliDate(iso)}
+      </span>
     </time>
   );
+}
+
+/** Weekday of an ISO date (YYYY-MM-DD) in Persian (the date is already the Tehran calendar day). */
+function weekdayFa(iso: string): string {
+  return new Intl.DateTimeFormat("fa-IR", { weekday: "long", timeZone: "UTC" }).format(new Date(`${iso}T12:00:00Z`));
 }
 
 interface Hit {

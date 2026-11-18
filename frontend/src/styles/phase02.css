@@ -90,6 +90,34 @@
   margin: 0 0 var(--space-1);
   font-size: var(--font-size-md);
 }
+.later__icon {
+  vertical-align: -3px;
+  margin-inline-end: 6px;
+  color: var(--color-primary);
+}
+/* metric rows of a later-phase chart: label, empty rail, «—» (catalogue form, never a value) */
+.later__rails {
+  list-style: none;
+  margin: 6px 0 8px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: var(--font-size-xs);
+}
+.later__rails li {
+  display: grid;
+  grid-template-columns: 7.5rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+}
+.later__rail {
+  display: block;
+  height: 10px;
+  border-radius: 5px;
+  background: var(--color-neutral-tint);
+  box-shadow: inset 0 0 0 1px #dde3ea;
+}
 .later__text {
   margin: 0;
   color: var(--color-warning);
@@ -110,11 +138,18 @@
   gap: var(--space-2);
 }
 .steps__item {
+  min-height: 30px;
   padding: var(--space-1) var(--space-3);
   border: 1px solid var(--color-line);
   border-radius: var(--radius-pill);
+  background: var(--color-surface);
   color: var(--color-muted);
+  font: inherit;
   font-size: var(--font-size-sm);
+}
+.steps__item:disabled {
+  cursor: default;
+  opacity: 1;
 }
 .steps__item--current {
   border-color: var(--color-primary);
@@ -165,3 +200,162 @@
   }
 }
 
+
+/* KPI mini bar (catalogue): a real share, or an empty rail */
+.kpi__bar {
+  display: block;
+  height: 5px;
+  margin-block-start: 8px;
+  border-radius: 3px;
+  background: var(--color-neutral-tint);
+  overflow: hidden;
+}
+.kpi__fill {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  background: var(--color-primary);
+}
+/* product image slot: an honest placeholder until product images exist */
+.product-card__image {
+  height: 118px;
+  margin-block: 2px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: linear-gradient(155deg, #f5f6f3, #e7ebef);
+  border: 1px dashed #cdd5df;
+  border-radius: 10px;
+  color: var(--color-muted);
+  font-size: var(--font-size-xs);
+}
+/* segmented filter buttons above a list */
+.segmented {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-block: 0 8px;
+}
+.chipbtn {
+  min-height: 30px;
+  padding: 2px 14px;
+  border: 1px solid var(--color-line);
+  background: var(--color-surface-muted);
+  color: var(--color-neutral);
+  font-size: var(--font-size-xs);
+}
+.chipbtn--on {
+  background: var(--color-primary-tint);
+  border-color: #bcd6cd;
+  color: var(--color-primary);
+  font-weight: var(--font-weight-bold);
+}
+/* later-phase table cells: neutral dot / empty rail + the placeholder word */
+.later-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.later-cell__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #b8c3cf;
+}
+.later-cell__rail {
+  width: 48px;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--color-neutral-tint);
+  box-shadow: inset 0 0 0 1px #dde3ea;
+}
+/* phone: serial cards instead of the table (catalogue) */
+.serial-cards-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.serial-card {
+  padding: 8px 10px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: 10px;
+}
+.serial-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-weight: var(--font-weight-bold);
+}
+.serial-card__facts {
+  margin: 3px 0 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, auto));
+  gap: 0 10px;
+  font-size: 11px;
+  line-height: 1.7;
+}
+.serial-card__facts > div {
+  display: flex;
+  gap: 4px;
+  min-width: 0;
+}
+.serial-card__facts dt {
+  flex: none;
+  color: var(--color-muted);
+}
+.serial-card__facts dt::after {
+  content: ":";
+}
+.serial-card__facts dd {
+  margin: 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.serial-card__wide {
+  grid-column: 1 / -1;
+}
+.serial-card {
+  padding-block: 9px;
+}
+.serial-cards-list {
+  gap: 10px;
+}
+@media (max-width: 600px) {
+  .product-card__image {
+    height: 96px;
+  }
+}
+
+/* Product 360 identity card: compact rows so the card keeps the catalogue height (styles at its foot) */
+.product-card .meta--rows > div {
+  padding-block: 1px;
+  font-size: var(--font-size-xs);
+}
+.product-card .facts {
+  gap: 6px;
+  margin: 6px 0;
+}
+.product-card .facts > div {
+  padding: 3px 8px;
+}
+.product-card .facts dd {
+  margin: 0;
+  font-size: var(--font-size-xs);
+}
+/* the related-serials table keeps its later-phase columns in view: long names are clipped (full text in title) */
+.cell-clip {
+  display: block;
+  max-width: 12.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

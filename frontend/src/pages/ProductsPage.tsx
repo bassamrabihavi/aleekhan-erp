@@ -22,6 +22,7 @@ import { ATTRIBUTE_LABEL, CODE_CHECK_REASONS, CODE_STATUS, ERP_STATUS, MASTER_ST
 import { useCursor } from "../lib/queries";
 import { useCustomerNames } from "../lib/queries02";
 import { navigate, segments, useRoute } from "../lib/router";
+import { useMediaQuery } from "../lib/hooks";
 import { useAction } from "../lib/useAction";
 import { Pager } from "./SecurityPage";
 
@@ -750,11 +751,16 @@ function Style360({ productId, styleId }: { productId: string; styleId: string }
       />
       {creating ? <CreateProductDialog onClose={() => { setCreating(false); }} /> : null}
       <ul className="kpis kpis--5" data-testid="style-counts" data-fid="kpis" aria-label="شاخص‌های این استایل">
-        <Kpi label="سریال‌های مرتبط" value={num(c?.serials_total)} note={c?.serials_active != null ? `فعال: ${toFaDigits(c.serials_active)}` : "سریال‌های این استایل"} />
-        <Kpi label="سفارش‌های فعال" value={num(c?.orders_active)} note="تأییدشده، ارسال‌شده یا متوقف" />
-        <Kpi label="مجموع تعداد سفارش" value={num(c?.quantity_total)} note="ردیف‌های تأییدشده سفارش‌های فعال" />
-        <LaterKpi label="در جریان تولید" phase="PHASE_07" />
-        <LaterKpi label="تعهدهای در معرض ریسک" phase="PHASE_05" />
+        <Kpi
+          label="سریال‌های مرتبط"
+          value={num(c?.serials_total)}
+          note={c?.serials_active != null ? `فعال: ${toFaDigits(c.serials_active)}` : "سریال‌های این استایل"}
+          bar={{ share: c?.serials_total && c.serials_active != null ? c.serials_active / c.serials_total : null, label: "سهم سریال‌های فعال" }}
+        />
+        <Kpi label="سفارش‌های فعال" value={num(c?.orders_active)} note="تأییدشده، ارسال‌شده یا متوقف" bar={{ share: null }} />
+        <Kpi label="مجموع تعداد سفارش" value={num(c?.quantity_total)} note="ردیف‌های تأییدشده سفارش‌های فعال" bar={{ share: null }} />
+        <LaterKpi label="در جریان تولید" phase="PHASE_07" bar />
+        <LaterKpi label="تعهدهای در معرض ریسک" phase="PHASE_05" bar />
       </ul>
       {(tracking.data?.withheld_sections ?? []).length > 0 ? (
         <p className="notice notice--info" data-testid="withheld">بخشی از داده برای نقش شما نمایش داده نمی‌شود (مجوز خواندن ندارید).</p>
@@ -766,6 +772,11 @@ function Style360({ productId, styleId }: { productId: string; styleId: string }
             {(r) => (
               <>
                 <p className="product-card__kicker">شناسنامه محصول</p>
+                {/* no product image exists in PHASE_02 data: an honest placeholder in the catalogue's picture slot */}
+                <div className="product-card__image" role="img" aria-label="تصویر محصول ثبت نشده">
+                  <Icon name="image" size={30} />
+                  <span aria-hidden="true">تصویر محصول ثبت نشده</span>
+                </div>
                 <ProductProfile p={r.data} version={r.version} />
                 <ProductFacts styleId={styleId} productId={productId} activeSerials={c?.serials_active} revisions={revisions.data?.items} />
                 <StyleColumn product={r.data} selected={styleId} />
@@ -778,6 +789,17 @@ function Style360({ productId, styleId }: { productId: string; styleId: string }
             <h2 id="ser-title">سریال‌های مرتبط با محصول / استایل</h2>
             {tracking.data && c?.serials_total != null ? <span className="field__hint">{toFaDigits(tracking.data.serials.length)} سریال در این صفحه</span> : null}
           </div>
+          <div className="segmented" role="group" aria-label="وضعیت سریال">
+            {[
+              { v: "", l: "همه" },
+              { v: "ALLOCATED", l: "تخصیص‌یافته" },
+              { v: "CANCELLED", l: "لغوشده" },
+            ].map((o) => (
+              <button key={o.v || "all"} type="button" className={filter.status === o.v ? "btn chipbtn chipbtn--on" : "btn chipbtn"} aria-pressed={filter.status === o.v} onClick={() => { set({ status: o.v }); }}>
+                {o.l}
+              </button>
+            ))}
+          </div>
           <DataView query={tracking} loading="در حال دریافت سریال‌ها…" errorTitle="سریال‌ها دریافت نشد">
             {(d) => <SerialRows d={d} />}
           </DataView>
@@ -786,8 +808,8 @@ function Style360({ productId, styleId }: { productId: string; styleId: string }
         </section>
       </div>
       <div className="grid-half grid-half--lower">
-        <LaterSection title="توزیع سریال‌ها در چرخه تولید" phase="PHASE_07" fid="stage-distribution" />
-        <LaterSection title="آخرین رخدادهای مرتبط" phase="PHASE_07" fid="events" />
+        <LaterSection title="توزیع سریال‌ها در چرخه تولید" phase="PHASE_07" fid="stage-distribution" icon="chart" rails={["بازرگانی / برنامه", "مواد و انبار", "برش / تولید", "کنترل کیفیت", "انبار محصول / ارسال"]} />
+        <LaterSection title="آخرین رخدادهای مرتبط" phase="PHASE_07" fid="events" icon="clock" />
       </div>
       {product.data ? <StyleDetail product={product.data.data} styleId={styleId} /> : null}
       <div className="split split--after">
@@ -923,9 +945,46 @@ function ProductFacts({ productId, styleId, activeSerials, revisions }: { produc
 
 const LATER_CELL = "در دست ساخت";
 
+/** Later-phase cell in the catalogue form: a neutral dot (stage) or an empty rail (progress), never a value. */
+function LaterCell({ kind }: { kind: "dot" | "rail" | "text" }) {
+  return (
+    <span className="later-cell" title="در دست ساخت">
+      {kind === "dot" ? <span className="later-cell__dot" aria-hidden="true" /> : kind === "rail" ? <span className="later-cell__rail" aria-hidden="true" /> : null}
+      {LATER_CELL}
+    </span>
+  );
+}
+
 function SerialRows({ d }: { d: StyleTracking }) {
   const names = useCustomerNames();
+  const phone = useMediaQuery("(max-width: 600px)");
   if (d.serials.length === 0) return <p className="state state--empty" data-testid="state-empty">سریالی برای این استایل با این فیلتر نیست.</p>;
+  if (phone) {
+    // phone (catalogue): one card per serial instead of the table
+    return (
+      <ul className="serial-cards-list" data-testid="style-serials" aria-label="سریال‌های استایل با رنگ و جنس واقعی هر سریال">
+        {d.serials.map((x) => {
+          const o = x.order_id ? d.orders?.[x.order_id] : undefined;
+          return (
+            <li key={x.serial_id} className="serial-card">
+              <div className="serial-card__head">
+                <a href={`#/serials/${x.serial_id}`}><Num value={x.serial_number} /></a>
+                <StatusChip {...toneLabel(SERIAL_STATUS, x.status)} />
+              </div>
+              <dl className="serial-card__facts">
+                <div><dt>استایل</dt><dd><Num value={d.style.style_no} /></dd></div>
+                <div><dt>تعداد</dt><dd>{x.quantity !== null ? `${toFaDigits(x.quantity)} ${UOM[x.uom ?? ""] ?? ""}` : "—"}</dd></div>
+                <div><dt>دوره سفارش</dt><dd>{o?.program_ref ?? "—"}</dd></div>
+                <div><dt>گرید</dt><dd>{o?.required_quality_requirement ?? "—"}</dd></div>
+                <div className="serial-card__wide"><dt>مشتری</dt><dd><CustomerName id={x.customer_id} names={names} /></dd></div>
+                <div className="serial-card__wide"><dt>جنس و رنگ واقعی</dt><dd><Attrs a={x.attributes} /></dd></div>
+              </dl>
+            </li>
+          );
+        })}
+      </ul>
+    );
+  }
   return (
     <div className="tablewrap">
       <table className="table table--cards" data-testid="style-serials">
@@ -934,13 +993,13 @@ function SerialRows({ d }: { d: StyleTracking }) {
           <tr>
             <th scope="col">سریال</th>
             <th scope="col">استایل</th>
+            <th scope="col" title="فاز مالک: PHASE_07">مرحله فعلی</th>
+            <th scope="col" title="فاز مالک: PHASE_07">پیشرفت</th>
             <th scope="col">مشتری</th>
             <th scope="col">جنس و رنگ واقعی</th>
             <th scope="col">دوره سفارش</th>
             <th scope="col">تعداد</th>
             <th scope="col">گرید</th>
-            <th scope="col" title="فاز مالک: PHASE_07">مرحله فعلی</th>
-            <th scope="col" title="فاز مالک: PHASE_07">پیشرفت</th>
             <th scope="col" title="فاز مالک: PHASE_05">تعهد</th>
           </tr>
         </thead>
@@ -951,14 +1010,14 @@ function SerialRows({ d }: { d: StyleTracking }) {
               <tr key={x.serial_id}>
                 <td data-label="سریال" className="cell--serial"><a href={`#/serials/${x.serial_id}`}><Num value={x.serial_number} /></a> <StatusChip {...toneLabel(SERIAL_STATUS, x.status)} /></td>
                 <td data-label="استایل" className="cell--style"><Num value={d.style.style_no} /></td>
-                <td data-label="مشتری" className="cell--wide"><CustomerName id={x.customer_id} names={names} /></td>
-                <td data-label="جنس و رنگ واقعی" className="cell--wide"><Attrs a={x.attributes} /></td>
+                <td data-label="مرحله فعلی" className="cell--later"><LaterCell kind="dot" /></td>
+                <td data-label="پیشرفت" className="cell--later"><LaterCell kind="rail" /></td>
+                <td data-label="مشتری" className="cell--wide"><span className="cell-clip" title={names.get(x.customer_id)?.display_name_fa}><CustomerName id={x.customer_id} names={names} /></span></td>
+                <td data-label="جنس و رنگ واقعی" className="cell--wide"><span className="cell-clip"><Attrs a={x.attributes} /></span></td>
                 <td data-label="دوره سفارش">{o?.program_ref ?? "—"}</td>
                 <td data-label="تعداد">{x.quantity !== null ? `${toFaDigits(x.quantity)} ${UOM[x.uom ?? ""] ?? ""}` : "—"}</td>
                 <td data-label="گرید">{o?.required_quality_requirement ?? "—"}</td>
-                <td data-label="مرحله فعلی" className="cell--later">{LATER_CELL}</td>
-                <td data-label="پیشرفت" className="cell--later">{LATER_CELL}</td>
-                <td data-label="تعهد" className="cell--later">{LATER_CELL}</td>
+                <td data-label="تعهد" className="cell--later"><LaterCell kind="text" /></td>
               </tr>
             );
           })}

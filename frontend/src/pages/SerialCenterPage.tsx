@@ -7,15 +7,17 @@
 //     the audited timeline.
 // No sample number of the images is ever shown (rule 1/2).
 import { useQuery } from "@tanstack/react-query";
-import { useState, type ReactNode } from "react";
+import { useId, useState, type ReactNode } from "react";
 
 import { g, get, K2, PERM, type CustomerOrder, type Serial, type SerialTracking } from "../api/phase02";
 import { useAuth } from "../auth/context";
 import { DataView, ForbiddenState } from "../components/DataView";
 import { Field, ShortId, TabPanel, Tabs } from "../components/Form";
+import { Icon, type IconName } from "../components/Icon";
 import { Code14, CustomerName, LATER_TEXT, LaterSection, Num, PageHead, Representative } from "../components/Phase02";
 import { StatusChip } from "../components/StatusChip";
 import { formatJalaliDateTime, toFaDigits } from "../lib/format";
+import { useMediaQuery } from "../lib/hooks";
 import { formatJalaliDate } from "../lib/jalali";
 import { toneLabel } from "../lib/labels";
 import { ATTRIBUTE_LABEL, CHANGE_KIND, CHANGE_STATUS, LINE_STATUS, ORDER_STATUS, ORDER_TYPES, SERIAL_STATUS, TRACKING_EVENT, UOM, VERSION_REASON } from "../lib/labels02";
@@ -113,8 +115,16 @@ const SERIAL_TABS: { id: string; label: string; phase?: string }[] = [
   { id: "history", label: "تاریخچه" },
 ];
 
+/** Tablet / phone layout (one column): the side panel and the problems card move into the tab body (concept). */
+const NARROW = "(max-width: 900px)";
+
+function useNarrow(): boolean {
+  return useMediaQuery(NARROW);
+}
+
 function SerialView({ id }: { id: string }) {
   const { can } = useAuth();
+  const narrow = useNarrow();
   const [tab, setTab] = useState("summary");
   const tracking = useQuery({
     queryKey: [...K2.serials, "tracking", id],
@@ -134,45 +144,121 @@ function SerialView({ id }: { id: string }) {
       {(t) => (
         <div className="serial-center">
           <div className="serial-top">
-            <div className="serial-actions" role="group" aria-label="اقدام‌های برنامه‌ریزی سریال" data-fid="header-actions">
-              {["تصمیم برنامه‌ریزی", "تغییر اولویت", "Fast Track", "سناریو", "بیشتر"].map((l) => (
-                <button key={l} type="button" className="btn btn--outline btn--compact" disabled title="در دست ساخت — فاز ۵ (برنامه‌ریزی)" aria-describedby="serial-actions-later">
-                  {l}
-                </button>
-              ))}
-              <span id="serial-actions-later" className="serial-actions__note">
-                {LATER_TEXT} · <bdi dir="ltr">PHASE_05</bdi>
-              </span>
-            </div>
-            <ul className="date-cards" aria-label="تاریخ‌های تعهد و پیش‌بینی" data-fid="date-cards">
-              {["تعهد", "Forecast", "اختلاف"].map((l) => (
-                <li key={l} className="date-card" data-fid-item title="فاز مالک: PHASE_05">
-                  <span className="date-card__label">{l}</span>
-                  <span className="date-card__value">در دست ساخت</span>
-                </li>
-              ))}
-            </ul>
+            <HeaderActions />
+            <DateCards />
           </div>
           <SerialHeader s={t.serial} order={order.data} />
-          <LaterSection title="مراحل تولید سریال" detail="مواد و انبار ← مهندسی ← تأمین ← برش ← دوخت ← کنترل کیفیت ← آماده محصول" phase="PHASE_03 … PHASE_09" fid="stage-flow" className="later--inline" />
-          <Tabs tabs={SERIAL_TABS.map(({ id: tid, label }) => ({ id: tid, label }))} active={tab} onChange={setTab} label="بخش‌های مرکز کنترل سریال" fid="tabs" />
-          <TabPanel id={tab}>
-            {tab === "summary" ? (
-              <SummaryTab t={t} />
-            ) : tab === "order" ? (
-              <OrderTab t={t} order={order.data} orderLoading={order.isPending && order.fetchStatus !== "idle"} />
-            ) : tab === "history" ? (
-              <section className="panel" aria-labelledby="hist-title" data-testid="serial-history">
-                <h2 id="hist-title">تاریخچه رویدادها</h2>
-                <EventList t={t} />
-              </section>
-            ) : current?.phase ? (
-              <LaterSection title={`بخش ${current.label} سریال`} phase={current.phase} />
-            ) : null}
-          </TabPanel>
+          <div className="serial-body">
+            <div className="serial-main">
+              <StageFlow />
+              <Tabs tabs={SERIAL_TABS.map(({ id: tid, label }) => ({ id: tid, label }))} active={tab} onChange={setTab} label="بخش‌های مرکز کنترل سریال" fid="tabs" />
+              <TabPanel id={tab}>
+                {tab === "summary" ? (
+                  <SummaryTab t={t} narrow={narrow} onAllEvents={() => { setTab("history"); }} />
+                ) : tab === "order" ? (
+                  <OrderTab t={t} order={order.data} orderLoading={order.isPending && order.fetchStatus !== "idle"} narrow={narrow} />
+                ) : tab === "history" ? (
+                  <section className="panel" aria-labelledby="hist-title" data-testid="serial-history">
+                    <h2 id="hist-title">تاریخچه رویدادها</h2>
+                    <EventList t={t} />
+                  </section>
+                ) : current?.phase ? (
+                  <LaterSection title={`بخش ${current.label} سریال`} phase={current.phase} />
+                ) : null}
+              </TabPanel>
+            </div>
+            {narrow ? null : <SidePanel serialId={t.serial.serial_id} />}
+          </div>
         </div>
       )}
     </DataView>
+  );
+}
+
+/** Planning actions of the concept (PHASE_05): real buttons in the concept's group, visibly disabled with the reason. */
+function HeaderActions() {
+  const actions: { label: string; icon: IconName; tone: string; caret?: boolean }[] = [
+    { label: "تصمیم برنامه‌ریزی", icon: "chevronDown", tone: "btn--primary", caret: true },
+    { label: "تغییر اولویت", icon: "priority", tone: "btn--outline" },
+    { label: "Fast Track", icon: "bolt", tone: "btn--tint" },
+    { label: "سناریو", icon: "layers", tone: "btn--outline" },
+    { label: "بیشتر", icon: "chevronDown", tone: "btn--outline" },
+  ];
+  return (
+    <div className="serial-actions" role="group" aria-label="اقدام‌های برنامه‌ریزی سریال" data-fid="header-actions">
+      {actions.map((a) => (
+        <button key={a.label} type="button" className={`btn ${a.tone} serial-actions__btn`} disabled title="در دست ساخت — فاز ۵ (برنامه‌ریزی)" aria-describedby="serial-actions-later">
+          {a.label}
+          <Icon name={a.icon} size={16} />
+        </button>
+      ))}
+      <span id="serial-actions-later" className="serial-actions__note">
+        در دست ساخت · <bdi dir="ltr">PHASE_05</bdi>
+      </span>
+    </div>
+  );
+}
+
+/** Commitment / forecast / gap (PHASE_05): the concept's dated cards with the value «—» until planning exists. */
+function DateCards() {
+  const cards: { label: string; icon: IconName; tone?: string }[] = [
+    { label: "تعهد", icon: "calendar" },
+    { label: "Forecast", icon: "calendar" },
+    { label: "اختلاف", icon: "alertCircle", tone: "date-card--gap" },
+  ];
+  return (
+    <ul className="date-cards" aria-label="تاریخ‌های تعهد و پیش‌بینی" data-fid="date-cards">
+      {cards.map((c) => (
+        <li key={c.label} className={c.tone ? `date-card ${c.tone}` : "date-card"} data-fid-item title="فاز مالک: PHASE_05">
+          <span className="date-card__head">
+            <span className="date-card__label">{c.label}</span>
+            <Icon name={c.icon} size={18} />
+          </span>
+          <span className="date-card__value" aria-label={`${c.label}: بدون داده`}>—</span>
+          <span className="date-card__meta">
+            در دست ساخت · <bdi dir="ltr">PHASE_05</bdi>
+          </span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/** The concept's stage tracker: every production stage as a circle with its icon, in the neutral «not connected»
+ * state (PHASE_03 … PHASE_09 own the stages); no stage is marked done and no WIP number is shown. */
+const STAGES: { label: string; icon: IconName; desktopOnly?: boolean }[] = [
+  { label: "بازرگانی", icon: "order", desktopOnly: true },
+  { label: "مواد و انبار", icon: "cube" },
+  { label: "مهندسی", icon: "gear" },
+  { label: "تأمین", icon: "truck" },
+  { label: "برش", icon: "scissors" },
+  { label: "دوخت", icon: "needle" },
+  { label: "کنترل کیفیت", icon: "search" },
+  { label: "آماده محصول", icon: "check" },
+];
+
+function StageFlow() {
+  return (
+    <section className="later stage-flow" data-testid="later-section" aria-label="مراحل تولید سریال" data-fid="stage-flow">
+      <ol className="stage-flow__steps">
+        {STAGES.map((s, i) => (
+          <li key={s.label} className={s.desktopOnly ? "stage stage--desktop" : "stage"}>
+            <span className="stage__circle" aria-hidden="true">
+              <Icon name={s.icon} size={18} />
+            </span>
+            <span className="stage__label">{s.label}</span>
+            {i < STAGES.length - 1 ? <Icon name="arrowLeft" size={16} className="stage__arrow" /> : null}
+          </li>
+        ))}
+      </ol>
+      <div className="stage-flow__note">
+        <h3 className="later__title">مراحل تولید سریال</h3>
+        <p className="later__text">{LATER_TEXT}</p>
+        <p className="later__meta">
+          فاز مالک: <bdi dir="ltr">PHASE_03 … PHASE_09</bdi>
+        </p>
+      </div>
+    </section>
   );
 }
 
@@ -209,13 +295,17 @@ function SerialHeader({ s, order }: { s: Serial; order: CustomerOrder | undefine
   const brand = brands.data?.items.find((b) => b.brand_id === order?.brand_id);
   return (
     <section className="serial-head panel" aria-labelledby="serial-title" data-testid="serial-header" data-fid="serial-header">
+      {/* no product image exists in PHASE_02 data: an honest placeholder in the concept's image slot */}
+      <div className="serial-head__image" role="img" aria-label="تصویر محصول ثبت نشده">
+        <Icon name="image" size={26} />
+        <span aria-hidden="true">تصویر محصول ثبت نشده</span>
+      </div>
       <div className="serial-head__main">
         <p className="eyebrow">صفحه ۱ و ۲ · مرکز کنترل سریال · فاز ۲</p>
         <div className="serial-head__title">
           <h1 id="serial-title">
             سریال <Num value={s.serial_number} testId="serial-number" />
           </h1>
-          <StatusChip {...toneLabel(SERIAL_STATUS, s.status)} testId="serial-status" />
         </div>
         <p className="serial-head__product">
           {product.data?.name_fa ?? "—"}
@@ -223,17 +313,21 @@ function SerialHeader({ s, order }: { s: Serial; order: CustomerOrder | undefine
         </p>
       </div>
       <div className="serial-head__chips">
-        <span className="chip chip--neutral chip--inline"><CustomerName id={s.customer_id} names={names} /></span>
-        {brand ? <span className="chip chip--info chip--inline">{brand.brand_name_fa}</span> : null}
+        <StatusChip {...toneLabel(SERIAL_STATUS, s.status)} testId="serial-status" />
+        {order ? <span className="chip chip--info chip--inline">{ORDER_TYPES[order.order_type] ?? order.order_type}</span> : null}
+        <span className="chip chip--neutral chip--inline chip--clip" title={names.get(s.customer_id)?.display_name_fa}>
+          <CustomerName id={s.customer_id} names={names} />
+        </span>
+        {brand ? <span className="chip chip--gold chip--inline">{brand.brand_name_fa}</span> : null}
         {order?.required_quality_requirement ? <span className="chip chip--warning chip--inline" title="متن گرید موردنیاز (مقایسه با گرید تا DEC-019 نیست)">گرید: {order.required_quality_requirement}</span> : null}
       </div>
       <dl className="serial-head__facts">
         <div><dt>کد محصول</dt><dd><Code14 code={s.product_code} copy testId="serial-code" /></dd></div>
-        <div><dt>استایل</dt><dd><Num value={style.data?.style_no} /></dd></div>
-        <div><dt>تعداد سفارش</dt><dd data-testid="serial-qty">{line ? `${toFaDigits(line.quantity)} ${UOM[line.uom] ?? line.uom}` : "—"}</dd></div>
+        <div className="fact--minor"><dt>استایل</dt><dd><Num value={style.data?.style_no} /></dd></div>
+        <div className="fact--icon"><Icon name="cube" size={16} /><dt>تعداد سفارش</dt><dd data-testid="serial-qty">{line ? `${toFaDigits(line.quantity)} ${UOM[line.uom] ?? line.uom}` : "—"}</dd></div>
         <div><dt>رنگ</dt><dd title={attr("colour_fa")}>{attr("colour_fa")}</dd></div>
         <div><dt>جنس</dt><dd title={attr("main_material_fa")}>{attr("main_material_fa")}</dd></div>
-        <div><dt>برنامه مشتری</dt><dd>{order?.program_ref ?? "—"}</dd></div>
+        <div className="fact--icon fact--minor"><Icon name="calendar" size={16} /><dt>برنامه مشتری</dt><dd>{order?.program_ref ?? "—"}</dd></div>
         <div className="fact--wide"><dt>تحویل درخواستی</dt><dd>{formatJalaliDate(line?.requested_due_date ?? order?.requested_due_date ?? null)}</dd></div>
         <div className="fact--wide"><dt>تخصیص</dt><dd>{formatJalaliDateTime(s.allocated_at)}</dd></div>
       </dl>
@@ -252,54 +346,95 @@ function SidePanel({ serialId }: { serialId: string }) {
   return (
     <aside className="panel serial-side" aria-labelledby="side-title" data-fid="side-panel">
       <div className="panel__head">
-        <h2 id="side-title">تصمیم‌ها و پیگیری‌ها</h2>
+        <h2 id="side-title">
+          <Icon name="clipboard" size={18} />
+          تصمیم‌ها و پیگیری‌ها
+        </h2>
         {can(PERM.changeRead) ? <a href="#/changes" className="btn btn--link">مشاهده همه</a> : null}
       </div>
-      <p className="serial-side__sub">درخواست‌های تغییر این سریال</p>
-      {!can(PERM.changeRead) ? (
-        <p className="field__hint">برای دیدن درخواست‌های تغییر مجوز ندارید.</p>
-      ) : (
-        <DataView query={changes} loading="در حال دریافت درخواست‌ها…" errorTitle="درخواست‌ها دریافت نشد" isEmpty={(d) => d.items.length === 0} empty={{ title: "درخواست تغییری برای این سریال ثبت نشده است." }}>
-          {(d) => (
-            <ul className="cards serial-side__list" data-testid="serial-changes">
-              {d.items.map((c) => (
-                <li key={c.change_request_id} className="card">
-                  <a href={`#/changes/${c.change_request_id}`} className="card__link">
-                    <Num value={c.request_no} /> · {CHANGE_KIND[c.kind] ?? c.kind}
-                  </a>
-                  <StatusChip {...toneLabel(CHANGE_STATUS, c.status)} />
-                </li>
-              ))}
-            </ul>
-          )}
-        </DataView>
-      )}
-      <div className="serial-side__laters">
-      <div className="serial-side__later">
-        <h3>تسک‌های نزدیک موعد</h3>
-        <p>
-          در دست ساخت · <bdi dir="ltr">PHASE_05</bdi>
-        </p>
+      <div className="side-card side-card--decision">
+        <div className="side-card__head">
+          <span className="side-card__icon side-card__icon--warning" aria-hidden="true"><Icon name="alertCircle" size={20} /></span>
+          <div>
+            <h3>تصمیم لازم</h3>
+            <p className="serial-side__sub">درخواست‌های تغییر این سریال</p>
+          </div>
+        </div>
+        {!can(PERM.changeRead) ? (
+          <p className="field__hint">برای دیدن درخواست‌های تغییر مجوز ندارید.</p>
+        ) : (
+          <DataView query={changes} loading="در حال دریافت درخواست‌ها…" errorTitle="درخواست‌ها دریافت نشد" isEmpty={(d) => d.items.length === 0} empty={{ title: "درخواست تغییری برای این سریال ثبت نشده است." }}>
+            {(d) => (
+              <ul className="cards serial-side__list" data-testid="serial-changes">
+                {d.items.map((c) => (
+                  <li key={c.change_request_id} className="card">
+                    <a href={`#/changes/${c.change_request_id}`} className="card__link">
+                      <Num value={c.request_no} /> · {CHANGE_KIND[c.kind] ?? c.kind}
+                    </a>
+                    <StatusChip {...toneLabel(CHANGE_STATUS, c.status)} />
+                  </li>
+                ))}
+              </ul>
+            )}
+          </DataView>
+        )}
+        {can(PERM.changeRead) ? (
+          <a href="#/changes" className="btn btn--outline btn--block side-card__action">مشاهده و تصمیم‌گیری</a>
+        ) : null}
       </div>
-      <div className="serial-side__later">
-        <h3>ریسک‌ها</h3>
-        <p>
-          در دست ساخت · <bdi dir="ltr">PHASE_05</bdi>
-        </p>
-      </div>
-      </div>
+      <SideLater title="تسک‌های نزدیک موعد" icon="check" tone="info" action="مشاهده تسک‌ها" detail="تسک‌های این سریال با موعد نزدیک، پس از ساخت برنامه‌ریزی اینجا دیده می‌شوند." />
+      <SideLater title="ریسک‌ها" icon="alert" tone="danger" action="جزئیات ریسک‌ها" detail="ریسک تأخیر، کسری مواد و خرابی دستگاه، پس از ساخت برنامه‌ریزی اینجا دیده می‌شود." />
     </aside>
   );
 }
 
+function SideLater({ title, icon, tone, action, detail }: { title: string; icon: IconName; tone: "info" | "danger"; action: string; detail: string }) {
+  const id = useId();
+  return (
+    <div className={`side-card side-card--${tone}`}>
+      <div className="side-card__head">
+        <span className={`side-card__icon side-card__icon--${tone}`} aria-hidden="true"><Icon name={icon} size={20} /></span>
+        <div>
+          <h3>{title}</h3>
+          <p className="serial-side__later-text">
+            در دست ساخت · <bdi dir="ltr">PHASE_05</bdi>
+          </p>
+          <p className="serial-side__sub">{detail}</p>
+        </div>
+      </div>
+      <button type="button" className="btn btn--outline btn--block side-card__action" disabled title="در دست ساخت — فاز ۵ (برنامه‌ریزی)" aria-describedby={id}>
+        {action}
+      </button>
+      <span id={id} className="sr-only">در دست ساخت — فاز ۵ (برنامه‌ریزی)</span>
+    </div>
+  );
+}
+
+const EVENT_ICON: Record<string, IconName> = {
+  ORDER_DRAFTED: "orderNew",
+  ORDER_VALIDATED: "check",
+  ORDER_CONFIRMED: "check",
+  SERIAL_ALLOCATED: "serial",
+  ORDER_RELEASED_TO_PLAN: "calendar",
+  CHANGE_REQUESTED: "change",
+  CHANGE_DECIDED: "check",
+  CHANGE_APPLIED: "change",
+  ORDER_CANCELLED: "alert",
+  SERIAL_CANCELLED: "alert",
+};
+
 function EventList({ t }: { t: SerialTracking }) {
   if (t.events.length === 0) return <p className="state state--empty" data-testid="state-empty">رویدادی ثبت نشده است.</p>;
   return (
-    <ol className="timeline" data-testid="serial-timeline">
+    <ol className="timeline timeline--icons" data-testid="serial-timeline">
       {t.events.map((e) => (
         <li key={e.audit_event_id}>
-          {TRACKING_EVENT[e.kind] ?? e.kind} · <time dateTime={e.occurred_at}>{formatJalaliDateTime(e.occurred_at)}</time>
-          {e.ref.entity_type === "change_request" ? <> · <a href={`#/changes/${e.ref.entity_id}`}>درخواست تغییر</a></> : null}
+          <Icon name={EVENT_ICON[e.kind] ?? "history"} size={16} className="timeline__icon" />
+          <span className="timeline__text">
+            {TRACKING_EVENT[e.kind] ?? e.kind}
+            {e.ref.entity_type === "change_request" ? <> · <a href={`#/changes/${e.ref.entity_id}`}>درخواست تغییر</a></> : null}
+          </span>
+          <time dateTime={e.occurred_at}>{formatJalaliDateTime(e.occurred_at)}</time>
         </li>
       ))}
     </ol>
@@ -307,22 +442,107 @@ function EventList({ t }: { t: SerialTracking }) {
 }
 
 // ------------------------------------------------------------------------------------------ page 1
-function SummaryTab({ t }: { t: SerialTracking }) {
+/** A later-phase summary card in the concept's form: icon header, the main value «—», the metric rows with their
+ * labels and «—» values, the placeholder text and the owning phase. Never a sample number (DEC-027). */
+function LaterCard({ title, icon, phase, main, bar = false, box, rows, className }: { title: string; icon: IconName; phase: string; main?: string; bar?: boolean; box?: string; rows: string[]; className?: string }) {
+  return (
+    <section className={className ? `later later-card ${className}` : "later later-card"} data-testid="later-section" aria-label={title}>
+      <div className="later-card__head">
+        <Icon name={icon} size={20} className="later-card__icon" />
+        <h3 className="later__title">{title}</h3>
+      </div>
+      {main ? (
+        <p className="later-card__main">
+          <span>{main}</span>
+          <strong aria-label="بدون داده">—</strong>
+        </p>
+      ) : null}
+      {box ? (
+        <div className="later-card__box">
+          <span>{box}</span>
+          <strong aria-label="بدون داده">—</strong>
+        </div>
+      ) : null}
+      {bar ? <span className="later-card__bar" aria-hidden="true" /> : null}
+      <ul className="later-card__rows">
+        {rows.map((r) => (
+          <li key={r}>
+            <span className="later-card__dot" aria-hidden="true" />
+            <span>{r}</span>
+            <span aria-label="بدون داده">—</span>
+          </li>
+        ))}
+      </ul>
+      <p className="later__text">{LATER_TEXT}</p>
+      <p className="later__meta">
+        فاز مالک: <bdi dir="ltr">{phase}</bdi>
+      </p>
+    </section>
+  );
+}
+
+function ProblemsCard({ fid }: { fid?: string }) {
+  return (
+    <section className="later later-card later-card--problems" data-testid="later-section" aria-label="مشکلات فعال" data-fid={fid}>
+      <div className="later-card__head">
+        <Icon name="alert" size={20} className="later-card__icon" />
+        <h3 className="later__title">مشکلات فعال</h3>
+        <span className="later-card__count" aria-label="تعداد: بدون داده">— مورد</span>
+      </div>
+      <div className="later-card__box later-card__box--problems">
+        <span>کسری، توقف دستگاه و تأخیر هر مرحله</span>
+        <strong aria-label="بدون داده">—</strong>
+      </div>
+      <p className="later__text">{LATER_TEXT}</p>
+      <p className="later__meta">
+        فاز مالک: <bdi dir="ltr">PHASE_06 / PHASE_07</bdi>
+      </p>
+    </section>
+  );
+}
+
+/** Event filter of the summary (concept chips): by what the audited event is about. */
+const EVENT_GROUPS: { id: string; label: string; kinds: readonly string[] | null }[] = [
+  { id: "all", label: "همه", kinds: null },
+  { id: "order", label: "سفارش", kinds: ["ORDER_DRAFTED", "ORDER_VALIDATED", "ORDER_CONFIRMED", "ORDER_RELEASED_TO_PLAN", "ORDER_CANCELLED"] },
+  { id: "serial", label: "سریال", kinds: ["SERIAL_ALLOCATED", "SERIAL_CANCELLED"] },
+  { id: "change", label: "تغییرات", kinds: ["CHANGE_REQUESTED", "CHANGE_DECIDED", "CHANGE_APPLIED"] },
+];
+
+function SummaryTab({ t, narrow, onAllEvents }: { t: SerialTracking; narrow: boolean; onAllEvents: () => void }) {
+  const [group, setGroup] = useState("all");
+  const kinds = EVENT_GROUPS.find((x) => x.id === group)?.kinds ?? null;
+  const shown: SerialTracking = kinds ? { ...t, events: t.events.filter((e) => kinds.includes(e.kind)) } : t;
   return (
     <div className="serial-grid serial-grid--summary" data-testid="serial-summary">
-      <SidePanel serialId={t.serial.serial_id} />
-      <LaterSection title="مشکلات فعال" phase="PHASE_06 / PHASE_07" fid="active-problems" className="serial-problems" />
-      <div className="later-grid serial-cards" data-fid="summary-cards">
-        <LaterSection title="پیشرفت کلی" phase="PHASE_07 / PHASE_09" />
-        <LaterSection title="آمادگی مواد" phase="PHASE_06" />
-        <LaterSection title="این کجاست (موقعیت فعلی)" phase="PHASE_07" />
-        <LaterSection title="کیفیت و گرید" phase="PHASE_08" />
+      {narrow ? <ProblemsCard fid="active-problems" /> : null}
+      {narrow ? <SidePanel serialId={t.serial.serial_id} /> : null}
+      <div className="serial-cards" data-fid="summary-cards">
+        <LaterCard title="پیشرفت کلی" icon="chart" phase="PHASE_07 / PHASE_09" main="پیشرفت واقعی" bar rows={["تولیدشده", "در فرایند", "محصول نهایی", "ارسال نشده"]} className="later-card--progress" />
+        <LaterCard title="این کجاست (موقعیت فعلی)" icon="location" phase="PHASE_07" box="خط و مرحله فعلی" bar rows={["قطعه‌سازی", "دوخت", "QC"]} className="later-card--where" />
+        {narrow ? null : <ProblemsCard />}
+        <LaterCard title="آمادگی مواد" icon="cube" phase="PHASE_06" main="آمادگی مواد" rows={["کامل", "کسری", "Hold کیفی", "در انتظار دریافت"]} className="later-card--materials" />
+        <LaterCard title="کیفیت و گرید" icon="quality" phase="PHASE_08" box="استاندارد محصول" rows={["A+", "A", "B", "Rework"]} className="later-card--quality" />
       </div>
       <section className="panel serial-events" aria-labelledby="ev-title" data-fid="events">
         <div className="panel__head">
-          <h2 id="ev-title">تاریخچه رویدادها</h2>
+          <h2 id="ev-title">
+            <Icon name="clock" size={18} />
+            تاریخچه رویدادها
+          </h2>
+          <div className="serial-events__filter" role="group" aria-label="فیلتر رویدادها">
+            {EVENT_GROUPS.map((x) => (
+              <button key={x.id} type="button" className={x.id === group ? "btn chipbtn chipbtn--on" : "btn chipbtn"} aria-pressed={x.id === group} onClick={() => { setGroup(x.id); }}>
+                {x.label}
+              </button>
+            ))}
+          </div>
         </div>
-        <EventList t={t} />
+        <EventList t={shown} />
+        <button type="button" className="btn btn--outline btn--compact serial-events__all" onClick={onAllEvents}>
+          <Icon name="tasks" size={16} />
+          مشاهده همه رویدادها
+        </button>
       </section>
     </div>
   );
@@ -330,7 +550,7 @@ function SummaryTab({ t }: { t: SerialTracking }) {
 
 /** A collapsible part of the order tab (native disclosure, keyboard accessible); the title shows what is inside.
  * `lazy`: the content (and its requests) is mounted only once the part is opened. */
-function Fold({ title, children, testId, lazy = false }: { title: string; children: ReactNode; testId?: string; lazy?: boolean }) {
+function Fold({ title, icon, children, testId, lazy = false }: { title: string; icon: IconName; children: ReactNode; testId?: string; lazy?: boolean }) {
   const [opened, setOpened] = useState(false);
   return (
     <details
@@ -340,14 +560,17 @@ function Fold({ title, children, testId, lazy = false }: { title: string; childr
         if (e.currentTarget.open) setOpened(true);
       }}
     >
-      <summary className="fold__title">{title}</summary>
+      <summary className="fold__title">
+        <Icon name={icon} size={18} className="fold__icon" />
+        {title}
+      </summary>
       <div className="fold__body">{!lazy || opened ? children : null}</div>
     </details>
   );
 }
 
 // ------------------------------------------------------------------------------------------ page 2
-function OrderTab({ t, order, orderLoading }: { t: SerialTracking; order: CustomerOrder | undefined; orderLoading: boolean }) {
+function OrderTab({ t, order, orderLoading, narrow }: { t: SerialTracking; order: CustomerOrder | undefined; orderLoading: boolean; narrow: boolean }) {
   const { can } = useAuth();
   const s = t.serial;
   const snaps = useQuery({
@@ -355,10 +578,40 @@ function OrderTab({ t, order, orderLoading }: { t: SerialTracking; order: Custom
     queryFn: async ({ signal }) => (await get(`/identity/serials/${s.serial_id}/snapshots`, g.snapshotPage, { page_size: 100 }, signal)).data,
   });
   const withheld = t.withheld_sections ?? [];
+  // the order lines: inside the order card on the desktop; on tablet / phone after the side panel (concept order)
+  const lines = order ? (
+    <div className="subcard">
+        <h3 className="subcard__title">
+          <Icon name="tasks" size={16} />
+          ردیف‌های سفارش
+        </h3>
+        <table className="table table--cards table--grid" data-testid="serial-order-lines">
+          <caption className="sr-only">ردیف‌های سفارش</caption>
+          <thead>
+            <tr><th scope="col">ردیف</th><th scope="col">کد</th><th scope="col">تعداد</th><th scope="col">تحویل</th><th scope="col">وضعیت</th><th scope="col">سریال</th></tr>
+          </thead>
+          <tbody>
+            {order.lines.filter((l) => l.status !== "REMOVED").map((l) => (
+              <tr key={l.line_id} className={l.serial_id === s.serial_id ? "row--current" : undefined}>
+                <td data-label="ردیف">{toFaDigits(l.line_no)}</td>
+                <td data-label="کد"><Code14 code={l.product_code} /></td>
+                <td data-label="تعداد">{toFaDigits(l.quantity)} {UOM[l.uom] ?? l.uom}</td>
+                <td data-label="تحویل">{formatJalaliDate(l.requested_due_date)}</td>
+                <td data-label="وضعیت"><StatusChip {...toneLabel(LINE_STATUS, l.status)} /></td>
+                <td data-label="سریال">{l.serial_id ? <a href={`#/serials/${l.serial_id}`}><Num value={l.serial_number} /></a> : "—"}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+  ) : null;
   return (
     <div className="serial-grid serial-grid--order" data-testid="serial-order" data-fid="order-tab">
       <section className="panel serial-order-head" aria-labelledby="o-title">
-        <h2 id="o-title">سفارش و ردیف‌های آن</h2>
+        <h2 id="o-title">
+          <Icon name="order" size={18} />
+          سفارش و ردیف‌های آن
+        </h2>
         {!can(PERM.orderRead) || withheld.includes("order_versions") ? (
           <p className="notice notice--info" data-testid="withheld">برای دیدن سفارش مجوز ندارید.</p>
         ) : orderLoading ? (
@@ -375,32 +628,16 @@ function OrderTab({ t, order, orderLoading }: { t: SerialTracking; order: Custom
               <div><dt>نسخه جاری</dt><dd>{order.current_version ? toFaDigits(order.current_version) : "—"}</dd></div>
               <div><dt>نماینده مشتری</dt><dd><Representative value={order.customer_representative_name} /></dd></div>
             </dl>
-            <table className="table table--cards table--grid" data-testid="serial-order-lines">
-              <caption>ردیف‌های سفارش</caption>
-              <thead>
-                <tr><th scope="col">ردیف</th><th scope="col">کد</th><th scope="col">تعداد</th><th scope="col">تحویل</th><th scope="col">وضعیت</th><th scope="col">سریال</th></tr>
-              </thead>
-              <tbody>
-                {order.lines.filter((l) => l.status !== "REMOVED").map((l) => (
-                  <tr key={l.line_id} className={l.serial_id === s.serial_id ? "row--current" : undefined}>
-                    <td data-label="ردیف">{toFaDigits(l.line_no)}</td>
-                    <td data-label="کد"><Code14 code={l.product_code} /></td>
-                    <td data-label="تعداد">{toFaDigits(l.quantity)} {UOM[l.uom] ?? l.uom}</td>
-                    <td data-label="تحویل">{formatJalaliDate(l.requested_due_date)}</td>
-                    <td data-label="وضعیت"><StatusChip {...toneLabel(LINE_STATUS, l.status)} /></td>
-                    <td data-label="سریال">{l.serial_id ? <a href={`#/serials/${l.serial_id}`}><Num value={l.serial_number} /></a> : "—"}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            {narrow ? null : lines}
           </>
         ) : (
           <p className="field__hint">این سریال به سفارشی وصل نیست.</p>
         )}
       </section>
-      <SidePanel serialId={s.serial_id} />
+      {narrow ? <SidePanel serialId={s.serial_id} /> : null}
+      {narrow && lines && can(PERM.orderRead) && !withheld.includes("order_versions") ? <section className="panel serial-order-lines" aria-label="ردیف‌های سفارش">{lines}</section> : null}
       <div className="serial-order-folds">
-        <Fold title={`Snapshot سریال (آنچه هنگام تعهد ثبت شد)${snaps.data ? ` · ${toFaDigits(snaps.data.items.length)} نسخه` : ""}`}>
+        <Fold icon="documents" title={`Snapshot سریال (آنچه هنگام تعهد ثبت شد)${snaps.data ? ` · ${toFaDigits(snaps.data.items.length)} نسخه` : ""}`}>
           <DataView query={snaps} loading="در حال دریافت Snapshotها…" errorTitle="Snapshotها دریافت نشد" isEmpty={(d) => d.items.length === 0} empty={{ title: "Snapshotی نیست." }}>
             {(d) => (
               <ol className="timeline" data-testid="serial-snapshots">
@@ -414,7 +651,7 @@ function OrderTab({ t, order, orderLoading }: { t: SerialTracking; order: Custom
             )}
           </DataView>
         </Fold>
-        <Fold title={`نسخه‌های سفارش · ${toFaDigits(t.order_versions.length)}`}>
+        <Fold icon="layers" title={`نسخه‌های سفارش · ${toFaDigits(t.order_versions.length)}`}>
           {t.order_versions.length === 0 ? (
             <p className="field__hint">{withheld.includes("order_versions") ? "بدون مجوز خواندن سفارش." : "نسخه‌ای نیست."}</p>
           ) : (
@@ -425,11 +662,11 @@ function OrderTab({ t, order, orderLoading }: { t: SerialTracking; order: Custom
             </ol>
           )}
         </Fold>
-        <Fold title="مرجع‌های خارجی (ارجاع‌های بیرونی سریال و سفارش)" testId="fold-refs" lazy>
+        <Fold icon="source" title="مرجع‌های خارجی (ارجاع‌های بیرونی سریال و سفارش)" testId="fold-refs" lazy>
           <ExternalRefs targetType="serial" targetId={s.serial_id} />
           {order ? <ExternalRefs targetType="customer_order" targetId={order.order_id} /> : null}
         </Fold>
-        <Fold title={`تاریخچه رویدادها · ${toFaDigits(t.events.length)}`}>
+        <Fold icon="clock" title={`تاریخچه رویدادها · ${toFaDigits(t.events.length)}`}>
           <EventList t={t} />
         </Fold>
       </div>
