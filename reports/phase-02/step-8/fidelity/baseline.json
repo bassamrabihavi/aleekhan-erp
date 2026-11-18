@@ -1,0 +1,3568 @@
+{
+  "schema": 1,
+  "threshold": 0.95,
+  "commit": "54a40b35c1ec",
+  "date": "2026-11-18",
+  "channel": "msedge",
+  "results": [
+    {
+      "page": "01",
+      "title_fa": "مرکز کنترل سریال — نمای خلاصه",
+      "authored": "hand",
+      "widths": [
+        {
+          "width": 1440,
+          "score": 0.44160326852634546,
+          "presence": 0.4941955480417019,
+          "layout": 0.07692307692307693,
+          "style": 0.8571428571428571,
+          "regions": [
+            {
+              "id": "side-menu",
+              "label_fa": "منوی کناری (آیکون‌دار)",
+              "presence": 1,
+              "iou": 0.229817264045613,
+              "in_place": false,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "topbar",
+              "label_fa": "نوار بالا",
+              "presence": 1,
+              "iou": 0.8508888713470185,
+              "in_place": true,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "topbar-search",
+              "label_fa": "جستجوی سراسری",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "topbar-date",
+              "label_fa": "تاریخ امروز",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "topbar-user",
+              "label_fa": "کاربر",
+              "presence": 1,
+              "iou": 0.22771504522959132,
+              "in_place": false,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "serial-header",
+              "label_fa": "سربرگ سریال (شماره، محصول، کد، مشتری، وضعیت، تعداد)",
+              "presence": 0.7142857142857143,
+              "iou": 0.36698382987660694,
+              "in_place": false,
+              "missing_children": [
+                "رنگ",
+                "جنس"
+              ],
+              "note": ""
+            },
+            {
+              "id": "header-actions",
+              "label_fa": "دکمه‌های اقدام سریال (تصمیم برنامه‌ریزی، تغییر اولویت، Fast Track، سناریو، بیشتر)",
+              "later_phase": "PHASE_05",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "تصمیم برنامه‌ریزی",
+                "تغییر اولویت",
+                "سناریو",
+                "بیشتر"
+              ],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "date-cards",
+              "label_fa": "کارت‌های تعهد / پیش‌بینی / اختلاف",
+              "later_phase": "PHASE_05",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "تعهد",
+                "Forecast",
+                "اختلاف"
+              ],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "stage-flow",
+              "label_fa": "مراحل تولید سریال",
+              "later_phase": "PHASE_03 … PHASE_09",
+              "presence": 1,
+              "iou": 0,
+              "in_place": false,
+              "missing_children": [],
+              "note": "later phase: honest «در دست ساخت» in place"
+            },
+            {
+              "id": "tabs",
+              "label_fa": "زبانه‌های مرکز کنترل سریال",
+              "presence": 0.21025641025641026,
+              "iou": 0,
+              "in_place": false,
+              "missing_children": [
+                "برنامه‌ریزی",
+                "مهندسی",
+                "مواد و انبار",
+                "برش",
+                "تولید",
+                "کیفیت",
+                "محصول و ارسال",
+                "بهای تمام‌شده",
+                "تسک‌ها",
+                "اسناد",
+                "تاریخچه"
+              ],
+              "note": "items 2/13"
+            },
+            {
+              "id": "side-panel",
+              "label_fa": "تصمیم‌ها و پیگیری‌ها / تسک‌ها / ریسک‌ها",
+              "presence": 0.5,
+              "iou": 0.052266229718707424,
+              "in_place": false,
+              "missing_children": [
+                "تسک‌های نزدیک موعد",
+                "ریسک‌ها"
+              ],
+              "note": ""
+            },
+            {
+              "id": "summary-cards",
+              "label_fa": "کارت‌های خلاصه (پیشرفت، موقعیت، مشکلات، آمادگی مواد، کیفیت)",
+              "later_phase": "PHASE_06 … PHASE_09",
+              "presence": 1,
+              "iou": 0.12938071398150083,
+              "in_place": false,
+              "missing_children": [],
+              "note": "later phase: honest «در دست ساخت» in place"
+            },
+            {
+              "id": "events",
+              "label_fa": "تاریخچه رویدادها",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "تاریخچه رویدادها"
+              ],
+              "note": "no data-fid region on the built page"
+            }
+          ],
+          "style_checks": [
+            {
+              "id": "side-menu-icons",
+              "ok": 0,
+              "detail": "menu visible, 0 icons"
+            },
+            {
+              "id": "panel-radius",
+              "ok": 1,
+              "detail": "built 9px vs mockup 10px (±4)"
+            },
+            {
+              "id": "panel-border",
+              "ok": 1,
+              "detail": "4/4 built panels with border or shadow"
+            },
+            {
+              "id": "font-family",
+              "ok": 1,
+              "detail": "Vazirmatn (approved token)"
+            },
+            {
+              "id": "heading-size",
+              "ok": 1,
+              "detail": "built 23px vs mockup 26px (±25%)"
+            },
+            {
+              "id": "content-padding",
+              "ok": 1,
+              "detail": "built 22px vs mockup 16px (±8)"
+            },
+            {
+              "id": "brand-colours",
+              "ok": 1,
+              "detail": "page bg = --color-bg"
+            }
+          ]
+        },
+        {
+          "width": 1180,
+          "score": 0.44160326852634546,
+          "presence": 0.4941955480417019,
+          "layout": 0.07692307692307693,
+          "style": 0.8571428571428571,
+          "regions": [
+            {
+              "id": "side-menu",
+              "label_fa": "منوی کناری (آیکون‌دار)",
+              "presence": 1,
+              "iou": 0.15023080157443677,
+              "in_place": false,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "topbar",
+              "label_fa": "نوار بالا",
+              "presence": 1,
+              "iou": 0.8944193500000001,
+              "in_place": true,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "topbar-search",
+              "label_fa": "جستجوی سراسری",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "topbar-date",
+              "label_fa": "تاریخ امروز",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "topbar-user",
+              "label_fa": "کاربر",
+              "presence": 1,
+              "iou": 0.17447755999772732,
+              "in_place": false,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "serial-header",
+              "label_fa": "سربرگ سریال (شماره، محصول، کد، مشتری، وضعیت، تعداد)",
+              "presence": 0.7142857142857143,
+              "iou": 0.2677762547139901,
+              "in_place": false,
+              "missing_children": [
+                "رنگ",
+                "جنس"
+              ],
+              "note": ""
+            },
+            {
+              "id": "header-actions",
+              "label_fa": "دکمه‌های اقدام سریال (تصمیم برنامه‌ریزی، تغییر اولویت، Fast Track، سناریو، بیشتر)",
+              "later_phase": "PHASE_05",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "تصمیم برنامه‌ریزی",
+                "تغییر اولویت",
+                "سناریو",
+                "بیشتر"
+              ],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "date-cards",
+              "label_fa": "کارت‌های تعهد / پیش‌بینی / اختلاف",
+              "later_phase": "PHASE_05",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "تعهد",
+                "Forecast",
+                "اختلاف"
+              ],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "stage-flow",
+              "label_fa": "مراحل تولید سریال",
+              "later_phase": "PHASE_03 … PHASE_09",
+              "presence": 1,
+              "iou": 0,
+              "in_place": false,
+              "missing_children": [],
+              "note": "later phase: honest «در دست ساخت» in place"
+            },
+            {
+              "id": "tabs",
+              "label_fa": "زبانه‌های مرکز کنترل سریال",
+              "presence": 0.21025641025641026,
+              "iou": 0,
+              "in_place": false,
+              "missing_children": [
+                "برنامه‌ریزی",
+                "مهندسی",
+                "مواد و انبار",
+                "برش",
+                "تولید",
+                "کیفیت",
+                "محصول و ارسال",
+                "بهای تمام‌شده",
+                "تسک‌ها",
+                "اسناد",
+                "تاریخچه"
+              ],
+              "note": "items 2/13"
+            },
+            {
+              "id": "side-panel",
+              "label_fa": "تصمیم‌ها و پیگیری‌ها / تسک‌ها / ریسک‌ها",
+              "presence": 0.5,
+              "iou": 0,
+              "in_place": false,
+              "missing_children": [
+                "تسک‌های نزدیک موعد",
+                "ریسک‌ها"
+              ],
+              "note": ""
+            },
+            {
+              "id": "summary-cards",
+              "label_fa": "کارت‌های خلاصه (پیشرفت، موقعیت، مشکلات، آمادگی مواد، کیفیت)",
+              "later_phase": "PHASE_06 … PHASE_09",
+              "presence": 1,
+              "iou": 0,
+              "in_place": false,
+              "missing_children": [],
+              "note": "later phase: honest «در دست ساخت» in place"
+            },
+            {
+              "id": "events",
+              "label_fa": "تاریخچه رویدادها",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "تاریخچه رویدادها"
+              ],
+              "note": "no data-fid region on the built page"
+            }
+          ],
+          "style_checks": [
+            {
+              "id": "side-menu-icons",
+              "ok": 0,
+              "detail": "menu visible, 0 icons"
+            },
+            {
+              "id": "panel-radius",
+              "ok": 1,
+              "detail": "built 9px vs mockup 10px (±4)"
+            },
+            {
+              "id": "panel-border",
+              "ok": 1,
+              "detail": "4/4 built panels with border or shadow"
+            },
+            {
+              "id": "font-family",
+              "ok": 1,
+              "detail": "Vazirmatn (approved token)"
+            },
+            {
+              "id": "heading-size",
+              "ok": 1,
+              "detail": "built 20px vs mockup 26px (±25%)"
+            },
+            {
+              "id": "content-padding",
+              "ok": 1,
+              "detail": "built 22px vs mockup 16px (±8)"
+            },
+            {
+              "id": "brand-colours",
+              "ok": 1,
+              "detail": "page bg = --color-bg"
+            }
+          ]
+        },
+        {
+          "width": 768,
+          "score": 0.5833333333333333,
+          "presence": 0.6904761904761905,
+          "layout": 0.2222222222222222,
+          "style": 0.8571428571428571,
+          "regions": [
+            {
+              "id": "topbar",
+              "label_fa": "نوار بالا",
+              "presence": 1,
+              "iou": 0.659839527027027,
+              "in_place": true,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "topbar-search",
+              "label_fa": "جستجوی سراسری",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "topbar-user",
+              "label_fa": "کاربر",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [],
+              "note": "not visible"
+            },
+            {
+              "id": "menu-toggle",
+              "label_fa": "دکمه باز کردن منو (موبایل)",
+              "presence": 1,
+              "iou": 0,
+              "in_place": false,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "serial-header",
+              "label_fa": "سربرگ سریال (شماره، محصول، کد، مشتری، وضعیت، تعداد)",
+              "presence": 0.7142857142857143,
+              "iou": 0.6577628674115199,
+              "in_place": true,
+              "missing_children": [
+                "رنگ",
+                "جنس"
+              ],
+              "note": ""
+            },
+            {
+              "id": "stage-flow",
+              "label_fa": "مراحل تولید سریال",
+              "later_phase": "PHASE_03 … PHASE_09",
+              "presence": 1,
+              "iou": 0,
+              "in_place": false,
+              "missing_children": [],
+              "note": "later phase: honest «در دست ساخت» in place"
+            },
+            {
+              "id": "side-panel",
+              "label_fa": "تصمیم‌ها و پیگیری‌ها / تسک‌ها / ریسک‌ها",
+              "presence": 0.5,
+              "iou": 0.310341059587164,
+              "in_place": false,
+              "missing_children": [
+                "تسک‌های نزدیک موعد",
+                "ریسک‌ها"
+              ],
+              "note": ""
+            },
+            {
+              "id": "summary-cards",
+              "label_fa": "کارت‌های خلاصه (پیشرفت، موقعیت، مشکلات، آمادگی مواد، کیفیت)",
+              "later_phase": "PHASE_06 … PHASE_09",
+              "presence": 1,
+              "iou": 0,
+              "in_place": false,
+              "missing_children": [],
+              "note": "later phase: honest «در دست ساخت» in place"
+            },
+            {
+              "id": "active-problems",
+              "label_fa": "مشکلات فعال (کارت موبایل)",
+              "later_phase": "PHASE_06 / PHASE_07",
+              "presence": 1,
+              "iou": 0.14983638346389175,
+              "in_place": false,
+              "missing_children": [],
+              "note": "later phase: honest «در دست ساخت» in place"
+            }
+          ],
+          "style_checks": [
+            {
+              "id": "menu-toggle",
+              "ok": 1,
+              "detail": "toggle visible"
+            },
+            {
+              "id": "panel-radius",
+              "ok": 1,
+              "detail": "built 9px vs mockup 10px (±4)"
+            },
+            {
+              "id": "panel-border",
+              "ok": 1,
+              "detail": "4/4 built panels with border or shadow"
+            },
+            {
+              "id": "font-family",
+              "ok": 1,
+              "detail": "Vazirmatn (approved token)"
+            },
+            {
+              "id": "heading-size",
+              "ok": 1,
+              "detail": "built 20px vs mockup 16px (±25%)"
+            },
+            {
+              "id": "content-padding",
+              "ok": 0,
+              "detail": "built 22px vs mockup 6px (±8)"
+            },
+            {
+              "id": "brand-colours",
+              "ok": 1,
+              "detail": "page bg = --color-bg"
+            }
+          ]
+        },
+        {
+          "width": 390,
+          "score": 0.5407142857142857,
+          "presence": 0.6214285714285714,
+          "layout": 0.1,
+          "style": 1,
+          "regions": [
+            {
+              "id": "topbar",
+              "label_fa": "نوار بالا",
+              "presence": 1,
+              "iou": 0.7569836065573771,
+              "in_place": true,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "topbar-search",
+              "label_fa": "جستجوی سراسری",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "topbar-user",
+              "label_fa": "کاربر",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [],
+              "note": "not visible"
+            },
+            {
+              "id": "menu-toggle",
+              "label_fa": "دکمه باز کردن منو (موبایل)",
+              "presence": 1,
+              "iou": 0,
+              "in_place": false,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "bottom-nav",
+              "label_fa": "نوار پایین موبایل",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "خانه",
+                "برنامه‌ریزی",
+                "ثبت",
+                "گزارش‌ها",
+                "بیشتر"
+              ],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "serial-header",
+              "label_fa": "سربرگ سریال (شماره، محصول، کد، مشتری، وضعیت، تعداد)",
+              "presence": 0.7142857142857143,
+              "iou": 0.2256568390110027,
+              "in_place": false,
+              "missing_children": [
+                "رنگ",
+                "جنس"
+              ],
+              "note": ""
+            },
+            {
+              "id": "stage-flow",
+              "label_fa": "مراحل تولید سریال",
+              "later_phase": "PHASE_03 … PHASE_09",
+              "presence": 1,
+              "iou": 0,
+              "in_place": false,
+              "missing_children": [],
+              "note": "later phase: honest «در دست ساخت» in place"
+            },
+            {
+              "id": "side-panel",
+              "label_fa": "تصمیم‌ها و پیگیری‌ها / تسک‌ها / ریسک‌ها",
+              "presence": 0.5,
+              "iou": 0,
+              "in_place": false,
+              "missing_children": [
+                "تسک‌های نزدیک موعد",
+                "ریسک‌ها"
+              ],
+              "note": ""
+            },
+            {
+              "id": "summary-cards",
+              "label_fa": "کارت‌های خلاصه (پیشرفت، موقعیت، مشکلات، آمادگی مواد، کیفیت)",
+              "later_phase": "PHASE_06 … PHASE_09",
+              "presence": 1,
+              "iou": 0.07034365702811206,
+              "in_place": false,
+              "missing_children": [],
+              "note": "later phase: honest «در دست ساخت» in place"
+            },
+            {
+              "id": "active-problems",
+              "label_fa": "مشکلات فعال (کارت موبایل)",
+              "later_phase": "PHASE_06 / PHASE_07",
+              "presence": 1,
+              "iou": 0,
+              "in_place": false,
+              "missing_children": [],
+              "note": "later phase: honest «در دست ساخت» in place"
+            }
+          ],
+          "style_checks": [
+            {
+              "id": "menu-toggle",
+              "ok": 1,
+              "detail": "toggle visible"
+            },
+            {
+              "id": "panel-radius",
+              "ok": 1,
+              "detail": "built 9px vs mockup 10px (±4)"
+            },
+            {
+              "id": "panel-border",
+              "ok": 1,
+              "detail": "4/4 built panels with border or shadow"
+            },
+            {
+              "id": "font-family",
+              "ok": 1,
+              "detail": "Vazirmatn (approved token)"
+            },
+            {
+              "id": "heading-size",
+              "ok": 1,
+              "detail": "built 18px vs mockup 16px (±25%)"
+            },
+            {
+              "id": "content-padding",
+              "ok": 1,
+              "detail": "built 12px vs mockup 6px (±8)"
+            },
+            {
+              "id": "brand-colours",
+              "ok": 1,
+              "detail": "page bg = --color-bg"
+            }
+          ]
+        }
+      ],
+      "min": 0.44160326852634546,
+      "passed": false
+    },
+    {
+      "page": "02",
+      "title_fa": "مرکز کنترل سریال — تب سفارش",
+      "authored": "hand",
+      "widths": [
+        {
+          "width": 1440,
+          "score": 0.39566544566544565,
+          "presence": 0.39847374847374845,
+          "layout": 0.08333333333333333,
+          "style": 0.8571428571428571,
+          "regions": [
+            {
+              "id": "side-menu",
+              "label_fa": "منوی کناری (آیکون‌دار)",
+              "presence": 1,
+              "iou": 0.10703957100413818,
+              "in_place": false,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "topbar",
+              "label_fa": "نوار بالا",
+              "presence": 1,
+              "iou": 0.8508888713470185,
+              "in_place": true,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "topbar-search",
+              "label_fa": "جستجوی سراسری",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "topbar-date",
+              "label_fa": "تاریخ امروز",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "topbar-user",
+              "label_fa": "کاربر",
+              "presence": 1,
+              "iou": 0.22771504522959132,
+              "in_place": false,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "serial-header",
+              "label_fa": "سربرگ سریال (شماره، محصول، کد، مشتری، وضعیت، تعداد)",
+              "presence": 0.7142857142857143,
+              "iou": 0.36698382987660694,
+              "in_place": false,
+              "missing_children": [
+                "رنگ",
+                "جنس"
+              ],
+              "note": ""
+            },
+            {
+              "id": "header-actions",
+              "label_fa": "دکمه‌های اقدام سریال (تصمیم برنامه‌ریزی، تغییر اولویت، Fast Track، سناریو، بیشتر)",
+              "later_phase": "PHASE_05",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "تصمیم برنامه‌ریزی",
+                "تغییر اولویت",
+                "سناریو",
+                "بیشتر"
+              ],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "date-cards",
+              "label_fa": "کارت‌های تعهد / پیش‌بینی / اختلاف",
+              "later_phase": "PHASE_05",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "تعهد",
+                "Forecast",
+                "اختلاف"
+              ],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "stage-flow",
+              "label_fa": "مراحل تولید سریال",
+              "later_phase": "PHASE_03 … PHASE_09",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "مواد و انبار",
+                "مهندسی",
+                "تأمین",
+                "برش",
+                "دوخت",
+                "کنترل کیفیت",
+                "آماده محصول"
+              ],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "tabs",
+              "label_fa": "زبانه‌های مرکز کنترل سریال",
+              "presence": 0.21025641025641026,
+              "iou": 0,
+              "in_place": false,
+              "missing_children": [
+                "برنامه‌ریزی",
+                "مهندسی",
+                "مواد و انبار",
+                "برش",
+                "تولید",
+                "کیفیت",
+                "محصول و ارسال",
+                "بهای تمام‌شده",
+                "تسک‌ها",
+                "اسناد",
+                "تاریخچه"
+              ],
+              "note": "items 2/13"
+            },
+            {
+              "id": "side-panel",
+              "label_fa": "تصمیم‌ها و پیگیری‌ها / تسک‌ها / ریسک‌ها",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "تصمیم‌ها و پیگیری‌ها",
+                "تسک‌های نزدیک موعد",
+                "ریسک‌ها"
+              ],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "order-tab",
+              "label_fa": "محتوای تب سفارش (سربرگ سفارش، ردیف‌ها، Snapshot، نسخه‌ها، مرجع‌های خارجی، خط زمانی)",
+              "presence": 0.8571428571428571,
+              "iou": 0.2003161212555725,
+              "in_place": false,
+              "missing_children": [
+                "مرجع‌های خارجی"
+              ],
+              "note": ""
+            }
+          ],
+          "style_checks": [
+            {
+              "id": "side-menu-icons",
+              "ok": 0,
+              "detail": "menu visible, 0 icons"
+            },
+            {
+              "id": "panel-radius",
+              "ok": 1,
+              "detail": "built 13px vs mockup 10px (±4)"
+            },
+            {
+              "id": "panel-border",
+              "ok": 1,
+              "detail": "1/1 built panels with border or shadow"
+            },
+            {
+              "id": "font-family",
+              "ok": 1,
+              "detail": "Vazirmatn (approved token)"
+            },
+            {
+              "id": "heading-size",
+              "ok": 1,
+              "detail": "built 23px vs mockup 26px (±25%)"
+            },
+            {
+              "id": "content-padding",
+              "ok": 1,
+              "detail": "built 22px vs mockup 16px (±8)"
+            },
+            {
+              "id": "brand-colours",
+              "ok": 1,
+              "detail": "page bg = --color-bg"
+            }
+          ]
+        },
+        {
+          "width": 1180,
+          "score": 0.39566544566544565,
+          "presence": 0.39847374847374845,
+          "layout": 0.08333333333333333,
+          "style": 0.8571428571428571,
+          "regions": [
+            {
+              "id": "side-menu",
+              "label_fa": "منوی کناری (آیکون‌دار)",
+              "presence": 1,
+              "iou": 0.07171511664201839,
+              "in_place": false,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "topbar",
+              "label_fa": "نوار بالا",
+              "presence": 1,
+              "iou": 0.8944193500000001,
+              "in_place": true,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "topbar-search",
+              "label_fa": "جستجوی سراسری",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "topbar-date",
+              "label_fa": "تاریخ امروز",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "topbar-user",
+              "label_fa": "کاربر",
+              "presence": 1,
+              "iou": 0.17447755999772732,
+              "in_place": false,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "serial-header",
+              "label_fa": "سربرگ سریال (شماره، محصول، کد، مشتری، وضعیت، تعداد)",
+              "presence": 0.7142857142857143,
+              "iou": 0.2677762547139901,
+              "in_place": false,
+              "missing_children": [
+                "رنگ",
+                "جنس"
+              ],
+              "note": ""
+            },
+            {
+              "id": "header-actions",
+              "label_fa": "دکمه‌های اقدام سریال (تصمیم برنامه‌ریزی، تغییر اولویت، Fast Track، سناریو، بیشتر)",
+              "later_phase": "PHASE_05",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "تصمیم برنامه‌ریزی",
+                "تغییر اولویت",
+                "سناریو",
+                "بیشتر"
+              ],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "date-cards",
+              "label_fa": "کارت‌های تعهد / پیش‌بینی / اختلاف",
+              "later_phase": "PHASE_05",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "تعهد",
+                "Forecast",
+                "اختلاف"
+              ],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "stage-flow",
+              "label_fa": "مراحل تولید سریال",
+              "later_phase": "PHASE_03 … PHASE_09",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "مواد و انبار",
+                "مهندسی",
+                "تأمین",
+                "برش",
+                "دوخت",
+                "کنترل کیفیت",
+                "آماده محصول"
+              ],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "tabs",
+              "label_fa": "زبانه‌های مرکز کنترل سریال",
+              "presence": 0.21025641025641026,
+              "iou": 0,
+              "in_place": false,
+              "missing_children": [
+                "برنامه‌ریزی",
+                "مهندسی",
+                "مواد و انبار",
+                "برش",
+                "تولید",
+                "کیفیت",
+                "محصول و ارسال",
+                "بهای تمام‌شده",
+                "تسک‌ها",
+                "اسناد",
+                "تاریخچه"
+              ],
+              "note": "items 2/13"
+            },
+            {
+              "id": "side-panel",
+              "label_fa": "تصمیم‌ها و پیگیری‌ها / تسک‌ها / ریسک‌ها",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "تصمیم‌ها و پیگیری‌ها",
+                "تسک‌های نزدیک موعد",
+                "ریسک‌ها"
+              ],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "order-tab",
+              "label_fa": "محتوای تب سفارش (سربرگ سفارش، ردیف‌ها، Snapshot، نسخه‌ها، مرجع‌های خارجی، خط زمانی)",
+              "presence": 0.8571428571428571,
+              "iou": 0.0885372873475899,
+              "in_place": false,
+              "missing_children": [
+                "مرجع‌های خارجی"
+              ],
+              "note": ""
+            }
+          ],
+          "style_checks": [
+            {
+              "id": "side-menu-icons",
+              "ok": 0,
+              "detail": "menu visible, 0 icons"
+            },
+            {
+              "id": "panel-radius",
+              "ok": 1,
+              "detail": "built 13px vs mockup 10px (±4)"
+            },
+            {
+              "id": "panel-border",
+              "ok": 1,
+              "detail": "1/1 built panels with border or shadow"
+            },
+            {
+              "id": "font-family",
+              "ok": 1,
+              "detail": "Vazirmatn (approved token)"
+            },
+            {
+              "id": "heading-size",
+              "ok": 1,
+              "detail": "built 20px vs mockup 26px (±25%)"
+            },
+            {
+              "id": "content-padding",
+              "ok": 1,
+              "detail": "built 22px vs mockup 16px (±8)"
+            },
+            {
+              "id": "brand-colours",
+              "ok": 1,
+              "detail": "page bg = --color-bg"
+            }
+          ]
+        },
+        {
+          "width": 768,
+          "score": 0.5071428571428571,
+          "presence": 0.44642857142857145,
+          "layout": 0.375,
+          "style": 0.8571428571428571,
+          "regions": [
+            {
+              "id": "topbar",
+              "label_fa": "نوار بالا",
+              "presence": 1,
+              "iou": 0.659839527027027,
+              "in_place": true,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "topbar-search",
+              "label_fa": "جستجوی سراسری",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "topbar-user",
+              "label_fa": "کاربر",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [],
+              "note": "not visible"
+            },
+            {
+              "id": "menu-toggle",
+              "label_fa": "دکمه باز کردن منو (موبایل)",
+              "presence": 1,
+              "iou": 0,
+              "in_place": false,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "serial-header",
+              "label_fa": "سربرگ سریال (شماره، محصول، کد، مشتری، وضعیت، تعداد)",
+              "presence": 0.7142857142857143,
+              "iou": 0.6577628674115199,
+              "in_place": true,
+              "missing_children": [
+                "رنگ",
+                "جنس"
+              ],
+              "note": ""
+            },
+            {
+              "id": "stage-flow",
+              "label_fa": "مراحل تولید سریال",
+              "later_phase": "PHASE_03 … PHASE_09",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "مواد و انبار",
+                "مهندسی",
+                "تأمین",
+                "برش",
+                "دوخت",
+                "کنترل کیفیت",
+                "آماده محصول"
+              ],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "side-panel",
+              "label_fa": "تصمیم‌ها و پیگیری‌ها / تسک‌ها / ریسک‌ها",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "تصمیم‌ها و پیگیری‌ها",
+                "تسک‌های نزدیک موعد",
+                "ریسک‌ها"
+              ],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "order-tab",
+              "label_fa": "محتوای تب سفارش (سربرگ سفارش، ردیف‌ها، Snapshot، نسخه‌ها، مرجع‌های خارجی، خط زمانی)",
+              "presence": 0.8571428571428571,
+              "iou": 0.6585065870999322,
+              "in_place": true,
+              "missing_children": [
+                "مرجع‌های خارجی"
+              ],
+              "note": ""
+            }
+          ],
+          "style_checks": [
+            {
+              "id": "menu-toggle",
+              "ok": 1,
+              "detail": "toggle visible"
+            },
+            {
+              "id": "panel-radius",
+              "ok": 1,
+              "detail": "built 13px vs mockup 10px (±4)"
+            },
+            {
+              "id": "panel-border",
+              "ok": 1,
+              "detail": "1/1 built panels with border or shadow"
+            },
+            {
+              "id": "font-family",
+              "ok": 1,
+              "detail": "Vazirmatn (approved token)"
+            },
+            {
+              "id": "heading-size",
+              "ok": 1,
+              "detail": "built 20px vs mockup 16px (±25%)"
+            },
+            {
+              "id": "content-padding",
+              "ok": 0,
+              "detail": "built 22px vs mockup 6px (±8)"
+            },
+            {
+              "id": "brand-colours",
+              "ok": 1,
+              "detail": "page bg = --color-bg"
+            }
+          ]
+        },
+        {
+          "width": 390,
+          "score": 0.43174603174603177,
+          "presence": 0.39682539682539686,
+          "layout": 0.1111111111111111,
+          "style": 1,
+          "regions": [
+            {
+              "id": "topbar",
+              "label_fa": "نوار بالا",
+              "presence": 1,
+              "iou": 0.7569836065573771,
+              "in_place": true,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "topbar-search",
+              "label_fa": "جستجوی سراسری",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "topbar-user",
+              "label_fa": "کاربر",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [],
+              "note": "not visible"
+            },
+            {
+              "id": "menu-toggle",
+              "label_fa": "دکمه باز کردن منو (موبایل)",
+              "presence": 1,
+              "iou": 0,
+              "in_place": false,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "bottom-nav",
+              "label_fa": "نوار پایین موبایل",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "خانه",
+                "برنامه‌ریزی",
+                "ثبت",
+                "گزارش‌ها",
+                "بیشتر"
+              ],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "serial-header",
+              "label_fa": "سربرگ سریال (شماره، محصول، کد، مشتری، وضعیت، تعداد)",
+              "presence": 0.7142857142857143,
+              "iou": 0.2256568390110027,
+              "in_place": false,
+              "missing_children": [
+                "رنگ",
+                "جنس"
+              ],
+              "note": ""
+            },
+            {
+              "id": "stage-flow",
+              "label_fa": "مراحل تولید سریال",
+              "later_phase": "PHASE_03 … PHASE_09",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "مواد و انبار",
+                "مهندسی",
+                "تأمین",
+                "برش",
+                "دوخت",
+                "کنترل کیفیت",
+                "آماده محصول"
+              ],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "side-panel",
+              "label_fa": "تصمیم‌ها و پیگیری‌ها / تسک‌ها / ریسک‌ها",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "تصمیم‌ها و پیگیری‌ها",
+                "تسک‌های نزدیک موعد",
+                "ریسک‌ها"
+              ],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "order-tab",
+              "label_fa": "محتوای تب سفارش (سربرگ سفارش، ردیف‌ها، Snapshot، نسخه‌ها، مرجع‌های خارجی، خط زمانی)",
+              "presence": 0.8571428571428571,
+              "iou": 0.08979492445153447,
+              "in_place": false,
+              "missing_children": [
+                "مرجع‌های خارجی"
+              ],
+              "note": ""
+            }
+          ],
+          "style_checks": [
+            {
+              "id": "menu-toggle",
+              "ok": 1,
+              "detail": "toggle visible"
+            },
+            {
+              "id": "panel-radius",
+              "ok": 1,
+              "detail": "built 13px vs mockup 10px (±4)"
+            },
+            {
+              "id": "panel-border",
+              "ok": 1,
+              "detail": "1/1 built panels with border or shadow"
+            },
+            {
+              "id": "font-family",
+              "ok": 1,
+              "detail": "Vazirmatn (approved token)"
+            },
+            {
+              "id": "heading-size",
+              "ok": 1,
+              "detail": "built 18px vs mockup 16px (±25%)"
+            },
+            {
+              "id": "content-padding",
+              "ok": 1,
+              "detail": "built 12px vs mockup 6px (±8)"
+            },
+            {
+              "id": "brand-colours",
+              "ok": 1,
+              "detail": "page bg = --color-bg"
+            }
+          ]
+        }
+      ],
+      "min": 0.39566544566544565,
+      "passed": false
+    },
+    {
+      "page": "04",
+      "title_fa": "ردیابی محصولات و استایل‌ها",
+      "authored": "extracted",
+      "widths": [
+        {
+          "width": 1440,
+          "score": 0.45577458256029685,
+          "presence": 0.525834879406308,
+          "layout": 0.07142857142857142,
+          "style": 0.8571428571428571,
+          "regions": [
+            {
+              "id": "side-menu",
+              "label_fa": "منوی کناری (آیکون‌دار)",
+              "presence": 0.9545454545454546,
+              "iou": 0.12892280836721173,
+              "in_place": false,
+              "missing_children": [],
+              "note": "items 10/11"
+            },
+            {
+              "id": "topbar",
+              "label_fa": "نوار بالا",
+              "presence": 1,
+              "iou": 0.922561818613347,
+              "in_place": true,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "topbar-search",
+              "label_fa": "جستجوی سراسری",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "topbar-date",
+              "label_fa": "تاریخ امروز",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "topbar-user",
+              "label_fa": "کاربر",
+              "presence": 1,
+              "iou": 0,
+              "in_place": false,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "page-header",
+              "label_fa": "سربرگ و عنوان صفحه",
+              "presence": 1,
+              "iou": 0.218533703457472,
+              "in_place": false,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "header-actions",
+              "label_fa": "دکمه‌های اقدام صفحه",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "پاک‌کردن فیلترها",
+                "خروجی Excel",
+                "محصول / استایل جدید"
+              ],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "kpis",
+              "label_fa": "کارت‌های شاخص (KPI)",
+              "presence": 0.5142857142857143,
+              "iou": 0,
+              "in_place": false,
+              "missing_children": [
+                "سفارش‌های فعال",
+                "در جریان تولید",
+                "تعهدهای در معرض ریسک"
+              ],
+              "note": "items 3/5"
+            },
+            {
+              "id": "filters",
+              "label_fa": "نوار فیلتر",
+              "presence": 0.14285714285714285,
+              "iou": 0,
+              "in_place": false,
+              "missing_children": [
+                "جستجوی کد محصول، استایل یا سریال",
+                "مشتری / برند",
+                "جنس اصلی",
+                "رنگ اصلی",
+                "دوره سفارش",
+                "موقعیت سریال"
+              ],
+              "note": ""
+            },
+            {
+              "id": "product-card",
+              "label_fa": "شناسنامه محصول",
+              "presence": 0.16666666666666666,
+              "iou": 0,
+              "in_place": false,
+              "missing_children": [
+                "شناسنامه محصول",
+                "تعداد استایل",
+                "گرید پیش‌فرض",
+                "آخرین نسخه فنی",
+                "سریال‌های فعال"
+              ],
+              "note": ""
+            },
+            {
+              "id": "product-styles",
+              "label_fa": "استایل‌های این محصول",
+              "presence": 1,
+              "iou": 0,
+              "in_place": false,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "serial-table",
+              "label_fa": "جدول سریال‌های مرتبط",
+              "presence": 0.5833333333333334,
+              "iou": 0,
+              "in_place": false,
+              "missing_children": [
+                "دوره سفارش",
+                "گرید",
+                "مرحله فعلی",
+                "پیشرفت",
+                "تعهد"
+              ],
+              "note": ""
+            },
+            {
+              "id": "stage-distribution",
+              "label_fa": "نمودار توزیع سریال‌ها در چرخه تولید",
+              "later_phase": "PHASE_07",
+              "presence": 1,
+              "iou": 0,
+              "in_place": false,
+              "missing_children": [],
+              "note": "later phase: honest «در دست ساخت» in place"
+            },
+            {
+              "id": "events",
+              "label_fa": "آخرین رخدادهای مرتبط",
+              "later_phase": "PHASE_07",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "آخرین رخدادهای مرتبط"
+              ],
+              "note": "no data-fid region on the built page"
+            }
+          ],
+          "style_checks": [
+            {
+              "id": "side-menu-icons",
+              "ok": 0,
+              "detail": "menu visible, 0 icons"
+            },
+            {
+              "id": "panel-radius",
+              "ok": 1,
+              "detail": "built 9px vs mockup 11px (±4)"
+            },
+            {
+              "id": "panel-border",
+              "ok": 1,
+              "detail": "6/6 built panels with border or shadow"
+            },
+            {
+              "id": "font-family",
+              "ok": 1,
+              "detail": "Vazirmatn (approved token)"
+            },
+            {
+              "id": "heading-size",
+              "ok": 1,
+              "detail": "built 23px vs mockup 21px (±25%)"
+            },
+            {
+              "id": "content-padding",
+              "ok": 1,
+              "detail": "built 22px vs mockup 22px (±8)"
+            },
+            {
+              "id": "brand-colours",
+              "ok": 1,
+              "detail": "page bg = --color-bg, primary button = --color-primary"
+            }
+          ]
+        },
+        {
+          "width": 1180,
+          "score": 0.45577458256029685,
+          "presence": 0.525834879406308,
+          "layout": 0.07142857142857142,
+          "style": 0.8571428571428571,
+          "regions": [
+            {
+              "id": "side-menu",
+              "label_fa": "منوی کناری (آیکون‌دار)",
+              "presence": 0.9545454545454546,
+              "iou": 0.10298450234541806,
+              "in_place": false,
+              "missing_children": [],
+              "note": "items 10/11"
+            },
+            {
+              "id": "topbar",
+              "label_fa": "نوار بالا",
+              "presence": 1,
+              "iou": 0.9143939423341886,
+              "in_place": true,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "topbar-search",
+              "label_fa": "جستجوی سراسری",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "topbar-date",
+              "label_fa": "تاریخ امروز",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "topbar-user",
+              "label_fa": "کاربر",
+              "presence": 1,
+              "iou": 0,
+              "in_place": false,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "page-header",
+              "label_fa": "سربرگ و عنوان صفحه",
+              "presence": 1,
+              "iou": 0.20816819137667084,
+              "in_place": false,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "header-actions",
+              "label_fa": "دکمه‌های اقدام صفحه",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "پاک‌کردن فیلترها",
+                "خروجی Excel",
+                "محصول / استایل جدید"
+              ],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "kpis",
+              "label_fa": "کارت‌های شاخص (KPI)",
+              "presence": 0.5142857142857143,
+              "iou": 0,
+              "in_place": false,
+              "missing_children": [
+                "سفارش‌های فعال",
+                "در جریان تولید",
+                "تعهدهای در معرض ریسک"
+              ],
+              "note": "items 3/5"
+            },
+            {
+              "id": "filters",
+              "label_fa": "نوار فیلتر",
+              "presence": 0.14285714285714285,
+              "iou": 0,
+              "in_place": false,
+              "missing_children": [
+                "جستجوی کد محصول، استایل یا سریال",
+                "مشتری / برند",
+                "جنس اصلی",
+                "رنگ اصلی",
+                "دوره سفارش",
+                "موقعیت سریال"
+              ],
+              "note": ""
+            },
+            {
+              "id": "product-card",
+              "label_fa": "شناسنامه محصول",
+              "presence": 0.16666666666666666,
+              "iou": 0,
+              "in_place": false,
+              "missing_children": [
+                "شناسنامه محصول",
+                "تعداد استایل",
+                "گرید پیش‌فرض",
+                "آخرین نسخه فنی",
+                "سریال‌های فعال"
+              ],
+              "note": ""
+            },
+            {
+              "id": "product-styles",
+              "label_fa": "استایل‌های این محصول",
+              "presence": 1,
+              "iou": 0,
+              "in_place": false,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "serial-table",
+              "label_fa": "جدول سریال‌های مرتبط",
+              "presence": 0.5833333333333334,
+              "iou": 0,
+              "in_place": false,
+              "missing_children": [
+                "دوره سفارش",
+                "گرید",
+                "مرحله فعلی",
+                "پیشرفت",
+                "تعهد"
+              ],
+              "note": ""
+            },
+            {
+              "id": "stage-distribution",
+              "label_fa": "نمودار توزیع سریال‌ها در چرخه تولید",
+              "later_phase": "PHASE_07",
+              "presence": 1,
+              "iou": 0,
+              "in_place": false,
+              "missing_children": [],
+              "note": "later phase: honest «در دست ساخت» in place"
+            },
+            {
+              "id": "events",
+              "label_fa": "آخرین رخدادهای مرتبط",
+              "later_phase": "PHASE_07",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "آخرین رخدادهای مرتبط"
+              ],
+              "note": "no data-fid region on the built page"
+            }
+          ],
+          "style_checks": [
+            {
+              "id": "side-menu-icons",
+              "ok": 0,
+              "detail": "menu visible, 0 icons"
+            },
+            {
+              "id": "panel-radius",
+              "ok": 1,
+              "detail": "built 9px vs mockup 11px (±4)"
+            },
+            {
+              "id": "panel-border",
+              "ok": 1,
+              "detail": "6/6 built panels with border or shadow"
+            },
+            {
+              "id": "font-family",
+              "ok": 1,
+              "detail": "Vazirmatn (approved token)"
+            },
+            {
+              "id": "heading-size",
+              "ok": 1,
+              "detail": "built 20px vs mockup 21px (±25%)"
+            },
+            {
+              "id": "content-padding",
+              "ok": 1,
+              "detail": "built 22px vs mockup 22px (±8)"
+            },
+            {
+              "id": "brand-colours",
+              "ok": 1,
+              "detail": "page bg = --color-bg, primary button = --color-primary"
+            }
+          ]
+        },
+        {
+          "width": 768,
+          "score": 0.42554945054945054,
+          "presence": 0.4159340659340659,
+          "layout": 0.15384615384615385,
+          "style": 0.8571428571428571,
+          "regions": [
+            {
+              "id": "side-menu",
+              "label_fa": "منوی کناری (آیکون‌دار)",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [],
+              "note": "not visible"
+            },
+            {
+              "id": "topbar",
+              "label_fa": "نوار بالا",
+              "presence": 1,
+              "iou": 0.884914478913425,
+              "in_place": true,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "topbar-date",
+              "label_fa": "تاریخ امروز",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "topbar-user",
+              "label_fa": "کاربر",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [],
+              "note": "not visible"
+            },
+            {
+              "id": "page-header",
+              "label_fa": "سربرگ و عنوان صفحه",
+              "presence": 1,
+              "iou": 0.27884432266181586,
+              "in_place": false,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "header-actions",
+              "label_fa": "دکمه‌های اقدام صفحه",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "پاک‌کردن فیلترها",
+                "خروجی Excel",
+                "محصول / استایل جدید"
+              ],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "kpis",
+              "label_fa": "کارت‌های شاخص (KPI)",
+              "presence": 0.5142857142857143,
+              "iou": 0,
+              "in_place": false,
+              "missing_children": [
+                "سفارش‌های فعال",
+                "در جریان تولید",
+                "تعهدهای در معرض ریسک"
+              ],
+              "note": "items 3/5"
+            },
+            {
+              "id": "filters",
+              "label_fa": "نوار فیلتر",
+              "presence": 0.14285714285714285,
+              "iou": 0,
+              "in_place": false,
+              "missing_children": [
+                "جستجوی کد محصول، استایل یا سریال",
+                "مشتری / برند",
+                "جنس اصلی",
+                "رنگ اصلی",
+                "دوره سفارش",
+                "موقعیت سریال"
+              ],
+              "note": ""
+            },
+            {
+              "id": "product-card",
+              "label_fa": "شناسنامه محصول",
+              "presence": 0.16666666666666666,
+              "iou": 0.04256133580792018,
+              "in_place": false,
+              "missing_children": [
+                "شناسنامه محصول",
+                "تعداد استایل",
+                "گرید پیش‌فرض",
+                "آخرین نسخه فنی",
+                "سریال‌های فعال"
+              ],
+              "note": ""
+            },
+            {
+              "id": "product-styles",
+              "label_fa": "استایل‌های این محصول",
+              "presence": 1,
+              "iou": 0,
+              "in_place": false,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "serial-table",
+              "label_fa": "جدول سریال‌های مرتبط",
+              "presence": 0.5833333333333334,
+              "iou": 0.5103062118328378,
+              "in_place": true,
+              "missing_children": [
+                "دوره سفارش",
+                "گرید",
+                "مرحله فعلی",
+                "پیشرفت",
+                "تعهد"
+              ],
+              "note": ""
+            },
+            {
+              "id": "stage-distribution",
+              "label_fa": "نمودار توزیع سریال‌ها در چرخه تولید",
+              "later_phase": "PHASE_07",
+              "presence": 1,
+              "iou": 0.017181909407081468,
+              "in_place": false,
+              "missing_children": [],
+              "note": "later phase: honest «در دست ساخت» in place"
+            },
+            {
+              "id": "events",
+              "label_fa": "آخرین رخدادهای مرتبط",
+              "later_phase": "PHASE_07",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "آخرین رخدادهای مرتبط"
+              ],
+              "note": "no data-fid region on the built page"
+            }
+          ],
+          "style_checks": [
+            {
+              "id": "side-menu-icons",
+              "ok": 0,
+              "detail": "no side menu"
+            },
+            {
+              "id": "panel-radius",
+              "ok": 1,
+              "detail": "built 9px vs mockup 11px (±4)"
+            },
+            {
+              "id": "panel-border",
+              "ok": 1,
+              "detail": "6/6 built panels with border or shadow"
+            },
+            {
+              "id": "font-family",
+              "ok": 1,
+              "detail": "Vazirmatn (approved token)"
+            },
+            {
+              "id": "heading-size",
+              "ok": 1,
+              "detail": "built 20px vs mockup 21px (±25%)"
+            },
+            {
+              "id": "content-padding",
+              "ok": 1,
+              "detail": "built 22px vs mockup 22px (±8)"
+            },
+            {
+              "id": "brand-colours",
+              "ok": 1,
+              "detail": "page bg = --color-bg, primary button = --color-primary"
+            }
+          ]
+        },
+        {
+          "width": 390,
+          "score": 0.5457792207792208,
+          "presence": 0.5824675324675325,
+          "layout": 0.18181818181818182,
+          "style": 1,
+          "regions": [
+            {
+              "id": "topbar",
+              "label_fa": "نوار بالا",
+              "presence": 1,
+              "iou": 0.8854918032786886,
+              "in_place": true,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "menu-toggle",
+              "label_fa": "دکمه باز کردن منو (موبایل)",
+              "presence": 1,
+              "iou": 0,
+              "in_place": false,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "page-header",
+              "label_fa": "سربرگ و عنوان صفحه",
+              "presence": 1,
+              "iou": 0.40997637524672154,
+              "in_place": false,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "header-actions",
+              "label_fa": "دکمه‌های اقدام صفحه",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "پاک‌کردن فیلترها",
+                "خروجی Excel",
+                "محصول / استایل جدید"
+              ],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "kpis",
+              "label_fa": "کارت‌های شاخص (KPI)",
+              "presence": 0.5142857142857143,
+              "iou": 0,
+              "in_place": false,
+              "missing_children": [
+                "سفارش‌های فعال",
+                "در جریان تولید",
+                "تعهدهای در معرض ریسک"
+              ],
+              "note": "items 3/5"
+            },
+            {
+              "id": "filters",
+              "label_fa": "نوار فیلتر",
+              "presence": 0.14285714285714285,
+              "iou": 0,
+              "in_place": false,
+              "missing_children": [
+                "جستجوی کد محصول، استایل یا سریال",
+                "مشتری / برند",
+                "جنس اصلی",
+                "رنگ اصلی",
+                "دوره سفارش",
+                "موقعیت سریال"
+              ],
+              "note": ""
+            },
+            {
+              "id": "product-card",
+              "label_fa": "شناسنامه محصول",
+              "presence": 0.16666666666666666,
+              "iou": 0,
+              "in_place": false,
+              "missing_children": [
+                "شناسنامه محصول",
+                "تعداد استایل",
+                "گرید پیش‌فرض",
+                "آخرین نسخه فنی",
+                "سریال‌های فعال"
+              ],
+              "note": ""
+            },
+            {
+              "id": "product-styles",
+              "label_fa": "استایل‌های این محصول",
+              "presence": 1,
+              "iou": 0,
+              "in_place": false,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "serial-table",
+              "label_fa": "جدول سریال‌های مرتبط",
+              "presence": 0.5833333333333334,
+              "iou": 0.6471940987040846,
+              "in_place": true,
+              "missing_children": [
+                "دوره سفارش",
+                "گرید",
+                "مرحله فعلی",
+                "پیشرفت",
+                "تعهد"
+              ],
+              "note": ""
+            },
+            {
+              "id": "stage-distribution",
+              "label_fa": "نمودار توزیع سریال‌ها در چرخه تولید",
+              "later_phase": "PHASE_07",
+              "presence": 1,
+              "iou": 0.4411629221686383,
+              "in_place": false,
+              "missing_children": [],
+              "note": "later phase: honest «در دست ساخت» in place"
+            },
+            {
+              "id": "events",
+              "label_fa": "آخرین رخدادهای مرتبط",
+              "later_phase": "PHASE_07",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "آخرین رخدادهای مرتبط"
+              ],
+              "note": "no data-fid region on the built page"
+            }
+          ],
+          "style_checks": [
+            {
+              "id": "menu-toggle",
+              "ok": 1,
+              "detail": "toggle visible"
+            },
+            {
+              "id": "panel-radius",
+              "ok": 1,
+              "detail": "built 9px vs mockup 11px (±4)"
+            },
+            {
+              "id": "panel-border",
+              "ok": 1,
+              "detail": "6/6 built panels with border or shadow"
+            },
+            {
+              "id": "font-family",
+              "ok": 1,
+              "detail": "Vazirmatn (approved token)"
+            },
+            {
+              "id": "heading-size",
+              "ok": 1,
+              "detail": "built 18px vs mockup 17px (±25%)"
+            },
+            {
+              "id": "content-padding",
+              "ok": 1,
+              "detail": "built 12px vs mockup 12px (±8)"
+            },
+            {
+              "id": "brand-colours",
+              "ok": 1,
+              "detail": "page bg = --color-bg, primary button = --color-primary"
+            }
+          ]
+        }
+      ],
+      "min": 0.42554945054945054,
+      "passed": false
+    },
+    {
+      "page": "29",
+      "title_fa": "ثبت سفارش و کدگذاری",
+      "authored": "extracted",
+      "widths": [
+        {
+          "width": 1440,
+          "score": 0.4368131868131868,
+          "presence": 0.43846153846153846,
+          "layout": 0.15384615384615385,
+          "style": 0.8571428571428571,
+          "regions": [
+            {
+              "id": "side-menu",
+              "label_fa": "منوی کناری (آیکون‌دار)",
+              "presence": 1,
+              "iou": 0.2716931285882758,
+              "in_place": false,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "topbar",
+              "label_fa": "نوار بالا",
+              "presence": 1,
+              "iou": 0.9534721574938556,
+              "in_place": true,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "topbar-search",
+              "label_fa": "جستجوی سراسری",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "topbar-date",
+              "label_fa": "تاریخ امروز",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "topbar-user",
+              "label_fa": "کاربر",
+              "presence": 1,
+              "iou": 0,
+              "in_place": false,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "page-header",
+              "label_fa": "سربرگ و عنوان صفحه",
+              "presence": 1,
+              "iou": 0.3418762011702366,
+              "in_place": false,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "header-actions",
+              "label_fa": "دکمه‌های اقدام صفحه",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "راهنمای صفحه",
+                "مالکیت و منبع داده",
+                "بررسی و ارسال به برنامه‌ریزی"
+              ],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "kpis",
+              "label_fa": "کارت‌های شاخص (KPI)",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "مرحله ثبت سفارش",
+                "کد ۱۴رقمی نمونه",
+                "استایل‌های مشابه",
+                "آمادگی فرم"
+              ],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "order-wizard",
+              "label_fa": "فرم مرحله‌ای ثبت سفارش",
+              "presence": 0.7,
+              "iou": 0.5219767158531545,
+              "in_place": true,
+              "missing_children": [
+                "فرم مرحله‌ای ثبت سفارش",
+                "مرحله قبل",
+                "مرحله بعد"
+              ],
+              "note": ""
+            },
+            {
+              "id": "wizard-steps",
+              "label_fa": "مراحل فرم",
+              "presence": 1,
+              "iou": 0,
+              "in_place": false,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "coding-validation",
+              "label_fa": "کدگذاری راهکاران و اعتبارسنجی",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "کدگذاری راهکاران و اعتبارسنجی",
+                "بخش",
+                "مقدار نمونه",
+                "منبع"
+              ],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "similar-styles",
+              "label_fa": "بررسی استایل‌های موجود",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "بررسی استایل‌های موجود",
+                "استایل",
+                "ویژگی",
+                "نتیجه"
+              ],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "pre-checks",
+              "label_fa": "کنترل‌های داده پیش از ثبت",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "کنترل‌های داده پیش از ثبت",
+                "هویت محصول",
+                "استایل جدید",
+                "ثبت نهایی"
+              ],
+              "note": "no data-fid region on the built page"
+            }
+          ],
+          "style_checks": [
+            {
+              "id": "side-menu-icons",
+              "ok": 0,
+              "detail": "menu visible, 0 icons"
+            },
+            {
+              "id": "panel-radius",
+              "ok": 1,
+              "detail": "built 13px vs mockup 13px (±4)"
+            },
+            {
+              "id": "panel-border",
+              "ok": 1,
+              "detail": "1/1 built panels with border or shadow"
+            },
+            {
+              "id": "font-family",
+              "ok": 1,
+              "detail": "Vazirmatn (approved token)"
+            },
+            {
+              "id": "heading-size",
+              "ok": 1,
+              "detail": "built 23px vs mockup 23px (±25%)"
+            },
+            {
+              "id": "content-padding",
+              "ok": 1,
+              "detail": "built 22px vs mockup 20px (±8)"
+            },
+            {
+              "id": "brand-colours",
+              "ok": 1,
+              "detail": "page bg = --color-bg, primary button = --color-primary"
+            }
+          ]
+        },
+        {
+          "width": 1180,
+          "score": 0.45892857142857146,
+          "presence": 0.47500000000000003,
+          "layout": 0.16666666666666666,
+          "style": 0.8571428571428571,
+          "regions": [
+            {
+              "id": "side-menu",
+              "label_fa": "منوی کناری (آیکون‌دار)",
+              "presence": 1,
+              "iou": 0.2471929600580407,
+              "in_place": false,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "topbar",
+              "label_fa": "نوار بالا",
+              "presence": 1,
+              "iou": 0.9432188400000001,
+              "in_place": true,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "topbar-search",
+              "label_fa": "جستجوی سراسری",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "topbar-user",
+              "label_fa": "کاربر",
+              "presence": 1,
+              "iou": 0,
+              "in_place": false,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "page-header",
+              "label_fa": "سربرگ و عنوان صفحه",
+              "presence": 1,
+              "iou": 0.32460948041414756,
+              "in_place": false,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "header-actions",
+              "label_fa": "دکمه‌های اقدام صفحه",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "راهنمای صفحه",
+                "مالکیت و منبع داده",
+                "بررسی و ارسال به برنامه‌ریزی"
+              ],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "kpis",
+              "label_fa": "کارت‌های شاخص (KPI)",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "مرحله ثبت سفارش",
+                "کد ۱۴رقمی نمونه",
+                "استایل‌های مشابه",
+                "آمادگی فرم"
+              ],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "order-wizard",
+              "label_fa": "فرم مرحله‌ای ثبت سفارش",
+              "presence": 0.7,
+              "iou": 0.5138307016196434,
+              "in_place": true,
+              "missing_children": [
+                "فرم مرحله‌ای ثبت سفارش",
+                "مرحله قبل",
+                "مرحله بعد"
+              ],
+              "note": ""
+            },
+            {
+              "id": "wizard-steps",
+              "label_fa": "مراحل فرم",
+              "presence": 1,
+              "iou": 0,
+              "in_place": false,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "coding-validation",
+              "label_fa": "کدگذاری راهکاران و اعتبارسنجی",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "کدگذاری راهکاران و اعتبارسنجی",
+                "بخش",
+                "مقدار نمونه",
+                "منبع"
+              ],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "similar-styles",
+              "label_fa": "بررسی استایل‌های موجود",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "بررسی استایل‌های موجود",
+                "استایل",
+                "ویژگی",
+                "نتیجه"
+              ],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "pre-checks",
+              "label_fa": "کنترل‌های داده پیش از ثبت",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "کنترل‌های داده پیش از ثبت",
+                "هویت محصول",
+                "استایل جدید",
+                "ثبت نهایی"
+              ],
+              "note": "no data-fid region on the built page"
+            }
+          ],
+          "style_checks": [
+            {
+              "id": "side-menu-icons",
+              "ok": 0,
+              "detail": "menu visible, 0 icons"
+            },
+            {
+              "id": "panel-radius",
+              "ok": 1,
+              "detail": "built 13px vs mockup 13px (±4)"
+            },
+            {
+              "id": "panel-border",
+              "ok": 1,
+              "detail": "1/1 built panels with border or shadow"
+            },
+            {
+              "id": "font-family",
+              "ok": 1,
+              "detail": "Vazirmatn (approved token)"
+            },
+            {
+              "id": "heading-size",
+              "ok": 1,
+              "detail": "built 20px vs mockup 23px (±25%)"
+            },
+            {
+              "id": "content-padding",
+              "ok": 1,
+              "detail": "built 22px vs mockup 15px (±8)"
+            },
+            {
+              "id": "brand-colours",
+              "ok": 1,
+              "detail": "page bg = --color-bg, primary button = --color-primary"
+            }
+          ]
+        },
+        {
+          "width": 768,
+          "score": 0.39226190476190476,
+          "presence": 0.39166666666666666,
+          "layout": 0.08333333333333333,
+          "style": 0.8571428571428571,
+          "regions": [
+            {
+              "id": "topbar",
+              "label_fa": "نوار بالا",
+              "presence": 1,
+              "iou": 0.99968,
+              "in_place": true,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "topbar-search",
+              "label_fa": "جستجوی سراسری",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "topbar-user",
+              "label_fa": "کاربر",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [],
+              "note": "not visible"
+            },
+            {
+              "id": "menu-toggle",
+              "label_fa": "دکمه باز کردن منو (موبایل)",
+              "presence": 1,
+              "iou": 0,
+              "in_place": false,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "page-header",
+              "label_fa": "سربرگ و عنوان صفحه",
+              "presence": 1,
+              "iou": 0.2846606757042244,
+              "in_place": false,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "header-actions",
+              "label_fa": "دکمه‌های اقدام صفحه",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "راهنمای صفحه",
+                "مالکیت و منبع داده",
+                "بررسی و ارسال به برنامه‌ریزی"
+              ],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "kpis",
+              "label_fa": "کارت‌های شاخص (KPI)",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "مرحله ثبت سفارش",
+                "کد ۱۴رقمی نمونه",
+                "استایل‌های مشابه",
+                "آمادگی فرم"
+              ],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "order-wizard",
+              "label_fa": "فرم مرحله‌ای ثبت سفارش",
+              "presence": 0.7,
+              "iou": 0.47906665352036976,
+              "in_place": false,
+              "missing_children": [
+                "فرم مرحله‌ای ثبت سفارش",
+                "مرحله قبل",
+                "مرحله بعد"
+              ],
+              "note": ""
+            },
+            {
+              "id": "wizard-steps",
+              "label_fa": "مراحل فرم",
+              "presence": 1,
+              "iou": 0,
+              "in_place": false,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "coding-validation",
+              "label_fa": "کدگذاری راهکاران و اعتبارسنجی",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "کدگذاری راهکاران و اعتبارسنجی",
+                "بخش",
+                "مقدار نمونه",
+                "منبع"
+              ],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "similar-styles",
+              "label_fa": "بررسی استایل‌های موجود",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "بررسی استایل‌های موجود",
+                "استایل",
+                "ویژگی",
+                "نتیجه"
+              ],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "pre-checks",
+              "label_fa": "کنترل‌های داده پیش از ثبت",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "کنترل‌های داده پیش از ثبت",
+                "هویت محصول",
+                "استایل جدید",
+                "ثبت نهایی"
+              ],
+              "note": "no data-fid region on the built page"
+            }
+          ],
+          "style_checks": [
+            {
+              "id": "menu-toggle",
+              "ok": 1,
+              "detail": "toggle visible"
+            },
+            {
+              "id": "panel-radius",
+              "ok": 1,
+              "detail": "built 13px vs mockup 13px (±4)"
+            },
+            {
+              "id": "panel-border",
+              "ok": 1,
+              "detail": "1/1 built panels with border or shadow"
+            },
+            {
+              "id": "font-family",
+              "ok": 1,
+              "detail": "Vazirmatn (approved token)"
+            },
+            {
+              "id": "heading-size",
+              "ok": 1,
+              "detail": "built 20px vs mockup 20px (±25%)"
+            },
+            {
+              "id": "content-padding",
+              "ok": 0,
+              "detail": "built 22px vs mockup 12px (±8)"
+            },
+            {
+              "id": "brand-colours",
+              "ok": 1,
+              "detail": "page bg = --color-bg, primary button = --color-primary"
+            }
+          ]
+        },
+        {
+          "width": 390,
+          "score": 0.4458333333333333,
+          "presence": 0.39166666666666666,
+          "layout": 0.16666666666666666,
+          "style": 1,
+          "regions": [
+            {
+              "id": "topbar",
+              "label_fa": "نوار بالا",
+              "presence": 1,
+              "iou": 0.8688688524590162,
+              "in_place": true,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "topbar-search",
+              "label_fa": "جستجوی سراسری",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "topbar-user",
+              "label_fa": "کاربر",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [],
+              "note": "not visible"
+            },
+            {
+              "id": "menu-toggle",
+              "label_fa": "دکمه باز کردن منو (موبایل)",
+              "presence": 1,
+              "iou": 0,
+              "in_place": false,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "page-header",
+              "label_fa": "سربرگ و عنوان صفحه",
+              "presence": 1,
+              "iou": 0.5565742532007408,
+              "in_place": true,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "header-actions",
+              "label_fa": "دکمه‌های اقدام صفحه",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "راهنمای صفحه",
+                "مالکیت و منبع داده",
+                "بررسی و ارسال به برنامه‌ریزی"
+              ],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "kpis",
+              "label_fa": "کارت‌های شاخص (KPI)",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "مرحله ثبت سفارش",
+                "کد ۱۴رقمی نمونه",
+                "استایل‌های مشابه",
+                "آمادگی فرم"
+              ],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "order-wizard",
+              "label_fa": "فرم مرحله‌ای ثبت سفارش",
+              "presence": 0.7,
+              "iou": 0.4827284339989234,
+              "in_place": false,
+              "missing_children": [
+                "فرم مرحله‌ای ثبت سفارش",
+                "مرحله قبل",
+                "مرحله بعد"
+              ],
+              "note": ""
+            },
+            {
+              "id": "wizard-steps",
+              "label_fa": "مراحل فرم",
+              "presence": 1,
+              "iou": 0,
+              "in_place": false,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "coding-validation",
+              "label_fa": "کدگذاری راهکاران و اعتبارسنجی",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "کدگذاری راهکاران و اعتبارسنجی",
+                "بخش",
+                "مقدار نمونه",
+                "منبع"
+              ],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "similar-styles",
+              "label_fa": "بررسی استایل‌های موجود",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "بررسی استایل‌های موجود",
+                "استایل",
+                "ویژگی",
+                "نتیجه"
+              ],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "pre-checks",
+              "label_fa": "کنترل‌های داده پیش از ثبت",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "کنترل‌های داده پیش از ثبت",
+                "هویت محصول",
+                "استایل جدید",
+                "ثبت نهایی"
+              ],
+              "note": "no data-fid region on the built page"
+            }
+          ],
+          "style_checks": [
+            {
+              "id": "menu-toggle",
+              "ok": 1,
+              "detail": "toggle visible"
+            },
+            {
+              "id": "panel-radius",
+              "ok": 1,
+              "detail": "built 13px vs mockup 13px (±4)"
+            },
+            {
+              "id": "panel-border",
+              "ok": 1,
+              "detail": "1/1 built panels with border or shadow"
+            },
+            {
+              "id": "font-family",
+              "ok": 1,
+              "detail": "Vazirmatn (approved token)"
+            },
+            {
+              "id": "heading-size",
+              "ok": 1,
+              "detail": "built 18px vs mockup 18px (±25%)"
+            },
+            {
+              "id": "content-padding",
+              "ok": 1,
+              "detail": "built 12px vs mockup 9px (±8)"
+            },
+            {
+              "id": "brand-colours",
+              "ok": 1,
+              "detail": "page bg = --color-bg, primary button = --color-primary"
+            }
+          ]
+        }
+      ],
+      "min": 0.39226190476190476,
+      "passed": false
+    },
+    {
+      "page": "33",
+      "title_fa": "تغییرات سفارش",
+      "authored": "extracted",
+      "widths": [
+        {
+          "width": 1440,
+          "score": 0.4032467532467533,
+          "presence": 0.4090909090909091,
+          "layout": 0.09090909090909091,
+          "style": 0.8571428571428571,
+          "regions": [
+            {
+              "id": "side-menu",
+              "label_fa": "منوی کناری (آیکون‌دار)",
+              "presence": 1,
+              "iou": 0.2716931285882758,
+              "in_place": false,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "topbar",
+              "label_fa": "نوار بالا",
+              "presence": 1,
+              "iou": 0.9534721574938556,
+              "in_place": true,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "topbar-search",
+              "label_fa": "جستجوی سراسری",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "topbar-date",
+              "label_fa": "تاریخ امروز",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "topbar-user",
+              "label_fa": "کاربر",
+              "presence": 1,
+              "iou": 0,
+              "in_place": false,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "page-header",
+              "label_fa": "سربرگ و عنوان صفحه",
+              "presence": 1,
+              "iou": 0.2594978312533674,
+              "in_place": false,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "header-actions",
+              "label_fa": "دکمه‌های اقدام صفحه",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "راهنمای صفحه",
+                "مالکیت و منبع داده",
+                "ثبت تصمیم روی درخواست"
+              ],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "kpis",
+              "label_fa": "کارت‌های شاخص (KPI)",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "درخواست‌های باز",
+                "نیازمند تحلیل اثر",
+                "تغییرات اجراشده",
+                "درخواست لغو"
+              ],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "change-list",
+              "label_fa": "فهرست درخواست‌ها",
+              "presence": 0.5,
+              "iou": 0.39891776116119537,
+              "in_place": false,
+              "missing_children": [
+                "فهرست درخواست‌ها"
+              ],
+              "note": ""
+            },
+            {
+              "id": "change-compare",
+              "label_fa": "مقایسه قبل و بعد و گیت‌های تأیید",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "مقایسه قبل و بعد",
+                "وضعیت قبل",
+                "وضعیت درخواستی",
+                "تحلیل اثر موردنیاز",
+                "گیت‌های تأیید",
+                "مهندسی",
+                "انبار/تأمین",
+                "برنامه‌ریزی و QA"
+              ],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "revision-effectivity",
+              "label_fa": "قاعده اثرپذیری Revision بر مقدار",
+              "later_phase": "PHASE_04 / PHASE_05",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "قاعده اثرپذیری Revision بر مقدار"
+              ],
+              "note": "no data-fid region on the built page"
+            }
+          ],
+          "style_checks": [
+            {
+              "id": "side-menu-icons",
+              "ok": 0,
+              "detail": "menu visible, 0 icons"
+            },
+            {
+              "id": "panel-radius",
+              "ok": 1,
+              "detail": "built 13px vs mockup 13px (±4)"
+            },
+            {
+              "id": "panel-border",
+              "ok": 1,
+              "detail": "1/1 built panels with border or shadow"
+            },
+            {
+              "id": "font-family",
+              "ok": 1,
+              "detail": "Vazirmatn (approved token)"
+            },
+            {
+              "id": "heading-size",
+              "ok": 1,
+              "detail": "built 23px vs mockup 23px (±25%)"
+            },
+            {
+              "id": "content-padding",
+              "ok": 1,
+              "detail": "built 22px vs mockup 20px (±8)"
+            },
+            {
+              "id": "brand-colours",
+              "ok": 1,
+              "detail": "page bg = --color-bg"
+            }
+          ]
+        },
+        {
+          "width": 1180,
+          "score": 0.42642857142857143,
+          "presence": 0.45,
+          "layout": 0.1,
+          "style": 0.8571428571428571,
+          "regions": [
+            {
+              "id": "side-menu",
+              "label_fa": "منوی کناری (آیکون‌دار)",
+              "presence": 1,
+              "iou": 0.2700516391776143,
+              "in_place": false,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "topbar",
+              "label_fa": "نوار بالا",
+              "presence": 1,
+              "iou": 0.9432188400000001,
+              "in_place": true,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "topbar-search",
+              "label_fa": "جستجوی سراسری",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "topbar-user",
+              "label_fa": "کاربر",
+              "presence": 1,
+              "iou": 0,
+              "in_place": false,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "page-header",
+              "label_fa": "سربرگ و عنوان صفحه",
+              "presence": 1,
+              "iou": 0.24502853492897572,
+              "in_place": false,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "header-actions",
+              "label_fa": "دکمه‌های اقدام صفحه",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "راهنمای صفحه",
+                "مالکیت و منبع داده",
+                "ثبت تصمیم روی درخواست"
+              ],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "kpis",
+              "label_fa": "کارت‌های شاخص (KPI)",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "درخواست‌های باز",
+                "نیازمند تحلیل اثر",
+                "تغییرات اجراشده",
+                "درخواست لغو"
+              ],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "change-list",
+              "label_fa": "فهرست درخواست‌ها",
+              "presence": 0.5,
+              "iou": 0.40144659615304623,
+              "in_place": false,
+              "missing_children": [
+                "فهرست درخواست‌ها"
+              ],
+              "note": ""
+            },
+            {
+              "id": "change-compare",
+              "label_fa": "مقایسه قبل و بعد و گیت‌های تأیید",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "مقایسه قبل و بعد",
+                "وضعیت قبل",
+                "وضعیت درخواستی",
+                "تحلیل اثر موردنیاز",
+                "گیت‌های تأیید",
+                "مهندسی",
+                "انبار/تأمین",
+                "برنامه‌ریزی و QA"
+              ],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "revision-effectivity",
+              "label_fa": "قاعده اثرپذیری Revision بر مقدار",
+              "later_phase": "PHASE_04 / PHASE_05",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "قاعده اثرپذیری Revision بر مقدار"
+              ],
+              "note": "no data-fid region on the built page"
+            }
+          ],
+          "style_checks": [
+            {
+              "id": "side-menu-icons",
+              "ok": 0,
+              "detail": "menu visible, 0 icons"
+            },
+            {
+              "id": "panel-radius",
+              "ok": 1,
+              "detail": "built 13px vs mockup 13px (±4)"
+            },
+            {
+              "id": "panel-border",
+              "ok": 1,
+              "detail": "1/1 built panels with border or shadow"
+            },
+            {
+              "id": "font-family",
+              "ok": 1,
+              "detail": "Vazirmatn (approved token)"
+            },
+            {
+              "id": "heading-size",
+              "ok": 1,
+              "detail": "built 20px vs mockup 23px (±25%)"
+            },
+            {
+              "id": "content-padding",
+              "ok": 1,
+              "detail": "built 22px vs mockup 15px (±8)"
+            },
+            {
+              "id": "brand-colours",
+              "ok": 1,
+              "detail": "page bg = --color-bg"
+            }
+          ]
+        },
+        {
+          "width": 768,
+          "score": 0.37642857142857145,
+          "presence": 0.35,
+          "layout": 0.1,
+          "style": 0.8571428571428571,
+          "regions": [
+            {
+              "id": "topbar",
+              "label_fa": "نوار بالا",
+              "presence": 1,
+              "iou": 0.99968,
+              "in_place": true,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "topbar-search",
+              "label_fa": "جستجوی سراسری",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "topbar-user",
+              "label_fa": "کاربر",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [],
+              "note": "not visible"
+            },
+            {
+              "id": "menu-toggle",
+              "label_fa": "دکمه باز کردن منو (موبایل)",
+              "presence": 1,
+              "iou": 0,
+              "in_place": false,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "page-header",
+              "label_fa": "سربرگ و عنوان صفحه",
+              "presence": 1,
+              "iou": 0.21482721265651608,
+              "in_place": false,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "header-actions",
+              "label_fa": "دکمه‌های اقدام صفحه",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "راهنمای صفحه",
+                "مالکیت و منبع داده",
+                "ثبت تصمیم روی درخواست"
+              ],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "kpis",
+              "label_fa": "کارت‌های شاخص (KPI)",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "درخواست‌های باز",
+                "نیازمند تحلیل اثر",
+                "تغییرات اجراشده",
+                "درخواست لغو"
+              ],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "change-list",
+              "label_fa": "فهرست درخواست‌ها",
+              "presence": 0.5,
+              "iou": 0.13610891862408608,
+              "in_place": false,
+              "missing_children": [
+                "فهرست درخواست‌ها"
+              ],
+              "note": ""
+            },
+            {
+              "id": "change-compare",
+              "label_fa": "مقایسه قبل و بعد و گیت‌های تأیید",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "مقایسه قبل و بعد",
+                "وضعیت قبل",
+                "وضعیت درخواستی",
+                "تحلیل اثر موردنیاز",
+                "گیت‌های تأیید",
+                "مهندسی",
+                "انبار/تأمین",
+                "برنامه‌ریزی و QA"
+              ],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "revision-effectivity",
+              "label_fa": "قاعده اثرپذیری Revision بر مقدار",
+              "later_phase": "PHASE_04 / PHASE_05",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "قاعده اثرپذیری Revision بر مقدار"
+              ],
+              "note": "no data-fid region on the built page"
+            }
+          ],
+          "style_checks": [
+            {
+              "id": "menu-toggle",
+              "ok": 1,
+              "detail": "toggle visible"
+            },
+            {
+              "id": "panel-radius",
+              "ok": 1,
+              "detail": "built 13px vs mockup 13px (±4)"
+            },
+            {
+              "id": "panel-border",
+              "ok": 1,
+              "detail": "1/1 built panels with border or shadow"
+            },
+            {
+              "id": "font-family",
+              "ok": 1,
+              "detail": "Vazirmatn (approved token)"
+            },
+            {
+              "id": "heading-size",
+              "ok": 1,
+              "detail": "built 20px vs mockup 20px (±25%)"
+            },
+            {
+              "id": "content-padding",
+              "ok": 0,
+              "detail": "built 22px vs mockup 12px (±8)"
+            },
+            {
+              "id": "brand-colours",
+              "ok": 1,
+              "detail": "page bg = --color-bg"
+            }
+          ]
+        },
+        {
+          "width": 390,
+          "score": 0.435,
+          "presence": 0.35,
+          "layout": 0.2,
+          "style": 1,
+          "regions": [
+            {
+              "id": "topbar",
+              "label_fa": "نوار بالا",
+              "presence": 1,
+              "iou": 0.8688688524590162,
+              "in_place": true,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "topbar-search",
+              "label_fa": "جستجوی سراسری",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "topbar-user",
+              "label_fa": "کاربر",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [],
+              "note": "not visible"
+            },
+            {
+              "id": "menu-toggle",
+              "label_fa": "دکمه باز کردن منو (موبایل)",
+              "presence": 1,
+              "iou": 0,
+              "in_place": false,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "page-header",
+              "label_fa": "سربرگ و عنوان صفحه",
+              "presence": 1,
+              "iou": 0.3563255628209421,
+              "in_place": false,
+              "missing_children": [],
+              "note": ""
+            },
+            {
+              "id": "header-actions",
+              "label_fa": "دکمه‌های اقدام صفحه",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "راهنمای صفحه",
+                "مالکیت و منبع داده",
+                "ثبت تصمیم روی درخواست"
+              ],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "kpis",
+              "label_fa": "کارت‌های شاخص (KPI)",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "درخواست‌های باز",
+                "نیازمند تحلیل اثر",
+                "تغییرات اجراشده",
+                "درخواست لغو"
+              ],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "change-list",
+              "label_fa": "فهرست درخواست‌ها",
+              "presence": 0.5,
+              "iou": 0.5459960139307397,
+              "in_place": true,
+              "missing_children": [
+                "فهرست درخواست‌ها"
+              ],
+              "note": ""
+            },
+            {
+              "id": "change-compare",
+              "label_fa": "مقایسه قبل و بعد و گیت‌های تأیید",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "مقایسه قبل و بعد",
+                "وضعیت قبل",
+                "وضعیت درخواستی",
+                "تحلیل اثر موردنیاز",
+                "گیت‌های تأیید",
+                "مهندسی",
+                "انبار/تأمین",
+                "برنامه‌ریزی و QA"
+              ],
+              "note": "no data-fid region on the built page"
+            },
+            {
+              "id": "revision-effectivity",
+              "label_fa": "قاعده اثرپذیری Revision بر مقدار",
+              "later_phase": "PHASE_04 / PHASE_05",
+              "presence": 0,
+              "iou": null,
+              "in_place": false,
+              "missing_children": [
+                "قاعده اثرپذیری Revision بر مقدار"
+              ],
+              "note": "no data-fid region on the built page"
+            }
+          ],
+          "style_checks": [
+            {
+              "id": "menu-toggle",
+              "ok": 1,
+              "detail": "toggle visible"
+            },
+            {
+              "id": "panel-radius",
+              "ok": 1,
+              "detail": "built 13px vs mockup 13px (±4)"
+            },
+            {
+              "id": "panel-border",
+              "ok": 1,
+              "detail": "1/1 built panels with border or shadow"
+            },
+            {
+              "id": "font-family",
+              "ok": 1,
+              "detail": "Vazirmatn (approved token)"
+            },
+            {
+              "id": "heading-size",
+              "ok": 1,
+              "detail": "built 18px vs mockup 18px (±25%)"
+            },
+            {
+              "id": "content-padding",
+              "ok": 1,
+              "detail": "built 12px vs mockup 9px (±8)"
+            },
+            {
+              "id": "brand-colours",
+              "ok": 1,
+              "detail": "page bg = --color-bg"
+            }
+          ]
+        }
+      ],
+      "min": 0.37642857142857145,
+      "passed": false
+    }
+  ]
+}
