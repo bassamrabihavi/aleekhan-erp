@@ -359,3 +359,11 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* tablet (catalogue 768): the style chips sit in the left part of the identity card's foot, beside the image column */
+@media (min-width: 601px) and (max-width: 900px) {
+  .product-card > .product-styles {
+    width: 72%;
+    margin-inline-start: auto;
+  }
+}
