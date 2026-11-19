@@ -295,9 +295,9 @@
         },
         "02.8": {
           "name": "Report & Review",
-          "state": "IN_PROGRESS",
-          "commit": "b359715",
-          "report": "reports/phase-02/step-8/REPORT.md",
+          "state": "IN_REVIEW",
+          "commit": "87e96f3",
+          "report": "reports/phase-02/step-8/REPORT_REWORK.md",
           "review": "reports/phase-02/step-8/REVIEW.md",
           "rework_cycles": 1,
           "started_at": "2026-11-16T04:22:39+00:00",
@@ -3769,7 +3769,16 @@
       "status": "APPROVED",
       "by": "بسام ربیهاوی",
       "note": "Amendment 2026-11-18: (1) pages without a tablet mockup (1, 2) are measured at 768 against the catalogue's shared shell for shell regions; (2) required sections absent from the mockup are allowed only below the mockup content (or in a separate tab/dialog); the fidelity test penalises extra sections placed above or between mockup regions"
+    },
+    {
+      "at": "2026-11-19T01:32:07+00:00",
+      "kind": "step",
+      "phase": "PHASE_02",
+      "step": "02.8",
+      "state": "IN_REVIEW",
+      "note": "Gate follow-up rework REV-0290..0295",
+      "commit": "87e96f3"
     }
   ],
-  "updated_at": "2026-11-18T17:50:25+00:00"
+  "updated_at": "2026-11-19T01:32:07+00:00"
 }
