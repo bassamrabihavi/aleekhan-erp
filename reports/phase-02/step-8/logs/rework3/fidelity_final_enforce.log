@@ -531,13 +531,13 @@ Running 2 tests using 1 worker
       270 |
         at F:\aleekhan\aleekhan-erp\frontend\e2e\fidelity\fidelity.spec.ts:268:102
 
-    Error Context: C:\Users\AC552~1.AME\AppData\Local\Temp\claude\3e6f5649318be9fe\b3f5274f-af12-4847-805e-b2ba99a10aa2\scratchpad\fidfinal\out\fidelity-fidelity--fidelit-ff685-ne-side-by-side-screenshots-chromium\error-context.md
+    Error Context: ~\AppData\Local\Temp\claude\3e6f5649318be9fe\b3f5274f-af12-4847-805e-b2ba99a10aa2\scratchpad\fidfinal\out\fidelity-fidelity--fidelit-ff685-ne-side-by-side-screenshots-chromium\error-context.md
 
     attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
-    C:\Users\AC552~1.AME\AppData\Local\Temp\claude\3e6f5649318be9fe\b3f5274f-af12-4847-805e-b2ba99a10aa2\scratchpad\fidfinal\out\fidelity-fidelity--fidelit-ff685-ne-side-by-side-screenshots-chromium\trace.zip
+    ~\AppData\Local\Temp\claude\3e6f5649318be9fe\b3f5274f-af12-4847-805e-b2ba99a10aa2\scratchpad\fidfinal\out\fidelity-fidelity--fidelit-ff685-ne-side-by-side-screenshots-chromium\trace.zip
     Usage:
 
-        npx playwright show-trace C:\Users\AC552~1.AME\AppData\Local\Temp\claude\3e6f5649318be9fe\b3f5274f-af12-4847-805e-b2ba99a10aa2\scratchpad\fidfinal\out\fidelity-fidelity--fidelit-ff685-ne-side-by-side-screenshots-chromium\trace.zip
+        npx playwright show-trace ~\AppData\Local\Temp\claude\3e6f5649318be9fe\b3f5274f-af12-4847-805e-b2ba99a10aa2\scratchpad\fidfinal\out\fidelity-fidelity--fidelit-ff685-ne-side-by-side-screenshots-chromium\trace.zip
 
     ────────────────────────────────────────────────────────────────────────────────────────────────
 
