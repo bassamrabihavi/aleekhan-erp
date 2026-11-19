@@ -118,6 +118,18 @@ export function gridFor(box: { w: number; h: number }): { w: number; h: number }
   return { w, h };
 }
 
+/**
+ * Horizontal scroll position at which a viewport screenshot and getBoundingClientRect() share one origin. Chromium
+ * captures a horizontally overflowing page from the document's left origin; in RTL the initial scroll position is
+ * the right edge (scrollX 0), so the capture is offset by scrollWidth - clientWidth against the rectangles (page 4
+ * mockup at 768: 942 - 768 = 174 px). Scrolling to the left origin (scrollX = -(overflow) in RTL) aligns both;
+ * fixed elements (side menu) keep their viewport position and stay in the capture. No overflow / LTR: 0.
+ */
+export function originScrollLeft(direction: string, scrollWidth: number, clientWidth: number): number {
+  const overflow = Math.max(0, Math.round(scrollWidth - clientWidth));
+  return direction === "rtl" && overflow > 0 ? -overflow : 0;
+}
+
 /** Region structure score: SSIM at or above STRUCTURE.full counts as 1, below that linearly (negative = 0). */
 export function structureScore(s: number): number {
   return Math.min(1, Math.max(0, s) / STRUCTURE.full);

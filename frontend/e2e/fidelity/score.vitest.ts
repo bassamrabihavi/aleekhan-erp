@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import { EXTRA_PENALTY, FORM_TOL, STRUCTURE, THRESHOLD, WEIGHTS } from "./config";
 import { extraAbove, formChecks, iou, labelPresent, normalize, pageResult, rgb, scoreRegion, scoreWidth, type BuiltPage, type BuiltRegion, type FormFeatures, type PageSpec } from "./score";
-import { downsample, gaussianBlur, gridFor, normaliseContrast, ssim, structureScore, structureSimilarity, type Gray } from "./structure";
+import { downsample, gaussianBlur, gridFor, normaliseContrast, originScrollLeft, ssim, structureScore, structureSimilarity, type Gray } from "./structure";
 
 const box = { x: 0.1, y: 0.1, w: 0.5, h: 0.2 };
 const built = (over: Partial<BuiltRegion> = {}): BuiltRegion => ({ visible: true, box, text: "", items: 0, radius: 11, border: 1, shadow: true, heading_px: 21, icons: 0, ...over });
@@ -273,5 +273,14 @@ describe("structure similarity (blurred grayscale SSIM)", () => {
     expect(structureScore(STRUCTURE.full)).toBe(1);
     expect(structureScore(STRUCTURE.full / 2)).toBeCloseTo(0.5);
     expect(structureScore(-0.3)).toBe(0);
+  });
+});
+
+describe("screenshot origin of a horizontally overflowing page", () => {
+  it("scrolls an overflowing RTL page to its left origin and leaves every other page alone", () => {
+    expect(originScrollLeft("rtl", 942, 768)).toBe(-174); // page-4 mockup at 768
+    expect(originScrollLeft("rtl", 768, 768)).toBe(0); // no overflow: nothing changes
+    expect(originScrollLeft("rtl", 767.6, 768)).toBe(0);
+    expect(originScrollLeft("ltr", 942, 768)).toBe(0); // LTR is already captured from its scroll origin
   });
 });

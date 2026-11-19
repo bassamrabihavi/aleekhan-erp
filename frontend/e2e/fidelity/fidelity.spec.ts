@@ -17,7 +17,7 @@ import { expect, test, type Browser, type Page } from "@playwright/test";
 import { CATALOG, DATA_ROW_KINDS, HAND_FRAMES, HAND_PAGES, HEIGHTS, MOCKUPS, OUT_DIR, REPO, SHOT_WIDTHS, SPEC_DIR, STRUCTURE, THRESHOLD, WIDTHS, type MockupDef, type Width } from "./config";
 import { asBuiltPage, grayCrops, measure, type CropReq, type PageMeasure, type Probe } from "./measure";
 import { pageResult, renderMarkdown, scoreWidth, type PageResult, type PageSpec, type SpecRegion, type WidthResult } from "./score";
-import { gridFor, structureSimilarity } from "./structure";
+import { gridFor, originScrollLeft, structureSimilarity } from "./structure";
 import { login, SYN_PW_P2, type Person, type Session } from "../phase02-helpers";
 
 test.describe.configure({ mode: "serial" });
@@ -236,7 +236,11 @@ async function tallShot(page: Page, w: Width, probes: Probe[], content: string, 
   const full = await page.evaluate(() => Math.max(document.documentElement.scrollHeight, document.body.scrollHeight));
   await page.setViewportSize({ width: w, height: Math.min(STRUCTURE.maxShotH, Math.max(HEIGHTS[w], full)) });
   await page.waitForTimeout(400);
-  await page.evaluate(() => { window.scrollTo(0, 0); });
+  // README "Structure": a horizontally overflowing RTL page is captured from the document's left origin; scroll
+  // there first so that the screenshot and the measured rectangles share one origin (no-op without overflow)
+  const doc = await page.evaluate(() => ({ dir: getComputedStyle(document.documentElement).direction, sw: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth }));
+  const left = originScrollLeft(doc.dir, doc.sw, doc.cw);
+  await page.evaluate((x) => { window.scrollTo(x, 0); }, left);
   const m = await measure(page, probes, content, primary, built);
   const png = await page.screenshot({ fullPage: false });
   await page.setViewportSize({ width: w, height: HEIGHTS[w] });

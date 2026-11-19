@@ -179,6 +179,13 @@ A blurred-grayscale structural similarity per region (`structure.ts`, no new dep
    concept PNG; a spec box is mapped into it with `HAND_FRAMES` (`config.ts`: desktop content x 20, y 90, width 1490,
    page width 1586; mobile content x 90, y 150, width 760, no viewport mapping). At 768 the hand-page shell regions
    have no image (their targets are not from the concept) and are left out of the structure mean.
+   **Horizontal overflow (fix of 2026-11-19).** Chromium captures a page that overflows sideways from the
+   document's left origin, while an RTL page starts scrolled to its right edge: the capture was offset by
+   `scrollWidth − clientWidth` against the measured rectangles (page-4 mockup at 768: 942 − 768 = 174 px, every
+   crop misregistered). Before measuring and capturing, the page is now scrolled to its left origin
+   (`originScrollLeft` in `structure.ts`), so screenshot and rectangles share one origin; fixed elements (side
+   menu) keep their viewport position. The same rule runs for every page and width; without overflow it does
+   nothing (pages 1, 2, 29, 33 and the built pages score exactly as before).
 2. In a blank browser page each region crop is drawn (canvas) at 4 × a grid 64 wide (height from the **mockup** box
    aspect, 6..192), converted to grayscale; both crops use the mockup's grid.
 3. Area-average to the grid, Gaussian blur σ = 1.5 grid px (text becomes grey bands: text content does not matter,
