@@ -110,6 +110,7 @@ flowchart LR
 
 ## آخرین رویدادها
 
+- `2026-11-19T04:20:40+00:00` decision id=DEC-059 status=APPROVED by=بسام ربیهاوی note=Display definitions 2026-11-19 (REV-0299): page-4 KPI active orders = CONFIRMED/RELEASED_TO_PLAN/ON_HOLD/PARTIAL_FULFILLED (confirmed); page-33 KPI open change requests = SUBMITTED + APPROVED-not-applied, DRAFT excluded (shown separately)
 - `2026-11-19T01:41:23+00:00` step phase=PHASE_02 step=02.8 state=PASS note=Gate follow-up rework PASS (advisory); REV-0296 redacted; REV-0300 -> UIP-004
 - `2026-11-19T01:41:23+00:00` gate_pending phase=PHASE_02
 - `2026-11-19T01:32:07+00:00` step phase=PHASE_02 step=02.8 state=IN_REVIEW note=Gate follow-up rework REV-0290..0295 commit=87e96f3
@@ -124,4 +125,3 @@ flowchart LR
 - `2026-11-17T17:27:48+00:00` decision id=DEC-059 status=APPROVED by=بسام ربیهاوی note=Amendment 2026-11-17 (REV-0203): at most one open (SUBMITTED/APPROVED) change request per order; an unanswered SUBMITTED/APPROVED change request expires after 30 days
 - `2026-11-17T17:24:27+00:00` test_result id=T-004 result=PASS
 - `2026-11-16T06:37:42+00:00` test_ready id=T-004 phase=PHASE_02
-- `2026-11-16T06:37:42+00:00` step phase=PHASE_02 step=02.8 state=PASS

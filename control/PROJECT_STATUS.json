@@ -2383,9 +2383,9 @@
       "owner": "بازرگانی + برنامه‌ریزی",
       "phase": "PHASE_02",
       "source": "گام 02.1 2026-11-11 (C-60/C-61)",
-      "resolution": "Amendment 2026-11-17 (REV-0203): at most one open (SUBMITTED/APPROVED) change request per order; an unanswered SUBMITTED/APPROVED change request expires after 30 days",
+      "resolution": "Display definitions 2026-11-19 (REV-0299): page-4 KPI active orders = CONFIRMED/RELEASED_TO_PLAN/ON_HOLD/PARTIAL_FULFILLED (confirmed); page-33 KPI open change requests = SUBMITTED + APPROVED-not-applied, DRAFT excluded (shown separately)",
       "decided_by": "بسام ربیهاوی",
-      "decided_at": "2026-11-17T17:27:48+00:00"
+      "decided_at": "2026-11-19T04:20:40+00:00"
     },
     {
       "id": "DEC-060",
@@ -3792,7 +3792,15 @@
       "state": "PASS",
       "note": "Gate follow-up rework PASS (advisory); REV-0296 redacted; REV-0300 -> UIP-004",
       "commit": null
+    },
+    {
+      "at": "2026-11-19T04:20:40+00:00",
+      "kind": "decision",
+      "id": "DEC-059",
+      "status": "APPROVED",
+      "by": "بسام ربیهاوی",
+      "note": "Display definitions 2026-11-19 (REV-0299): page-4 KPI active orders = CONFIRMED/RELEASED_TO_PLAN/ON_HOLD/PARTIAL_FULFILLED (confirmed); page-33 KPI open change requests = SUBMITTED + APPROVED-not-applied, DRAFT excluded (shown separately)"
     }
   ],
-  "updated_at": "2026-11-19T01:41:23+00:00"
+  "updated_at": "2026-11-19T04:20:40+00:00"
 }
