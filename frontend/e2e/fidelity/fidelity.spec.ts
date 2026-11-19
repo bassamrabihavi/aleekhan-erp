@@ -242,6 +242,9 @@ async function tallShot(page: Page, w: Width, probes: Probe[], content: string, 
   const left = originScrollLeft(doc.dir, doc.sw, doc.cw);
   await page.evaluate((x) => { window.scrollTo(x, 0); }, left);
   const m = await measure(page, probes, content, primary, built);
+  // crop boxes are page coordinates (+ scrollX); the viewport capture starts at the scrolled origin (no-op at 0)
+  const sx = await page.evaluate(() => window.scrollX);
+  for (const reg of Object.values(m.regions)) if (reg?.px) reg.px = { ...reg.px, x: reg.px.x - sx };
   const png = await page.screenshot({ fullPage: false });
   await page.setViewportSize({ width: w, height: HEIGHTS[w] });
   await page.waitForTimeout(200);
