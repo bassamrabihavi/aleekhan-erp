@@ -1,8 +1,8 @@
 {
   "schema": 1,
   "threshold": 0.95,
-  "commit": "b0cba1a2ac86",
-  "date": "2026-11-18",
+  "commit": "735040fa124f",
+  "date": "2026-11-19",
   "channel": "msedge",
   "results": [
     {
@@ -12,7 +12,7 @@
       "widths": [
         {
           "width": 1440,
-          "score": 0.9598269230769231,
+          "score": 0.9598666666666666,
           "presence": 1,
           "layout": 1,
           "layout_in_place": 1,
@@ -21,8 +21,8 @@
           "extra_free": [],
           "style": 1,
           "form_checks": 1,
-          "structure": 0.5982692307692308,
-          "form": 0.8660897435897437,
+          "structure": 0.5986666666666667,
+          "form": 0.8662222222222222,
           "regions": [
             {
               "id": "side-menu",
@@ -134,7 +134,7 @@
                 }
               ],
               "form": 1,
-              "ssim": 0.5246
+              "ssim": 0.5231
             },
             {
               "id": "header-actions",
@@ -334,7 +334,7 @@
                 }
               ],
               "form": 1,
-              "ssim": 0.2412
+              "ssim": 0.2458
             }
           ],
           "style_checks": [
@@ -377,7 +377,7 @@
         },
         {
           "width": 1180,
-          "score": 0.9602423076923077,
+          "score": 0.9602333333333334,
           "presence": 1,
           "layout": 1,
           "layout_in_place": 1,
@@ -386,8 +386,8 @@
           "extra_free": [],
           "style": 1,
           "form_checks": 1,
-          "structure": 0.6024230769230768,
-          "form": 0.867474358974359,
+          "structure": 0.6023333333333334,
+          "form": 0.8674444444444445,
           "regions": [
             {
               "id": "side-menu",
@@ -499,7 +499,7 @@
                 }
               ],
               "form": 1,
-              "ssim": 0.5347
+              "ssim": 0.5328
             },
             {
               "id": "header-actions",
@@ -699,7 +699,7 @@
                 }
               ],
               "form": 1,
-              "ssim": 0.2556
+              "ssim": 0.2568
             }
           ],
           "style_checks": [
@@ -742,7 +742,7 @@
         },
         {
           "width": 768,
-          "score": 0.9596533333333334,
+          "score": 0.95956,
           "presence": 1,
           "layout": 1,
           "layout_in_place": 1,
@@ -751,8 +751,8 @@
           "extra_free": [],
           "style": 1,
           "form_checks": 1,
-          "structure": 0.5965333333333334,
-          "form": 0.865511111111111,
+          "structure": 0.5955999999999999,
+          "form": 0.8652,
           "regions": [
             {
               "id": "topbar",
@@ -866,7 +866,7 @@
                 }
               ],
               "form": 1,
-              "ssim": 0.4177
+              "ssim": 0.4149
             },
             {
               "id": "stage-flow",
@@ -1029,7 +1029,7 @@
         },
         {
           "width": 390,
-          "score": 0.9579633333333334,
+          "score": 0.9577966666666667,
           "presence": 1,
           "layout": 1,
           "layout_in_place": 1,
@@ -1038,8 +1038,8 @@
           "extra_free": [],
           "style": 1,
           "form_checks": 1,
-          "structure": 0.5796333333333333,
-          "form": 0.8598777777777776,
+          "structure": 0.5779666666666667,
+          "form": 0.8593222222222221,
           "regions": [
             {
               "id": "topbar",
@@ -1161,7 +1161,7 @@
                 }
               ],
               "form": 1,
-              "ssim": 0.3265
+              "ssim": 0.3215
             },
             {
               "id": "stage-flow",
@@ -1323,7 +1323,7 @@
           ]
         }
       ],
-      "min": 0.9579633333333334,
+      "min": 0.9577966666666667,
       "passed": true
     },
     {
@@ -1333,7 +1333,7 @@
       "widths": [
         {
           "width": 1440,
-          "score": 0.9627791666666666,
+          "score": 0.9627652777777778,
           "presence": 1,
           "layout": 1,
           "layout_in_place": 1,
@@ -1342,8 +1342,8 @@
           "extra_free": [],
           "style": 1,
           "form_checks": 1,
-          "structure": 0.6277916666666666,
-          "form": 0.8759305555555554,
+          "structure": 0.6276527777777777,
+          "form": 0.8758842592592592,
           "regions": [
             {
               "id": "side-menu",
@@ -1455,7 +1455,7 @@
                 }
               ],
               "form": 1,
-              "ssim": 0.5186
+              "ssim": 0.5172
             },
             {
               "id": "header-actions",
@@ -1611,7 +1611,7 @@
                 }
               ],
               "form": 1,
-              "ssim": 0.1836
+              "ssim": 0.184
             }
           ],
           "style_checks": [
@@ -1654,7 +1654,7 @@
         },
         {
           "width": 1180,
-          "score": 0.9615347222222222,
+          "score": 0.9614944444444444,
           "presence": 1,
           "layout": 1,
           "layout_in_place": 1,
@@ -1663,8 +1663,8 @@
           "extra_free": [],
           "style": 1,
           "form_checks": 1,
-          "structure": 0.6153472222222222,
-          "form": 0.8717824074074073,
+          "structure": 0.6149444444444444,
+          "form": 0.8716481481481482,
           "regions": [
             {
               "id": "side-menu",
@@ -1776,7 +1776,7 @@
                 }
               ],
               "form": 1,
-              "ssim": 0.5016
+              "ssim": 0.4991
             },
             {
               "id": "header-actions",
@@ -1932,7 +1932,7 @@
                 }
               ],
               "form": 1,
-              "ssim": 0.2075
+              "ssim": 0.2071
             }
           ],
           "style_checks": [
@@ -1975,7 +1975,7 @@
         },
         {
           "width": 768,
-          "score": 0.9577291666666666,
+          "score": 0.9576166666666667,
           "presence": 1,
           "layout": 1,
           "layout_in_place": 1,
@@ -1984,8 +1984,8 @@
           "extra_free": [],
           "style": 1,
           "form_checks": 1,
-          "structure": 0.5772916666666666,
-          "form": 0.8590972222222222,
+          "structure": 0.5761666666666667,
+          "form": 0.8587222222222223,
           "regions": [
             {
               "id": "topbar",
@@ -2099,7 +2099,7 @@
                 }
               ],
               "form": 1,
-              "ssim": 0.4177
+              "ssim": 0.4149
             },
             {
               "id": "stage-flow",
@@ -2179,7 +2179,7 @@
                 }
               ],
               "form": 1,
-              "ssim": 0.2037
+              "ssim": 0.2038
             }
           ],
           "style_checks": [
@@ -2222,7 +2222,7 @@
         },
         {
           "width": 390,
-          "score": 0.9593833333333334,
+          "score": 0.9591791666666667,
           "presence": 1,
           "layout": 1,
           "layout_in_place": 1,
@@ -2231,8 +2231,8 @@
           "extra_free": [],
           "style": 1,
           "form_checks": 1,
-          "structure": 0.5938333333333334,
-          "form": 0.8646111111111111,
+          "structure": 0.5917916666666667,
+          "form": 0.8639305555555555,
           "regions": [
             {
               "id": "topbar",
@@ -2354,7 +2354,7 @@
                 }
               ],
               "form": 1,
-              "ssim": 0.3265
+              "ssim": 0.3215
             },
             {
               "id": "stage-flow",
@@ -2434,7 +2434,7 @@
                 }
               ],
               "form": 1,
-              "ssim": 0.0825
+              "ssim": 0.0826
             }
           ],
           "style_checks": [
@@ -2476,7 +2476,7 @@
           ]
         }
       ],
-      "min": 0.9577291666666666,
+      "min": 0.9576166666666667,
       "passed": true
     },
     {
@@ -2486,7 +2486,7 @@
       "widths": [
         {
           "width": 1440,
-          "score": 0.9679226190476191,
+          "score": 0.9679369047619047,
           "presence": 1,
           "layout": 1,
           "layout_in_place": 1,
@@ -2498,8 +2498,8 @@
           ],
           "style": 1,
           "form_checks": 1,
-          "structure": 0.6792261904761905,
-          "form": 0.8930753968253967,
+          "structure": 0.6793690476190477,
+          "form": 0.8931230158730158,
           "regions": [
             {
               "id": "side-menu",
@@ -2731,7 +2731,7 @@
                 }
               ],
               "form": 1,
-              "ssim": 0.1209
+              "ssim": 0.1221
             },
             {
               "id": "stage-distribution",
@@ -2822,7 +2822,7 @@
         },
         {
           "width": 1180,
-          "score": 0.9680154761904762,
+          "score": 0.9679869047619047,
           "presence": 1,
           "layout": 1,
           "layout_in_place": 1,
@@ -2834,8 +2834,8 @@
           ],
           "style": 1,
           "form_checks": 1,
-          "structure": 0.6801547619047618,
-          "form": 0.8933849206349204,
+          "structure": 0.6798690476190475,
+          "form": 0.8932896825396824,
           "regions": [
             {
               "id": "side-menu",
@@ -3067,7 +3067,7 @@
                 }
               ],
               "form": 1,
-              "ssim": 0.1132
+              "ssim": 0.1108
             },
             {
               "id": "stage-distribution",
@@ -3158,10 +3158,10 @@
         },
         {
           "width": 768,
-          "score": 0.9108730769230771,
+          "score": 0.9538871794871795,
           "presence": 1,
-          "layout": 0.9230769230769231,
-          "layout_in_place": 0.9230769230769231,
+          "layout": 1,
+          "layout_in_place": 1,
           "extra_above": 0,
           "extra_sections": [],
           "extra_free": [
@@ -3170,8 +3170,8 @@
           ],
           "style": 1,
           "form_checks": 1,
-          "structure": 0.30103846153846153,
-          "form": 0.7670128205128204,
+          "structure": 0.5388717948717949,
+          "form": 0.8462905982905984,
           "regions": [
             {
               "id": "side-menu",
@@ -3194,7 +3194,7 @@
                 }
               ],
               "form": 1,
-              "ssim": 0.6207
+              "ssim": 0.8744
             },
             {
               "id": "topbar",
@@ -3212,7 +3212,7 @@
                 }
               ],
               "form": 1,
-              "ssim": 0.25
+              "ssim": 0.2212
             },
             {
               "id": "topbar-date",
@@ -3224,7 +3224,7 @@
               "note": "",
               "form_checks": [],
               "form": null,
-              "ssim": 0
+              "ssim": 0.1026
             },
             {
               "id": "topbar-user",
@@ -3236,7 +3236,7 @@
               "note": "",
               "form_checks": [],
               "form": null,
-              "ssim": 0.0001
+              "ssim": 0.6651
             },
             {
               "id": "page-header",
@@ -3248,7 +3248,7 @@
               "note": "",
               "form_checks": [],
               "form": null,
-              "ssim": -0.0889
+              "ssim": 0.4599
             },
             {
               "id": "header-actions",
@@ -3266,7 +3266,7 @@
                 }
               ],
               "form": 1,
-              "ssim": 0.0122
+              "ssim": 0.4626
             },
             {
               "id": "kpis",
@@ -3294,7 +3294,7 @@
                 }
               ],
               "form": 1,
-              "ssim": 0.1769
+              "ssim": 0.154
             },
             {
               "id": "filters",
@@ -3312,7 +3312,7 @@
                 }
               ],
               "form": 1,
-              "ssim": 0.0774
+              "ssim": 0.1203
             },
             {
               "id": "product-card",
@@ -3335,14 +3335,14 @@
                 }
               ],
               "form": 1,
-              "ssim": 0.2509
+              "ssim": 0.3333
             },
             {
               "id": "product-styles",
               "label_fa": "استایل‌های این محصول",
               "presence": 1,
-              "iou": 0.4338809892568783,
-              "in_place": false,
+              "iou": 0.5276372389431271,
+              "in_place": true,
               "missing_children": [],
               "note": "",
               "form_checks": [
@@ -3353,7 +3353,7 @@
                 }
               ],
               "form": 1,
-              "ssim": 0.3419
+              "ssim": 0.3099
             },
             {
               "id": "serial-table",
@@ -3391,7 +3391,7 @@
                 }
               ],
               "form": 1,
-              "ssim": -0.0138
+              "ssim": 0.1741
             },
             {
               "id": "stage-distribution",
@@ -3415,7 +3415,7 @@
                 }
               ],
               "form": 1,
-              "ssim": 0.2337
+              "ssim": 0.2172
             },
             {
               "id": "events",
@@ -3439,7 +3439,7 @@
                 }
               ],
               "form": 1,
-              "ssim": 0.405
+              "ssim": 0.4481
             }
           ],
           "style_checks": [
@@ -3482,7 +3482,7 @@
         },
         {
           "width": 390,
-          "score": 0.963769696969697,
+          "score": 0.963739393939394,
           "presence": 1,
           "layout": 1,
           "layout_in_place": 1,
@@ -3494,8 +3494,8 @@
           ],
           "style": 1,
           "form_checks": 1,
-          "structure": 0.6376969696969698,
-          "form": 0.8792323232323231,
+          "structure": 0.6373939393939394,
+          "form": 0.879131313131313,
           "regions": [
             {
               "id": "topbar",
@@ -3681,7 +3681,7 @@
                 }
               ],
               "form": 1,
-              "ssim": 0.2226
+              "ssim": 0.2206
             },
             {
               "id": "stage-distribution",
@@ -3771,8 +3771,8 @@
           ]
         }
       ],
-      "min": 0.9108730769230771,
-      "passed": false
+      "min": 0.9538871794871795,
+      "passed": true
     },
     {
       "page": "29",
@@ -4990,7 +4990,7 @@
       "widths": [
         {
           "width": 1440,
-          "score": 0.9714348484848486,
+          "score": 0.9839545454545455,
           "presence": 1,
           "layout": 1,
           "layout_in_place": 1,
@@ -4998,9 +4998,9 @@
           "extra_sections": [],
           "extra_free": [],
           "style": 1,
-          "form_checks": 0.9375,
-          "structure": 0.8393484848484849,
-          "form": 0.9047828282828282,
+          "form_checks": 1,
+          "structure": 0.8395454545454547,
+          "form": 0.9465151515151514,
           "regions": [
             {
               "id": "side-menu",
@@ -5136,18 +5136,18 @@
                 },
                 {
                   "feature": "big_px",
-                  "ok": false,
-                  "detail": "big number -px (mockup 23px; need >= 18.4)"
+                  "ok": true,
+                  "detail": "big number 22px (mockup 23px; need >= 18.4)"
                 }
               ],
-              "form": 0.5,
+              "form": 1,
               "ssim": 0.7082
             },
             {
               "id": "change-list",
               "label_fa": "فهرست درخواست‌ها",
               "presence": 1,
-              "iou": 0.9673853595063285,
+              "iou": 0.9371877631437749,
               "in_place": true,
               "missing_children": [],
               "note": "",
@@ -5170,7 +5170,7 @@
               "id": "change-compare",
               "label_fa": "مقایسه قبل و بعد و گیت‌های تأیید",
               "presence": 1,
-              "iou": 0.9672262432751486,
+              "iou": 0.9370354640698005,
               "in_place": true,
               "missing_children": [],
               "note": "",
@@ -5192,14 +5192,14 @@
                 }
               ],
               "form": 1,
-              "ssim": 0.4689
+              "ssim": 0.4702
             },
             {
               "id": "revision-effectivity",
               "label_fa": "قاعده اثرپذیری Revision بر مقدار",
               "later_phase": "PHASE_04 / PHASE_05",
               "presence": 1,
-              "iou": 0.8556946716583231,
+              "iou": 0.703314183116661,
               "in_place": true,
               "missing_children": [],
               "note": "later phase: honest «در دست ساخت» in place",
@@ -5259,7 +5259,7 @@
         },
         {
           "width": 1180,
-          "score": 0.9628166666666668,
+          "score": 0.9628266666666668,
           "presence": 1,
           "layout": 0.9,
           "layout_in_place": 0.9,
@@ -5268,8 +5268,8 @@
           "extra_free": [],
           "style": 1,
           "form_checks": 1,
-          "structure": 0.8781666666666667,
-          "form": 0.9593888888888887,
+          "structure": 0.8782666666666668,
+          "form": 0.9594222222222221,
           "regions": [
             {
               "id": "side-menu",
@@ -5449,7 +5449,7 @@
                 }
               ],
               "form": 1,
-              "ssim": 0.402
+              "ssim": 0.4026
             },
             {
               "id": "revision-effectivity",
@@ -5516,7 +5516,7 @@
         },
         {
           "width": 768,
-          "score": 0.9894733333333333,
+          "score": 0.9894816666666667,
           "presence": 1,
           "layout": 1,
           "layout_in_place": 1,
@@ -5525,8 +5525,8 @@
           "extra_free": [],
           "style": 1,
           "form_checks": 1,
-          "structure": 0.8947333333333333,
-          "form": 0.964911111111111,
+          "structure": 0.8948166666666666,
+          "form": 0.9649388888888888,
           "regions": [
             {
               "id": "topbar",
@@ -5678,7 +5678,7 @@
                 }
               ],
               "form": 1,
-              "ssim": 0.4508
+              "ssim": 0.4509
             },
             {
               "id": "change-compare",
@@ -5706,7 +5706,7 @@
                 }
               ],
               "form": 1,
-              "ssim": 0.5422
+              "ssim": 0.5426
             },
             {
               "id": "revision-effectivity",
@@ -5773,7 +5773,7 @@
         },
         {
           "width": 390,
-          "score": 0.97618,
+          "score": 0.9834516666666667,
           "presence": 1,
           "layout": 1,
           "layout_in_place": 1,
@@ -5782,8 +5782,8 @@
           "extra_free": [],
           "style": 1,
           "form_checks": 1,
-          "structure": 0.7618,
-          "form": 0.9206,
+          "structure": 0.8345166666666668,
+          "form": 0.9448388888888889,
           "regions": [
             {
               "id": "topbar",
@@ -5806,7 +5806,7 @@
                 }
               ],
               "form": 1,
-              "ssim": 0.5827
+              "ssim": 0.5834
             },
             {
               "id": "topbar-search",
@@ -5824,7 +5824,7 @@
                 }
               ],
               "form": 1,
-              "ssim": 0.7577
+              "ssim": 0.6968
             },
             {
               "id": "topbar-user",
@@ -5836,7 +5836,7 @@
               "note": "",
               "form_checks": [],
               "form": null,
-              "ssim": 0.535
+              "ssim": 0.7172
             },
             {
               "id": "menu-toggle",
@@ -5859,7 +5859,7 @@
                 }
               ],
               "form": 1,
-              "ssim": 0.3922
+              "ssim": 0.7982
             },
             {
               "id": "page-header",
@@ -5871,7 +5871,7 @@
               "note": "",
               "form_checks": [],
               "form": null,
-              "ssim": 0.2154
+              "ssim": 0.2827
             },
             {
               "id": "header-actions",
@@ -5889,7 +5889,7 @@
                 }
               ],
               "form": 1,
-              "ssim": 0.6215
+              "ssim": 0.8047
             },
             {
               "id": "kpis",
@@ -5912,7 +5912,7 @@
                 }
               ],
               "form": 1,
-              "ssim": 0.5341
+              "ssim": 0.6532
             },
             {
               "id": "change-list",
@@ -5935,7 +5935,7 @@
                 }
               ],
               "form": 1,
-              "ssim": 0.2228
+              "ssim": 0.2242
             },
             {
               "id": "change-compare",
@@ -5963,7 +5963,7 @@
                 }
               ],
               "form": 1,
-              "ssim": 0.4228
+              "ssim": 0.4449
             },
             {
               "id": "revision-effectivity",
@@ -5987,7 +5987,7 @@
                 }
               ],
               "form": 1,
-              "ssim": 0.4658
+              "ssim": 0.4719
             }
           ],
           "style_checks": [
@@ -6029,7 +6029,7 @@
           ]
         }
       ],
-      "min": 0.9628166666666668,
+      "min": 0.9628266666666668,
       "passed": true
     }
   ]
